@@ -52,7 +52,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | --- | --- | --- | --- | --- | --- |
 | `status` | all workflow + knowledge | **required** | preflight/landing/status/walkaround | status/landing/user | Audit 1 |
 | `summary` | workflow (sketches/specs/plans) | recommended | INDEX generation | status/landing/author | INFO if missing |
-| `last_updated` | knowledge **required**; workflow recommended | preflight (staleness) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
+| `last_updated` | knowledge + workflow | knowledge **required**; workflow recommended | preflight (staleness) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
 | `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
 | `supersedes` | workflow | optional | grep (reverse derived) | author/status | dangling-edge INFO (optional) |
 | `related` | workflow | optional | grep | author | dangling-edge INFO (optional) |

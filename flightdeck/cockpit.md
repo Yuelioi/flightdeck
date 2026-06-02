@@ -1,8 +1,7 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
 **Last updated**: 2026-06-02 by 月离 (v2.1.0 shipped — model_invocable soft gate + flightdeck:status ritual; soft-config & status-lifecycle artifacts landed)
-**Active focus**: flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `disable-model-invocation` hard switch; new 5th ritual `flightdeck:status` (lifecycle auto-flip via `status_auto`). Layout still 1.2.
-**Layout**: 1.2
+**Active focus**: flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `disable-model-invocation` hard switch; new 5th ritual `flightdeck:status` (lifecycle auto-flip via `status_auto`).
 
 ## Next session
 

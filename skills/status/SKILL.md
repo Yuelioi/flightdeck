@@ -7,7 +7,7 @@ description: Keep a flightdeck artifact's lifecycle status fresh and its folder 
 
 The only **high-frequency, lightweight, model-invocable** flightdeck ritual. It keeps a single artifact's lifecycle `status:` honest mid-session, so state doesn't drift and the next `preflight` reads truth from the INDEX. It is complementary to `landing`, not a replacement: `landing` is the low-frequency batch wrap-up; `status` is the in-flight keep-fresh.
 
-It **only** edits one artifact's frontmatter `status:` + that artifact's row in its folder `INDEX.md` (+ that folder's count in the root INDEX). When `land` is enabled it additionally archives via the shared Land Routine (confirm-gated). It does **not** touch `cockpit.md`, does **not** commit, does **not** run length / AGENTS.md regeneration.
+It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md` (+ that folder's count in the root INDEX). When `land` is enabled it additionally archives via the shared Land Routine (confirm-gated). It does **not** touch `cockpit.md`, does **not** commit, does **not** run length / AGENTS.md regeneration.
 
 ## Step 0 — model-invocation gate (run before any other step)
 
@@ -53,12 +53,13 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 - **Forward-only / idempotent**: if the target status equals the current one or is *earlier* in the chain → **no-op** (never downgrade, never error). E.g. user manually set a new file to `active`; the create→pending trigger is a no-op.
 - **sketches**: legal statuses are `active`/`scrapped` only; create sets `active`; sketches never enter the awaiting-review/done chain.
 - `blocked` / `scrapped` are **explicit human** actions — never auto-set them.
+- **Bump `last_updated` on every flip.** Whenever this skill changes `status:` (any transition above, including the create→`pending`/`active` write), set the same artifact's `last_updated:` to today. A status flip is by definition a substantive change. This is the auto-bump anchor for the case where the user (or model) edited the body and `status` performs the flip — `status` writes `last_updated` so no one has to remember a second field. Adding `last_updated` to a workflow artifact that lacked it is fine (it's recommended). Do **not** bump `last_updated` on a no-op (when the flip is skipped per forward-only).
 
 ## Step 5 — sync the INDEX
 
 After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)):
 
-1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math).
+1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone).
 2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.
 
 ## Step 6 — done + land (only when `status_auto` includes `land`)

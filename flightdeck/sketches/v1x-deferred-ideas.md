@@ -1,5 +1,6 @@
 ---
 status: active
+summary: v1.x 长期想法暂存（MCP server、boomerang 子 agent、continuance benchmark、spec 压缩、可选文件夹）；找到时机再促成 spec
 ---
 
 # v1.x deferred ideas

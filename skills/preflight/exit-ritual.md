@@ -76,6 +76,14 @@ Step 3a: Suggest status for affected artifacts
          change status to any legal value at any time — the AI does not block.
          (Status is a label — no table, no verbs. The AI suggests; the user decides.)
 
+         Bump last_updated: for each workflow artifact (sketches/specs/plans)
+         changed substantively this session — body OR frontmatter, not a
+         typo/wording-only edit — set its `last_updated:` to today before
+         regenerating that folder's INDEX. A confirmed status flip already
+         counts as substantive (its last_updated is today). This is the landing
+         anchor for the recommended-but-not-required workflow `last_updated`;
+         knowledge artifacts already carry their own required `last_updated`.
+
          For done or scrapped artifacts, offer to land them via the
          single shared Land Routine (see "## Land Routine" below) —
          do not inline the move/INDEX/HISTORY steps here.
@@ -226,6 +234,14 @@ The hand area outside `<!-- AUTO -->` is never touched by the AI — grouping no
 
 Walkaround is responsible for the **full-consistency check** — it regenerates all indexes and validates every frontmatter. Exit ritual only touches changed folders.
 
+### Row format — how each AUTO row is built (single source of truth)
+
+Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (this read-frontmatter-not-body rule is the main token saving). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
+
+- **Workflow folders** (`sketches/` `specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` are never shown in the INDEX (reverse links are grep-derived).
+- **Knowledge folders** (`incidents/` `checklists/` `charts/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. `debriefs/`: reviewed spec + `last_updated`. (`charts/` rows show project/file count, not per-file status.)
+- **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
+
 ## Cockpit update — what changes
 
 ```
@@ -256,7 +272,8 @@ Given a `done` (or `scrapped`) artifact at `<folder>/<file>`:
 
 1. Move it to `landed/<folder>/<file>`, mirroring source structure (e.g. `specs/foo.md → landed/specs/foo.md`). Create `landed/<folder>/` if absent.
 2. Remove its row from `<folder>/INDEX.md`'s `<!-- AUTO -->` region, then recompute that folder's count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No other folder is touched.
-3. When `rules.md` sets `git: false`, append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+3. **Rewrite inbound relation edges.** The file's path just changed, so any *other* artifact whose `supersedes:` or `related:` frontmatter points at the old `<folder>/<file>` is now dangling. Grep the active tree (NOT `landed/`) for `supersedes:` / `related:` values equal to the old path and rewrite each to the new `landed/<folder>/<file>` path, so the edge still navigates after archival. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
+4. When `rules.md` sets `git: false`, append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
 
 **There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.**
 

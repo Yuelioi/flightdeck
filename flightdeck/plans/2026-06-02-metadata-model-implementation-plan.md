@@ -1,6 +1,9 @@
 ---
-status: pending
+status: active
+summary: 一个 plan 一趟 pass 落地三篇叠放 spec（归一 + version + enrichment）：Phase 0 立权威字段表 → 1 version→rules.md → 2 workflow 富化 → 3 dogfood 回填 + 发布
+last_updated: 2026-06-02
 implements: specs/2026-06-02-metadata-model-consolidation-design.md
+related: [specs/2026-06-02-version-in-rules-migration-detection-design.md, specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
 ---
 
 # 元数据模型实现 plan —— 归一 + version + enrichment（三篇一栈）
@@ -47,20 +50,20 @@ implements: specs/2026-06-02-metadata-model-consolidation-design.md
 
 ## Phase 2 — workflow 富化（enrichment spec）
 
-- [ ] **2.1** `skills/preflight/templates.md`：spec/sketch、plan frontmatter 加 `summary`（单行约束注释）+ `last_updated` + `supersedes`/`related`；per-folder INDEX 行格式说明改为"从 `summary` 派生"。权威表同步。
-- [ ] **2.2** INDEX 生成逻辑（`landing` / `status` / `walkaround` 重生成 AUTO 区处）：读 frontmatter 时一并取 `summary` 生成行；`|` 转义兜底。
-- [ ] **2.3** `skills/status/SKILL.md` + `skills/landing/SKILL.md`：`last_updated` 自动 bump 锚点（status 翻状态 / landing 归档实质修改时）；模型自调 status 时由 status 写 `last_updated`。
-- [ ] **2.4** `skills/landing/SKILL.md`（Land Routine）：归档时扫描全仓 `supersedes`/`related`，把指向被归档文件的边改写为 `landed/` 前缀。
-- [ ] **2.5** `skills/walkaround/SKILL.md`：可选 INFO 检查 —— 缺 `summary`/`last_updated`；`supersedes`/`related` 断边（目标在树及 landed 均不存在）。Audit 3 不扩 spec（`superseded_by` 仅 knowledge）。
-- [ ] **2.6** 复核 Phase 2.2：`status`（v2.1 已落地）的 INDEX 单行写入**从一开始就读 `summary`**，确认无"先实现再回改"。
+- [x] **2.1** `skills/preflight/templates.md`：spec/sketch、plan frontmatter 加 `summary`（单行约束注释）+ `last_updated` + `supersedes`/`related`；per-folder INDEX 行格式说明改为"从 `summary` 派生"。权威表同步。
+- [x] **2.2** INDEX 生成逻辑（`landing` / `status` / `walkaround` 重生成 AUTO 区处）：读 frontmatter 时一并取 `summary` 生成行；`|` 转义兜底。
+- [x] **2.3** `skills/status/SKILL.md` + `skills/landing/SKILL.md`：`last_updated` 自动 bump 锚点（status 翻状态 / landing 归档实质修改时）；模型自调 status 时由 status 写 `last_updated`。
+- [x] **2.4** `skills/landing/SKILL.md`（Land Routine）：归档时扫描全仓 `supersedes`/`related`，把指向被归档文件的边改写为 `landed/` 前缀。
+- [x] **2.5** `skills/walkaround/SKILL.md`：可选 INFO 检查 —— 缺 `summary`/`last_updated`；`supersedes`/`related` 断边（目标在树及 landed 均不存在）。Audit 3 不扩 spec（`superseded_by` 仅 knowledge）。
+- [x] **2.6** 复核 Phase 2.2：`status`（v2.1 已落地）的 INDEX 单行写入**从一开始就读 `summary`**，确认无"先实现再回改"。
 
 **Phase 2 验收**：spec/plan 带 `summary`/`last_updated`，INDEX 行由 `summary` 派生；landing 归档后关系边路径仍可导航；`last_updated` 由 skill 自动维护。
 
 ## Phase 3 — dogfood 回填 + 发布
 
-- [ ] **3.1** 回填本 deck 存量 workflow 工件（三篇 pending spec、本 plan、`sketches/v1x-deferred-ideas.md`）：补 `summary` + `last_updated`；本 plan/spec 间补 `supersedes`/`related`（本 plan 三篇关系、consolidation↔version↔enrichment）。
-- [ ] **3.2** 本 deck：`flightdeck/rules.md` 加 `version`；删 `flightdeck/cockpit.md` 的 `**Layout**: 1.2` 行；scaffolds 同步。
-- [ ] **3.3** 跑 `/flightdeck:walkaround`，确认 clean（尤其新 audit 对齐、断边检查、version 检测）。
+- [x] **3.1** 回填本 deck 存量 workflow 工件（三篇 pending spec、本 plan、`sketches/v1x-deferred-ideas.md`）：补 `summary` + `last_updated`；本 plan/spec 间补 `supersedes`/`related`（本 plan 三篇关系、consolidation↔version↔enrichment）。
+- [x] **3.2** 本 deck：`flightdeck/rules.md` 加 `version`；删 `flightdeck/cockpit.md` 的 `**Layout**: 1.2` 行；scaffolds 同步。
+- [x] **3.3** 跑 `/flightdeck:walkaround`，确认 clean（尤其新 audit 对齐、断边检查、version 检测）。
 - [ ] **3.4** **发布**（按 `version-bump.md`）：本次含"rules.md 必选 + 删 Layout 行"= **布局影响变更** → 把本发布版本写进 `MIGRATION.md` `layout_need_update`（这是该机制的首个真实条目）；bump 5 个 manifest + CHANGELOG + `MIGRATION.md` `current`；写迁移指引。
 - [ ] **3.5** AGENTS.md 重生成（`/flightdeck:emit-agents-md`）；cockpit Next session 收尾。
 

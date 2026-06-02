@@ -1,4 +1,5 @@
 ---
+version: 2.2               # 本 deck 遵循的 flightdeck 发布版本；驱动迁移检测（非 toggle）
 git: true                  # false → 跳过 git 对账/commit
 emit_agents_md: true       # false → emit-agents-md 不输出
 disabled_folders: []       # 关掉的文件夹（不建议/不审计）

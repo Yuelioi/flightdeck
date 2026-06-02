@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / sketches / specs / plans / incidents / checklists / charts / debriefs for status validity, INDEX↔folder consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and layout-version / legacy 1.x paths. Triggered by `/flightdeck:walkaround`.
+description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / sketches / specs / plans / incidents / checklists / charts / debriefs for status validity, INDEX↔folder consistency, orphan plans, dangling references, stray files, AGENTS.md drift, layout-version / legacy 1.x paths, and (INFO) missing workflow summary/last_updated + dangling supersedes/related edges. Triggered by `/flightdeck:walkaround`.
 ---
 
 # Flightdeck Walkaround
@@ -33,13 +33,13 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
 
 ## Audits
 
-Run all 10 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray) and `disabled_gates` (do not flag a disabled gate). For each, report findings with the severity tag.
+Run all 12 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray) and `disabled_gates` (do not flag a disabled gate). For each, report findings with the severity tag.
 
 **Field validity is governed by [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical)** — that table is the source of truth for which fields are required per kind. The audits below check against it; if they disagree, the canonical table wins.
 
 ### 1. Frontmatter status validity (CRITICAL / WARNING)
 
-**Folder = kind (implicit); `status` = the only required frontmatter field.** Audit `status` only; no other frontmatter field is required or validated here.
+**Folder = kind (implicit); `status` = the only required frontmatter field.** Audit `status` only here; no other frontmatter field is *required* for workflow artifacts. (The recommended workflow fields `summary` / `last_updated` and the optional relation edges `supersedes` / `related` get soft INFO checks in Audits 11–12, never CRITICAL/WARNING.)
 
 #### Workflow artifacts (`sketches/`, `specs/`, `plans/`) — NOT in `landed/`
 
@@ -66,6 +66,8 @@ For each knowledge artifact NOT in `landed/`:
 - Files in `incidents/`, `checklists/`, `charts/`: MUST carry `when_to_read` + `applies_to` + `last_updated`. Any missing: **WARNING** — file is invisible to flightdeck routing.
 - Files in `debriefs/`: MUST carry `reviewed` + `last_updated`. Any missing: **WARNING**. (`debriefs/` does NOT use `when_to_read` / `applies_to`.)
 - Malformed values (e.g. `last_updated: potato`, empty `when_to_read`): **WARNING**.
+
+Workflow artifacts (`sketches/`, `specs/`, `plans/`) are **out of scope here** — they carry no required routing fields. Their recommended `summary` / `last_updated` are checked at INFO in Audit 11.
 
 ### 3. `superseded` needs `superseded_by` (WARNING)
 
@@ -142,6 +144,22 @@ Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `
 - **`version` < `current` but no newer `layout_need_update` entry**, or **`version == current`** → pass; report nothing (preflight silently bumps the compatible-but-behind case).
 
 Only report once per path — do not also flag these as stray/orphan in Audit 8.
+
+### 11. Workflow recommended fields (INFO)
+
+For each workflow artifact (`sketches/`, `specs/`, `plans/`) NOT in `landed/`:
+
+- Missing `summary`: **INFO** — the artifact's INDEX row carries no summary; consider adding one (it drives the row and survives into `landed/`).
+- Missing `last_updated`: **INFO** — staleness can't be judged; the next `status`/`landing` flip auto-adds it.
+
+These are **recommended, not required** — never escalate to WARNING/CRITICAL (that would flood pre-enrichment decks). Sketches commonly lack `last_updated`; INFO is enough.
+
+### 12. Dangling relation edges (INFO)
+
+For each workflow artifact NOT in `landed/` carrying `supersedes:` or `related:`:
+
+- Resolve each path value relative to the flightdeck root. If the target exists **neither in the active tree nor under `landed/`**: **INFO** — dangling relation edge (target deleted or never existed). An edge that points into `landed/` is normal (the Land Routine rewrites edges to the `landed/` prefix on archive) — do NOT flag it.
+- This checks frontmatter edge **values** only; prose `[text](path)` links are Audit 7's job (`supersedes`/`related` are not markdown links). `superseded_by` is knowledge-only and stays in Audit 3 — Audit 12 does not touch it.
 
 ## Output format
 

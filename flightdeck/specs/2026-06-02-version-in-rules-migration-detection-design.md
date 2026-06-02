@@ -1,5 +1,9 @@
 ---
 status: pending
+summary: 版本号从 cockpit Layout 行搬进 rules.md（rules.md 转必选、三件套最小契约）；MIGRATION.md current + layout_need_update 驱动迁移检测
+last_updated: 2026-06-02
+supersedes: landed/specs/2026-06-01-layout-version-migration-detection-design.md
+related: [specs/2026-06-02-metadata-model-consolidation-design.md, landed/specs/2026-06-02-soft-config-model-invocation-design.md]
 ---
 
 # 版本号收进 rules.md + 三件套最小契约 + MIGRATION.md 驱动迁移检测

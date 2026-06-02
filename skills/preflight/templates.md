@@ -52,8 +52,14 @@ Free-prose project conventions every flightdeck skill must honor
 ```markdown
 ---
 status: active        # spec: pending/active/awaiting-review/blocked/done/scrapped — sketch: active/scrapped only
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines (use commas/dashes). Drives the INDEX row.
+last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a real change (not typos)
+supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
+related: [<path>, ...]       # optional; weak links — shared premise / blast-radius, NOT supersedes or implements
 ---
 ```
+
+(A sketch usually carries only `status` + `summary`; the rest are for longer-lived specs.)
 
 ---
 
@@ -62,7 +68,11 @@ status: active        # spec: pending/active/awaiting-review/blocked/done/scrapp
 ```markdown
 ---
 status: active
-implements: specs/<x>.md   # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row.
+last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing
+implements: specs/<x>.md     # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"
+supersedes: <path>           # optional; forward edge to the artifact this replaces
+related: [<path>, ...]       # optional; weak cross-links
 ---
 ```
 
@@ -109,7 +119,7 @@ last_updated: YYYY-MM-DD
 <!-- optional hand-maintained area (grouping notes for multi-file topics); AI does not touch -->
 ```
 
-Rows in `incidents/` `checklists/` `charts/` add `when_to_read` / `applies_to`. `debriefs/` rows show reviewed spec + date. `implements` does NOT go into the INDEX.
+For a workflow row (`sketches/` `specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `charts/` add `when_to_read` / `applies_to`. `debriefs/` rows show reviewed spec + date. `implements`, `supersedes`, `related` do NOT go into the INDEX.
 
 ---
 

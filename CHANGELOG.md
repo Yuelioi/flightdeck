@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Soft-config gating + a new high-frequency status ritual. Additive and opt-in — `flightdeck/` Layout stays 1.2; default behavior is unchanged.
 
 ### Added
-- **`model_invocable` rules.md toggle** — per-project soft gate replacing the global `disable-model-invocation` hard switch on the four entry skills. Default `[]` = all manual (identical to before); opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`. ([spec](flightdeck/specs/2026-06-02-soft-config-model-invocation-design.md))
-- **5th ritual `/flightdeck:status`** — high-frequency, model-invocable lifecycle auto-flip of a single artifact's `status:` + its INDEX row (forward-only; never touches cockpit/commit). ([spec](flightdeck/specs/2026-06-02-status-lifecycle-skill-design.md))
+- **`model_invocable` rules.md toggle** — per-project soft gate replacing the global `disable-model-invocation` hard switch on the four entry skills. Default `[]` = all manual (identical to before); opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`. ([spec](flightdeck/landed/specs/2026-06-02-soft-config-model-invocation-design.md))
+- **5th ritual `/flightdeck:status`** — high-frequency, model-invocable lifecycle auto-flip of a single artifact's `status:` + its INDEX row (forward-only; never touches cockpit/commit). ([spec](flightdeck/landed/specs/2026-06-02-status-lifecycle-skill-design.md))
 - **`status_auto` rules.md toggle** — opt-in list controlling which *optional* status transitions (`start`, `land`) the `status` skill auto-applies; core `create→pending` / `finish→awaiting-review` are always automatic.
 - **rules.md key admission policy** — a 4-point gate in `protocol.md` governing when a new toggle may be added (anti-sprawl).
 
