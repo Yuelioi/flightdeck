@@ -8,9 +8,9 @@
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection). It also carries a closed set of structured toggles plus free-prose house rules. *Omitted toggle fields* default (git on, emit on, all folders/gates active, all rituals manual) — only the file's existence + `version` are required, not every key.
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection). It also carries a closed set of structured toggles plus free-prose house rules. *Omitted toggle fields* default (git on, emit on, all folders/gates active, all rituals manual, commit confirm-gated) — only the file's existence + `version` are required, not every key.
 
-Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto`; plus the required `version` identity field (not a toggle — see [migration detection](#migration-detection)). Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
+Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode`; plus the required `version` identity field (not a toggle — see [migration detection](#migration-detection)). Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
 
 ### Key admission policy (anti-sprawl)
 
@@ -23,7 +23,7 @@ The toggle set is **closed**: an unknown key is ignored with a one-line warning,
 
 A key that fails any point is either hard-coded protocol, a backlog item, or redundant — not a `rules.md` toggle.
 
-When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the four toggles or the project's own agent rules.
+When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. `commit_mode` tunes *how* landing commits when `git: true` (`manual`/`confirm`/`auto`); `git: false` overrides it (no commit at all). When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the toggles or the project's own agent rules.
 
 ## Migration detection
 
@@ -175,7 +175,7 @@ A scrapped sketch stays in `sketches/` (marked `status: scrapped`), never archiv
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + `Next session` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when `git: false`; then commit (unless `git: false`). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Last updated` + `Next session` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when `git: false`; then commit per `commit_mode` (`confirm` default; skipped entirely when `git: false`). landing regenerates the INDEX of any folders changed this session.
 
 ## Write gate
 

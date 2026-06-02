@@ -17,19 +17,20 @@ disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not fla
 disabled_gates: []        # e.g. [debrief-disposition]
 model_invocable: []       # rituals the model may self-invoke; [] = all manual. e.g. [landing]
 status_auto: []           # optional status transitions; [] = none. add `start` (→active) / `land` (done+land)
+commit_mode: confirm      # landing's commit step: manual (never commit) / confirm (ask Y/n, default) / auto (commit, no prompt). Only when git: true
 ---
 
 ## House rules
 
 Free-prose project conventions every flightdeck skill must honor
-(e.g. "never auto-commit", "specs written in Chinese", "do not create sketches/").
+(e.g. "specs written in Chinese", "do not create sketches/", "always branch before committing").
 ```
 
 ### Rules
 
-- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. *Omitted toggle fields* still default (git on, emit on, all folders/gates active, all rituals manual) — only the file's existence + `version` are required, not every key.
+- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. *Omitted toggle fields* still default (git on, emit on, all folders/gates active, all rituals manual, commit confirm-gated) — only the file's existence + `version` are required, not every key.
 - **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. It is NOT part of the closed toggle set and is exempt from the key-admission policy.
-- **Closed toggle set** — only these six keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
+- **Closed toggle set** — only these seven keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
 
   | Key | Type | Default | Effect when changed |
   | --- | --- | --- | --- |
@@ -39,7 +40,9 @@ Free-prose project conventions every flightdeck skill must honor
   | `disabled_gates` | list | `[]` | Named gates skipped. Known: `debrief-disposition`, `frontmatter-required`. |
   | `model_invocable` | list | `[]` | Rituals (`landing`/`preflight`/`walkaround`/`emit-agents-md`/`status`) the model may self-invoke via the skill tool. `[]` = all manual (explicit `/flightdeck:<x>` only). Each ritual's Step-0 gate enforces it. |
   | `status_auto` | list | `[]` | Optional lifecycle transitions the `status` skill may auto-apply once invoked. `[]` = none; the two core transitions (create→pending, finish→awaiting-review) are always automatic and are NOT in this list. Members: `start` (→active), `land` (done + confirm-gated land). |
+  | `commit_mode` | enum | `confirm` | Landing's commit step (step 7). `manual` → landing runs fully but never commits (leaves changes for you / CI); `confirm` → generate the commit, then ask Y/n (default; the pre-2.2 behavior); `auto` → commit without prompting. **Applies only when `git: true`** — under `git: false` there is no commit regardless. |
 
+- **`git` vs `commit_mode`** — `git` decides whether git is used at all (reconcile, staleness, history); `commit_mode` only tunes *how landing commits* when git is on. `git: false` wins: no reconcile, history via `landed/HISTORY.md`, no commit whatever `commit_mode` says.
 - **`disabled_gates: [frontmatter-required]` is dangerous** — it makes routed files invisible to grep-routing. Warn the user when honoring it.
 - **House rules are advisory prose** the AI honors, but they cannot redefine the six toggle keys.
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail (a broken `rules.md` must not brick the entry ritual).

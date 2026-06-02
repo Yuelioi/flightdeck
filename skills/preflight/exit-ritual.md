@@ -97,9 +97,12 @@ Step 4: Update cockpit.md
         - Update Hanging tasks: add new blocking items, clear resolved ones
         - Cockpit is focus only — artifact status lives in the folder `INDEX.md` files
 
-Step 5: Commit
-        - Use checklists/commits.md if it exists
-        - Otherwise: terse imperative subject + reasoning in body
+Step 5: Commit — honor `commit_mode` (rules.md; default `confirm`)
+        - manual  → do NOT commit; leave the changes for you / CI
+        - confirm → generate the commit, then ask "Commit now? (Y/n)"  (default)
+        - auto    → commit without prompting
+        - git: false overrides all three → no commit (landing already logged landed/HISTORY.md)
+        - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
 
 ### Step 5a — Check incidents→checklists promotion gate (wrap-up)

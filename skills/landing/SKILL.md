@@ -26,7 +26,7 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
 
 The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md). Skeleton:
 
-0. **Read `flightdeck/rules.md`** if present. When `git: false`: skip the commit step (step 7), and instead append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <result>; next: <pointer>`, newest first). Honor `disabled_gates` (e.g. skip the debrief-disposition gate if disabled).
+0. **Read `flightdeck/rules.md`** if present. When `git: false`: skip the commit step (step 7), and instead append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <result>; next: <pointer>`, newest first). Note `commit_mode` (default `confirm`) — it drives step 7 when `git: true`. Honor `disabled_gates` (e.g. skip the debrief-disposition gate if disabled).
 1. **Resolve hanging tasks first** — incomplete debrief dispositions block clean exit. See [exit-ritual.md § Hanging tasks](../preflight/exit-ritual.md#hanging-tasks--block-session-exit). If one is genuinely blocking, list it and pause for the user before running steps 2–7.
 2. **Classify new knowledge** — apply heuristics (a)–(h), first-match wins. Folders: `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`, `sketches/`. Each written artifact carries a `status` field in frontmatter. No new knowledge is a valid outcome — don't manufacture a classification just to complete landing. See [exit-ritual.md § Classification heuristics](../preflight/exit-ritual.md#classification-heuristics).
 3. **Regenerate INDEX for changed folders** — at session end, regenerate the `<!-- AUTO -->` region of `INDEX.md` only for folders where a file was added, modified, moved, landed, or had its status changed this session. Leave other folders' INDEX untouched. If any folder's counts changed, also refresh the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. See [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules).
@@ -39,7 +39,7 @@ The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md)
    - **Missing frontmatter `status`**: a new flat file in any knowledge folder lacking a `status` field → flag.
    - **Known folders (1.2)**: `sketches/`, `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`, and `landed/`. Files placed outside these known folders or directly under `flightdeck/` root (other than `cockpit.md` / `INDEX.md` / `rules.md`) are stray.
    Surface any hit **before** the commit prompt so junk isn't committed; the user decides whether to fix now or proceed.
-7. **Commit (if user wants)** — ask before; use `checklists/commits.md` style if it exists; otherwise terse imperative subject + reasoning in body.
+7. **Commit** — per `commit_mode` (rules.md; default `confirm`): `manual` → don't commit, leave the changes for the user / CI; `confirm` → generate the commit then ask "Commit now? (Y/n)"; `auto` → commit without prompting. (`git: false` already skipped this step at step 0.) Use `checklists/commits.md` style if it exists; otherwise terse imperative subject + reasoning in body.
 
 ## Length check (runs right after step 4)
 
@@ -63,7 +63,7 @@ Cockpit updated:
 History (git:false): [+1 HISTORY.md line / n/a]
 Workspace smoke-check: clean / [stray: X | orphan: Y | missing-status: Z]  (run /flightdeck:walkaround for full audit)
 
-Commit now? (Y/n)
+Commit: [committed (auto) / Commit now? (Y/n) (confirm) / skipped (manual | git:false)]
 ```
 
 ## Red flags
