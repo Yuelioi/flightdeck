@@ -28,6 +28,8 @@ This document records breaking migrations for the maintainer's reference.
 
 Each step skips if already done.
 
+> **Note (frontmatter enrichment):** 2.2 also adds the recommended workflow fields `summary` / `last_updated` and the optional edges `supersedes` / `related`. These are optional and need no migration — **except**: if your existing `INDEX.md` rows carry hand-written summaries, backfill `summary:` into each artifact's frontmatter **before the next `landing`/`status` run**. Those rituals regenerate the `<!-- AUTO -->` rows purely from frontmatter, so a row whose file has no `summary` loses its summary segment (the hand-written text is not preserved).
+
 ## 2.0 → 2.1 — model_invocable soft gate + status ritual
 
 2.1 is **additive and opt-in** — nothing breaks. `flightdeck/` Layout stays 1.2, existing decks need no changes, and default behavior is identical to 2.0.

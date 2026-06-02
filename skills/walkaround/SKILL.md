@@ -92,7 +92,7 @@ For each artifact folder (`sketches/`, `specs/`, `plans/`, `incidents/`, `checkl
 - Read the `<!-- AUTO -->` block in the folder's `INDEX.md`. Each row should list one file with its `status` (and other displayed metadata). Check:
   - A real file exists with no corresponding row: **WARNING** — missing INDEX row.
   - A row exists for a file not on disk: **WARNING** — stale INDEX row (ghost).
-  - A row's displayed `status` does not match the file's actual frontmatter `status`: **WARNING** — out-of-sync status in INDEX. (Exception: `charts/` rows show project/file count, not per-file status — do not flag `charts/` for missing status values.)
+  - A row's displayed `status` does not match the file's actual frontmatter `status`: **WARNING** — out-of-sync status in INDEX. (Exception: `charts/` rows show project/file count, not per-file status — do not flag `charts/` for missing status values.) Audit 5 validates the `status` segment **only** — the `summary` segment is a derived value that the next `landing`/`status` regeneration self-heals, so it is not byte-compared here (avoids false drift from punctuation/wording).
 - For the root `flightdeck/INDEX.md`:
   - If absent: **WARNING** — missing root INDEX.
   - Each per-folder summary line's counts (e.g. `specs/ — 3 (2 active, 1 done)`) must match the actual file counts and status distribution in that folder. Mismatch: **WARNING**. (Again, `charts/` is exempt from status counting.)
@@ -147,12 +147,12 @@ Only report once per path — do not also flag these as stray/orphan in Audit 8.
 
 ### 11. Workflow recommended fields (INFO)
 
-For each workflow artifact (`sketches/`, `specs/`, `plans/`) NOT in `landed/`:
+Scan workflow artifacts (`sketches/`, `specs/`, `plans/`) NOT in `landed/` for the recommended `summary` / `last_updated`. **Report as a single aggregated INFO per field, not one finding per file** — a pre-enrichment deck would otherwise flood the report:
 
-- Missing `summary`: **INFO** — the artifact's INDEX row carries no summary; consider adding one (it drives the row and survives into `landed/`).
-- Missing `last_updated`: **INFO** — staleness can't be judged; the next `status`/`landing` flip auto-adds it.
+- `INFO — N workflow artifacts missing summary: <file, file, …>` (consider adding one; it drives the INDEX row and survives into `landed/`).
+- `INFO — N workflow artifacts missing last_updated: <file, file, …>` (the next `status`/`landing` flip auto-adds it; sketches commonly omit it — expected).
 
-These are **recommended, not required** — never escalate to WARNING/CRITICAL (that would flood pre-enrichment decks). Sketches commonly lack `last_updated`; INFO is enough.
+These are **recommended, not required** — never escalate to WARNING/CRITICAL. If every workflow artifact has both, report nothing.
 
 ### 12. Dangling relation edges (INFO)
 
