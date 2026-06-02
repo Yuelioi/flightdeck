@@ -12,6 +12,17 @@
 
 Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
 
+### Key admission policy (anti-sprawl)
+
+The toggle set is **closed**: an unknown key is ignored with a one-line warning, so config never grows by accident (a typo can't add behavior). It grows only by a deliberate decision — and a proposed new key MUST pass **all four** of these, or it does not belong in `rules.md`:
+
+1. **Per-project varying** — it encodes a preference/policy that genuinely differs from project to project, not a universal default everyone would set the same way.
+2. **Not a protocol contract** — it is NOT a structural contract. Layout version, the `<!-- AUTO -->` region mechanics, graph-reachability rules, folder kinds, and the *semantics* of the existing toggles stay hard-coded. `rules.md` tunes behavior; it never redefines the protocol.
+3. **Real demand now** — a concrete project has actually hit the wall (YAGNI). No speculative keys: park the idea in a spec backlog until a real need appears (e.g. `cockpit_max_lines` / `staleness_days` remain backlog precisely because nothing has needed them yet).
+4. **Not foldable** — it cannot be expressed through an existing key. No redundant or overlapping toggles.
+
+A key that fails any point is either hard-coded protocol, a backlog item, or redundant — not a `rules.md` toggle.
+
 When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the four toggles or the project's own agent rules.
 
 ## Data model (folder = kind, frontmatter = status)
