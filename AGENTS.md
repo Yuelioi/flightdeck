@@ -5,12 +5,12 @@
 
 ## Current focus
 
-flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `disable-model-invocation` hard switch; new 5th ritual `flightdeck:status` (lifecycle auto-flip via `status_auto`). Layout still 1.2.
+flightdeck 2.2.0 shipped — single canonical frontmatter field table; deck `version` now in the mandatory `rules.md` (3-file contract); workflow artifacts gain `summary`/`last_updated`/`supersedes`/`related` (INDEX rows derive from `summary`).
 
 ## Next session
 
-1. Execute [plans/2026-06-02-metadata-model-implementation-plan.md](flightdeck/plans/2026-06-02-metadata-model-implementation-plan.md) (implements the 3 stacked specs). Phase 0 stand up the canonical field table in protocol.md → Phase 1 version→rules.md + migration detection → Phase 2 workflow frontmatter enrichment → Phase 3 dogfood backfill + release. Order is a hard dependency.
-2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
+1. Land the completed metadata-model plan + its 3 specs (all `done`, currently un-archived) via `/flightdeck:landing` — confirm the Land Routine rewrites the `supersedes`/`related` edges to the `landed/` prefix.
+2. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](flightdeck/sketches/v1x-deferred-ideas.md).
 
 ## Hanging tasks

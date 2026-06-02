@@ -1,7 +1,7 @@
 ---
-status: active
+status: done
 summary: 一个 plan 一趟 pass 落地三篇叠放 spec（归一 + version + enrichment）：Phase 0 立权威字段表 → 1 version→rules.md → 2 workflow 富化 → 3 dogfood 回填 + 发布
-last_updated: 2026-06-02
+last_updated: 2026-06-03
 implements: specs/2026-06-02-metadata-model-consolidation-design.md
 related: [specs/2026-06-02-version-in-rules-migration-detection-design.md, specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
 ---
@@ -64,8 +64,8 @@ related: [specs/2026-06-02-version-in-rules-migration-detection-design.md, specs
 - [x] **3.1** 回填本 deck 存量 workflow 工件（三篇 pending spec、本 plan、`sketches/v1x-deferred-ideas.md`）：补 `summary` + `last_updated`；本 plan/spec 间补 `supersedes`/`related`（本 plan 三篇关系、consolidation↔version↔enrichment）。
 - [x] **3.2** 本 deck：`flightdeck/rules.md` 加 `version`；删 `flightdeck/cockpit.md` 的 `**Layout**: 1.2` 行；scaffolds 同步。
 - [x] **3.3** 跑 `/flightdeck:walkaround`，确认 clean（尤其新 audit 对齐、断边检查、version 检测）。
-- [ ] **3.4** **发布**（按 `version-bump.md`）：本次含"rules.md 必选 + 删 Layout 行"= **布局影响变更** → 把本发布版本写进 `MIGRATION.md` `layout_need_update`（这是该机制的首个真实条目）；bump 5 个 manifest + CHANGELOG + `MIGRATION.md` `current`；写迁移指引。
-- [ ] **3.5** AGENTS.md 重生成（`/flightdeck:emit-agents-md`）；cockpit Next session 收尾。
+- [x] **3.4** **发布**（按 `version-bump.md`）：本次含"rules.md 必选 + 删 Layout 行"= **布局影响变更** → 把本发布版本写进 `MIGRATION.md` `layout_need_update`（这是该机制的首个真实条目）；bump 5 个 manifest + CHANGELOG + `MIGRATION.md` `current`；写迁移指引。
+- [x] **3.5** AGENTS.md 重生成（`/flightdeck:emit-agents-md`）；cockpit Next session 收尾。
 
 **Phase 3 验收**：本 deck 自身已是新模型（三件套 + version + 富化字段），walkaround clean，发布物一致，旧 deck 有明确迁移路径。
 

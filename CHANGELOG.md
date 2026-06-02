@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-06-03
+
+Metadata-model consolidation + workflow frontmatter enrichment, with the deck-conformance version relocated into a now-mandatory `rules.md`. **Existing decks need a one-time migration** — see [MIGRATION.md](MIGRATION.md) (2.1 → 2.2).
+
+### Added
+- **Workflow frontmatter enrichment** — sketches/specs/plans gain recommended `summary` + `last_updated` and optional `supersedes` / `related` edges. `summary` drives the INDEX row (rows now derive purely from frontmatter); `last_updated` is auto-bumped by `status`/`landing`; relation edges are forward-only (reverse is grep-derived). ([spec](flightdeck/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md))
+- **Canonical frontmatter field table** in `protocol.md` — single source of truth; `templates.md` / `folder-semantics.md` / `walkaround` defer to it instead of restating field semantics. ([spec](flightdeck/specs/2026-06-02-metadata-model-consolidation-design.md))
+- **walkaround Audits 11–12** — aggregated INFO for missing workflow `summary`/`last_updated`, plus dangling `supersedes`/`related` edge detection.
+
+### Changed
+- **`rules.md` is now mandatory** and carries the deck-conformance `version:` — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. ([spec](flightdeck/specs/2026-06-02-version-in-rules-migration-detection-design.md))
+- **The `` `**Layout**` `` line is removed from `cockpit.md`** — the version now lives in `rules.md`; cockpit is pure focus.
+- **INDEX rows derive from `summary`**, and `landing` rewrites inbound `supersedes`/`related` edges to the `landed/` prefix on archive.
+
 ## [2.1.0] — 2026-06-02
 
 Soft-config gating + a new high-frequency status ritual. Additive and opt-in — `flightdeck/` Layout stays 1.2; default behavior is unchanged.
