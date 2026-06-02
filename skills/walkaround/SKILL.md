@@ -1,7 +1,6 @@
 ---
 name: walkaround
 description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / sketches / specs / plans / incidents / checklists / charts / debriefs for status validity, INDEX↔folder consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and layout-version / legacy 1.x paths. Triggered by `/flightdeck:walkaround`.
-disable-model-invocation: true
 ---
 
 # Flightdeck Walkaround
@@ -20,6 +19,17 @@ User-triggered integrity audit of a flightdeck for protocol drift. The protocol 
 - **CRITICAL** — protocol contract broken (e.g., artifact missing required frontmatter, dangling internal reference). Fix before proceeding with new work.
 - **WARNING** — drift that will accumulate (e.g., stale INDEX rows, missing routing fields, legacy paths). Fix soon, before the next release.
 - **INFO** — heads-up that may or may not need action (e.g., orphan plan with no `implements`, stale `awaiting-review`). Judge per item.
+
+## Step 0 — model-invocation gate (run before any other step)
+
+Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+
+- If **`walkaround` is in `model_invocable`** → allowed; continue this ritual normally.
+- Else (`walkaround` not listed):
+  - If you can tell this run was an **explicit user `/flightdeck:walkaround`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
+  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`walkaround` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [walkaround]` to `flightdeck/rules.md`." Run no further step.
+
+This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 
 ## Audits
 

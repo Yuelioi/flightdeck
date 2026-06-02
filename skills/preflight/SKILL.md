@@ -1,7 +1,6 @@
 ---
 name: preflight
 description: Use when explicitly invoking the flightdeck entry ritual — the single entry point. Initializes `flightdeck/` when absent (no cockpit.md); otherwise reconciles cockpit.md against repo state via root INDEX.md, loads a routing catalog from folder INDEX files, and reports the first "next session" item. Triggered by `/flightdeck:preflight`.
-disable-model-invocation: true
 ---
 
 # Flightdeck Preflight
@@ -13,6 +12,17 @@ The **single explicit entry point** for flightdeck. Nothing loads on its own —
 - You want a clean, read-only starting point before delegating to other skills.
 
 The protocol "textbook" (data model, folder semantics, routing, write gate, lifecycle) is in [protocol.md](protocol.md) — load it on demand; see the index at the bottom.
+
+## Step 0 — model-invocation gate (run before any other step)
+
+Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+
+- If **`preflight` is in `model_invocable`** → allowed; continue this ritual normally.
+- Else (`preflight` not listed):
+  - If you can tell this run was an **explicit user `/flightdeck:preflight`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
+  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`preflight` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [preflight]` to `flightdeck/rules.md`." Run no further step.
+
+This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.) Once past this gate, the checklist's **Branch-0 (deck existence) still runs first** within the ritual.
 
 ## Run this checklist exactly
 
