@@ -2,8 +2,8 @@
 status: done
 summary: 一个 plan 一趟 pass 落地三篇叠放 spec（归一 + version + enrichment）：Phase 0 立权威字段表 → 1 version→rules.md → 2 workflow 富化 → 3 dogfood 回填 + 发布
 last_updated: 2026-06-03
-implements: specs/2026-06-02-metadata-model-consolidation-design.md
-related: [specs/2026-06-02-version-in-rules-migration-detection-design.md, specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
+implements: landed/specs/2026-06-02-metadata-model-consolidation-design.md
+related: [landed/specs/2026-06-02-version-in-rules-migration-detection-design.md, landed/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
 ---
 
 # 元数据模型实现 plan —— 归一 + version + enrichment（三篇一栈）

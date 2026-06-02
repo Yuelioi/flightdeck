@@ -2,7 +2,7 @@
 status: done
 summary: 单一权威字段表立在 protocol.md，收编 templates/folder-semantics 的漂移字段语义；裁决取代关系与 last_updated 强制级别两处不对称
 last_updated: 2026-06-03
-related: [specs/2026-06-02-version-in-rules-migration-detection-design.md, specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
+related: [landed/specs/2026-06-02-version-in-rules-migration-detection-design.md, landed/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md]
 ---
 
 # 元数据模型归一：单一权威字段表 + 收编漂移字段 + 裁决不对称

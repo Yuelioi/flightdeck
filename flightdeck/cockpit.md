@@ -1,13 +1,13 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-03 by 月离 (v2.2.0 shipped — metadata-model consolidation + version→rules.md + workflow frontmatter enrichment; plan + 3 specs done, awaiting land)
+**Last updated**: 2026-06-03 by 月离 (v2.2.0 metadata-model plan + 3 specs landed → `landed/`; intra-cluster `implements`/`related` edges rewritten to `landed/` prefix during the land)
 **Active focus**: flightdeck 2.2.0 shipped — single canonical frontmatter field table; deck `version` now in the mandatory `rules.md` (3-file contract); workflow artifacts gain `summary`/`last_updated`/`supersedes`/`related` (INDEX rows derive from `summary`).
 
 ## Next session
 
-1. **Land the completed metadata-model plan + its 3 specs** (all `done`, currently un-archived) via `/flightdeck:landing` — confirm the Land Routine rewrites the `supersedes`/`related` edges to the `landed/` prefix.
-2. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
-3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
+1. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
+2. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
+3. **Land Routine gap** (surfaced this land): step 3 rewrites only *inbound* edges from the active tree, so co-landing a mutual-reference cluster leaves intra-batch edges dangling — I hand-fixed them this time. Decide: tighten the routine (also rewrite the landed file's own outbound edges to siblings) vs. leave to walkaround's dangling-edge audit.
 
 ## Hanging tasks
 

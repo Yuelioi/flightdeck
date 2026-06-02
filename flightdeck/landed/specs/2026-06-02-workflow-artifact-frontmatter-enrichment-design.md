@@ -2,7 +2,7 @@
 status: done
 summary: workflow 工件 frontmatter 加 summary + last_updated + supersedes/related 关系边；INDEX 行从 summary 派生，last_updated 由 skill 自动 bump
 last_updated: 2026-06-03
-related: [specs/2026-06-02-metadata-model-consolidation-design.md, specs/2026-06-02-version-in-rules-migration-detection-design.md]
+related: [landed/specs/2026-06-02-metadata-model-consolidation-design.md, landed/specs/2026-06-02-version-in-rules-migration-detection-design.md]
 ---
 
 # workflow 工件 frontmatter 富化：summary + last_updated + 关系边
