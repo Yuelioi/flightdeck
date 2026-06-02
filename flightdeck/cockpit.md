@@ -6,7 +6,7 @@
 
 ## Next session
 
-1. Execute [plans/2026-06-02-metadata-model-implementation-plan.md](plans/2026-06-02-metadata-model-implementation-plan.md) (implements the 3 stacked specs). Phase 0 stand up the canonical field table in protocol.md → Phase 1 version→rules.md + migration detection → Phase 2 workflow frontmatter enrichment → Phase 3 dogfood backfill + release. Order is a hard dependency. Use subagent-driven-development / executing-plans.
+1. **Resume the metadata-model plan at Phase 2** ([plans/2026-06-02-metadata-model-implementation-plan.md](plans/2026-06-02-metadata-model-implementation-plan.md)). Phase 0 (canonical field table) + Phase 1 (version→rules.md, migration detection) are DONE and committed on branch `metadata-model-impl` (`a8c46f2`, `f10e47e`; checkboxes track this). Remaining: Phase 2 (summary→INDEX, last_updated auto-bump, supersedes/related edges, landing path-rewrite) → Phase 3 (dogfood backfill + release as **2.2.0 minor** — `version` value is already `2.2` throughout, no rework). Use executing-plans on the branch.
 2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
 
