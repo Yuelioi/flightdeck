@@ -76,10 +76,9 @@ Step 3a: Suggest status for affected artifacts
          change status to any legal value at any time — the AI does not block.
          (Status is a label — no table, no verbs. The AI suggests; the user decides.)
 
-         For done or scrapped artifacts, offer to land them:
-         move to landed/ mirroring source structure
-         (e.g. specs/foo.md → landed/specs/foo.md).
-         Append a line to landed/HISTORY.md when git: false.
+         For done or scrapped artifacts, offer to land them via the
+         single shared Land Routine (see "## Land Routine" below) —
+         do not inline the move/INDEX/HISTORY steps here.
 
 Step 4: Update cockpit.md
         - Bump Last updated ONLY on real progress (new artifact written,
@@ -248,6 +247,18 @@ HISTORY.md:       when git: false, append one line per landing (YYYY-MM-DD — r
 **When to update mid-session:** after any commit that changes user-perceivable state, refresh `Next session` before starting the next task — don't wait for landing.
 
 **Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry or a sketch). History is `git log` / `landed/HISTORY.md`, never cockpit.
+
+## Land Routine
+
+The single source of truth for landing an artifact. Both `landing` (Step 3a above) and the `status` skill (`skills/status/SKILL.md`) MUST call this — do not reimplement it anywhere.
+
+Given a `done` (or `scrapped`) artifact at `<folder>/<file>`:
+
+1. Move it to `landed/<folder>/<file>`, mirroring source structure (e.g. `specs/foo.md → landed/specs/foo.md`). Create `landed/<folder>/` if absent.
+2. Remove its row from `<folder>/INDEX.md`'s `<!-- AUTO -->` region, then recompute that folder's count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No other folder is touched.
+3. When `rules.md` sets `git: false`, append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+
+**There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.**
 
 ## See also
 
