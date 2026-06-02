@@ -13,6 +13,7 @@ emit_agents_md: true      # false → the emit-agents-md skill exits without wri
 disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not flagged as orphans
 disabled_gates: []        # e.g. [debrief-disposition]
 model_invocable: []       # rituals the model may self-invoke; [] = all manual. e.g. [landing]
+status_auto: []           # optional status transitions; [] = none. add `start` (→active) / `land` (done+land)
 ---
 
 ## House rules
@@ -24,7 +25,7 @@ Free-prose project conventions every flightdeck skill must honor
 ### Rules
 
 - **Optional file.** No `rules.md` = defaults (git on, emit on, all folders/gates active). Purely additive.
-- **Closed toggle set** — only these five keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
+- **Closed toggle set** — only these six keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
 
   | Key | Type | Default | Effect when changed |
   | --- | --- | --- | --- |
@@ -32,12 +33,13 @@ Free-prose project conventions every flightdeck skill must honor
   | `emit_agents_md` | bool | `true` | `false` → `emit-agents-md` refuses and reports "disabled via rules.md". |
   | `disabled_folders` | list | `[]` | Listed folders never suggested by fallback/exit classification; not flagged as orphans by `walkaround`. |
   | `disabled_gates` | list | `[]` | Named gates skipped. Known: `debrief-disposition`, `frontmatter-required`. |
-  | `model_invocable` | list | `[]` | Rituals (`landing`/`preflight`/`walkaround`/`emit-agents-md`) the model may self-invoke via the skill tool. `[]` = all manual (explicit `/flightdeck:<x>` only). Each ritual's Step-0 gate enforces it. |
+  | `model_invocable` | list | `[]` | Rituals (`landing`/`preflight`/`walkaround`/`emit-agents-md`/`status`) the model may self-invoke via the skill tool. `[]` = all manual (explicit `/flightdeck:<x>` only). Each ritual's Step-0 gate enforces it. |
+  | `status_auto` | list | `[]` | Optional lifecycle transitions the `status` skill may auto-apply once invoked. `[]` = none; the two core transitions (create→pending, finish→awaiting-review) are always automatic and are NOT in this list. Members: `start` (→active), `land` (done + confirm-gated land). |
 
 - **`disabled_gates: [frontmatter-required]` is dangerous** — it makes routed files invisible to grep-routing. Warn the user when honoring it.
-- **House rules are advisory prose** the AI honors, but they cannot redefine the four toggle keys.
+- **House rules are advisory prose** the AI honors, but they cannot redefine the six toggle keys.
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail (a broken `rules.md` must not brick the entry ritual).
-- **Read first**: every entry skill (`preflight`, `walkaround`, `landing`, `emit-agents-md`) reads `rules.md` before acting and branches on the toggles.
+- **Read first**: every entry skill (`preflight`, `walkaround`, `landing`, `emit-agents-md`, `status`) reads `rules.md` before acting and branches on the toggles.
 
 ---
 
