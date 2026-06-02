@@ -93,3 +93,12 @@ rm -rf ~/.claude/skills/{preflight,landing,walkaround,emit-agents-md}
 # Windows
 Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md"
 ```
+
+## Call-source detection (model_invocable gate)
+
+**Mode: formal.** Claude Code injects a `<command-name>/flightdeck:<ritual></command-name>`
+marker when the user types the slash, and omits it on a model self-invoke (Skill tool).
+The Step-0 gate keys off this marker: explicit user invocations are always allowed;
+model self-invocation is allowed only when the ritual is listed in `rules.md`
+`model_invocable`. Default (`model_invocable: []`) ⇒ identical to the old
+`disable-model-invocation: true`.
