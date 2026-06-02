@@ -105,6 +105,8 @@ Don't auto-start anything. Search in order (a missing directory counts as empty)
 2. `flightdeck/specs/` — `active` / `pending` designs not yet turned into a plan (read `specs/INDEX.md`); ask which to plan next.
 3. `flightdeck/sketches/` — unstarted ideas (read `sketches/INDEX.md`); ask which (if any) to promote to a spec.
 
+> **Done-but-unlanded (any folder):** an artifact whose `status: done` but which still sits in its source folder (not yet under `landed/`) is *done-but-unlanded* — the `status` skill produces these when its `land` confirm is declined. Offer to land it via the [Land Routine](exit-ritual.md#land-routine). This applies to `specs/`, `plans/`, and any workflow folder, not just plans.
+
 ## Output format
 
 Report concisely:
