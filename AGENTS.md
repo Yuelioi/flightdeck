@@ -9,7 +9,7 @@ flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `
 
 ## Next session
 
-1. Open ONE plan implementing three stacked designs in a single `templates.md`/`protocol.md`/walkaround pass: [metadata-model consolidation](flightdeck/specs/2026-06-02-metadata-model-consolidation-design.md) (umbrella — single canonical field table in protocol.md, absorb `skip_when`, kill bundle/scope/non_goals, rule the two asymmetries) → then fold in [version→rules.md relocation](flightdeck/specs/2026-06-02-version-in-rules-migration-detection-design.md) + [frontmatter enrichment](flightdeck/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md). Consolidation first, then the two field-adding specs.
+1. Execute [plans/2026-06-02-metadata-model-implementation-plan.md](flightdeck/plans/2026-06-02-metadata-model-implementation-plan.md) (implements the 3 stacked specs). Phase 0 stand up the canonical field table in protocol.md → Phase 1 version→rules.md + migration detection → Phase 2 workflow frontmatter enrichment → Phase 3 dogfood backfill + release. Order is a hard dependency.
 2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](flightdeck/sketches/v1x-deferred-ideas.md).
 

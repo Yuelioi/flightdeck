@@ -2,7 +2,7 @@
 
 <!-- AUTO:root -->
 - specs/ — 3 (3 pending)
-- plans/ — 0
+- plans/ — 1 (1 pending)
 - checklists/ — 1 active
 - charts/ — 1 project imported
 - debriefs/ — 1 active
