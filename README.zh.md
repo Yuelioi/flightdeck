@@ -268,8 +268,11 @@ cd my-project
 | `/flightdeck:landing` | Session 收尾 —— 分类新知识、更新 cockpit、可选 commit。 |
 | `/flightdeck:walkaround` | 10 类完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 在 fenced markers 之间重生 `AGENTS.md`。 |
+| `/flightdeck:status` | 自动翻转单个 artifact 的生命周期 `status:` + 其 INDEX 行（model-invocable；经 `rules.md` opt-in）。 |
 
 默认情况下，命令只在用户显式打 slash 时触发，不会从对话上下文自动触发，会话开始也不加载任何东西。这现在是一个 per-project 软门栓：每个仪式读 `flightdeck/rules.md` 的 `model_invocable` 列表（默认 `[]` = 全部手动）。要允许某仪式被模型自调，写如 `model_invocable: [landing]`。
+
+`flightdeck:status` 是唯一可被模型自调的高频仪式：会话中途保持 artifact 状态新鲜。用 `model_invocable: [status]` 允许自调；用 `status_auto: [start, land]` 选择哪些可选转换自动触发（默认只有 `create→pending` 与 `finish→awaiting-review` 自动）。
 
 ### 路由表 —— 什么情况下进哪个文件夹
 
