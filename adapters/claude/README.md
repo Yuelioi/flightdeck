@@ -102,3 +102,5 @@ The Step-0 gate keys off this marker: explicit user invocations are always allow
 model self-invocation is allowed only when the ritual is listed in `rules.md`
 `model_invocable`. Default (`model_invocable: []`) ⇒ identical to the old
 `disable-model-invocation: true`.
+
+The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate: it self-invokes only when `model_invocable` lists `status`. No manifest edit is needed to add it.
