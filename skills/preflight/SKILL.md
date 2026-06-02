@@ -49,7 +49,7 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
         - (none)
         ```
 
-        Also write `flightdeck/rules.md` (defaults + `version: <current>`):
+        Also write `flightdeck/rules.md` (ships **full-auto** — every ritual self-invocable + auto-status; `commit` stays the one human checkpoint. Tell the user, and that emptying `model_invocable` / `status_auto` reverts to manual):
 
         ```markdown
         ---
@@ -58,8 +58,9 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
         emit_agents_md: true
         disabled_folders: []
         disabled_gates: []
-        model_invocable: []
-        status_auto: []
+        model_invocable: [preflight, landing, walkaround, emit-agents-md, status]
+        status_auto: [start, land]
+        commit_mode: confirm
         ---
 
         ## House rules

@@ -4,10 +4,12 @@ git: true                 # false → skills skip all git reconcile/commit steps
 emit_agents_md: true      # false → emit-agents-md refuses (no-op)
 disabled_folders: []      # e.g. [charts, debriefs]
 disabled_gates: []        # e.g. [debrief-disposition]
-model_invocable: []       # rituals the model may self-invoke; [] = all manual (/flightdeck:<x> only). e.g. [landing]
-status_auto: []           # optional status transitions the status skill may auto-apply; [] = none. add `start` / `land`.
+model_invocable: [preflight, landing, walkaround, emit-agents-md, status]   # full-auto: AI may self-invoke every ritual. [] = all manual (/flightdeck:<x> only).
+status_auto: [start, land]   # auto-advance optional transitions: start (→active) + land (archive done→landed/). [] = none.
+commit_mode: confirm         # landing's commit step: manual / confirm (ask, default) / auto (no prompt). The one human checkpoint left in full-auto.
 ---
 
 ## House rules
 
-<!-- Free-prose project conventions every flightdeck skill must honor. -->
+<!-- Free-prose project conventions every flightdeck skill must honor.
+     This deck ships full-auto; set model_invocable: [] and status_auto: [] to go manual. -->
