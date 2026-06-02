@@ -6,7 +6,7 @@
 
 ## Next session
 
-1. Spec the version→`rules.md` relocation: drop cockpit's `Layout` line, make `rules.md` mandatory (3-file minimal contract: rules + cockpit + HISTORY), add `version`; MIGRATION.md carries `current` + `layout_need_update` to drive migration detection. Supersedes the `layout-version-migration-detection` design; revises soft-config's "rules.md optional" stance.
+1. Implement the version→`rules.md` relocation — design landed at [specs/2026-06-02-version-in-rules-migration-detection-design.md](specs/2026-06-02-version-in-rules-migration-detection-design.md). Open a plan: drop cockpit's `Layout` line, `rules.md` mandatory (3-file minimal contract), add `version`, MIGRATION.md `current` + `layout_need_update` drives detection. Touches preflight/walkaround/templates/protocol/scaffolds/version-bump/README.
 2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
 
