@@ -2,6 +2,23 @@
 
 This document records breaking migrations for the maintainer's reference.
 
+## 2.0 → 2.1 — model_invocable soft gate + status ritual
+
+2.1 is **additive and opt-in** — nothing breaks. `flightdeck/` Layout stays 1.2, existing decks need no changes, and default behavior is identical to 2.0.
+
+| Area | Affected? |
+|---|---|
+| deck data / `**Layout**` / `cockpit.md` | **No** — Layout stays 1.2 |
+| existing slash commands | **No** — still manual by default |
+| new automation | **Opt-in** via `flightdeck/rules.md` (see below) |
+
+What's new (all default-off):
+
+- The four entry skills (`preflight` / `landing` / `walkaround` / `emit-agents-md`) dropped the global `disable-model-invocation` hard switch for a per-project soft gate. Default `model_invocable: []` = all manual (identical to before). Opt a ritual into model self-invocation: `model_invocable: [landing]`.
+- New 5th ritual `/flightdeck:status` auto-flips one artifact's lifecycle status. Self-invocation requires `model_invocable: [status]`; which *optional* transitions fire is controlled by `status_auto: [start, land]` (default `[]` = only `create→pending` / `finish→awaiting-review`).
+
+**Action required:** none, unless you want the new automation — then add the opt-in keys to `flightdeck/rules.md`. After upgrading the plugin, **reinstall/sync the plugin-cache copy** so the new `status` ritual and keys load.
+
 ## 1.3 → 2.0 — single explicit entry
 
 2.0 removes the auto-loaded `workflow` skill and the SessionStart hook. The entry is now a single explicit command, `/flightdeck:preflight` (it initializes `flightdeck/` when there is no `cockpit.md`, otherwise reconciles and reports).

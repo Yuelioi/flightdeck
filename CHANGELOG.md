@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-06-02
+
+Soft-config gating + a new high-frequency status ritual. Additive and opt-in — `flightdeck/` Layout stays 1.2; default behavior is unchanged.
+
+### Added
+- **`model_invocable` rules.md toggle** — per-project soft gate replacing the global `disable-model-invocation` hard switch on the four entry skills. Default `[]` = all manual (identical to before); opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`. ([spec](flightdeck/specs/2026-06-02-soft-config-model-invocation-design.md))
+- **5th ritual `/flightdeck:status`** — high-frequency, model-invocable lifecycle auto-flip of a single artifact's `status:` + its INDEX row (forward-only; never touches cockpit/commit). ([spec](flightdeck/specs/2026-06-02-status-lifecycle-skill-design.md))
+- **`status_auto` rules.md toggle** — opt-in list controlling which *optional* status transitions (`start`, `land`) the `status` skill auto-applies; core `create→pending` / `finish→awaiting-review` are always automatic.
+- **rules.md key admission policy** — a 4-point gate in `protocol.md` governing when a new toggle may be added (anti-sprawl).
+
+### Changed
+- The four entry skills no longer carry `disable-model-invocation`; self-invocation is gated by `model_invocable` (default-off). The gate ships in the shared `SKILL.md` body, so it reaches every platform.
+- **Land procedure extracted** into a single shared `## Land Routine` anchor in `exit-ritual.md`; `landing` and `status` are two invocation paths over one implementation.
+- `preflight` now surfaces `done`-but-unlanded artifacts in any folder (not just plans).
+
+### Migration
+- Additive / opt-in — Layout stays 1.2; existing decks need no changes. To adopt the new automation, add the opt-in keys to `flightdeck/rules.md`. Reinstall/sync the plugin-cache copy so the new ritual loads. See [MIGRATION.md](MIGRATION.md).
+
 ## [2.0.0] — 2026-06-02
 
 Entry-layer collapse: one explicit entry skill, no auto-load. (Unrelated to the abandoned work-items "2.0" line — this 2.0 is purely about the entry model; `flightdeck/` layout is unchanged at 1.2.)

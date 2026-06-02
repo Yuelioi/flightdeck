@@ -1,6 +1,6 @@
 {
   "name": "flightdeck",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Operational protocol for AI-assisted engineering sessions — preflight, scenario triggers, write gate, and landing ritual",
   "author": {
     "name": "月离",
