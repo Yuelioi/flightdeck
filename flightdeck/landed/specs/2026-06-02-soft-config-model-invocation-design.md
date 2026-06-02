@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 ---
 
 # 把仪式入口的「硬禁自调」下放成 rules.md 软门栓 + 软配置面盘点

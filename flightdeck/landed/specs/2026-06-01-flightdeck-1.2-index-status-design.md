@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 ---
 
 # flightdeck 1.2 — INDEX + 显式 status 的轻量项目导航

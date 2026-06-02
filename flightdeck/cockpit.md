@@ -1,13 +1,13 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-02 by 月离 (v2.0.0 shipped — single explicit /preflight entry; workflow skill + hook removed)
-**Active focus**: flightdeck 2.0 shipped — single explicit `/flightdeck:preflight` entry (init-or-read); `workflow` skill + SessionStart hook deleted; protocol folded into `preflight/`. Layout still 1.2.
+**Last updated**: 2026-06-02 by 月离 (v2.1.0 shipped — model_invocable soft gate + flightdeck:status ritual; soft-config & status-lifecycle artifacts landed)
+**Active focus**: flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `disable-model-invocation` hard switch; new 5th ritual `flightdeck:status` (lifecycle auto-flip via `status_auto`). Layout still 1.2.
 **Layout**: 1.2
 
 ## Next session
 
-1. Dogfood 2.0 single-entry on real projects — confirm `/preflight` init-or-read and no auto-load surprises; classify friction at landing.
-2. Behaviorally verify Codex / Cursor / Gemini manifests against the archived release-gate scenarios (see [checklists/version-bump.md](checklists/version-bump.md) verification section for smoke-check reference).
+1. Spec the version→`rules.md` relocation: drop cockpit's `Layout` line, make `rules.md` mandatory (3-file minimal contract: rules + cockpit + HISTORY), add `version`; MIGRATION.md carries `current` + `layout_need_update` to drive migration detection. Supersedes the `layout-version-migration-detection` design; revises soft-config's "rules.md optional" stance.
+2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
 
 ## Hanging tasks

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 ---
 
 # 新增第 5 仪式 `flightdeck:status` —— 状态生命周期自动翻转

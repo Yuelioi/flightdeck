@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 implements: specs/2026-06-02-status-lifecycle-skill-design.md
 ---
 
