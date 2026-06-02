@@ -22,12 +22,12 @@ implements: specs/2026-06-02-metadata-model-consolidation-design.md
 
 ## Phase 0 — 归一骨架（consolidation spec）
 
-- [ ] **0.1** `skills/preflight/protocol.md`：在 "Data model" 下新增 `## Frontmatter field reference (canonical)`，照搬 consolidation spec §2.2 的 13 行字段表（kind × 必填 × 谁读 × 谁写 × walkaround）。
-- [ ] **0.2** 同文件：写入两条裁决理由 —— §2.4 取代关系不对称（knowledge 留位→`superseded_by` 正向重定向；workflow 归档→`supersedes` 边 + grep）、§2.5 `last_updated` 强制级别不对称。
-- [ ] **0.3** `skills/preflight/templates.md`：各 frontmatter 模板块**去语义说明**，改注 "字段语义见 protocol.md § frontmatter reference"；**补 `skip_when`**（incidents/checklists，可选）到知识类模板。
-- [ ] **0.4** `skills/preflight/folder-semantics.md`：删除字段内联重述（line 144–251 一带），保留"文件夹用途"，字段一律指向权威表。
-- [ ] **0.5** `flightdeck/landed/specs/2026-05-30-bundles-and-routing-graph-design.md`：头部加一行废弃标注（bundles/`scope`/`non_goals` 未采纳，见 `protocol.md` "No bundle README"）。
-- [ ] **0.6** `skills/walkaround/SKILL.md`：Audit 列表加一句"校验项以 protocol.md 权威表为准"；此处不改具体 audit（留 Phase 1/2 随字段一起改），仅建立指向。
+- [x] **0.1** `skills/preflight/protocol.md`：在 "Data model" 下新增 `## Frontmatter field reference (canonical)`，照搬 consolidation spec §2.2 的 13 行字段表（kind × 必填 × 谁读 × 谁写 × walkaround）。
+- [x] **0.2** 同文件：写入两条裁决理由 —— §2.4 取代关系不对称（knowledge 留位→`superseded_by` 正向重定向；workflow 归档→`supersedes` 边 + grep）、§2.5 `last_updated` 强制级别不对称。
+- [x] **0.3** `skills/preflight/templates.md`：各 frontmatter 模板块**去语义说明**，改注 "字段语义见 protocol.md § frontmatter reference"；**补 `skip_when`**（incidents/checklists，可选）到知识类模板。
+- [x] **0.4** `skills/preflight/folder-semantics.md`：删除字段内联重述（line 144–251 一带），保留"文件夹用途"，字段一律指向权威表。
+- [x] **0.5** `flightdeck/landed/specs/2026-05-30-bundles-and-routing-graph-design.md`：头部加一行废弃标注（bundles/`scope`/`non_goals` 未采纳，见 `protocol.md` "No bundle README"）。
+- [x] **0.6** `skills/walkaround/SKILL.md`：Audit 列表加一句"校验项以 protocol.md 权威表为准"；此处不改具体 audit（留 Phase 1/2 随字段一起改），仅建立指向。
 
 **Phase 0 验收**：`protocol.md` 是唯一定义字段语义处；templates/folder-semantics 不再自带字段语义；`skip_when` 三处一致；bundles spec 标废。
 

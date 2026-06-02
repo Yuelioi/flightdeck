@@ -2,6 +2,8 @@
 
 Reusable file templates for `flightdeck/` files. Each template has a strict structure — deviation typically means the file should live in a different folder or be deleted.
 
+> **Field semantics are canonical in [protocol.md § Frontmatter field reference](protocol.md#frontmatter-field-reference-canonical).** This file holds ready-to-paste blocks + per-template authoring rules; it does not redefine what a field *means* or which kinds require it.
+
 ---
 
 ## rules.md
@@ -73,6 +75,7 @@ when_to_read: <one-line trigger>
 applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
 # superseded only: superseded_by: <path>
+# optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
 ---
 ```
 

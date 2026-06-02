@@ -35,6 +35,8 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
 
 Run all 10 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray) and `disabled_gates` (do not flag a disabled gate). For each, report findings with the severity tag.
 
+**Field validity is governed by [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical)** — that table is the source of truth for which fields are required per kind. The audits below check against it; if they disagree, the canonical table wins.
+
 ### 1. Frontmatter status validity (CRITICAL / WARNING)
 
 **Folder = kind (implicit); `status` = the only required frontmatter field.** Audit `status` only; no other frontmatter field is required or validated here.

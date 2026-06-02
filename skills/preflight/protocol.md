@@ -31,7 +31,35 @@ flightdeck has exactly two axes:
 - **Folder = kind** (implicit; never written in frontmatter). Workflow kinds: `sketches/` `specs/` `plans/`. Knowledge kinds: `incidents/` `checklists/` `charts/` `debriefs/`.
 - **Frontmatter = status** (explicit, required) + knowledge routing fields (`when_to_read`/`applies_to`/`last_updated`) + a plan's optional `implements:`. The folder is the kind — files carry no type field.
 
-See [templates.md](templates.md) for per-folder frontmatter templates.
+See [templates.md](templates.md) for per-folder frontmatter templates. The full field set is the canonical table below.
+
+## Frontmatter field reference (canonical)
+
+This table is the **single source of truth** for every frontmatter / config field. `templates.md` (ready-to-paste blocks), `folder-semantics.md` (folder purpose), and `walkaround` (validation) defer here — they must not restate field semantics.
+
+| Field | Applies to (kind) | Required? | Read by | Written by | walkaround |
+| --- | --- | --- | --- | --- | --- |
+| `status` | all workflow + knowledge | **required** | preflight/landing/status/walkaround | status/landing/user | Audit 1 |
+| `summary` | workflow (sketches/specs/plans) | recommended | INDEX generation | status/landing/author | INFO if missing |
+| `last_updated` | knowledge **required**; workflow recommended | preflight (staleness) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
+| `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
+| `supersedes` | workflow | optional | grep (reverse derived) | author/status | dangling-edge INFO (optional) |
+| `related` | workflow | optional | grep | author | dangling-edge INFO (optional) |
+| `when_to_read` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
+| `applies_to` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
+| `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
+| `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
+| `reviewed` | debriefs | **required** | links to the reviewed spec/topic | author | debrief check |
+| `version` | `rules.md` (root) | **required** (rules.md is mandatory) | preflight/walkaround migration detection | preflight setup / auto-bump | Audit 10 |
+| `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto` | `rules.md` | optional (defaulted) | all entry skills | user | — |
+
+`cockpit.md` header lines (`Last updated` / `Active focus` / `Next session` / `Hanging tasks`) are board fields, not YAML frontmatter.
+
+### Two deliberate asymmetries
+
+**Supersession — edge (workflow) vs status pointer (knowledge).** Knowledge files stay in place (never archived): a reader can land on a dead-but-in-place file, so a *forward* `superseded_by` (required when `status: superseded`) redirects to the replacement. Workflow artifacts archive into `landed/` when done — the old one is history a reader rarely hits cold, so the new artifact carries a *backward* `supersedes` edge and the reverse ("who superseded me") is grep-derived, never stored. Two mechanisms, one principle each — do not unify.
+
+**`last_updated` — required (knowledge) vs recommended + auto-bump (workflow).** Knowledge is found by grep-routing where stale advice is dangerous → required. Workflow is found via INDEX/cockpit → staleness matters less; recommended, and auto-bumped by `status`/`landing` to prevent rot.
 
 ## Status (label + recommended flow)
 

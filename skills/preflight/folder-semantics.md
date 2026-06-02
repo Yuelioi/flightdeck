@@ -139,18 +139,13 @@ Rules:
 
 ## Folder details
 
+> Per-folder frontmatter **blocks** live in [templates.md](templates.md); field **semantics** (required-ness, who reads/writes) are canonical in [protocol.md § Frontmatter field reference](protocol.md#frontmatter-field-reference-canonical). The sections below describe folder *purpose* and *lifecycle* only.
+
 ### `sketches/` — uncommitted ideas
 
 Unstarted ideas waiting for a trigger. `status: active` or `scrapped`. **The folder is the kind — files carry no type field; no `implements:`.**
 
 Naming: `<topic>.md` (no date prefix — ideas are timeless until acted on).
-
-**Frontmatter**:
-```yaml
----
-status: active    # active / scrapped
----
-```
 
 **Promote** a sketch to a spec when it becomes actionable: move `sketches/foo.md → specs/foo.md` and set `status: pending`. The sketch leaves `sketches/` on promotion.
 
@@ -164,13 +159,6 @@ Committed design documents to review or implement. A spec captures the *what* an
 
 Naming: `YYYY-MM-DD-<topic>.md` (date helps order by recency; specs are time-bound designs).
 
-**Frontmatter**:
-```yaml
----
-status: pending    # pending / active / awaiting-review / blocked / done / scrapped
----
-```
-
 The folder is the kind — files carry no type field. No `implements:` (that goes on the plan side).
 
 Lifecycle: when a spec is done and all its plans are complete, `land` it — move to `landed/specs/foo.md`. The spec leaves the active routing set but its history is preserved.
@@ -180,14 +168,6 @@ Lifecycle: when a spec is done and all its plans are complete, `land` it — mov
 Task-level breakdowns of how to execute a spec (or a standalone piece of work). Plans carry the optional `implements:` back-reference to the spec they execute.
 
 Naming: `YYYY-MM-DD-<topic>.md`.
-
-**Frontmatter**:
-```yaml
----
-status: active           # pending / active / awaiting-review / blocked / done / scrapped
-implements: specs/<x>.md  # optional; relative to flightdeck root; walkaround warns "orphan plan" if absent
----
-```
 
 `implements:` is a single unidirectional reference. To see which plans implement a given spec, read `plans/INDEX.md` — do NOT add a reverse `implemented_by:` field to the spec.
 
@@ -201,18 +181,7 @@ Naming: `<topic>.md` (no date prefix — incident reports are reference, not log
 
 Recurrence rule: same incident happens again → **append `## [Case N]`** to existing file. Do not create a new file. Repeated recurrence (≥3 times or single severe case) → promote one-liner to your project agent rules.
 
-**Frontmatter**:
-```yaml
----
-status: active            # active / obsolete / superseded
-when_to_read: <one-line trigger condition>
-applies_to: [<tag>, ...]
-last_updated: YYYY-MM-DD
-# when status: superseded — add: superseded_by: <path>
----
-```
-
-`when_to_read` and `applies_to` are required. An incident without `when_to_read` is invisible to skill routing. `last_updated` must be bumped on each Case append or status flip.
+`last_updated` must be bumped on each Case append or status flip (per the canonical field table).
 
 ### `checklists/` — procedures
 
@@ -222,36 +191,13 @@ Naming: `<topic>.md` (no date prefix — checklists are stable resources).
 
 Promotion rule: a process becomes a checklist the **second** time you run it. First time = ad-hoc. Second time = pattern.
 
-**Frontmatter**:
-```yaml
----
-status: active            # active / obsolete / superseded
-when_to_read: <one-line trigger condition>
-applies_to: [<tag>, ...]
-last_updated: YYYY-MM-DD
-# when status: superseded — add: superseded_by: <path>
-# optional: skip_when: <one-line "when NOT to read this">
----
-```
-
-`status: superseded` requires `superseded_by: <path>`. `status: obsolete` means the external constraint no longer exists; `status: superseded` means a newer checklist replaces this one. Both may stay in place indefinitely — no automatic "to-land" reminder.
+`status: obsolete` = the external constraint no longer exists; `status: superseded` = a newer checklist replaces this one (set `superseded_by`). Both may stay in place indefinitely — no automatic "to-land" reminder.
 
 ### `charts/` — external material
 
 External docs, competitor source code, RFCs, blog posts, etc. — a single place for "where do I find that thing".
 
 Naming: `<source>-<topic>.md` (e.g. `boltframe-shape-layer.md`, `rfc-6749.md`).
-
-**Frontmatter** (for single-file chart entries):
-```yaml
----
-status: active            # active / obsolete / superseded
-when_to_read: <one-line trigger>
-applies_to: [<tag>, ...]
-last_updated: YYYY-MM-DD
-# when status: superseded — add: superseded_by: <path>
----
-```
 
 **Imported external project tree**: `charts/` is the only folder where a subdirectory is permitted. When importing an entire external project (competitor code, an RFC suite, a large article series), place it at `charts/<project>/` and add a `charts/<project>/INDEX.md` as a human-readable guide to the project's contents. The root `charts/INDEX.md` row for that project shows project count + "imported" rather than a status count (imported files do not carry uniform flightdeck frontmatter).
 
@@ -261,15 +207,7 @@ Raw feedback from reviewers (other AIs, colleagues) + your **disposition** (adop
 
 Naming: `YYYY-MM-DD-<spec-or-topic>-<reviewer>.md`.
 
-**Frontmatter**:
-```yaml
----
-status: active            # active / obsolete / superseded
-last_updated: YYYY-MM-DD
----
-```
-
-Retrieved by the spec/topic reviewed + date, not by a trigger — so no `when_to_read`/`applies_to`.
+Retrieved by the spec/topic reviewed + date (`reviewed:` field), not by a trigger — so no `when_to_read`/`applies_to`.
 
 Disposition rule: no debrief can exist in `debriefs/` without a disposition section. If disposition is incomplete, add a hanging task to `cockpit.md` ("finish disposition of `<file>`") and do not close the session.
 

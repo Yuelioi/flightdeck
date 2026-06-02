@@ -1,6 +1,7 @@
 # RFC: Bundles & Routing Graph — scaling flightdeck beyond flat files
 
 > **Status**: implemented in v1.1.0 (2026-05-30). Archived.
+> **⚠ Bundle mechanism later REMOVED by the 2.0 entry-collapse rewrite (2026-06-01)** — `protocol.md` now states "No bundle README". The bundle-only fields **`bundle` / `reading_order` / `scope` / `non_goals` are NOT live fields**; only `skip_when` (negative routing) survives. Canonical field set: [protocol.md § Frontmatter field reference](../../../skills/preflight/protocol.md#frontmatter-field-reference-canonical). Do not read this RFC as a live design.
 > **Targets**: `skills/workflow/folder-semantics.md`, `skills/workflow/SKILL.md`, `skills/walkaround/SKILL.md`, `CHANGELOG.md` + `VERSION` + plugin manifests.
 > **Type**: additive (post-v1.0 additive-only window) → minor bump.
 
