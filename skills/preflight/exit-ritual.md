@@ -266,16 +266,17 @@ HISTORY.md:       when git: false, append one line per landing (YYYY-MM-DD — r
 
 ## Land Routine
 
-The single source of truth for landing an artifact. Both `landing` (Step 3a above) and the `status` skill (`skills/status/SKILL.md`) MUST call this — do not reimplement it anywhere.
+The single source of truth for landing artifacts. Both `landing` (Step 3a above) and the `status` skill (`skills/status/SKILL.md`) MUST call this — do not reimplement it anywhere.
 
-Given a `done` (or `scrapped`) artifact at `<folder>/<file>`:
+Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
-1. Move it to `landed/<folder>/<file>`, mirroring source structure (e.g. `specs/foo.md → landed/specs/foo.md`). Create `landed/<folder>/` if absent.
-2. Remove its row from `<folder>/INDEX.md`'s `<!-- AUTO -->` region, then recompute that folder's count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No other folder is touched.
-3. **Rewrite inbound relation edges.** The file's path just changed, so any *other* artifact whose `supersedes:` or `related:` frontmatter points at the old `<folder>/<file>` is now dangling. Grep the active tree (NOT `landed/`) for `supersedes:` / `related:` values equal to the old path and rewrite each to the new `landed/<folder>/<file>` path, so the edge still navigates after archival. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
-4. When `rules.md` sets `git: false`, append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = landed/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → landed/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
+2. **Move.** For each entry in `M`, move `<folder>/<file>` → `landed/<folder>/<file>`, creating `landed/<folder>/` if absent.
+3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
+4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region, then recompute the affected folders' count lines in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
+5. When `rules.md` sets `git: false`, append one line per landing to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
 
-**There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.**
+**There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
 
 ## See also
 

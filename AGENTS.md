@@ -11,7 +11,7 @@ flightdeck 2.2.0 shipped — single canonical frontmatter field table; deck `ver
 
 1. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
 2. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](flightdeck/sketches/v1x-deferred-ideas.md).
-3. **Land Routine gap** (surfaced this land): step 3 rewrites only *inbound* edges from the active tree, so co-landing a mutual-reference cluster leaves intra-batch edges dangling — I hand-fixed them this time. Decide: tighten the routine (also rewrite the landed file's own outbound edges to siblings) vs. leave to walkaround's dangling-edge audit.
+3. **Cut 2.2.1** to publish the Land Routine collect-then-migrate fix (run [checklists/version-bump.md](flightdeck/checklists/version-bump.md)): bump `rules.md` / `MIGRATION.md` `current`, marketplace, tag. Skill-behavior change only — **no** deck migration (`layout_need_update` untouched).
 
 ## Hanging tasks
 
