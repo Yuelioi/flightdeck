@@ -84,7 +84,7 @@ Contains:
 
 ### `rules.md` — optional project config
 
-Read first by every entry skill. Carries a closed set of toggles (`git`, `emit_agents_md`, `disabled_folders`, `disabled_gates`) plus free-prose house rules. Absent = defaults (git on, emit on, all folders active). Full schema: [templates.md § rules.md](templates.md#rulesmd).
+Read first by every entry skill. Carries a closed set of toggles (`git`, `emit_agents_md`, `disabled_folders`, `disabled_gates`, `model_invocable`) plus free-prose house rules. Absent = defaults (git on, emit on, all folders active, all rituals manual). Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
 ### `INDEX.md` — root index
 

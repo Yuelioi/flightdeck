@@ -12,6 +12,7 @@ git: true                 # false → skills skip all git reconcile/commit steps
 emit_agents_md: true      # false → the emit-agents-md skill exits without writing
 disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not flagged as orphans
 disabled_gates: []        # e.g. [debrief-disposition]
+model_invocable: []       # rituals the model may self-invoke; [] = all manual. e.g. [landing]
 ---
 
 ## House rules
@@ -23,7 +24,7 @@ Free-prose project conventions every flightdeck skill must honor
 ### Rules
 
 - **Optional file.** No `rules.md` = defaults (git on, emit on, all folders/gates active). Purely additive.
-- **Closed toggle set** — only these four keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
+- **Closed toggle set** — only these five keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
 
   | Key | Type | Default | Effect when changed |
   | --- | --- | --- | --- |
@@ -31,6 +32,7 @@ Free-prose project conventions every flightdeck skill must honor
   | `emit_agents_md` | bool | `true` | `false` → `emit-agents-md` refuses and reports "disabled via rules.md". |
   | `disabled_folders` | list | `[]` | Listed folders never suggested by fallback/exit classification; not flagged as orphans by `walkaround`. |
   | `disabled_gates` | list | `[]` | Named gates skipped. Known: `debrief-disposition`, `frontmatter-required`. |
+  | `model_invocable` | list | `[]` | Rituals (`landing`/`preflight`/`walkaround`/`emit-agents-md`) the model may self-invoke via the skill tool. `[]` = all manual (explicit `/flightdeck:<x>` only). Each ritual's Step-0 gate enforces it. |
 
 - **`disabled_gates: [frontmatter-required]` is dangerous** — it makes routed files invisible to grep-routing. Warn the user when honoring it.
 - **House rules are advisory prose** the AI honors, but they cannot redefine the four toggle keys.

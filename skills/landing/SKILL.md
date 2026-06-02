@@ -1,7 +1,6 @@
 ---
 name: landing
 description: Use when explicitly invoking the flightdeck landing ritual — classifies new knowledge from the session, regenerates changed-folder INDEX files, updates cockpit.md, blocks on hanging tasks, runs a lightweight workspace smoke-check, optionally commits. Triggered by `/flightdeck:landing`.
-disable-model-invocation: true
 ---
 
 # Flightdeck Landing
@@ -11,6 +10,17 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 - Wrapping up a session cleanly before context compression.
 - Natural pause point (ship complete / brainstorm done) — closing checks before moving on.
 - Re-running mid-session to enforce the "no hanging debrief disposition" discipline.
+
+## Step 0 — model-invocation gate (run before any other step)
+
+Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+
+- If **`landing` is in `model_invocable`** → allowed; continue this ritual normally.
+- Else (`landing` not listed):
+  - If you can tell this run was an **explicit user `/flightdeck:landing`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
+  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`landing` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [landing]` to `flightdeck/rules.md`." Run no further step.
+
+This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 
 ## Run this checklist
 

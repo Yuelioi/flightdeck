@@ -41,3 +41,13 @@ Gemini CLI's extension mechanism loads `GEMINI.md` as project / session context.
    - Updates the README compatibility matrix `⚠️ untested` → `✅ tested`.
    - Pastes the verification transcript here.
    - Notes whether a conditional-load workaround is needed.
+
+## Call-source detection (model_invocable gate)
+
+**Mode: degraded (until verified).** This platform's manifest carries no per-skill
+manual-only switch — the `disable-model-invocation` field is Claude-Code-only — so the
+soft gate ships via the shared `SKILL.md` body. Whether this platform lets the skill body
+distinguish a user invocation from a model self-invoke is **unverified**; until confirmed,
+the gate runs degraded: a ritual NOT in `rules.md` `model_invocable` is treated as
+manual-only and will prompt even on an explicit user invocation. Opt in per-project with
+`model_invocable: [<ritual>]`. Flip this note to "formal" with a transcript when verified.

@@ -269,7 +269,7 @@ Run `/flightdeck:preflight`. It:
 | `/flightdeck:walkaround` | Integrity audit across 10 categories — protocol drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` between fenced markers from `cockpit.md`. |
 
-Every command carries `disable-model-invocation: true` — they fire only on an explicit slash, never auto-triggered from conversation context. Nothing loads on session start.
+By default the commands fire only on an explicit slash, never auto-triggered from conversation context, and nothing loads on session start. This is now a per-project soft gate: each ritual checks `flightdeck/rules.md`'s `model_invocable` list (default `[]` = all manual). Opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`.
 
 ### Routing — what triggers what
 

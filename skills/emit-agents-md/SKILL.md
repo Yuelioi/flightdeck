@@ -1,7 +1,6 @@
 ---
 name: emit-agents-md
 description: Use when explicitly invoking the flightdeck AGENTS.md emitter — regenerates `AGENTS.md` at repo root from `flightdeck/cockpit.md` between fenced markers, preserving any hand-authored content outside the markers. Triggered by `/flightdeck:emit-agents-md`.
-disable-model-invocation: true
 ---
 
 # Flightdeck AGENTS.md Emitter
@@ -14,9 +13,20 @@ User-triggered regeneration of `AGENTS.md` at repo root from the current state o
 
 AGENTS.md is the cross-tool standard for project-level AI instructions, stewarded by the Agentic AI Foundation under the Linux Foundation; ~60k+ repos adopted by mid-2026 with measurable 28.6% runtime / 16.6% token wins. Flightdeck tracks the same information (current focus, next actions, hanging tasks) in `flightdeck/cockpit.md`. The emitter is the bridge: flightdeck authors maintain this file, and AI tools that don't speak flightdeck natively read the auto-regenerated `AGENTS.md`.
 
+## Step 0 — model-invocation gate (run before any other step)
+
+Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+
+- If **`emit-agents-md` is in `model_invocable`** → allowed; continue this ritual normally.
+- Else (`emit-agents-md` not listed):
+  - If you can tell this run was an **explicit user `/flightdeck:emit-agents-md`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
+  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`emit-agents-md` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [emit-agents-md]` to `flightdeck/rules.md`." Run no further step.
+
+This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
+
 ## Run this checklist
 
-### Step 0: Read `flightdeck/rules.md`
+### Step 0a: Apply `flightdeck/rules.md` toggles
 
 If present: when `emit_agents_md: false`, do nothing and report "AGENTS.md emit disabled via rules.md" — skip all remaining steps. When `git: false`, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do".
 

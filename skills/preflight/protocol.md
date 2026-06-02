@@ -10,7 +10,7 @@
 
 `flightdeck/rules.md` is an **optional** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`). It carries a closed set of structured toggles plus free-prose house rules. Absent file = defaults (git on, emit on, all folders/gates active).
 
-Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
+Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
 
 When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the four toggles or the project's own agent rules.
 
