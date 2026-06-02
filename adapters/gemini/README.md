@@ -51,3 +51,7 @@ distinguish a user invocation from a model self-invoke is **unverified**; until 
 the gate runs degraded: a ritual NOT in `rules.md` `model_invocable` is treated as
 manual-only and will prompt even on an explicit user invocation. Opt in per-project with
 `model_invocable: [<ritual>]`. Flip this note to "formal" with a transcript when verified.
+
+## Ritual coverage (GEMINI.md)
+
+`GEMINI.md` `@`-includes only the **preflight** bundle (SKILL.md + protocol/folder-semantics/templates/exit-ritual). The non-preflight rituals — `landing`, `walkaround`, `emit-agents-md`, and now `status` — are **not** individually `@`-included, so their skill bodies aren't loaded on Gemini. This is a pre-existing, untested gap (the manifest is "behaviorally untested"), not specific to `status`. Wiring all rituals into `GEMINI.md` is tracked separately; `status` inherits the same posture as its siblings.

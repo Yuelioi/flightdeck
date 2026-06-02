@@ -8,9 +8,9 @@
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is an **optional** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`). It carries a closed set of structured toggles plus free-prose house rules. Absent file = defaults (git on, emit on, all folders/gates active).
+`flightdeck/rules.md` is an **optional** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It carries a closed set of structured toggles plus free-prose house rules. Absent file = defaults (git on, emit on, all folders/gates active, all rituals manual).
 
-Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
+Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
 
 ### Key admission policy (anti-sprawl)
 

@@ -268,8 +268,11 @@ Run `/flightdeck:preflight`. It:
 | `/flightdeck:landing` | Clean session wrap — classify new knowledge, update cockpit, optionally commit. |
 | `/flightdeck:walkaround` | Integrity audit across 10 categories — protocol drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` between fenced markers from `cockpit.md`. |
+| `/flightdeck:status` | Auto-flip one artifact's lifecycle `status:` + its INDEX row (model-invocable; opt-in via `rules.md`). |
 
 By default the commands fire only on an explicit slash, never auto-triggered from conversation context, and nothing loads on session start. This is now a per-project soft gate: each ritual checks `flightdeck/rules.md`'s `model_invocable` list (default `[]` = all manual). Opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`.
+
+`flightdeck:status` is the only model-invocable, high-frequency ritual: it keeps an artifact's status fresh mid-session. Enable self-invocation with `model_invocable: [status]`; choose which optional transitions auto-fire with `status_auto: [start, land]` (default: only `create→pending` and `finish→awaiting-review` are automatic).
 
 ### Routing — what triggers what
 
