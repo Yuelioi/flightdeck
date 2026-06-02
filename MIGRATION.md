@@ -1,5 +1,5 @@
 ---
-current: 2.2
+current: 2.3
 layout_need_update: [2.2]   # releases requiring a deck migration; deck.version < any listed (or no version) → non-silent migration offer
 ---
 
@@ -8,6 +8,19 @@ layout_need_update: [2.2]   # releases requiring a deck migration; deck.version 
 This document records breaking migrations for the maintainer's reference.
 
 > **Migration detection reads this frontmatter.** `current` = latest release; `layout_need_update` = releases that changed deck structure. `preflight`/`walkaround` compare a deck's `rules.md` `version` against it: version below any `layout_need_update` entry (or no `version` at all) → non-silent migration offer; otherwise preflight silently bumps the deck's `version` to `current`. (Replaces the old cockpit `**Layout**` string check.)
+
+## 2.2 → 2.3 — autonomy defaults + `commit_mode` (additive, no migration)
+
+2.3 is **purely additive**. Existing decks need no changes — `preflight` silently bumps `rules.md` `version` 2.2 → 2.3 on entry (2.3 is not in `layout_need_update`, so no prompt).
+
+| Area | Affected? |
+|---|---|
+| `commit_mode` toggle | **New** — optional; default `confirm` = the pre-2.3 behavior (ask before committing) |
+| New-deck scaffold / first-time-setup | **Changed** — now writes full-auto `model_invocable` / `status_auto` + `commit_mode: confirm` |
+| Gate fallback (absent / empty `model_invocable`) | **No** — still manual; existing and hand-made decks unaffected |
+| existing toggles / contract | **No** — `git` / `emit_agents_md` / `disabled_*` / `model_invocable` / `status_auto` unchanged |
+
+**To adopt on an existing deck (optional):** add `commit_mode:` and/or expand `model_invocable` / `status_auto` in `flightdeck/rules.md`. Nothing is required. Reinstall/sync the plugin-cache copy to load the updated skills.
 
 ## 2.1 → 2.2 — version stamp moves into rules.md (rules.md now mandatory)
 

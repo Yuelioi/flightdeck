@@ -1,5 +1,5 @@
 ---
-version: 2.2              # REQUIRED — flightdeck release this deck conforms to; drives migration detection
+version: 2.3              # REQUIRED — flightdeck release this deck conforms to; drives migration detection
 git: true                 # false → skills skip all git reconcile/commit steps
 emit_agents_md: true      # false → emit-agents-md refuses (no-op)
 disabled_folders: []      # e.g. [charts, debriefs]

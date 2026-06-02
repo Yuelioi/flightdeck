@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-06-03
+
+Autonomy release: new decks ship full-auto, a `commit_mode` landing policy, and a more robust Land Routine. Additive and backward-compatible — existing decks keep their current behavior and `version` silently advances 2.2 → 2.3 on the next `preflight` (no migration).
+
+### Added
+- **`commit_mode` rules.md toggle** (`manual` / `confirm` / `auto`, default `confirm`) — controls landing's commit step independently of `git` and `model_invocable`: `manual` never commits, `confirm` asks (the pre-2.3 behavior), `auto` commits unprompted. Applies only when `git: true`. Removes the last manual checkpoint for a headless run.
+- **Full-auto defaults for new decks** — scaffolds (`minimal` + `full`) and `preflight` first-time-setup now write `model_invocable: [preflight, landing, walkaround, emit-agents-md, status]` + `status_auto: [start, land]` + `commit_mode: confirm`, so a freshly created deck drives status/landing itself out of the box (commit stays the one confirm-gated step). The gate fallback is unchanged (absent / empty = manual), so existing and hand-made decks are unaffected.
+
+### Changed
+- **Land Routine rewritten to collect-then-migrate** — landing now builds the full old→`landed/` remap for the entire land set *before* moving, then rewrites `implements` / `supersedes` / `related` across the active tree **and** the moved set. Fixes dangling edges when co-landing a mutual-reference cluster (the old inbound-only pass missed intra-set edges).
+- **Docs** — README / README.zh gain a Configuration section documenting the full `rules.md` surface + an autonomous-operation guide; Roadmap de-staled to 2.x; TEST_PLAN gains 2.1 / 2.2 points; the Claude adapter install/uninstall now lists the `status` skill.
+
+### Migration
+- Additive / opt-in — `layout_need_update` unchanged (stays `[2.2]`); no deck migration. `version` silently bumps 2.2 → 2.3 on next `preflight`. To adopt full-auto on an existing deck, add the keys to `flightdeck/rules.md` (or re-scaffold). Reinstall/sync the plugin-cache copy to load the updated skills. See [MIGRATION.md](MIGRATION.md).
+
 ## [2.2.0] — 2026-06-03
 
 Metadata-model consolidation + workflow frontmatter enrichment, with the deck-conformance version relocated into a now-mandatory `rules.md`. **Existing decks need a one-time migration** — see [MIGRATION.md](MIGRATION.md) (2.1 → 2.2).

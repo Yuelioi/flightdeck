@@ -10,7 +10,7 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 
 ```markdown
 ---
-version: 2.2              # REQUIRED — flightdeck release this deck conforms to; drives migration detection (not a toggle)
+version: 2.3              # REQUIRED — flightdeck release this deck conforms to; drives migration detection (not a toggle)
 git: true                 # false → skills skip all git reconcile/commit steps
 emit_agents_md: true      # false → the emit-agents-md skill exits without writing
 disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not flagged as orphans
