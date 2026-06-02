@@ -30,16 +30,15 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
    Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract, so this also covers a half-initialized `flightdeck/` that has no cockpit).
 
    - **`flightdeck/cockpit.md` does NOT exist** → run **First-time setup**:
-     1. Ask: **"No `flightdeck/cockpit.md` here. Create one? (minimal: just `cockpit.md`)"** — wait for confirmation.
+     1. Ask: **"No `flightdeck/` deck here. Create one? (minimal contract: `rules.md` + `cockpit.md` + `landed/HISTORY.md`)"** — wait for confirmation.
      2. Short interview: "Active focus — current main thread (5–15 words)?" / "First 'next session' item — one concrete action?".
-     3. Write `flightdeck/cockpit.md` from this template (today's date, answers substituted):
+     3. Write the three contract files (today's date, answers substituted; `<current>` = `MIGRATION.md` `current`). `flightdeck/cockpit.md` from this template:
 
         ```markdown
         # Cockpit — <project name>
 
         **Last updated**: <YYYY-MM-DD> by <user>
         **Active focus**: <from interview>
-        **Layout**: 1.2
 
         ## Next session
 
@@ -49,19 +48,37 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
 
         - (none)
         ```
-     4. Do NOT pre-create other folders — `cockpit.md` alone is the minimal contract. **Then STOP** — the next `/preflight` takes the read path below.
+
+        Also write `flightdeck/rules.md` (defaults + `version: <current>`):
+
+        ```markdown
+        ---
+        version: <current>
+        git: true
+        emit_agents_md: true
+        disabled_folders: []
+        disabled_gates: []
+        model_invocable: []
+        status_auto: []
+        ---
+
+        ## House rules
+
+        (none yet)
+        ```
+
+        And create `flightdeck/landed/HISTORY.md` (add-only log, header comment only).
+     4. Do NOT pre-create other folders — the three contract files (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) are the minimal deck. **Then STOP** — the next `/preflight` takes the read path below.
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
 1. **Read `flightdeck/rules.md`** if present. Apply its toggles for the whole ritual: when `git: false`, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback).
 
-2. **Check layout version (non-silent on mismatch).** Read the `**Layout**: <ver>` line in `flightdeck/cockpit.md`'s header. The current layout version is **1.2**.
+2. **Check version (migration detection; non-silent on mismatch).** Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](protocol.md#migration-detection):
 
-   - **`Layout` == 1.2** → up to date; continue silently (report nothing for this step).
-   - **`Layout` present but older (e.g. `1.1`)** → tell the user: "Layout `<ver>` detected — migrate to 1.2?" and follow [MIGRATION.md](../../MIGRATION.md). Do not proceed with the rest of the checklist until the user decides.
-   - **No `Layout` line** (decks created before the stamp existed) → fall back to the legacy-marker presence check. If ANY of these exist:
-     - `flightdeck/manifest.md` · `flightdeck/logbook.md` · `flightdeck/kneeboard/` · `flightdeck/flight-plans/` · `flightdeck/incident-reports/` · `flightdeck/safety-reviews/`
-
-     → it is a 1.x deck: tell the user "1.x layout detected — migrate to 1.2?" and follow [MIGRATION.md](../../MIGRATION.md); do not proceed until they decide. If NONE exist → it is a pre-stamp 1.2 deck: offer to add `**Layout**: 1.2` to the cockpit header (ask first), then continue.
+   - **`version == current`** → up to date; continue silently (report nothing).
+   - **`version` < some `layout_need_update` entry** → "deck on `<version>`, migration `<v>` applies — migrate now?"; follow the matching [MIGRATION.md](../../MIGRATION.md) section; do not proceed until the user decides.
+   - **`version` < `current`, no newer `layout_need_update` entry** → silently bump `rules.md` `version` to `current`; continue.
+   - **No `version` / no `rules.md`** (pre-2.2 deck, incl. a cockpit-only deck) → "pre-2.2 deck detected — run the 2.2 migration? (create `rules.md` with `version`, ensure `landed/HISTORY.md`, drop the cockpit `**Layout**` line)" per [MIGRATION.md](../../MIGRATION.md). If legacy 1.x markers exist (`manifest.md`/`logbook.md`/`kneeboard/`/`flight-plans/`/`incident-reports/`/`safety-reviews/`), route to the 1.x→1.2 migration first.
 
    Never migrate (or stamp) silently — always ask the user first.
 

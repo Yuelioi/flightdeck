@@ -226,8 +226,8 @@ cd flightdeck
 ### Scaffold a `flightdeck/` in your project
 
 ```powershell
-.\install.ps1 -Scaffold minimal     # just cockpit.md
-.\install.ps1 -Scaffold full        # all subdirs + cockpit.md + optional rules.md
+.\install.ps1 -Scaffold minimal     # minimal contract: rules.md + cockpit.md + landed/HISTORY.md
+.\install.ps1 -Scaffold full        # all subdirs + the 3-file contract
 ```
 
 ```bash
@@ -246,9 +246,9 @@ cd my-project
 /flightdeck:preflight
 ```
 
-With no `flightdeck/cockpit.md` yet, `/flightdeck:preflight` asks to create one, runs a two-question interview (Active focus, first Next session item), writes `flightdeck/cockpit.md`, and stops. Every later session, run `/flightdeck:preflight` again to read it back and resume.
+With no `flightdeck/cockpit.md` yet, `/flightdeck:preflight` asks to create one, runs a two-question interview (Active focus, first Next session item), writes the 3-file minimal contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`), and stops. Every later session, run `/flightdeck:preflight` again to read it back and resume.
 
-**Already have an older `flightdeck/`?** On entry, `/flightdeck:preflight` (and the `walkaround` audit) read the layout version and offer a guided migration to the current layout — see [MIGRATION.md](MIGRATION.md). Migration is never silent: you confirm before anything moves.
+**Already have an older `flightdeck/`?** On entry, `/flightdeck:preflight` (and the `walkaround` audit) read the deck `version` (in `rules.md`) and offer a guided migration to the current release — see [MIGRATION.md](MIGRATION.md). Migration is never silent: you confirm before anything moves.
 
 ### Every session
 

@@ -2,7 +2,6 @@
 
 **Last updated**: YYYY-MM-DD by [who] (one-line state)
 **Active focus**: [current main thread]
-**Layout**: 1.2
 
 ## Next session
 

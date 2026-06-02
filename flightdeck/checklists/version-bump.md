@@ -1,8 +1,8 @@
 ---
 status: active
-last_updated: 2026-05-30
+last_updated: 2026-06-02
 when_to_read: before cutting a new flightdeck release / bumping the version number
-applies_to: [release, version, changelog, semver, publish]
+applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.json, CHANGELOG.md, MIGRATION.md]
 ---
 
 # Version bump checklist
@@ -24,6 +24,7 @@ Whenever the version number changes — shipping a release, or correcting a vers
    - `.cursor-plugin/plugin.json`
    - `gemini-extension.json`
 3. **Add a `CHANGELOG.md` entry** at the top under a new `## [x.y.z] — YYYY-MM-DD` heading, grouped Keep-a-Changelog style (`Added` / `Changed` / `Fixed` / etc.). Link landed specs/plans in `flightdeck/landed/` where relevant.
+   - **Also update `MIGRATION.md` frontmatter `current`** to the new version. If the release changes deck structure (a mandatory new field, a removed cockpit field, any contract change requiring existing decks to migrate), **add the new version to `layout_need_update`** and write a migration section. Purely additive releases leave `layout_need_update` untouched (so they never trigger a false migration prompt).
 4. **Commit** — subject `vX.Y.Z: <one-line summary>` (matches existing release commits). Follow `checklists/commits.md` if present.
 5. **Tag — annotated** — `git tag -a vX.Y.Z -m "vX.Y.Z — <summary>"`. Must be annotated: lightweight tags (`git tag vX.Y.Z`) are silently skipped by `--follow-tags` and never reach origin. The README version badge reads GitHub releases, which come from tags.
 6. **Push** — `git push origin main --follow-tags` (commit + annotated tag together), then confirm with `git ls-remote --tags origin`. If the tag is missing, push it explicitly: `git push origin vX.Y.Z`.

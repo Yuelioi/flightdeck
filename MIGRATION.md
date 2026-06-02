@@ -1,6 +1,32 @@
+---
+current: 2.2
+layout_need_update: [2.2]   # releases requiring a deck migration; deck.version < any listed (or no version) → non-silent migration offer
+---
+
 # Migration
 
 This document records breaking migrations for the maintainer's reference.
+
+> **Migration detection reads this frontmatter.** `current` = latest release; `layout_need_update` = releases that changed deck structure. `preflight`/`walkaround` compare a deck's `rules.md` `version` against it: version below any `layout_need_update` entry (or no `version` at all) → non-silent migration offer; otherwise preflight silently bumps the deck's `version` to `current`. (Replaces the old cockpit `**Layout**` string check.)
+
+## 2.1 → 2.2 — version stamp moves into rules.md (rules.md now mandatory)
+
+2.2 relocates the deck-conformance version out of `cockpit.md`'s `**Layout**` line into a **mandatory** `flightdeck/rules.md` `version:` field, and makes `rules.md` part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`).
+
+| Area | Affected? |
+|---|---|
+| `cockpit.md` `**Layout**` line | **Yes** — removed; version lives in `rules.md` now |
+| `rules.md` | **Yes** — now mandatory; must carry `version` |
+| `landed/HISTORY.md` | **Yes** — now part of the minimal contract (create if absent) |
+| existing toggles / behavior | **No** — git / emit / disabled_* / model_invocable / status_auto unchanged |
+
+**Migration (interactive, non-silent, idempotent)** — on a deck with no `rules.md` `version` (or `version` < 2.2):
+1. Create `rules.md` if absent (defaults + `version: <current>`).
+2. Add/refresh `version`.
+3. Remove the `**Layout**` line from `cockpit.md`.
+4. Ensure `landed/HISTORY.md` exists.
+
+Each step skips if already done.
 
 ## 2.0 → 2.1 — model_invocable soft gate + status ritual
 

@@ -131,13 +131,15 @@ If `AGENTS.md` exists at repo root with flightdeck markers (`<!-- BEGIN: flightd
 
 If `AGENTS.md` doesn't exist or has no flightdeck markers: skip (the project hasn't dogfooded the emitter yet; that's optional).
 
-### 10. Layout version (WARNING / INFO)
+### 10. Version / migration detection (CRITICAL / WARNING / INFO)
 
-Read the `**Layout**: <ver>` line in `flightdeck/cockpit.md`'s header. The current layout version is **1.2**.
+Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](../preflight/protocol.md#migration-detection).
 
-- **`Layout` older than 1.2** (e.g. `1.1`) → **WARNING** — deck is on an old layout; point to [MIGRATION.md](../../MIGRATION.md).
-- **No `Layout` line** → fall back to the legacy-marker presence check. If ANY of `flightdeck/manifest.md` · `flightdeck/logbook.md` · `flightdeck/kneeboard/` · `flightdeck/flight-plans/` · `flightdeck/incident-reports/` · `flightdeck/safety-reviews/` exist → **WARNING** — legacy 1.x deck; point to [MIGRATION.md](../../MIGRATION.md). If NONE exist → **INFO** — no `Layout` stamp; suggest adding `**Layout**: 1.2` to the cockpit header.
-- **`Layout` == 1.2** → pass; report nothing.
+- **No `flightdeck/rules.md`, or `rules.md` has no `version`** → **CRITICAL** — `rules.md` + `version` are part of the minimal 3-file contract. (A cockpit-only / pre-2.2 deck → point to the 2.2 migration in [MIGRATION.md](../../MIGRATION.md).)
+- **`version` < some `layout_need_update` entry** → **WARNING** — a structural migration applies; point to the matching [MIGRATION.md](../../MIGRATION.md) section.
+- **Legacy 1.x markers present** (`flightdeck/manifest.md` · `logbook.md` · `kneeboard/` · `flight-plans/` · `incident-reports/` · `safety-reviews/`) → **WARNING** — legacy 1.x deck; route to the 1.x→1.2 migration first.
+- **A stray `**Layout**` line still in `cockpit.md`** → **INFO** — leftover from a pre-2.2 deck; the 2.2 migration removes it (version lives in `rules.md` now).
+- **`version` < `current` but no newer `layout_need_update` entry**, or **`version == current`** → pass; report nothing (preflight silently bumps the compatible-but-behind case).
 
 Only report once per path — do not also flag these as stray/orphan in Audit 8.
 

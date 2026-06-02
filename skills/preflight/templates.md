@@ -10,6 +10,7 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 
 ```markdown
 ---
+version: 2.2              # REQUIRED — flightdeck release this deck conforms to; drives migration detection (not a toggle)
 git: true                 # false → skills skip all git reconcile/commit steps
 emit_agents_md: true      # false → the emit-agents-md skill exits without writing
 disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not flagged as orphans
@@ -26,7 +27,8 @@ Free-prose project conventions every flightdeck skill must honor
 
 ### Rules
 
-- **Optional file.** No `rules.md` = defaults (git on, emit on, all folders/gates active). Purely additive.
+- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. *Omitted toggle fields* still default (git on, emit on, all folders/gates active, all rituals manual) — only the file's existence + `version` are required, not every key.
+- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. It is NOT part of the closed toggle set and is exempt from the key-admission policy.
 - **Closed toggle set** — only these six keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
 
   | Key | Type | Default | Effect when changed |
@@ -268,7 +270,6 @@ I assumed X, but in reality Y.
 
 **Last updated**: YYYY-MM-DD by <who> (<one-line state summary>)
 **Active focus**: <current main thread, 5–15 words>
-**Layout**: 1.2
 
 ## Next session
 
@@ -287,7 +288,7 @@ I assumed X, but in reality Y.
 - **Hanging tasks block landing** — resolve, or explicitly defer with a date.
 - **History does not live in cockpit.** Durable record = `landed/` archive + `git log` (+ `landed/HISTORY.md` when `git: false`). A finished item leaves `Next session`; it is not logged in cockpit.
 - **No metric tracking duplicated elsewhere** — link to the single source.
-- **`Layout` = the flightdeck layout version this deck conforms to.** Entry skills (`preflight`, `walkaround`) compare it against the current version to decide migration. New decks start at the current version; bump it only when migrating to a new layout (see [MIGRATION.md](../../MIGRATION.md)).
+- **No version stamp in cockpit.** The deck-conformance version lives in `rules.md` `version:`; migration detection compares it against `MIGRATION.md` (`current` + `layout_need_update`). cockpit is pure focus.
 
 ---
 

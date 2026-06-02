@@ -33,15 +33,15 @@ implements: specs/2026-06-02-metadata-model-consolidation-design.md
 
 ## Phase 1 — version → rules.md（version spec）
 
-- [ ] **1.1** `skills/preflight/templates.md` rules.md 段 + `protocol.md`：rules.md 由"Optional file"改为**必选**；定义**三件套最小契约**（rules + cockpit + HISTORY）；rules 模板加 `version`。权威表对应行同步。
-- [ ] **1.2** `MIGRATION.md`：加 frontmatter `current: <发布版本>` + `layout_need_update: []`；补一节"本次（version 搬家）存量迁移步骤"。
-- [ ] **1.3** `skills/preflight/templates.md` cockpit 模板 + §Rules：**删 `**Layout**` 行**及其说明。
-- [ ] **1.4** `skills/preflight/SKILL.md`：step 0 最小契约判定改为三件套；step 2 改读 rules.md `version` + MIGRATION.md 元数据，按 version spec §2.3 三分支判定；补"存量 deck 无 rules.md → 一次性提示补建（stamp version + 删 Layout 行）"。
-- [ ] **1.5** `skills/walkaround/SKILL.md` Audit 10：从读 cockpit `Layout` 改为读 rules.md `version` + MIGRATION.md `current`/`layout_need_update`，按同一三分支判定。
-- [ ] **1.6** `skills/landing/SKILL.md`（及共享 Land Routine）：归档前按需 bump `last_updated`（与 Phase 2 合流，先占位）。
-- [ ] **1.7** `scaffolds/**`：full / minimal 补 `rules.md`（带 `version`）+ `landed/HISTORY.md`；删 cockpit `Layout` 行。
-- [ ] **1.8** `flightdeck/checklists/version-bump.md`：加两条 —— 发布时 bump `MIGRATION.md` `current`；**破坏性布局变更**时追加 `layout_need_update`。顺手把该文件 `applies_to` 由主题词改为项目路径（house-rule nudge）。
-- [ ] **1.9** `README.md` / `README.zh.md`：凡 `Layout` / 最小契约 / 迁移检测处改为新口径。
+- [x] **1.1** `skills/preflight/templates.md` rules.md 段 + `protocol.md`：rules.md 由"Optional file"改为**必选**；定义**三件套最小契约**（rules + cockpit + HISTORY）；rules 模板加 `version`。权威表对应行同步。
+- [x] **1.2** `MIGRATION.md`：加 frontmatter `current: <发布版本>` + `layout_need_update: []`；补一节"本次（version 搬家）存量迁移步骤"。
+- [x] **1.3** `skills/preflight/templates.md` cockpit 模板 + §Rules：**删 `**Layout**` 行**及其说明。
+- [x] **1.4** `skills/preflight/SKILL.md`：step 0 最小契约判定改为三件套；step 2 改读 rules.md `version` + MIGRATION.md 元数据，按 version spec §2.3 三分支判定；补"存量 deck 无 rules.md → 一次性提示补建（stamp version + 删 Layout 行）"。
+- [x] **1.5** `skills/walkaround/SKILL.md` Audit 10：从读 cockpit `Layout` 改为读 rules.md `version` + MIGRATION.md `current`/`layout_need_update`，按同一三分支判定。
+- [x] **1.6** `skills/landing/SKILL.md`（及共享 Land Routine）：归档前按需 bump `last_updated`（与 Phase 2 合流，先占位）。
+- [x] **1.7** `scaffolds/**`：full / minimal 补 `rules.md`（带 `version`）+ `landed/HISTORY.md`；删 cockpit `Layout` 行。
+- [x] **1.8** `flightdeck/checklists/version-bump.md`：加两条 —— 发布时 bump `MIGRATION.md` `current`；**破坏性布局变更**时追加 `layout_need_update`。顺手把该文件 `applies_to` 由主题词改为项目路径（house-rule nudge）。
+- [x] **1.9** `README.md` / `README.zh.md`：凡 `Layout` / 最小契约 / 迁移检测处改为新口径。
 
 **Phase 1 验收**：新建 deck 写三件套 + `version`；preflight/walkaround 用 `version` 判迁移，旧 1.2 deck 触发"补建 rules.md"一次性迁移；cockpit 不再有 `Layout` 行。
 

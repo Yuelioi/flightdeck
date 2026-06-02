@@ -8,22 +8,33 @@
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is an **optional** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It carries a closed set of structured toggles plus free-prose house rules. Absent file = defaults (git on, emit on, all folders/gates active, all rituals manual).
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection). It also carries a closed set of structured toggles plus free-prose house rules. *Omitted toggle fields* default (git on, emit on, all folders/gates active, all rituals manual) — only the file's existence + `version` are required, not every key.
 
-Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto`. Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
+Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto`; plus the required `version` identity field (not a toggle — see [migration detection](#migration-detection)). Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
 
 ### Key admission policy (anti-sprawl)
 
 The toggle set is **closed**: an unknown key is ignored with a one-line warning, so config never grows by accident (a typo can't add behavior). It grows only by a deliberate decision — and a proposed new key MUST pass **all four** of these, or it does not belong in `rules.md`:
 
 1. **Per-project varying** — it encodes a preference/policy that genuinely differs from project to project, not a universal default everyone would set the same way.
-2. **Not a protocol contract** — it is NOT a structural contract. Layout version, the `<!-- AUTO -->` region mechanics, graph-reachability rules, folder kinds, and the *semantics* of the existing toggles stay hard-coded. `rules.md` tunes behavior; it never redefines the protocol.
+2. **Not a protocol contract** — it is NOT a structural contract. The `<!-- AUTO -->` region mechanics, graph-reachability rules, folder kinds, and the *semantics* of the existing toggles stay hard-coded. (`version` lives in `rules.md` but is a required **identity** field, not a behavior toggle — it is exempt from this admission policy.) `rules.md` tunes behavior; it never redefines the protocol.
 3. **Real demand now** — a concrete project has actually hit the wall (YAGNI). No speculative keys: park the idea in a spec backlog until a real need appears (e.g. `cockpit_max_lines` / `staleness_days` remain backlog precisely because nothing has needed them yet).
 4. **Not foldable** — it cannot be expressed through an existing key. No redundant or overlapping toggles.
 
 A key that fails any point is either hard-coded protocol, a backlog item, or redundant — not a `rules.md` toggle.
 
 When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the four toggles or the project's own agent rules.
+
+## Migration detection
+
+`MIGRATION.md` (repo root) carries frontmatter `current` (latest release) + `layout_need_update` (releases that changed deck structure). `preflight` (step 2) and `walkaround` (Audit 10) compare the deck's `rules.md` `version` against it — never silently migrating:
+
+- `version == current` → up to date; continue silently.
+- `version < current` **and** some `layout_need_update` entry is `> version` → a structural migration applies → **non-silent offer**, pointing at the matching `MIGRATION.md` section.
+- `version < current` but no `layout_need_update` entry is newer → compatible; silently bump the deck's `version` to `current`.
+- **No `version` (or no `rules.md`)** → treat as pre-stamp → run the existing-deck migration (create `rules.md` with `version`, ensure the 3-file contract, remove any legacy cockpit `**Layout**` line).
+
+This replaces the pre-2.2 cockpit `**Layout**` string check. Purely additive releases never enter `layout_need_update`, so they never trigger a false migration prompt.
 
 ## Data model (folder = kind, frontmatter = status)
 

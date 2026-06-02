@@ -226,8 +226,8 @@ cd flightdeck
 ### 在项目里创建一个 `flightdeck/` 骨架
 
 ```powershell
-.\install.ps1 -Scaffold minimal     # 只 cockpit.md
-.\install.ps1 -Scaffold full        # 完整子目录 + cockpit.md + 可选 rules.md
+.\install.ps1 -Scaffold minimal     # 最小契约：rules.md + cockpit.md + landed/HISTORY.md
+.\install.ps1 -Scaffold full        # 完整子目录 + 三件套契约
 ```
 
 ```bash
@@ -246,9 +246,9 @@ cd my-project
 /flightdeck:preflight
 ```
 
-当还没有 `flightdeck/cockpit.md` 时，`/flightdeck:preflight` 会征询确认，通过两个简短问题（Active focus、Next session 第一条）生成 `flightdeck/cockpit.md`，然后停下。之后每次会话，再运行一次 `/flightdeck:preflight` 即可读回并续上。
+当还没有 `flightdeck/cockpit.md` 时，`/flightdeck:preflight` 会征询确认，通过两个简短问题（Active focus、Next session 第一条）生成最小契约三件套（`rules.md` + `cockpit.md` + `landed/HISTORY.md`），然后停下。之后每次会话，再运行一次 `/flightdeck:preflight` 即可读回并续上。
 
-**已经有一个旧版 `flightdeck/`？** 入场时 `/flightdeck:preflight`（以及 `walkaround` 审计）会读取布局版本，并在确认后引导你迁移到当前布局 —— 详见 [MIGRATION.md](MIGRATION.md)。迁移绝不静默：任何文件移动前都先征得你同意。
+**已经有一个旧版 `flightdeck/`？** 入场时 `/flightdeck:preflight`（以及 `walkaround` 审计）会读取 deck 的 `version`（在 `rules.md`），并在确认后引导你迁移到当前发布版本 —— 详见 [MIGRATION.md](MIGRATION.md)。迁移绝不静默：任何文件移动前都先征得你同意。
 
 ### 每次会话开始
 
