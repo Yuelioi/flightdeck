@@ -19,3 +19,18 @@ This stub remains so links from `README.md` / `README.zh.md` / `CHANGELOG.md` st
 - **Branch-0 init-or-read**: in a directory with no `flightdeck/cockpit.md`, `/flightdeck:preflight` runs the First-time-setup interview and writes `cockpit.md` (with `**Layout**: 1.2`), then stops. With a `cockpit.md` present, it takes the read path (layout check → reconcile → catalog → report).
 - **Existence before layout**: the deck-existence check runs before the layout-version check (no attempt to read a `**Layout**` line when there is no cockpit).
 - **Companion paths**: `landing` / `walkaround` / `emit-agents-md` resolve their companion links under `skills/preflight/` (the old companion location is gone, no stale links remain).
+
+## 2.1 test points
+
+- **`model_invocable` soft gate**: the four entry skills no longer carry `disable-model-invocation`; self-invocation is allowed only when `rules.md` `model_invocable` lists the ritual. Default (`[]`) = manual-only, identical to before; an explicit user slash is always allowed.
+- **`status` ritual**: `/flightdeck:status` flips one artifact's `status:` + its INDEX row (forward-only; never touches `cockpit.md` or commits). `status_auto: [start, land]` controls the *optional* `start`/`land` transitions; core `create→pending` / `finish→awaiting-review` stay automatic.
+- **Shared Land Routine**: `landing` and `status` both call the single `## Land Routine` in `exit-ritual.md` — no reimplementation in either.
+- **Done-but-unlanded**: declining the `status land` confirm leaves the artifact `done` but un-archived; `preflight` / `landing` surface it and offer to land later (never reverts `done`).
+
+## 2.2 test points
+
+- **`rules.md` mandatory + version**: `rules.md` is part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and carries `version:`. The `**Layout**` cockpit line is gone — `preflight` / `walkaround` read the version from `rules.md` and compare against `MIGRATION.md` (`current` + `layout_need_update`) for migration detection.
+- **2.1→2.2 migration**: a deck with no `rules.md` `version` (or `< 2.2`) triggers a non-silent migration offer; the migration is idempotent (each step skips if already done).
+- **Workflow frontmatter enrichment**: sketches/specs/plans gain recommended `summary` + `last_updated` and optional `supersedes` / `related`. INDEX rows derive purely from `summary`; `last_updated` auto-bumps on substantive change; reverse edges are grep-derived (no persisted `superseded_by`).
+- **Land Routine collect-then-migrate**: landing a set builds the full old→`landed/` remap *before* moving, then rewrites `implements` / `supersedes` / `related` across the active tree **and** the moved set — so intra-set mutual references survive archival (no dangling edges after a co-landed cluster).
+- **walkaround Audits 11–12**: aggregated INFO for missing workflow `summary` / `last_updated`; dangling `supersedes` / `related` edge detection (an edge into `landed/` is normal, not flagged).

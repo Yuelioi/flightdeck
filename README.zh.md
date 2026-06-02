@@ -30,6 +30,7 @@
 - [设计哲学](#设计哲学)
 - [安装](#安装)
 - [用法](#用法)
+- [配置](#配置)
 - [兼容性](#兼容性)
 - [横向对比](#横向对比)
 - [FAQ](#faq)
@@ -46,7 +47,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-然后在工作会话开始时运行 `/flightdeck:preflight` —— 唯一入口。已有项目里它读取 `flightdeck/cockpit.md`、与 `git status` 对账、报告你上次停在哪。全新项目（还没有 `cockpit.md`）则通过两个问题引导生成一个。**没有任何东西会自动运行** —— 不调用它，flightdeck 什么都不做。
+然后在工作会话开始时运行 `/flightdeck:preflight` —— 唯一入口。已有项目里它读取 `flightdeck/cockpit.md`、与 `git status` 对账、报告你上次停在哪。全新项目（还没有 `cockpit.md`）则通过两个问题引导生成一个。**会话开始时不会自动加载任何东西** —— 由你打 `/flightdeck:preflight`。从那之后，新建的 deck 默认就配好了让 AI 自驱其余仪式（自动 status、自动 landing）；想手动可在 [`rules.md`](#配置) 里调回。
 
 ## 它是什么
 
@@ -77,7 +78,7 @@ flightdeck/
     └── INDEX.md
 ```
 
-**文件夹 = 类型（隐式）。** 每个文件夹本身就声明了里面的文件*是什么* —— 不需要 per-file 的类型字段。**`status` 是唯一必填的 frontmatter 字段**，加上可选的知识路由字段和 `implements:`（仅 plans 使用，指向它所执行的 spec）。
+**文件夹 = 类型（隐式）。** 每个文件夹本身就声明了里面的文件*是什么* —— 不需要 per-file 的类型字段。**`status` 是唯一必填的 frontmatter 字段**，加上可选的知识路由字段、喂给 INDEX 行的 `summary`，以及关系边（`implements:` 指向 plan 所执行的 spec；workflow 工件之间用 `supersedes:` / `related:`）。
 
 每个文件夹，以及根目录，都有一个 `INDEX.md` —— 文件名、状态、一行摘要的衍生索引。读 `INDEX.md` 就能看到整个文件夹的状态，不用逐个打开文件。根目录 `INDEX.md` 是跨所有文件夹的全局状态汇总。
 
@@ -237,7 +238,7 @@ cd flightdeck
 
 ## 用法
 
-安装后，在会话开始时运行 `/flightdeck:preflight` —— 它是唯一入口。没有任何东西会自动运行；不调用它，flightdeck 什么都不做。
+安装后，在会话开始时运行 `/flightdeck:preflight` —— 它是唯一入口；在那之前不会自动加载任何东西。新建的 deck 默认就配好了让 AI 自驱其余仪式（自动 status、自动 landing）—— 想调回手动见[配置](#配置)。
 
 ### 快速上手 —— 为新项目初始化
 
@@ -270,9 +271,7 @@ cd my-project
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 在 fenced markers 之间重生 `AGENTS.md`。 |
 | `/flightdeck:status` | 自动翻转单个 artifact 的生命周期 `status:` + 其 INDEX 行（model-invocable；经 `rules.md` opt-in）。 |
 
-默认情况下，命令只在用户显式打 slash 时触发，不会从对话上下文自动触发，会话开始也不加载任何东西。这现在是一个 per-project 软门栓：每个仪式读 `flightdeck/rules.md` 的 `model_invocable` 列表（默认 `[]` = 全部手动）。要允许某仪式被模型自调，写如 `model_invocable: [landing]`。
-
-`flightdeck:status` 是唯一可被模型自调的高频仪式：会话中途保持 artifact 状态新鲜。用 `model_invocable: [status]` 允许自调；用 `status_auto: [start, land]` 选择哪些可选转换自动触发（默认只有 `create→pending` 与 `finish→awaiting-review` 自动）。
+默认情况下，命令只在用户显式打 slash 时触发 —— 不会从对话上下文自动触发，会话开始也不加载任何东西。这是一个 **per-project 软门栓**：每个仪式在允许模型自调前，先读 `flightdeck/rules.md` 的 `model_invocable` 列表（默认 `[]` = 全部手动）。把仪式 opt-in 进去就能让 flightdeck 自驱 —— 完整配方见[配置](#配置)。
 
 ### 路由表 —— 什么情况下进哪个文件夹
 
@@ -297,6 +296,56 @@ cd my-project
 3. Commit。
 
 下一次会话 —— 哪怕换了 AI、换了开发者 —— 能从上次结束的位置无缝接着干。
+
+> 全自动场景下不必手打这条。`rules.md` 里配了 `model_invocable: [landing]`，AI 会在会话结束时自己跑收尾 —— 见[配置](#配置)。
+
+## 配置
+
+`flightdeck/rules.md` 是按项目的控制面板。它在 **2.2 起转为必选**（同时承载 deck 的 `version`），每个仪式入场都会读它。除 `version` 外所有键都可选 —— 省略即取默认值。
+
+```yaml
+---
+version: 2.2              # deck 遵循的发布版本 —— 驱动迁移检测（非 toggle）
+git: true                 # false → 跳过所有 git 对账/commit 步骤
+emit_agents_md: true      # false → /flightdeck:emit-agents-md 不输出
+disabled_folders: []      # 关掉的文件夹 —— 不建议、不审计
+disabled_gates: []        # 关掉的 gate（如 debrief 处置的退出阻断）
+model_invocable: []       # ← 自动化开关（见下）
+status_auto: []           # status 哪些可选转换自动触发：start, land
+commit_mode: confirm      # landing 的提交步：manual / confirm / auto
+---
+```
+
+| 键 | 默认 | 作用 |
+| --- | --- | --- |
+| `version` | *（必填）* | deck 遵循的版本；`preflight` / `walkaround` 拿它对比 `MIGRATION.md` 来提示迁移。非行为开关。 |
+| `git` | `true` | `false` → 跳过 git 对账/commit；landing 改为往 `landed/HISTORY.md` 追加一行。用于非 git deck。 |
+| `emit_agents_md` | `true` | `false` → AGENTS.md emitter 不输出（项目不需要跨工具桥接文件）。 |
+| `disabled_folders` | `[]` | flightdeck 忽略的文件夹 —— 不在 fallback 里建议、不审计。 |
+| `disabled_gates` | `[]` | 关掉的具名 gate。 |
+| `model_invocable` | `[]` | **自动化开关** —— 哪些仪式 AI 可以*自己*调（不用你打 slash）。`[]` = 每个仪式都手动。 |
+| `status_auto` | `[]` | `status` 哪些*可选*转换自动触发：`start`（开工 → `active`）和 `land`（`done` 时归档到 `landed/`）。核心的 `create→pending` / `finish→awaiting-review` 永远自动。 |
+| `commit_mode` | `confirm` | landing 的提交步：`manual`（跑完但不提交）、`confirm`（生成提交后问你 —— 默认）、`auto`（不问直接提交）。仅在 `git: true` 时生效。 |
+
+### 全自动运行
+
+**新 deck 默认全自动。** flightdeck 给你建 `flightdeck/` 时 —— 经 `/flightdeck:preflight` 首次建档或 `install --scaffold` —— 生成的 `rules.md` 会开启所有仪式自调 + 自动 status：
+
+```yaml
+model_invocable: [preflight, landing, walkaround, emit-agents-md, status]
+status_auto: [start, land]
+commit_mode: confirm
+```
+
+于是开箱即用，AI 会自己：
+
+- 随工作推进保持每个工件的 `status` 新鲜，并把完成的**自动归档**到 `landed/`（`status_auto: [start, land]`）；
+- 在会话收尾时**自己跑完整的 landing 仪式** —— 分类新知识、刷新 `cockpit.md`、重生 `AGENTS.md` —— 不用手打 `/flightdeck:landing`；
+- 于是下一次会话（或下一轮循环）经 `preflight` 重新入场时，面对的是干净、最新的 deck。
+
+`commit_mode: confirm` 保留**唯一一个人工确认点**：别的 AI 全自己干，到提交前问你一句。纯无人值守改 `commit_mode: auto`，永不提交用 `manual`。想完全手动，把列表清空：`model_invocable: []` + `status_auto: []`。
+
+**这是 *scaffold* 默认，不是 gate 默认。** 底层 gate fallback 仍是手动 —— 没有 `rules.md` 或 `model_invocable` 为空的 deck 不会自调任何东西，显式 `/flightdeck:<ritual>` 永远能用。**没有 hook、没有后台进程**：这里的"全自动"指 AI 被*允许*在它判断合适时自调这些仪式，而不是有什么东西在背后偷偷触发。（旧的 SessionStart 自动加载 hook 已在 2.0 移除。）
 
 ## 兼容性
 
@@ -450,11 +499,13 @@ Codex / Cursor / Gemini 的 manifest 都到位了，但**行为没测过**。当
 
 ## Roadmap
 
-v1.x ship 状态见 [TEST_PLAN.md](TEST_PLAN.md)。v1.2 之后：
+**已发布：** 生命周期模型 + 严格写入门控（1.0–1.2）· 单一入口 `preflight`、不再自动加载（2.0）· 按项目的软配置门控 + 高频 `status` 仪式（2.1）· 元数据模型归一 + workflow frontmatter 富化（2.2）。完整历史见 [CHANGELOG.md](CHANGELOG.md)；skill 测试状态见 [TEST_PLAN.md](TEST_PLAN.md)。
+
+**接下来：**
 
 | | 目标 |
 | --- | --- |
-| **v1.3+** | 可选文件夹 —— `briefing/`（领域背景）、`blackbox/`（原始 session log）、`crew-handover/`（跨 AI 交接）、`experiments/`（长期 probe）。待实际使用证明需求再加。 |
+| **可选文件夹** | `briefing/`（领域背景）、`blackbox/`（原始 session log）、`crew-handover/`（跨 AI 交接）、`experiments/`（长期 probe）。待实际使用证明需求再加。 |
 | **Continuance benchmark** | 给任意 AI 一个中途断片的项目，让它"接着干"，量化恢复能力。 |
 | **Synthesis / 压缩** | 把大量归档文件压成主题复盘，不丢决策历史。 |
 | **INDEX 自动化** | 可选 hook 保持各文件夹 `INDEX.md` 同步，无需人工干预。 |

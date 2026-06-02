@@ -52,6 +52,8 @@ After install:
 └── SKILL.md
 ~/.claude/skills/emit-agents-md/        # /flightdeck:emit-agents-md AGENTS.md emitter
 └── SKILL.md
+~/.claude/skills/status/                # /flightdeck:status lifecycle status flip (model-invocable; opt-in via rules.md)
+└── SKILL.md
 ```
 
 ## Verification
@@ -86,12 +88,12 @@ Direct path:
 
 ```bash
 # macOS / Linux
-rm -rf ~/.claude/skills/{preflight,landing,walkaround,emit-agents-md}
+rm -rf ~/.claude/skills/{preflight,landing,walkaround,emit-agents-md,status}
 ```
 
 ```powershell
 # Windows
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
 ```
 
 ## Call-source detection (model_invocable gate)
