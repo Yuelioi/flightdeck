@@ -9,7 +9,7 @@ flightdeck 2.1 shipped — `model_invocable` soft gate (rules.md) replaced the `
 
 ## Next session
 
-1. Implement the version→`rules.md` relocation — design landed at [specs/2026-06-02-version-in-rules-migration-detection-design.md](flightdeck/specs/2026-06-02-version-in-rules-migration-detection-design.md). Open a plan: drop cockpit's `Layout` line, `rules.md` mandatory (3-file minimal contract), add `version`, MIGRATION.md `current` + `layout_need_update` drives detection. Touches preflight/walkaround/templates/protocol/scaffolds/version-bump/README.
+1. Implement two pending designs in one `templates.md`/walkaround pass (both touch the same files): [version→rules.md relocation](flightdeck/specs/2026-06-02-version-in-rules-migration-detection-design.md) (drop `Layout` line, mandatory rules.md, 3-file contract, MIGRATION.md-driven detection) + [workflow-artifact frontmatter enrichment](flightdeck/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md) (`summary` derives INDEX row, `last_updated`, `supersedes`/`related` edges). Open a plan each.
 2. Dogfood v2.1 on real projects — exercise `flightdeck:status` auto-flip + `model_invocable` opt-in; classify friction at landing.
 3. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](flightdeck/sketches/v1x-deferred-ideas.md).
 
