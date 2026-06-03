@@ -36,6 +36,26 @@ This document records breaking migrations for the maintainer's reference.
 
 After rewriting, **reinstall/sync the plugin-cache copy** to load the 3.0 skills.
 
+### 3.0 — model-v4: folder 7→5, status 6→4, cockpit as status projection (BREAKING)
+
+Folded into 3.0 (still in `layout_need_update`, so the offer is non-silent). model-v4 collapses `sketches/`+`specs/`→`specs/`, deletes `debriefs/`, narrows workflow status to four values (`idea`/`active`/`done`/`scrapped`), and turns `cockpit.md` from a hand-maintained workspace into a **status projection of the active set** (a machine-derived `## 进行中` AUTO region). See the design in `flightdeck/specs/2026-06-03-model-v4-folder-state-cockpit-design.md` §1–4.
+
+**Detection (preflight step 2 — structural, independent of the `version` number).** A deck is flagged unmigrated when it shows **any** pre-model-v4 signal:
+- a `sketches/` or `debriefs/` folder still present;
+- any workflow file carrying a retired status — `pending` / `awaiting-review` / `blocked`, or a sketch's `active`;
+- a `cockpit.md` with a hand-written `## Next session` and **no** `## 进行中` AUTO region.
+
+`preflight` surfaces it and offers this migration; it never performs the moves/remaps itself.
+
+**Migration (`preflight` offers it; never silent):**
+
+1. **`sketches/*` → `specs/`.** Move each sketch file into `specs/`. A sketch `status: active` (an unstarted idea) becomes `status: idea`; a sketch `status: scrapped` stays `scrapped`. idea-stage files keep their date-less `<topic>.md` name (the `YYYY-MM-DD-` prefix is added only on the eventual `idea → active` flip). Delete the empty `sketches/` folder.
+2. **`debriefs/` → removed.** For each **un-archived** debrief, fold its **disposition** (adopt / reject / defer) into the reviewed spec's own `## 评审纪要` section, then discard the raw text (it is transient — keep raw external feedback in project-root `tmp/`, gitignored, going forward). Anything already under `landed/debriefs/` is **kept as history** (not touched). Delete the now-empty `debriefs/` folder.
+3. **Status remap** on every workflow file (`specs/`, `plans/`): `pending → idea`; `awaiting-review → active`; `blocked → active` (carry the "why it hasn't moved" reason into the optional `note:` frontmatter field + the cockpit `## 进行中` row, since `blocked` no longer exists as a status). `idea`/`active`/`done`/`scrapped` already on a file are unchanged. **knowledge status is untouched** (`active`/`obsolete`/`superseded`).
+4. **cockpit.** Insert a `## 进行中` section with an empty `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` region above `## 下一步`, then **regen it once** (script fast path: `flightdeck_index.py` now emits this region from every `status: active` spec/plan; markdown path otherwise). Split the old hand-written `## Next session` into the new pair: the active artifacts it listed are now derived into `## 进行中` (do not hand-copy them — the regen fills it), and the single next concrete action becomes the `## 下一步` body. `Active focus` and `## Hanging tasks` carry over unchanged.
+
+`current` stays `3.0`; `3.0` is already in `layout_need_update`, so a deck whose structure still matches a pre-model-v4 signal gets the non-silent offer even though the version string may already read `3.0`. After migrating, **reinstall/sync the plugin-cache copy** to load the model-v4 skills.
+
 ## 2.2 → 2.3 — autonomy defaults + `commit_mode` (additive, no migration)
 
 2.3 is **purely additive**. Existing decks need no changes — `preflight` silently bumps `rules.md` `version` 2.2 → 2.3 on entry (2.3 is not in `layout_need_update`, so no prompt).

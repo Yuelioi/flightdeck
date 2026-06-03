@@ -3,9 +3,15 @@
 **Last updated**: YYYY-MM-DD by [who] (one-line state)
 **Active focus**: <ACTIVE_FOCUS — filled by preflight first-time-setup>
 
-## Next session
+## 进行中
 
-1. <FIRST_NEXT_ITEM — filled by preflight first-time-setup>
+<!-- AUTO:inprogress -->
+
+<!-- /AUTO -->
+
+## 下一步
+
+<FIRST_NEXT_ITEM — filled by preflight first-time-setup>
 
 ## Hanging tasks
 
