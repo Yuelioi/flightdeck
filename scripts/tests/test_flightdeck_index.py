@@ -133,6 +133,29 @@ class FolderSummaryTest(unittest.TestCase):
             (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
             self.assertEqual(folder_summary(folder), "2 done")
 
+    def test_mixed_status_breaks_down_in_lifecycle_order(self):
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "specs"
+            folder.mkdir()
+            (folder / "a.md").write_text(
+                "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
+            )
+            (folder / "b.md").write_text(
+                "---\nstatus: active\nsummary: y\n---\n", encoding="utf-8"
+            )
+            (folder / "c.md").write_text(
+                "---\nstatus: done\nsummary: z\n---\n", encoding="utf-8"
+            )
+            # active before done (lifecycle order), per folder-semantics example
+            self.assertEqual(folder_summary(folder), "3 (1 active, 2 done)")
+
+    def test_empty_folder_is_zero(self):
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "specs"
+            folder.mkdir()
+            (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
+            self.assertEqual(folder_summary(folder), "0")
+
     def test_charts_summary_counts_imported_entries(self):
         with tempfile.TemporaryDirectory() as d:
             folder = Path(d) / "charts"

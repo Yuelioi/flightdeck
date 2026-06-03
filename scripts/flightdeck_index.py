@@ -1,12 +1,16 @@
 """flightdeck mechanical layer — INDEX regeneration (pure stdlib).
 
-See flightdeck/sketches/scriptable-mechanical-layer.md for the design.
+See flightdeck/specs/2026-06-03-scriptable-mechanical-layer-design.md for the design.
 Computes facts (regenerate INDEX from deck files); judgment stays in the model.
 """
 
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
+
+# Workflow status lifecycle order — drives the mixed-status root summary breakdown.
+STATUS_ORDER = ["pending", "active", "awaiting-review", "blocked", "done", "scrapped"]
 
 DASH = "—"  # em dash — the INDEX row delimiter
 
@@ -71,12 +75,20 @@ def folder_summary(folder):
     """
     folder = Path(folder)
     names = [p for p in folder.glob("*.md") if p.name != "INDEX.md"]
-    statuses = {
+    total = len(names)
+    if total == 0:
+        return "0"
+    statuses = [
         parse_frontmatter(p.read_text(encoding="utf-8")).get("status", "")
         for p in names
-    }
-    descriptor = statuses.pop() if len(statuses) == 1 else "mixed"
-    return f"{len(names)} {descriptor}"
+    ]
+    if len(set(statuses)) == 1:
+        return f"{total} {statuses[0]}"
+    counts = Counter(statuses)
+    ordered = [s for s in STATUS_ORDER if counts.get(s)]
+    ordered += [s for s in counts if s not in STATUS_ORDER]  # unknown statuses last
+    parts = ", ".join(f"{counts[s]} {s}" for s in ordered)
+    return f"{total} ({parts})"
 
 
 def charts_summary(folder):
