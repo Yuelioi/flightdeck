@@ -2,7 +2,15 @@
 
 See flightdeck/specs/2026-06-03-scriptable-mechanical-layer-design.md for the design.
 Computes facts (regenerate INDEX from deck files); judgment stays in the model.
+
+Runnable as `uv run flightdeck_index.py <deck>` or `python flightdeck_index.py <deck>`
+— pure stdlib, so uv has nothing to install.
 """
+
+# /// script
+# requires-python = ">=3.8"
+# dependencies = []
+# ///
 
 import argparse
 import sys

@@ -49,7 +49,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 | a status transition off | `status: don't auto <transition>` | `status 不要自动 <transition>` |
 | no git | `this deck doesn't use git; history in landed/HISTORY.md` | `本 deck 不走 git，历史记 landed/HISTORY.md` |
 | has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
-| run the INDEX-regen fast-path script | `run scripts` (or `run scripts with <runtime>`) | `跑脚本`（或 `跑脚本，用 <runtime>`） |
+| run the INDEX-regen fast-path script | `run scripts` (or `run scripts with <runtime>` — e.g. `uv run`, `python3`) | `跑脚本`（或 `跑脚本，用 <runtime>`） |
 
 When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan.
 

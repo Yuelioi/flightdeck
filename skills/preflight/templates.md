@@ -29,7 +29,7 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To override, uncomment 
 <!-- landing: don't self-invoke; I run it manually -->
 <!-- this deck doesn't use git; history in landed/HISTORY.md -->
 <!-- has AGENTS.md but don't auto-regen -->
-<!-- run scripts with python3 -->
+<!-- run scripts with uv run -->   <!-- runtime is any of: uv run · python3 · python · a pinned path -->
 ```
 
 ### Rules
