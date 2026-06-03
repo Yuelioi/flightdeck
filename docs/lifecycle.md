@@ -12,7 +12,7 @@ session start ─▶ /flightdeck:preflight ─▶ … work … ─▶ /flightdec
                  git, report next item      state current   cockpit, commit
 ```
 
-- **preflight** (entry) — reads `cockpit.md`, reconciles against `git status`, and reports the next item. On a brand-new project it runs first-time setup instead (create the deck, interview, optional tour). → [SKILL.md](../skills/preflight/SKILL.md)
+- **preflight** (entry) — reads `cockpit.md`, reconciles against `git status`, and reports the next item. On a brand-new project it runs first-time setup instead (create the deck, interview). → [SKILL.md](../skills/preflight/SKILL.md)
 - **status** (mid-session, automatic) — as work moves it keeps each artifact's `status:` current and its `INDEX.md` row in sync, so the next `preflight` reads truth. → [status/SKILL.md](../skills/status/SKILL.md)
 - **landing** (exit) — classifies new knowledge into the right folder, refreshes `cockpit.md`, and commits. → [exit-ritual.md](../skills/preflight/exit-ritual.md)
 

@@ -34,8 +34,7 @@ Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](p
      3. **Copy the scaffold verbatim** from this skill's `../../scaffolds/full/flightdeck/` (resolve relative to this skill's base directory; the plugin packages `scaffolds/`) into `./flightdeck/` — every folder + each `INDEX.md` + the **commented** `rules.md` + `cockpit.md` + `landed/HISTORY.md`. **Copy, do NOT re-author** — this is what preserves the `rules.md` comments. Then substitute today's date + `<user>` into `cockpit.md`; the scaffold `rules.md` `version` should equal `MIGRATION.md` `current` — bump it if the scaffold is behind.
      4. **Interview (2 Q)** → replace the cockpit placeholders: "Active focus — current main thread (5–15 words)?" → replace `<ACTIVE_FOCUS …>`; "First 'next session' item — one concrete action?" → replace `<FIRST_NEXT_ITEM …>`.
      5. **AGENTS.md** — ask "Generate `AGENTS.md` (cross-tool bridge from cockpit)? (Y/n)". If yes, run `/flightdeck:emit-agents-md`. (Opt-in; creating it now is the bootstrap — matches the 3.0 emit-on-presence rule.)
-     6. **Tutorial** — ask "Run a 2-minute guided tour? It creates a throwaway sample and cleans it up. (y/N)". If yes, follow [onboarding.md](onboarding.md); if no, skip.
-     7. **Then STOP** — the next `/preflight` takes the read path below.
+     6. **Then STOP** — the next `/preflight` takes the read path below.
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
 1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
@@ -154,4 +153,3 @@ The operational entry ritual is above. The protocol "textbook" lives in companio
 - [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout (full, always)
 - [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
 - [exit-ritual.md](exit-ritual.md) — the landing ritual (run by `/flightdeck:landing`) + Land-readiness check
-- [onboarding.md](onboarding.md) — optional first-run guided tour (demonstration; auto-cleaned)

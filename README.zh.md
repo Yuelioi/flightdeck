@@ -100,7 +100,7 @@ flightdeck/
 2. 对账 `git status`（分支、未提交、stash）。
 3. 报告下一项 —— 说 "go" 执行，或它发现不一致就问你。
 
-全新项目（没有 `cockpit.md`）则跑首次建档：检测 git、建好 deck、两个问题的访谈、问你要不要生成 `AGENTS.md`、并提供一个可跳过的上手教程。
+全新项目（没有 `cockpit.md`）则跑首次建档：检测 git、建好 deck、两个问题的访谈、问你要不要生成 `AGENTS.md`。
 
 **会话结束** —— 运行 `/flightdeck:landing`。它把新知识分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）、刷新 `cockpit.md`、提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 

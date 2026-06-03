@@ -100,7 +100,7 @@ You don't scaffold the deck by hand — `/flightdeck:preflight` creates it on fi
 2. Reconciles against `git status` (branch, uncommitted, stashes).
 3. Reports the next item — say "go" to execute, or it surfaces a mismatch and asks.
 
-On a brand-new project (no `cockpit.md`) it runs first-time setup instead: checks for git, creates the deck, a 2-question interview, asks about `AGENTS.md`, and offers a skippable guided tour.
+On a brand-new project (no `cockpit.md`) it runs first-time setup instead: checks for git, creates the deck, a 2-question interview, and asks about `AGENTS.md`.
 
 **Session end** — run `/flightdeck:landing`. It classifies new knowledge (bug → `incidents/`, procedure → `checklists/`, one-off → discard), refreshes `cockpit.md`, and commits. The next session — even a different AI or developer — picks up exactly here.
 
