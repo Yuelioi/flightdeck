@@ -18,6 +18,7 @@ When dogfooding an **unpublished** flightdeck build (e.g. a `3.x` branch) before
 1. The config dir is **`$env:CLAUDE_CONFIG_DIR`**, *not* always `~/.claude`. A multi-account switcher relocates it (e.g. under `…\.claude-accounts\<name>.config`). Always resolve it from the env var — guessing `~/.claude` syncs into the wrong profile.
 2. Cache path: `$env:CLAUDE_CONFIG_DIR\plugins\cache\flightdeck-marketplace\flightdeck\<version>\`.
    - The folder is named after the **published** version (e.g. `2.3.0`) and stays that way even when the content is newer — cosmetic. Confirm the active path via `installed_plugins.json` (`installPath`) if unsure.
+3. **`installPath` and the env-var path can disagree yet resolve to the *same bytes*.** On this setup `$CLAUDE_CONFIG_DIR\plugins` is a **junction** → `~/.claude\plugins`, so `installed_plugins.json`'s `installPath` (`~/.claude\…`) and the env-var path point at **one physical cache** — syncing either updates both. Don't assume two profiles when the paths differ: check for a reparse point first — `(Get-Item <path> -Force).Attributes -band [IO.FileAttributes]::ReparsePoint` (+ `.Target`). Only `…\max.config\plugins` is the junction; `…\max.config` itself is a real dir. (2026-06-03: lost two turns treating env-var-path vs `installPath` as two caches — it was one junction.)
 
 ## Sync the working tree into the cache
 
