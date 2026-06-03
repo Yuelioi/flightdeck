@@ -1,6 +1,6 @@
 ---
 status: active
-reviewed: specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md
+reviewed: landed/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md
 last_updated: 2026-06-02
 ---
 

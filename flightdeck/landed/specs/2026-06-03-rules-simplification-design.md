@@ -2,7 +2,7 @@
 status: done
 summary: 溶解 rules.md 结构化 toggle 集（推断 / 默认+House Rules / 仅留 disabled_folders），House Rules 升为 flightdeck 局部权威覆盖并定职责边界，附 0 配置 when-to-land
 last_updated: 2026-06-03
-related: [sketches/preflight-upgrade-nudge.md, sketches/status-spec-lags-plan.md]
+related: [specs/2026-06-03-preflight-silent-bump-nudge-design.md, specs/2026-06-03-status-spec-co-advance-design.md]
 ---
 
 # rules.md 简化 + 主动 land-readiness — 设计

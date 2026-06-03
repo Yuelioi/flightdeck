@@ -2,7 +2,7 @@
 status: done
 summary: 分 P0–P4 实施 init 重做：删 minimal scaffold、install/preflight 统一 copy-the-scaffold、git 检测+AGENTS opt-in、可跳过演示式 onboarding 教程（带 safe-to-delete 标记+幂等 cleanup）、walkaround 容忍空 INDEX；末尾单 commit
 last_updated: 2026-06-03
-implements: specs/2026-06-03-init-redesign-single-scaffold-design.md
+implements: landed/specs/2026-06-03-init-redesign-single-scaffold-design.md
 ---
 
 # init 重做 + 单一 scaffold 实施计划
