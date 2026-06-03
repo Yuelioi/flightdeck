@@ -170,7 +170,7 @@ Active focus: <AI 维护的一句话主线>
 
 - 与已 landed 的 `rules-simplification` **正交**，同属 3.0「简化」主题。
 - 与 active 的 [`scriptable-mechanical-layer`](2026-06-03-scriptable-mechanical-layer-design.md) **协同**：cockpit 进行中区 regen 直接接进机械层脚本（§2.4）。
-- **`status-spec-co-advance`（本会话刚由 sketch 提升）很可能被本重构吸收**：状态从 6 砍到 4、cockpit 自动驱动后，"plan 推进不带动 spec" 的痛点大幅缩小。实施时复核：若确认消解 → 转 `scrapped` 并在此标注；否则保留为独立增强。
+- **`status-spec-co-advance`（本会话刚由 sketch 提升）部分被本重构吸收**：状态从 6 砍到 4、cockpit 自动驱动后，"plan 推进不带动 spec" 的**可见性/孤儿症状已消解**（active spec 永远在 `## 进行中`，不会被遗忘）。但"plan 翻 `done` 自动带动其 `implements:` 的 spec"这一**多工件状态联动 v4 未实现**（status 仍只动一个工件）。**复核结论（Phase 5）：保留为 `idea`**（待启动池），不 scrapped——剩余的状态联动增强仍是一个独立、可选的小设计。
 - `structural-edit-guard` 仍独立有效（防多行 Edit 吞标题），不受本重构影响。
 
 ## 7. 开放问题（实施时定，不阻塞设计）

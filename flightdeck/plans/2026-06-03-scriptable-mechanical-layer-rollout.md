@@ -24,7 +24,7 @@ last_updated: 2026-06-03
 
 ## Phase 3 — walkaround lint 子命令（待前置）
 
-- [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
+- [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../landed/specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
 - [ ] `flightdeck.py lint`：把 Audit 1–10 的机械项（INDEX↔文件夹一致性、orphan、dangling ref、stray file、status 合法性）脚本化，吐 JSON；模型读结果做判断/叙述。**anchor/link 检查已有 PoC**——2026-06-03 一个 ~40 行 Python（全仓扫 `[..](x.md#anchor)` vs 标题 slug）当场抓到一处既存 dangling link；把它并进 `lint` 的 dangling-ref 项。
 - [ ] **lint 候选：untracked outstanding spec**（本会话教训）—— `active` / `pending` 的 spec（或开放设计问题）**没被 cockpit `## Next session` 引用** → INFO「untracked 发布前工作」。**教训**：本会话一路建 spec / 提开放问题，却没当场汇进 Next session，攒到用户点破才补；规矩 = 建 spec / 提问题**当场**进 Next session，lint 兜底抓漏。**误报注意**：in-progress 但焦点在别处的 active spec 未必该在 Next session —— 需判据（如只查 `pending` + 未 landed 的 `done`，或带 release 标记的）。与 [structural-edit-guard](../specs/2026-06-03-structural-edit-guard-design.md) 同属 lint 的「维护者流程守卫」类（结构块断言也归这）。
 - [ ] **Verify**：lint 输出与现 walkaround 人工审计结论一致；token 实测对比。

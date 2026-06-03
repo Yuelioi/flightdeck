@@ -15,8 +15,8 @@
 
 ## 下一步
 
-- 完成 model-v4 实施：Phase 5 验证收尾（walkaround 零假阳性、reload dogfood 跑通 preflight/status/landing、复核 status-spec-co-advance 是否被 v4 吸收）。
-- 然后发布 3.0：version-bump + marketplace + tag + 合并分支 → main（见 checklists/version-bump.md）。
+- 发布前验证：reload（重载 plugin）后 dogfood 跑通 model-v4 行为（preflight 读新 cockpit / status idea→active 带动 `## 进行中` / landing 自动写两区）；重跑 `/flightdeck:emit-agents-md` 消除 AGENTS.md drift。
+- 发布 3.0：version-bump + marketplace + tag + 合并分支 → main（见 [checklists/version-bump.md](checklists/version-bump.md)）。
 
 ## Hanging tasks
 
