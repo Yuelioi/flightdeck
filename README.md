@@ -346,28 +346,7 @@ The skill content under [`skills/`](skills/) is **tool-agnostic markdown**. Mani
 
 ## How it compares
 
-There are several adjacent approaches to giving an AI continuity. flightdeck sits in a specific spot:
-
-| | flightdeck | [AGENTS.md](https://agents.md) | Cline Memory Bank | OpenSpec | Cursor MDC | Letta Code |
-| --- | --- | --- | --- | --- | --- | --- |
-| **Static project rules** | via emit | ✅ native | — | — | ✅ | — |
-| **Session-to-session continuity** | ✅ | — | ✅ | — | — | ✅ |
-| **Lifecycle model** (folder=kind · status · landed) | ✅ | — | — | ✅ | — | — |
-| **Strict write gate** (anti junk-drawer) | ✅ | — | — | — | — | — |
-| **Incident / lesson tracking** with root-cause discipline | ✅ | — | — | — | — | — |
-| **External review disposition** tracking | ✅ | — | — | — | — | — |
-| **Read-time decomposition** (cockpit-first; on-demand folder routing) | ✅ | — | — | — | — | — |
-| **INDEX-first token saving** (per-folder derived index) | ✅ | — | — | — | — | — |
-| **Tool-agnostic** (markdown + filesystem) | ✅ | ✅ | partial | ✅ | Cursor-only | — |
-| **Single explicit entry** (`/preflight`) | ✅ | — | — | — | — | — |
-| **Cross-tool reach** | via AGENTS.md emit | native | — | — | — | — |
-
-**Short version:**
-- **AGENTS.md** is the wire format for static rules. flightdeck **emits into** AGENTS.md, doesn't compete with it.
-- **Cline Memory Bank** gives raw memory persistence; flightdeck gives memory + lifecycle + write discipline.
-- **OpenSpec** is the closest sibling for spec evolution markers; flightdeck adopts its `ADDED:` / `MODIFIED:` / `REMOVED:` convention.
-- **Cursor MDC** is a path-based scope tag; flightdeck includes MDC frontmatter on incidents / checklists for Cursor interop.
-- **Letta Code** has a skill-library promotion pattern; flightdeck adopts the gate-based incident → checklist promotion.
+flightdeck sits **on top of** [AGENTS.md](https://agents.md), not against it — it **emits into** AGENTS.md (the wire format for static rules) and adds what AGENTS.md doesn't: session-to-session continuity, a folder=kind · status · landed lifecycle, a strict write gate against junk-drawer accumulation, and incident / review-disposition tracking. Closest neighbors: **Cline Memory Bank** (raw memory — flightdeck adds lifecycle + write discipline), **OpenSpec** (spec-evolution markers — flightdeck adopts its `ADDED:` / `MODIFIED:` / `REMOVED:`), and **Cursor MDC** / **Letta Code** (flightdeck borrows their path-scope and promotion-gate ideas).
 
 flightdeck is **opinionated**: write gate before storage, lifecycle before memory, peer reviews before merge. If that fits, it fits well.
 
@@ -377,24 +356,6 @@ flightdeck is **opinionated**: write gate before storage, lifecycle before memor
 <summary><b>Is this just a directory of markdown files?</b></summary>
 
 Yes — that's the whole point. The protocol is `skills/preflight/SKILL.md` (plus `protocol.md`), which the AI loads when you run `/flightdeck:preflight`. The state is plain markdown in `flightdeck/`. No database, no server, no service to deploy. Diff it in code review, grep it from the terminal, edit it in your editor. AI tools are participants in the protocol, not its custodians.
-
-</details>
-
-<details>
-<summary><b>Why aviation? Isn't this just a coding tool?</b></summary>
-
-The aviation framing reflects what the protocol actually does: session lifecycle, checklists under uncertainty, incident tracking, handoffs between operators, controlled autonomy with periodic re-anchoring. Those are aviation concepts — not metaphor, structure.
-
-The framing has a guardrail: **"Semantic clarity outranks thematic consistency."** Folder names are chosen for clarity first. The metaphor is a tool, not a theme.
-
-</details>
-
-<details>
-<summary><b>Does the 80-line cockpit ceiling actually matter?</b></summary>
-
-Yes. The ceiling is **cognitive-load engineering**, not style. cockpit.md is read every session by both human and AI. At 80 lines it fits on one screen and consumes < 1k tokens. Without the ceiling, board-style files grow to 300-500 lines, the AI burns context just orienting, and humans stop reading them.
-
-Hitting the ceiling forces a real decision: does this content earn its place in the entry-point, or does it belong in a deeper folder (`specs/`, `incidents/`) or `## Hanging tasks`, or out entirely?
 
 </details>
 
@@ -428,7 +389,7 @@ In the meantime, the [`/flightdeck:emit-agents-md`](skills/emit-agents-md/SKILL.
 </details>
 
 <details>
-<summary><b>How is this different from just writing a CLAUDE.md / project notes file?</b></summary>
+<summary><b>How is this different from a static CLAUDE.md / project notes file?</b></summary>
 
 A static rules file (CLAUDE.md, project notes) is **append-only knowledge**. flightdeck is a **state machine with lifecycle gates**:
 
@@ -438,15 +399,6 @@ A static rules file (CLAUDE.md, project notes) is **append-only knowledge**. fli
 - Work ships → `status` advances to `done`, file moves to `landed/`, no longer authoritative for current state.
 
 The lifecycle is what prevents the "junk drawer" failure mode that static rules files always succumb to over time.
-
-</details>
-
-<details>
-<summary><b>Why not use vector embeddings / RAG over my code?</b></summary>
-
-flightdeck is solving a different problem. Vector retrieval gives you *similar* content; flightdeck gives you *operationally relevant* content with explicit routing. You don't want similarity-based retrieval to surface a stale incident file alongside three irrelevant ones — you want the active `cockpit.md` and nothing else until you ask.
-
-flightdeck is also durable in ways embeddings aren't: it's plain text that survives a model upgrade, a vendor change, a switch between AI tools, or a code review where a human edits the files directly.
 
 </details>
 

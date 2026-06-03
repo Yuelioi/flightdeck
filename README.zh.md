@@ -346,28 +346,7 @@ disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
 
 ## 横向对比
 
-给 AI 加持续性这件事有几个相邻方案。flightdeck 占的是这块：
-
-| | flightdeck | [AGENTS.md](https://agents.md) | Cline Memory Bank | OpenSpec | Cursor MDC | Letta Code |
-| --- | --- | --- | --- | --- | --- | --- |
-| **静态项目规范** | 通过 emit | ✅ 原生 | — | — | ✅ | — |
-| **跨 session 接续** | ✅ | — | ✅ | — | — | ✅ |
-| **生命周期模型**（文件夹=类型 · status · landed） | ✅ | — | — | ✅ | — | — |
-| **严格守门**（防 junk-drawer） | ✅ | — | — | — | — | — |
-| **错题 / 教训追踪**（含根因纪律） | ✅ | — | — | — | — | — |
-| **外部 review disposition** 追踪 | ✅ | — | — | — | — | — |
-| **读时分层**（cockpit 优先；按需文件夹路由） | ✅ | — | — | — | — | — |
-| **INDEX 优先省 token**（各文件夹衍生索引） | ✅ | — | — | — | — | — |
-| **工具无关**（markdown + filesystem） | ✅ | ✅ | 部分 | ✅ | 仅 Cursor | — |
-| **单一显式入口**（`/preflight`） | ✅ | — | — | — | — | — |
-| **跨工具触达** | 通过 AGENTS.md emit | 原生 | — | — | — | — |
-
-**一句话总结：**
-- **AGENTS.md** 是静态规则的 wire format。flightdeck **emit 进** AGENTS.md，不竞争。
-- **Cline Memory Bank** 提供原始 memory 持久化；flightdeck 提供 memory + 生命周期 + 写入纪律。
-- **OpenSpec** 是 spec 演化标记的近亲；flightdeck 采纳了它的 `ADDED:` / `MODIFIED:` / `REMOVED:` 约定。
-- **Cursor MDC** 是路径范围标签；flightdeck 在 incidents / checklists 上加 MDC frontmatter 以兼容 Cursor。
-- **Letta Code** 有 skill-library 晋升模式；flightdeck 采纳了它的多准则 incident → checklist 晋升门。
+flightdeck **架在** [AGENTS.md](https://agents.md) 之上、不是替代 —— 它 **emit 进** AGENTS.md（静态规则的 wire format），并补上 AGENTS.md 没有的：跨 session 接续、文件夹=类型 · status · landed 的生命周期、防 junk-drawer 的严格写入门控、以及 incident / review-disposition 追踪。近邻：**Cline Memory Bank**（原始 memory —— flightdeck 加生命周期 + 写入纪律）、**OpenSpec**（spec 演化标记 —— flightdeck 采纳其 `ADDED:` / `MODIFIED:` / `REMOVED:`）、以及 **Cursor MDC** / **Letta Code**（flightdeck 借鉴其路径范围与晋升门思路）。
 
 flightdeck **立场鲜明**：写入门控先于存储、生命周期先于 memory、同行评审先于合并。一旦契合你的工作方式，便会非常契合。
 
@@ -377,24 +356,6 @@ flightdeck **立场鲜明**：写入门控先于存储、生命周期先于 memo
 <summary><b>这就是一堆 markdown 文件而已？</b></summary>
 
 对 —— 就是这个意思。协议是 `skills/preflight/SKILL.md`（加上 `protocol.md`），运行 `/flightdeck:preflight` 时 AI 加载它。状态是 `flightdeck/` 下面的纯 markdown。没数据库、没服务器、不用部署任何东西。可以在代码评审里 diff 它、在终端里 grep 它、在编辑器里改它。AI 工具是协议的**参与者**，而非它的保管者。
-
-</details>
-
-<details>
-<summary><b>为啥用航空隐喻？这不就是个编程工具吗？</b></summary>
-
-航空框架反映的是协议实际在做的事：session 生命周期、不确定下的 checklist、事故追踪、operator 之间的交接、带周期性重锚定的受控自主。这些就是航空概念 —— 不是比喻，是结构。
-
-框架自带护栏：**"语义清晰高于主题统一"**。文件夹名以清晰为第一标准。隐喻是工具，不是主题。
-
-</details>
-
-<details>
-<summary><b>80 行 cockpit 天花板真的重要吗？</b></summary>
-
-是。这个天花板是**认知负载工程**，不是风格。cockpit.md 每次会话都被人和 AI 一起读。80 行能一屏装下，token 消耗 < 1k。没有这个天花板，board 风格的文件会膨胀到 300-500 行，AI 光是定位就要消耗大量上下文，人也就索性不读了。
-
-触及上限会强制一次真实的取舍：这条内容配得上留在入口文件吗？还是应该下沉到更深的文件夹（`specs/`、`incidents/`）或 `## Hanging tasks`，又或者干脆移除？
 
 </details>
 
@@ -438,15 +399,6 @@ flightdeck **架在** AGENTS.md 之上，不是替代：
 - 工作落地 → `status` 推进到 `done`，文件移到 `landed/`，对当前状态不再有权威性。
 
 正是这套生命周期防止了静态规则文件长期必然滑向的"垃圾抽屉"失败模式。
-
-</details>
-
-<details>
-<summary><b>为啥不用向量 embedding / RAG 索引代码？</b></summary>
-
-flightdeck 解决的问题不一样。向量检索给你**相似**内容；flightdeck 给你带明确路由的**操作相关**内容。你不会想要相似检索把一个已废弃的 incident 文件和三个无关的一起翻出来 —— 你要的是当前 `cockpit.md`，没别的，除非你主动问。
-
-flightdeck 在 embedding 做不到的方面也更耐用：纯文本，能扛过模型升级、厂商切换、AI 工具切换、人在 code review 里直接改文件。
 
 </details>
 
