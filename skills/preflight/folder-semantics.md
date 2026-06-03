@@ -4,12 +4,12 @@ Reference for every `flightdeck/` subdirectory: what it holds, naming convention
 
 ## Deck layout (3.x: full, always)
 
-As of 3.x, both `preflight` first-time setup and `install --scaffold` lay the **full layout** — every folder with its `INDEX.md`, plus the 3-file contract. There is no longer a minimal/full choice (the `scaffolds/minimal` variant was removed).
+As of 3.x, both `preflight` first-time setup and `install --scaffold` lay the **full layout** — every folder with its `INDEX.md`, plus the minimal contract files. There is no longer a minimal/full choice (the `scaffolds/minimal` variant was removed).
 
 | Concept | What it means |
 | --- | --- |
-| **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ charts/ landed/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` + `landed/HISTORY.md` |
-| **3-file contract** (validation floor) | `rules.md` + `cockpit.md` + `landed/HISTORY.md` must exist (walkaround CRITICAL if missing) — the *floor*, not a scaffold variant |
+| **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ charts/ landed/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` (+ `landed/HISTORY.md` for no-git decks — init removes it when the deck has `.git`) |
+| **Minimal contract** (validation floor) | `rules.md` (+ `version`) + `cockpit.md` must exist (walkaround CRITICAL if `rules.md`/`version` missing); `landed/HISTORY.md` additionally under no-git — the *floor*, not a scaffold variant |
 
 **Empty is the normal initial state.** A freshly scaffolded deck has empty folders + empty `INDEX.md` files — expected, not an anti-pattern. Under the full layout a **missing** known folder is the anomaly (walkaround flags it); an **empty-but-present** folder / `INDEX.md` is fine and never flagged. (This reverses the pre-3.x "add folders on demand" guidance.)
 
@@ -39,7 +39,7 @@ The common mistake is keeping an evergreen reference in `specs/` or `plans/`. A 
 ```
 flightdeck/
 ├── cockpit.md          # The single must-read entry (≤80 lines): focus / next / hanging
-├── rules.md            # Mandatory file (3-file contract); content optional — read first by every entry skill
+├── rules.md            # Mandatory file (minimal contract); content optional — read first by every entry skill
 ├── INDEX.md            # Root index: subfolder directory + global status summary
 │
 ├── specs/              # Designs & ideas (status: idea / active / done / scrapped)
@@ -54,7 +54,7 @@ flightdeck/
 │   └── INDEX.md
 │
 └── landed/             # Archive umbrella — mirrors source structure on demand
-    └── HISTORY.md      # Landing log, newest first (required when rules.md git: false)
+    └── HISTORY.md      # Landing log, newest first — no-git decks only (init removes it when the deck has .git)
 ```
 
 ## Entry files
@@ -76,7 +76,7 @@ Contains:
 
 ### `rules.md` — project config (mandatory file, optional content)
 
-Read first by every entry skill. As of 3.0 it carries `version` + `disabled_folders` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit from `.git` / `AGENTS.md` presence) or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the 3-file contract — `walkaround` CRITICAL if missing) and must carry `version`; its **content** is optional — a minimal `rules.md` = full-auto defaults. Full schema: [templates.md § rules.md](templates.md#rulesmd).
+Read first by every entry skill. As of 3.0 it carries `version` + `disabled_folders` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit from `.git` / `AGENTS.md` presence) or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the minimal contract — `walkaround` CRITICAL if `rules.md`/`version` missing) and must carry `version`; its **content** is optional — a minimal `rules.md` = the built-in defaults (safe: `landing` manual, no auto-archive/commit). Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
 ### `INDEX.md` — root index
 
@@ -100,9 +100,9 @@ The root INDEX is a **downgradeable component** — if the project finds per-fol
 
 ### `landed/HISTORY.md` — landing log
 
-Lives under `landed/`, so it is **outside the routing graph** (never read at session start). An **add-only** log (never edit or delete past entries), one line per landing, **newest first**.
+Lives under `landed/`, so it is **outside the routing graph** (never read at session start). An **add-only** log (never edit, delete, or truncate past entries), one line per landing, **newest first**.
 
-**Required when `rules.md` sets `git: false`** (no commit log to lean on); optional otherwise.
+**Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history in place of `git log`, kept **in full** (length is free: it never enters context; only its newest line is read, as the no-git staleness signal).
 
 ## INDEX.md (per-folder)
 
@@ -195,7 +195,7 @@ Top-level archive for completed or retired work. `landed/` **mirrors any source 
 - `landed/specs/` — specs archived after the work is done.
 - `landed/plans/` — plans archived after execution.
 - `landed/incidents/`, `landed/checklists/`, `landed/charts/` — obsolete-but-historical reference moved out of the active set. (A pre-3.0 deck may still carry a historical `landed/debriefs/` — left in place, not regenerated.)
-- `landed/HISTORY.md` — append-only landing log.
+- `landed/HISTORY.md` — append-only landing log (no-git decks only; absent when the deck has `.git`).
 
 Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `landed/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `landed/`.
 

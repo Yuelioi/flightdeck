@@ -3,8 +3,14 @@
 The mechanical part of preflight Branch-0 first-time-setup: deterministically copy
 `scaffolds/full/flightdeck/` into `<target>/flightdeck/` (verbatim — preserves the
 `rules.md` comments, which hand re-authoring drops; see the scaffold-ships-verbatim
-incident) and substitute the cockpit placeholders. Judgment stays in preflight: the
-git check, the 2-question interview, and the AGENTS.md opt-in.
+incident) and substitute the cockpit placeholders. As of 3.0 first-run is zero-prompt:
+preflight just detects a runtime and calls this — no git check, interview, or AGENTS.md
+question. `--focus`/`--next` default to `(set me)` placeholders the user fills later.
+
+It also silently detects the deck's git mode: if `<target>/.git` exists, the copied
+`landed/HISTORY.md` is removed — `git log` is the history for git-backed decks, so the
+file is kept only for no-git decks (where it is the git-log substitute). Avoids shipping
+a permanently-dead file into every git project.
 
 Refuses if the deck already exists. Pure stdlib; run with `uv run` or `python`.
 """
@@ -37,6 +43,13 @@ def init(target, name, user, date, focus, next_item):
     text = text.replace(_ACTIVE, focus)
     text = text.replace(_NEXT, next_item)
     cockpit.write_text(text, encoding="utf-8")
+
+    # HISTORY.md is the no-git history substrate (the git-log stand-in). A git-backed
+    # deck uses `git log` instead, so drop the copied file — keeping it would be a
+    # permanently-dead file. It survives only for no-git decks.
+    if (Path(target) / ".git").exists():
+        (deck / "landed" / "HISTORY.md").unlink(missing_ok=True)
+
     return deck
 
 

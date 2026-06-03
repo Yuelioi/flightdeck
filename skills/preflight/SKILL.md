@@ -22,7 +22,7 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
 0. **Branch-0 — deck existence (MUST run first; layout detection MUST NOT run before this).**
    Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract, so this also covers a half-initialized `flightdeck/` that has no cockpit).
 
-   - **`flightdeck/cockpit.md` does NOT exist** → **first-time setup**: load [setup.md](setup.md) and run it (git check → confirm → 2-Q interview → scaffold-copy via `flightdeck_init.py` or by hand → AGENTS.md opt-in → STOP).
+   - **`flightdeck/cockpit.md` does NOT exist** → **first-time setup**: load [setup.md](setup.md) and run it (zero prompts — detect a Python runtime → scaffold-copy via `flightdeck_init.py` or by hand → STOP; no git/interview/AGENTS.md questions).
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
 1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.

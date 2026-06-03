@@ -139,7 +139,7 @@ If `AGENTS.md` doesn't exist or has no flightdeck markers: skip (the project has
 
 Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](../preflight/protocol.md#migration-detection).
 
-- **No `flightdeck/rules.md`, or `rules.md` has no `version`** → **CRITICAL** — `rules.md` + `version` are part of the minimal 3-file contract. (A cockpit-only / pre-2.2 deck → point to the 2.2 migration in [MIGRATION.md](../../MIGRATION.md).)
+- **No `flightdeck/rules.md`, or `rules.md` has no `version`** → **CRITICAL** — `rules.md` + `version` are part of the minimal contract (`rules.md` + `cockpit.md`; `landed/HISTORY.md` only under no-git). (A cockpit-only / pre-2.2 deck → point to the 2.2 migration in [MIGRATION.md](../../MIGRATION.md).)
 - **`version` < some `layout_need_update` entry** → **WARNING** — a structural migration applies; point to the matching [MIGRATION.md](../../MIGRATION.md) section.
 - **Legacy 1.x markers present** (`flightdeck/manifest.md` · `logbook.md` · `kneeboard/` · `flight-plans/` · `incident-reports/` · `safety-reviews/`) → **WARNING** — legacy 1.x deck; route to the 1.x→1.2 migration first.
 - **Pre-model-v4 structure present** (a `flightdeck/sketches/` or `flightdeck/debriefs/` folder in the *active* tree — not `landed/`; or a workflow file carrying a retired status `pending` / `awaiting-review` / `blocked`; or a `cockpit.md` with a hand-written `## Next session` and no `## 进行中` AUTO region) → **WARNING** — unmigrated model-v4 deck; route to the matching model-v4 section of [MIGRATION.md](../../MIGRATION.md). Report once here, not also as stray (Audit 8) or illegal-status (Audit 1 already points at the same migration).

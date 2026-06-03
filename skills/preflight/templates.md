@@ -23,10 +23,10 @@ General project conventions (code style, "branch before committing") belong in C
 
 ### Autonomy overrides
 
-Omit = defaults (commit confirm · all rituals self-invocable · status_auto fully on ·
-git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **delete its `<!-- -->` wrapper** — commented lines are skipped by phrase-matching:
+Omit = defaults (commit confirm · preflight/walkaround/emit/status self-invoke · **landing manual** · status auto-`start` but **not** auto-`land` · git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **delete its `<!-- -->` wrapper** — commented lines are skipped by phrase-matching:
+<!-- landing: self-invoke -->                  <!-- let me run landing (default: manual) -->
+<!-- status: auto land -->                     <!-- auto-archive on a done flip (default: off) -->
 <!-- commit without asking -->
-<!-- landing: don't self-invoke; I run it manually -->
 <!-- this deck doesn't use git; history in landed/HISTORY.md -->
 <!-- has AGENTS.md but don't auto-regen -->
 <!-- run scripts with uv run -->   <!-- runtime is any of: uv run · python3 · python · a pinned path -->
@@ -34,7 +34,7 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **dele
 
 ### Rules
 
-- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. Omitted `disabled_folders` defaults `[]`; all behavior not pinned here resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default).
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version`. Omitted `disabled_folders` defaults `[]`; all behavior not pinned here resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default).
 - **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations.
 - **One structured toggle (3.0).** Only `disabled_folders` remains structured:
 
@@ -46,8 +46,8 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **dele
   - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in landed/HISTORY.md` overrides.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
   - `commit` → defaults `confirm`; House Rules `commit without asking` (auto) / `don't auto-commit; leave changes for me / CI` (manual). Under no-git there is no commit regardless.
-  - ritual self-invocation → defaults **on**; House Rule `<ritual>: don't self-invoke; I run it manually` restricts one.
-  - `status_auto` → defaults `start` + `land` **on**; House Rule `status: don't auto <transition>` restricts one.
+  - ritual self-invocation → `preflight`/`walkaround`/`emit-agents-md`/`status` default **on** (House Rule `<ritual>: don't self-invoke; I run it manually` restricts one); **`landing` defaults off (manual)** — it archives + commits — enabled by House Rule `landing: self-invoke`.
+  - `status_auto` → `start` defaults **on** (House Rule `status: don't auto start` turns it off); **`land` defaults off** — auto-archive on a `done` flip is opt-in via House Rule `status: auto land`.
   - `scripts` → defaults **manual** (INDEX regen / consistency checks done by hand). House Rule `run scripts [with <runtime>]` opts into the bundled `flightdeck_index.py` fast path; the markdown path is always the valid fallback, so a runtime-less tool loses only speed. Runs code → a higher-trust action → opt-in, never on by default. See [exit-ritual § Script fast path](exit-ritual.md#script-fast-path-optional-accelerator).
 - **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
 - **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`model_invocable`/`status_auto`/`commit_mode`) are **read and honored through 3.x**, removed at 4.0; `preflight` offers to migrate a deck still carrying them.
@@ -277,18 +277,19 @@ There is **no debrief template** — `debriefs/` was removed. External review fe
 ```markdown
 # History — <project>
 
-<!-- Add-only landing log: one line per landing, newest first. Never edit or delete past entries.
-     Required when rules.md sets git: false; optional otherwise.
-     Lives under landed/ — outside the routing graph; never read at session start. -->
+<!-- No-git history log. Present ONLY in git-less decks — init removes it when the project has .git (git log is the
+     history there). Add-only: one line per landing, newest first; never edit, delete, or truncate past entries.
+     This file IS the project's whole history, kept in full however long it grows.
+     Lives under landed/ — outside the routing graph; never read at session start (only its newest line). -->
 
 - YYYY-MM-DD — <what landed this session>; next: <pointer to the 下一步 action>
 ```
 
 ### Rules
 
-- **One line per landing**, newest first. Never edit or delete past entries (add-only). No multi-line entries — link to the archived artifact for detail.
-- **Required only when `git: false`** (no commit log). Git projects may keep it but `git log` is authoritative.
-- **Never read at session start** — it is reference for retrospectives / no-git staleness checks only.
+- **One line per landing**, newest first. Never edit, delete, or truncate past entries (add-only). No multi-line entries — link to the archived artifact for detail.
+- **Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history, kept **in full** and never trimmed however long it grows. Length is free: it never enters context (only its newest line is read, as the no-git staleness signal).
+- **Never read at session start** — reference for retrospectives / the no-git staleness check (newest line) only.
 
 ---
 

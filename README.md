@@ -23,7 +23,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-Run `/flightdeck:preflight` at the start of a session — the single entry point. In an existing project it reads `flightdeck/cockpit.md`, reconciles against `git status`, and reports where you left off. In a fresh one it bootstraps a deck from a short interview. Nothing loads on its own; you invoke it.
+Run `/flightdeck:preflight` at the start of a session — the single entry point. In an existing project it reads `flightdeck/cockpit.md`, reconciles against `git status`, and reports where you left off. In a fresh one it bootstraps a deck in one step — zero prompts. Nothing loads on its own; you invoke it.
 
 ## What it is
 
@@ -100,7 +100,7 @@ You don't scaffold the deck by hand — `/flightdeck:preflight` creates it on fi
 2. Reconciles against `git status` (branch, uncommitted, stashes).
 3. Reports the next item — say "go" to execute, or it surfaces a mismatch and asks.
 
-On a brand-new project (no `cockpit.md`) it runs first-time setup instead: checks for git, creates the deck, a 2-question interview, and asks about `AGENTS.md`.
+On a brand-new project (no `cockpit.md`) it runs first-time setup instead: it copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
 
 **Session end** — run `/flightdeck:landing`. It classifies new knowledge (bug → `incidents/`, procedure → `checklists/`, one-off → discard), refreshes `cockpit.md`, and commits. The next session — even a different AI or developer — picks up exactly here.
 
@@ -113,7 +113,7 @@ On a brand-new project (no `cockpit.md`) it runs first-time setup instead: check
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
 
-Artifact `status` advances **automatically** — you rarely type a command for it. By default the AI may self-invoke these rituals when it judges the moment right; nothing fires on session start, and there's no background process.
+Artifact `status` advances **automatically** (idea→active). By default the AI may self-invoke `preflight` / `walkaround` / `emit-agents-md` / `status`, but **`landing` is manual** — it archives + commits, so you run it (or opt into auto in `rules.md`). Nothing fires on session start; there's no background process.
 
 ### Routing — what triggers what
 
@@ -142,19 +142,19 @@ disabled_folders: []     # folders to treat as off — not suggested, not audite
 # deck-local conventions, e.g. "specs in Chinese", "don't create sketches/"
 
 ### Autonomy overrides
-# behavioral overrides; omit = full-auto defaults
+# behavioral overrides; omit = defaults (landing manual; nothing archives/commits unprompted)
 ```
 
 Everything not pinned here is **inferred or defaulted**:
 
 - **git** — inferred from a `.git` directory.
 - **AGENTS.md** regeneration — inferred from an `AGENTS.md` file being present.
-- **rituals** are self-invocable, **`status`** auto-advances, **`commit`** asks first (the one human checkpoint).
+- **rituals** self-invoke *except `landing`* (manual — it archives + commits); **`status`** auto-advances idea→active but does **not** auto-archive; **`commit`** asks first (the human checkpoint).
 
 Override any of these with a one-line standard phrase under `### Autonomy overrides`:
 
+- `landing: self-invoke` — let the AI run landing · `status: auto land` — auto-archive on a `done` flip
 - `commit without asking` — or `don't auto-commit; leave changes for me / CI`
-- `landing: don't self-invoke; I run it manually`
 - `this deck doesn't use git`
 
 ## Why it exists

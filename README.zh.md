@@ -23,7 +23,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 唯一入口。已有项目里它读 `flightdeck/cockpit.md`、对账 `git status`、报告你上次停在哪。全新项目里它通过简短访谈建好一个 deck。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 唯一入口。已有项目里它读 `flightdeck/cockpit.md`、对账 `git status`、报告你上次停在哪。全新项目里它一步建好一个 deck —— 零提问。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
@@ -100,7 +100,7 @@ flightdeck/
 2. 对账 `git status`（分支、未提交、stash）。
 3. 报告下一项 —— 说 "go" 执行，或它发现不一致就问你。
 
-全新项目（没有 `cockpit.md`）则跑首次建档：检测 git、建好 deck、两个问题的访谈、问你要不要生成 `AGENTS.md`。
+全新项目（没有 `cockpit.md`）则跑首次建档：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## 下一步`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
 
 **会话结束** —— 运行 `/flightdeck:landing`。它把新知识分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）、刷新 `cockpit.md`、提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
@@ -113,7 +113,7 @@ flightdeck/
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
 
-工件 `status` **自动**推进 —— 你基本不用为它打命令。默认 AI 会在它判断合适时自调这些仪式；会话开始不加载任何东西，也没有后台进程。
+工件 `status` **自动**推进（idea→active）。默认 AI 可自调 `preflight` / `walkaround` / `emit-agents-md` / `status`，但 **`landing` 是手动的** —— 它会归档 + 提交，所以由你来跑（或在 `rules.md` 里打开自动）。会话开始不加载任何东西，也没有后台进程。
 
 ### 路由 —— 什么触发什么
 
@@ -142,19 +142,19 @@ disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
 # deck 局部约定，如 "specs 用中文"、"不建 sketches/"
 
 ### Autonomy overrides
-# 行为覆盖；省略 = 全自动默认
+# 行为覆盖；省略 = 默认（landing 手动；不经你同意不归档/提交）
 ```
 
 其余未在此固定的，全靠**推断或默认**：
 
 - **git** —— 由是否有 `.git` 目录推断。
 - **AGENTS.md** 重生 —— 由是否有 `AGENTS.md` 文件推断。
-- **仪式**默认可自调，**`status`** 自动推进，**`commit`** 先问你（唯一人工确认点）。
+- **仪式**默认可自调，**唯独 `landing` 手动**（它会归档 + 提交）；**`status`** 自动推进 idea→active，但**不**自动归档；**`commit`** 先问你（人工确认点）。
 
 要改其中任何一条，在 `### Autonomy overrides` 里写一句标准句：
 
+- `landing: self-invoke` —— 让 AI 自己跑 landing（默认手动）· `status: auto land` —— flip 成 done 时自动归档
 - `commit without asking` —— 或 `don't auto-commit; leave changes for me / CI`
-- `landing: don't self-invoke; I run it manually`
 - `this deck doesn't use git`
 
 ## 为什么需要它

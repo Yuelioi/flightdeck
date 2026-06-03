@@ -32,6 +32,22 @@ class InitTest(unittest.TestCase):
             # rules.md copied verbatim (a scaffold token survives — not re-authored)
             self.assertIn("disabled_folders", (deck / "rules.md").read_text(encoding="utf-8"))
 
+    def test_no_git_keeps_history(self):
+        # target without .git → no-git deck → HISTORY.md is the history substrate, kept
+        with tempfile.TemporaryDirectory() as d:
+            init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
+            self.assertTrue((Path(d) / "flightdeck" / "landed" / "HISTORY.md").exists())
+
+    def test_git_deck_drops_history(self):
+        # target with .git → git log is the history → the copied HISTORY.md is removed
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / ".git").mkdir()
+            init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
+            self.assertFalse((Path(d) / "flightdeck" / "landed" / "HISTORY.md").exists())
+            # the rest of the deck is unaffected
+            self.assertTrue((Path(d) / "flightdeck" / "cockpit.md").exists())
+            self.assertTrue((Path(d) / "flightdeck" / "landed").is_dir())
+
     def test_refuses_if_deck_already_exists(self):
         with tempfile.TemporaryDirectory() as d:
             init(d, name="x", user="x", date="2026-06-03", focus="f", next_item="n")

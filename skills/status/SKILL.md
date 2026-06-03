@@ -21,7 +21,7 @@ Manual `/flightdeck:status` always bypasses this gate (it only restricts model s
 
 ## Step 1 — read config
 
-**Default (3.0): both optional transitions (`start`, `land`) are on.** A House Rule `status: don't auto start` / `status: don't auto land` disables one (or, on a not-yet-migrated deck, a pre-3.0 `status_auto` list is honored for compat — enabling only its members). The **core** create→`idea` transition below always runs.
+**Default (3.0): `start` is on, `land` is off.** `start` (idea→active when work begins) fires automatically; `land` (auto-archive on a `done` flip) is **opt-in** — enable it with a House Rule `status: auto land`. A House Rule `status: don't auto start` turns `start` off; on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat (enabling only its members). The **core** create→`idea` transition below always runs. (Rationale: archiving is the consequential write — like the `landing` ritual it stays off until the user opts in.)
 
 ## Step 2 — identify the target artifact (confidence rule)
 
@@ -40,11 +40,11 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 |---|---|---|---|
 | Wrote a **new spec/plan** into `flightdeck/{specs,plans}` | `idea` (a captured-but-unstarted thought) | core | always |
 | **Began work** on an idea (start executing / fleshing it out) | `idea → active` (+ date prefix + regen cockpit `## 进行中`) | default-on `start` | unless House Rule `status: don't auto start` |
-| User **approved / signed off** | `done` → land | default-on `land` | unless disabled; `done` auto, land confirm-gated |
+| User **approved / signed off** | `done` → land | **opt-in `land`** | only if House Rule `status: auto land`; then `done` auto, land confirm-gated |
 
 - Fire only at **new-artifact writes** and **clear status-semantic moments** — never on ordinary edits (typo/wording fixes).
 - A new spec/plan that is *already* being worked on (not merely captured) may go straight to `active` — see the direct-jump note in Step 4.
-- For the last trigger, if `land` is **disabled** (House Rule `status: don't auto land`), do nothing (leave it to `landing`) — do not set `done` either.
+- For the last trigger, `land` is **off by default** — do nothing (leave the `done` flip + archive to `landing` or the user). Only when House Rule `status: auto land` is set do you auto-set `done` and run the Land Routine.
 
 ## Step 4 — forward-only state machine
 

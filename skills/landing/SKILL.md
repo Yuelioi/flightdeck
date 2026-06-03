@@ -13,11 +13,10 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `landing` is self-invocable** — continue.
+Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `landing` is manual** — it is the one ritual that archives + commits, so it does not self-invoke unless you opt in.
 
-- **Restricted** only if House Rules `### Autonomy overrides` says `landing: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `landing`):
-  - explicit user `/flightdeck:landing` (e.g. a `<command-name>` marker) → allowed; continue.
-  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`landing` is manual-only in this project (House Rule). Remove the `landing: don't self-invoke` line to allow model self-invoke." Run no further step.
+- **Manual (default):** an explicit user `/flightdeck:landing` (e.g. a `<command-name>` marker) → continue. Model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`landing` is manual by default — run `/flightdeck:landing` yourself, or add `landing: self-invoke` to `rules.md` `### Autonomy overrides` to let me run it." Run no further step.
+- **Self-invoking** only if House Rules `### Autonomy overrides` says `landing: self-invoke` (or a pre-3.0 deck's `model_invocable` list includes `landing`): model self-invocation allowed → continue.
 
 (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 

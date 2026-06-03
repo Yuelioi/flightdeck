@@ -8,7 +8,7 @@
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection).
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` under no-git) and must carry a `version` field (the deck-conformance version that drives migration detection).
 
 As of **3.0**, `rules.md` carries only two structured fields plus free-prose house rules:
 
@@ -16,7 +16,7 @@ As of **3.0**, `rules.md` carries only two structured fields plus free-prose hou
 - `disabled_folders` — the one surviving structured toggle: listed folders are never suggested and never flagged as orphans.
 - **House rules** — free prose in two recommended subsections: `### Project conventions` (deck-local conventions) and `### Autonomy overrides` (behavioral overrides).
 
-Everything that used to be a toggle is now **inferred from the environment** (`git`, `emit_agents_md`) or a **default that House Rules can override** (`commit` confirm, all rituals self-invocable, all `status_auto` transitions on). The pre-3.0 keys (`git` · `emit_agents_md` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode`) are **read for compatibility through 3.x and removed at 4.0** — a deck still carrying them is honored, and `preflight` offers to migrate it (see [migration detection](#migration-detection)). Re-adding a structured toggle still faces a high bar (per-project-varying + real-demand-now + not-inferable + not-foldable); almost everything belongs in House Rules or inference instead. Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
+Everything that used to be a toggle is now **inferred from the environment** (`git`, `emit_agents_md`) or a **default that House Rules can override** (`commit` confirm; `preflight`/`walkaround`/`emit-agents-md`/`status` self-invocable but **`landing` manual** — it is the one ritual that archives + commits; `status_auto` = `start` only, **`land` off** so a `done` flip never auto-archives). The pre-3.0 keys (`git` · `emit_agents_md` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode`) are **read for compatibility through 3.x and removed at 4.0** — a deck still carrying them is honored, and `preflight` offers to migrate it (see [migration detection](#migration-detection)). Re-adding a structured toggle still faces a high bar (per-project-varying + real-demand-now + not-inferable + not-foldable); almost everything belongs in House Rules or inference instead. Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
 
 ## Rule resolution order
 
@@ -24,7 +24,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
 2. **Environment inference** — `git`: does deck root contain `.git`?; `emit_agents_md`: does deck root already have `AGENTS.md`?
-3. **Built-in default** — `commit` = confirm; every ritual self-invocable; `status_auto` = `start` + `land` both on; `scripts` = manual (no bundled-script execution — INDEX regen / consistency by hand).
+3. **Built-in default** — `commit` = confirm; **`landing` manual** (explicit invocation only), **all other rituals (`preflight` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status_auto` = `start` only (**`land` off** — no auto-archive on a `done` flip); `scripts` = manual (no bundled-script execution — INDEX regen / consistency by hand). The two write-heavy autonomies (auto-landing, auto-archive-on-done) are **opt-in**, so nothing archives or commits without the user unless a House Rule enables it.
 
 (Pre-3.0 structured keys, when still present on a not-yet-migrated deck, are read between steps 1 and 2 — honored for 3.x compatibility, removed at 4.0.)
 
@@ -32,7 +32,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 **Override authority** (which config wins): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
 
-**Behavioral-override matching:** within the literal `### Autonomy overrides` heading, skills match the standard phrases (table below) by **lenient substring** — not per-call semantic guessing (consistent + testable across models) — **skipping HTML-comment lines** (so a `<!-- migrated … -->` provenance note never mis-matches) and recognizing the **legacy Chinese** equivalents (right column). No `### Autonomy overrides` segment → fall back to tolerant whole-House-Rules reading. **Internal conflicts are the user's responsibility** — flightdeck never auto-resolves contradictory overrides (it may passively flag one, never silently pick).
+**Behavioral-override matching:** within the literal `### Autonomy overrides` heading, skills match the standard phrases (table below) by **lenient (contiguous) substring** — not per-call semantic guessing (consistent + testable across models) — **skipping HTML-comment lines** (so a `<!-- migrated … -->` provenance note never mis-matches) and recognizing the **legacy Chinese** equivalents (right column). An ON phrase and its `don't`-negated OFF twin (`landing: self-invoke` vs `landing: don't self-invoke`; `status: auto land` vs `status: don't auto land`) are distinguished by the inserted `don't` — the contiguous ON substring is absent from the OFF line, so they never cross-match. No `### Autonomy overrides` segment → fall back to tolerant whole-House-Rules reading. **Internal conflicts are the user's responsibility** — flightdeck never auto-resolves contradictory overrides (it may passively flag one, never silently pick).
 
 **Standard-phrase table** (canonical English; migration emits exactly these; hand-written overrides recommended to match):
 
@@ -40,8 +40,10 @@ Every skill resolves each behavior in this order — **first hit wins**:
 | --- | --- | --- |
 | commit automatically | `commit without asking` | `提交不必询问，直接 commit` |
 | commit manually (never) | `don't auto-commit; leave changes for me / CI` | `不要自动 commit，留给我或 CI` |
-| a ritual must not self-invoke | `<ritual>: don't self-invoke; I run it manually` | `<ritual> 不要自调，我手动跑` |
-| a status transition off | `status: don't auto <transition>` | `status 不要自动 <transition>` |
+| a ritual must not self-invoke (preflight/walkaround/emit/status — on by default) | `<ritual>: don't self-invoke; I run it manually` | `<ritual> 不要自调，我手动跑` |
+| make `landing` self-invoke (manual by default) | `landing: self-invoke` | `landing 自动跑` |
+| a status transition off (`start` — on by default) | `status: don't auto <transition>` | `status 不要自动 <transition>` |
+| make `land` auto-fire on a `done` flip (off by default) | `status: auto land` | `status 自动 land` |
 | no git | `this deck doesn't use git; history in landed/HISTORY.md` | `本 deck 不走 git，历史记 landed/HISTORY.md` |
 | has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
 | run the INDEX-regen fast-path script | `run scripts` (or `run scripts with <runtime>` — e.g. `uv run`, `python3`) | `跑脚本`（或 `跑脚本，用 <runtime>`） |
@@ -55,7 +57,7 @@ When a folder is in `disabled_folders`, it is never suggested and never flagged 
 - `version == current` → up to date; continue silently.
 - `version < current` **and** some `layout_need_update` entry is `> version` → a structural migration applies → **non-silent offer**, pointing at the matching `MIGRATION.md` section.
 - `version < current` but no `layout_need_update` entry is newer → compatible; silently bump the deck's `version` to `current`.
-- **No `version` (or no `rules.md`)** → treat as pre-stamp → run the existing-deck migration (create `rules.md` with `version`, ensure the 3-file contract, remove any legacy cockpit `**Layout**` line).
+- **No `version` (or no `rules.md`)** → treat as pre-stamp → run the existing-deck migration (create `rules.md` with `version`, ensure the minimal contract — `rules.md` + `cockpit.md`, plus `landed/HISTORY.md` under no-git — remove any legacy cockpit `**Layout**` line).
 
 This replaces the pre-2.2 cockpit `**Layout**` string check. Purely additive releases never enter `layout_need_update`, so they never trigger a false migration prompt.
 
