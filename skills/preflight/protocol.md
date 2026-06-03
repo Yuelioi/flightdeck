@@ -4,7 +4,7 @@
 
 ## Core principle
 
-`flightdeck/` is a directory convention organized by **when you read what** — a persistent workbench for AI-assisted coding. Write strictly: only content that changes future behavior, influences decisions, or gets referenced repeatedly.
+`flightdeck/` is a directory convention organized by **when you read what** — a persistent workbench for AI-assisted coding. What earns a place is governed by the [write gate](#write-gate).
 
 ## Project rules (`rules.md`)
 

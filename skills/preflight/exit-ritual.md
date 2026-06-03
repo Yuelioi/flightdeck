@@ -18,59 +18,26 @@ Step 1: Are there pending hanging tasks?
 
 Step 2: Did this session produce new knowledge / discover a bug / agree on a decision?
 ├─ no  → only update cockpit.md if Active focus shifted, then proceed to Step 4
-└─ yes → for each piece of new knowledge:
+└─ yes → for each piece, apply classification heuristics in order, first match wins
+         (full triggers + detail in "## Classification heuristics" below):
+           (a) bug + root cause → incidents/ (status: active; existing topic → append [Case N])
+           (b) repeated procedure, 2nd occurrence → checklists/ (status: active)
+           (c) design decision → specs/ (status: pending; brainstorm if substantial)
+           (d) multi-step task → plans/ (status: pending; optional implements: specs/<x>.md)
+           (e) external feedback → debriefs/ (status: active; disposition required)
+           (f) imported external material → charts/ (status: active)
+           (g) long-term idea → sketches/ (status: active; mark "Revisit when")
+           (h) one-off / log / byproduct → DO NOT WRITE (gate)
+           (i) ambiguous, no clear primary → brainstorm with user
 
-         Apply classification heuristics in order, first match wins:
-
-         (a) Bug + root cause → incidents/
-             (use incident-report template; check if existing topic — append [Case N])
-             Set status: active in frontmatter.
-
-         (b) "Every time we do X, follow these steps" → checklists/
-             (promote only on the second occurrence, not the first)
-             Set status: active in frontmatter.
-
-         (c) Design decision worth referencing later → specs/
-             Set status: pending in frontmatter.
-             (if substantial, brainstorm with user first)
-
-         (d) Multi-step task to execute later → plans/
-             Set status: pending in frontmatter.
-             Optionally add implements: specs/<x>.md if it executes a spec.
-
-         (e) External feedback / review received → debriefs/
-             (must include disposition section before landing)
-             Set status: active in frontmatter.
-
-         (f) Imported external material (RFCs, articles, competitor code) → charts/
-             Set status: active in frontmatter.
-
-         (g) Long-term idea worth remembering → sketches/
-             Set status: active in frontmatter.
-             Mark "Revisit when" condition if you can.
-
-         (h) One-off log analysis, debug output, conversation byproduct
-             → DO NOT WRITE (gating)
-
-         (i) Spans multiple folders, no clear primary
-             → brainstorm with user
-
-Step 3: Regenerate INDEX for changed folders
-        At session end, regenerate the <!-- AUTO --> region of INDEX.md
-        only for folders where a file was added, modified, moved, landed,
-        or had its status changed this session. Other folders' INDEX untouched.
-
-        If any folder's counts changed, also refresh the root flightdeck/INDEX.md
-        <!-- AUTO --> region.
-
-        Walkaround does the full INDEX↔frontmatter consistency check across all folders.
+Step 3: Regenerate INDEX for changed folders — full rules in "## INDEX regeneration —
+        scope rules" below. Gist: regenerate the <!-- AUTO --> region only for folders
+        with activity this session; refresh root INDEX if counts changed; walkaround
+        owns the full INDEX↔frontmatter check.
 
 Step 3a: Suggest status for affected artifacts
-         For each artifact written or touched this session, the AI MAY suggest
-         the next typical status per the recommended flow:
-           pending → active → awaiting-review → done
-           active ↔ blocked
-           any active state → scrapped
+         For each artifact written or touched this session, the AI MAY suggest the next
+         typical status per the recommended flow ([protocol § Status](protocol.md#status-label--recommended-flow)).
 
          Status changes are applied ONLY after the user confirms. The user may
          change status to any legal value at any time — the AI does not block.

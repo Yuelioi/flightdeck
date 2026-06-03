@@ -18,7 +18,7 @@ last_updated: 2026-06-03
 |---|---|---|---|
 | A1 拆 migration 出 preflight | 减重 | ⏳ deferred | [token-reduction](2026-06-03-token-reduction-design.md) Remaining（结构性，较大） |
 | A2 status 审计收窄(Step 7) | 减重 | ✅ done | SKILL Step 7 "loaded folders only"，深查归 walkaround |
-| A3 git reconcile 降 heuristic | 减重 | ⏳ deferred | token-reduction Remaining |
+| A3 git reconcile 降 heuristic | 减重 | ✅ done | SKILL Step 4/5 改 fuzzy 启发式信号（只报明确背离、不猜等价），~12→4 行 |
 | A4 拆 protocol.md | 减重 | ⏳ deferred | token-reduction Remaining（与 A1 协同） |
 | B1 silent version bump 矛盾 | 纠错 | ✅ done | SKILL Step 2 末句限定"仅结构性迁移；兼容 bump 为唯一允许的静默 stamp" |
 | B2 rules.md mandatory vs optional | 纠错 | ✅ done | folder-semantics 改"文件强制(3-file 契约)、内容可选"，与 protocol/templates 对齐 |

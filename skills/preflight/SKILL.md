@@ -31,19 +31,9 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
 
 3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; read each once and treat as cached for the rest of the ritual (no need to re-open).
 
-4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state.** Run these checks independently (in parallel where supported):
-   - `git branch --show-current` — matches `Active focus` in cockpit?
-   - `git status --short` — does the first "Next session" item show up as in-progress files?
-   - `git stash list` — any entries not mentioned in cockpit?
-   - `git log -1 --format=%cs` — is `Last updated` more than ~14 days behind the most recent commit? (When no-git, compare against the newest `landed/HISTORY.md` entry instead.)
+4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state — heuristic signals, not hard checks.** Gather independently (parallel where supported): `git branch --show-current`, `git status --short`, `git stash list`, `git log -1 --format=%cs` (no-git: newest `landed/HISTORY.md` entry). These are **fuzzy** — a branch name rarely equals an `Active focus` sentence, so only surface a **clear** divergence, never a guessed equality.
 
-   Cross-check cockpit's `## Next session` against reality (branch, tree state). Flag any mismatch.
-
-5. **Mismatch handling** — **always ask the user before acting**:
-   - If branch differs: "Cockpit says focus is X but branch is Y — which is current?"
-   - If `git status` is clean but cockpit says in-progress: "Cockpit flags 'X in progress' but tree is clean — did it ship?"
-   - If stash exists not in cockpit: "Stash entry from <date> not on cockpit — pick up, drop, or note?"
-   - If cockpit > 14 days stale: "Cockpit last updated <date>, most recent commit <date>. Cockpit may be stale — refresh first?"
+5. **When a signal looks clearly off — surface as a question, never auto-act** (one per real divergence): branch vs `Active focus`; tree clean but cockpit says in-progress ("did it ship?"); stash not on cockpit ("pick up / drop / note?"); `Last updated` > ~14 days behind newest commit ("cockpit may be stale — refresh first?"). No divergence → say nothing.
 
 6. **Load the routing catalog** (know-what-exists, NOT read-all). Read the folder INDEX files — do NOT glob individual files or read per-file frontmatter:
    - Read `flightdeck/checklists/INDEX.md` — it already lists each checklist's `when_to_read`, `applies_to`, and `status`.

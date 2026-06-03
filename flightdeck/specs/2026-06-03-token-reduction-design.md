@@ -25,14 +25,17 @@ skill 文本 ~130KB ≈ ~32k token；每次调用进上下文。很多内容是�
 - **流程**：A2 —— preflight step 7 status 审计收窄到"已加载文件夹"（修"扫不动没读的文件夹"）。
 - **去重**：folder-semantics INDEX-Rules 三重复述 → 指针、删冗余 Naming 表；protocol behavioral-override 段 5-bullet → 2 句（去"穿针"）。
 
+## Done（第二批，2026-06-03）
+
+- **Tier 2 真重复折叠**：templates status-flow 图（6 行 verbatim）→ 指针 protocol §Status；protocol Core-principle 与 Write-gate 的"write strictly"重句 → 合并到 write-gate canonical。（核查发现批 1 已清掉多数高频 fat；其余"6×/5×"多为独立加载 skill 的简短本地引用或已是指针，保留——删了那些 skill 就跑不起来。）
+- **exit-ritual 内部去重**：决策树 Step 2 的 (a)–(i) 由逐条展开压成单行 + 指针「## Classification heuristics」（详情归专节）；Step 3 INDEX-scope 收成 gist + 指针；Step 3a status 箭头 → 指针 protocol §Status。**决策树 ~58→25 行**，不改行为。
+- **A3 git reconcile 降 heuristic**：SKILL Step 4/5 由"Mismatch handling"逐条改为"fuzzy 启发式信号——只报明确背离、不猜等价"，~12→4 行、降误报。
+
 ## Remaining（分批，按价值/频率）
 
-- **Tier 2 跨文件去重（中）**：status flow（6×）、80 行 trim recipe（3×）、`last_updated`（6×）、HISTORY 行格式（5×）、migration 4-case —— 各定一处 canonical、余者一行指针。
-- **exit-ritual §§ 内部去重**：INDEX-scope（Step3↔§）、classification 启发式（决策树↔专节，a-i 两遍）。
-- **protocol（S）**：pre-3.0 解释 3×→1、common-mistakes 与 write-gate 重叠行。
-- **templates.md（按需、优先级低）**：~210 行 body 模板 + "### Rules" 压缩 / defer。
-- **walkaround**：审计压缩 —— **前置**：`flightdeck_index.py` 目前只验 INDEX↔frontmatter 行一致、**不验 status 合法值**；要压 Audit 1/2/3 得先给脚本加 `lint` 子命令（= [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) Phase 3）。
-- **流程（结构性，较大）**：A1 拆 migration 成独立流程；A3 git reconcile 降 heuristic。
+- **templates.md（按需、优先级低）**：~210 行 body 模板 + 各 "### Rules" 段重述 protocol 字段语义 → 压成指针（body 模板保 paste-able 不动）。
+- **walkaround**：审计压缩 —— **前置**：`flightdeck_index.py` 目前只验 INDEX↔frontmatter 行一致、**不验 status 合法值**；要压 Audit 1/2/3 得先给脚本加 `lint` 子命令（= [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) Phase 3）。**阻塞**。
+- **流程（结构性，较大）**：A1 拆 migration 成「仅版本不符时加载的 companion」（轻路径，不加新命令）；A4 拆 protocol.md（**最低 ROI / 最高 anchor 改动风险**，待评估）。
 
 ## 量级
 

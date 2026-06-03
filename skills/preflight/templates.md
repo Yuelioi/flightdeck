@@ -152,12 +152,7 @@ For a workflow row (`sketches/` `specs/` `plans/`) the `<one-line summary>` is t
 
 ## status flow (recommended, not enforced)
 
-```
-pending → active → awaiting-review → done
-active ↔ blocked
-any active state → scrapped
-knowledge: active → obsolete | superseded
-```
+Status values (by kind) + the recommended transition arrows are canonical in [protocol § Status](protocol.md#status-label--recommended-flow) — not restated here.
 
 ---
 
