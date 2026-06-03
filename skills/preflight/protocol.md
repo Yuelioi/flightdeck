@@ -154,7 +154,7 @@ Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README 
 | Designing new feature | promote sketch → `specs/` |
 | Breaking work into steps | `specs/` → write a `plans/` file |
 
-**How to pick the right incident / checklist**: don't read every file. Both folders use frontmatter (`when_to_read` + `applies_to` + `last_updated`) — grep the metadata, only load full files whose triggers match the current task. Use `last_updated` to judge staleness. An optional `skip_when` field (negative routing — "when NOT to read this") lets a file pre-empt a false match; absent is fine.
+**How to pick the right incident / checklist**: don't read every file. Both folders use frontmatter (`when_to_read` + `applies_to` + `last_updated`) — grep the metadata, only load full files whose triggers match the current task. Use `last_updated` to judge staleness. An optional `skip_when` field (negative routing — "when NOT to read this") lets a file pre-empt a false match (e.g. `skip_when: editing tests only` on a production-hardening checklist, so it stays silent during test-only work); absent is fine.
 
 ### Frontmatter requirements (hard-fail)
 
@@ -201,6 +201,18 @@ A scrapped sketch stays in `sketches/` (marked `status: scrapped`), never archiv
 
 After classifying: update `cockpit.md` (`Last updated` + `Next session` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when no-git; then commit per the commit override (`confirm` default; skipped entirely under no-git). landing regenerates the INDEX of any folders changed this session.
 
+## Ritual responsibilities — who owns what
+
+Three entry rituals, three non-overlapping jobs — so no check is both everyone's and no-one's. When a check could belong to two rituals, this table decides:
+
+| Ritual | Role | Writes? | Cockpit 80-line trim | INDEX | Deep per-file audit |
+| --- | --- | --- | --- | --- | --- |
+| `preflight` | read-only recon at session start | no (first-time setup excepted) | reads only — flags staleness, never trims | reads folder INDEX as catalog | no — only shallow root-count sanity |
+| `landing` | write the session's outcome | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
+| `walkaround` | integrity audit on demand | no (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
+
+The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
+
 ## Write gate
 
 `flightdeck/` records only content that **changes future behavior, influences decisions, or gets referenced repeatedly**. Session byproducts, debug logs, and chat play-by-plays do not qualify. Gate strictly.
@@ -237,7 +249,7 @@ A separate **project-rules upgrade gate** fires when a promoted incident continu
 | `incidents/` writes "forgot / careless" | Root cause must be a wrong assumption / wrong model / wrong process. |
 | `debriefs/` paste-only, no disposition | Disposition required (adopt / reject / defer). No disposition = hanging task. |
 | Brainstorming where every knowledge item belongs | Heuristics catch 90%. Default-brainstorm is the failure mode. |
-| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` / `landed/HISTORY.md`, not cockpit. |
+| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` / `landed/HISTORY.md`, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
 | Bumping `Last updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |
 | Incident / checklist without required frontmatter | STOP, report file path + missing fields. Add or delete before proceeding. |
 | Incident / checklist with `last_updated` > 1 year in a fast-moving project | Likely stale advice. Bump after re-verifying or flip to `status: obsolete`. |

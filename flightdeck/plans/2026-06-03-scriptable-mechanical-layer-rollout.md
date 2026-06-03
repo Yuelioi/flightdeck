@@ -24,7 +24,7 @@ last_updated: 2026-06-03
 
 ## Phase 3 — walkaround lint 子命令（待前置）
 
-- [ ] **前置**：等 [preflight-tri-review-triage](../sketches/preflight-tri-review-triage.md) 的范围重构（A1 拆 migration 等）落定，避免脚本化一坨又被重构掉。
+- [ ] **前置**：等 [preflight-tri-review-remediation](../specs/2026-06-03-preflight-tri-review-remediation.md) 的范围重构（A1 拆 migration 等）落定，避免脚本化一坨又被重构掉。
 - [ ] `flightdeck.py lint`：把 Audit 1–10 的机械项（INDEX↔文件夹一致性、orphan、dangling ref、stray file、status 合法性）脚本化，吐 JSON；模型读结果做判断/叙述。
 - [ ] **Verify**：lint 输出与现 walkaround 人工审计结论一致；token 实测对比。
 

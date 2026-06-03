@@ -48,5 +48,5 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 
 ## Related
 
-- [sketches/preflight-tri-review-triage](../sketches/preflight-tri-review-triage.md) —— walkaround lint 等其范围重构（A1 拆 migration）落定。
+- [preflight-tri-review-remediation](2026-06-03-preflight-tri-review-remediation.md) —— walkaround lint 等其范围重构（A1 拆 migration）落定。
 - [incidents/index-row-summary-delimiter](../incidents/index-row-summary-delimiter.md) —— "rows are regenerated, not parsed"；summary 含 ` — ` 的隐患（本脚本"从 frontmatter 重生、不解析旧行"正好绕开）。

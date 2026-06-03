@@ -40,7 +40,7 @@ The common mistake is keeping an evergreen reference in `specs/` or `plans/`. A 
 ```
 flightdeck/
 ├── cockpit.md          # The single must-read entry (≤80 lines): focus / next / hanging
-├── rules.md            # OPTIONAL project config — read first by every entry skill
+├── rules.md            # Mandatory file (3-file contract); content optional — read first by every entry skill
 ├── INDEX.md            # Root index: subfolder directory + global status summary
 │
 ├── sketches/           # Uncommitted ideas (status: active / scrapped)
@@ -78,9 +78,9 @@ Contains:
 
 `cockpit.md` is the pure focus layer: "what am I working on now". Status visibility is delegated to INDEX — look at the relevant folder's INDEX (or the root INDEX) to see the full picture.
 
-### `rules.md` — optional project config
+### `rules.md` — project config (mandatory file, optional content)
 
-Read first by every entry skill. As of 3.0 it carries `version` + `disabled_folders` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit from `.git` / `AGENTS.md` presence) or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). Absent / minimal = full-auto defaults. Full schema: [templates.md § rules.md](templates.md#rulesmd).
+Read first by every entry skill. As of 3.0 it carries `version` + `disabled_folders` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit from `.git` / `AGENTS.md` presence) or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the 3-file contract — `walkaround` CRITICAL if missing) and must carry `version`; its **content** is optional — a minimal `rules.md` = full-auto defaults. Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
 ### `INDEX.md` — root index
 

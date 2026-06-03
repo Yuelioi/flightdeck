@@ -13,7 +13,7 @@ The **single explicit entry point** for flightdeck. Nothing loads on its own —
 
 The protocol "textbook" (data model, folder semantics, routing, write gate, lifecycle) is in [protocol.md](protocol.md) — load it on demand; see the index at the bottom.
 
-## Step 0 — model-invocation gate (run before any other step)
+## Gate — model-invocation check (run before the checklist)
 
 Resolve `preflight` self-invocability per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): self-invocable — continue.** Restricted only if House Rules say `preflight: don't self-invoke` (or a pre-3.0 deck omits `preflight` from `model_invocable`): then an explicit user `/flightdeck:preflight` → continue; model self-invocation or unknown call source → **STOP immediately** and report "`preflight` is manual-only (House Rule). Remove the `preflight: don't self-invoke` line to allow self-invoke." Branch-0 (deck existence) still runs first.
 
@@ -27,9 +27,9 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
 
 1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
 
-2. **Migration detection (non-silent).** Compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`) and act per [protocol § Migration detection](protocol.md#migration-detection): `== current` → continue; `< a layout_need_update` entry → offer that migration ([MIGRATION.md](../../MIGRATION.md)); older-but-compatible → silently bump `version` to `current`; no `version`/`rules.md` → offer the pre-2.2 migration; legacy 1.x markers (`manifest.md`/`logbook.md`/`kneeboard/`/…) → 1.x migration first. **Never migrate or stamp silently — always ask.**
+2. **Migration detection (non-silent).** Compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`) and act per [protocol § Migration detection](protocol.md#migration-detection): `== current` → continue; `< a layout_need_update` entry → offer that migration ([MIGRATION.md](../../MIGRATION.md)); older-but-compatible → silently bump `version` to `current`; no `version`/`rules.md` → offer the pre-2.2 migration; legacy 1.x markers (`manifest.md`/`logbook.md`/`kneeboard/`/…) → 1.x migration first. **Never apply a *structural* migration silently — always ask; a compatible version bump is the one allowed silent stamp.**
 
-3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; do not re-read either during the ritual.
+3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; read each once and treat as cached for the rest of the ritual (no need to re-open).
 
 4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state.** Run these checks independently (in parallel where supported):
    - `git branch --show-current` — matches `Active focus` in cockpit?
@@ -50,6 +50,7 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
    - Read `flightdeck/incidents/INDEX.md` — same structure for incident files.
    - If either INDEX is missing or obviously stale (file count in INDEX differs from root INDEX count), note it: "⚠ `<folder>/INDEX.md` missing or stale — walkaround owns the fix." This is non-blocking.
    - **Do NOT read individual checklist or incident files** at catalog time. The folder INDEX is the catalog. Only drill into an individual file when a trigger actually matches the current task (i.e. at execution time, not preflight time).
+   - **`charts/` is deliberately out of the auto-routing catalog** — even though its files may carry `when_to_read`/`applies_to`, imported external material is browsed on purpose (the "need outside perspective" scenario), not surfaced every preflight, and a chart may be a large imported tree. `walkaround` still audits it.
 
 7. **Status sanity (loaded folders only).** For the catalog folders just read (`checklists/`, `incidents/`), flag any INDEX row with a missing or illegal `status` for its kind (legal values: [protocol § Status](protocol.md#status-label--recommended-flow)). List all findings, then offer once "Fix all flagged?" — don't fix until confirmed. Global per-file audits across all folders belong to `walkaround`.
 

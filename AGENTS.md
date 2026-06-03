@@ -11,9 +11,8 @@ flightdeck 3.0 分支 code-complete、未 push；机械层脚本化(INDEX/init/r
 
 1. 行为 dogfood（reload/重装插件后）：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、迁移改写、when-to-land、walkaround；②init 重做——干净目录首次建档全程。
 2. 发布 3.0（[checklists/version-bump.md](flightdeck/checklists/version-bump.md)）+ 合并分支 → main。
-3. token-reduction 余下批次（[specs/2026-06-03-token-reduction-design.md](flightdeck/specs/2026-06-03-token-reduction-design.md)）：Tier 2 去重、templates、walkaround(待脚本 lint)、A1 拆 migration / A3 git heuristic。
-4. preflight 纠错（[sketches/preflight-tri-review-triage.md](flightdeck/sketches/preflight-tri-review-triage.md)）：B1/B3 等（减重项已并入 token-reduction spec）。
-5. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式。
+3. token-reduction 余下批次（[specs/2026-06-03-token-reduction-design.md](flightdeck/specs/2026-06-03-token-reduction-design.md)）：Tier 2 去重、templates、walkaround(待脚本 lint)、A1 拆 migration / A3 git heuristic / A4 拆 protocol（preflight 整改 B/C 已全完成，仅余这些减重项）。
+4. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式。
 
 ## Hanging tasks
 

@@ -41,4 +41,4 @@ skill 文本 ~130KB ≈ ~32k token；每次调用进上下文。很多内容是�
 ## Related
 
 - [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md)（脚本接管机械层 → prose 可缩；walkaround lint 是其 Phase 3）
-- [sketches/preflight-tri-review-triage](../sketches/preflight-tri-review-triage.md)（A1/A2/A3 流程项的来源）
+- [preflight-tri-review-remediation](2026-06-03-preflight-tri-review-remediation.md)（A1/A2/A3 流程项的来源；三方审核整改总账）

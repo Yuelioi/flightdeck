@@ -24,7 +24,7 @@ General project conventions (code style, "branch before committing") belong in C
 ### Autonomy overrides
 
 Omit = defaults (commit confirm · all rituals self-invocable · status_auto fully on ·
-git & emit inferred from `.git` / `AGENTS.md` presence). To override, uncomment a standard phrase:
+git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **delete its `<!-- -->` wrapper** — commented lines are skipped by phrase-matching:
 <!-- commit without asking -->
 <!-- landing: don't self-invoke; I run it manually -->
 <!-- this deck doesn't use git; history in landed/HISTORY.md -->
