@@ -97,6 +97,7 @@ applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
 # superseded only: superseded_by: <path>
 # optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
+# incidents only: recurrences: 1   # auto-bumped at landing on a clear recurrence; renders to INDEX as `recur: N` when > 1
 ---
 ```
 
@@ -161,8 +162,6 @@ Status values (by kind) + the recommended transition arrows are canonical in [pr
 ```markdown
 # <one-line topic>
 
-**Recurrences**: 1 — sessions: YYYY-MM-DD   <!-- bump the count AND add the session date on every [Case N] append; count ≥3 across ≥2 sessions is the promotion-gate trigger, so this line is the at-a-glance tally -->
-
 **Symptom**: How the user / test / build actually observed it. Error text verbatim.
 
 **Root cause** (FORBIDDEN: "forgot", "careless", "didn't notice" — must be a wrong assumption / wrong model / wrong process):
@@ -181,7 +180,7 @@ I assumed X, but in reality Y.
 
 ### Rules
 
-- **One file per topic.** Recurrences append `## [Case N]` **and** bump the top `**Recurrences**:` header (increment the count, add the new session date). The header is the scannable tally — read the count without scrolling/counting Case blocks, and see both promotion-gate inputs (count + distinct sessions) inline.
+- **One file per topic.** A recurrence appends `## [Case N]` (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (ambiguous → asks first); `recurrences` renders into the INDEX row as `recur: N`, so the count + the `[Case N]` dates (the promotion-gate inputs) are visible without opening the file.
 - **Forbidden root causes**: "forgot", "careless", "didn't notice", "rushed". These hide the real model error.
 - **Status field**:
   - `active` — still applies to the current codebase

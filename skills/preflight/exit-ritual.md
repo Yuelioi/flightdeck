@@ -69,12 +69,16 @@ Step 5: Commit — honor the commit override (House Rules; default `confirm`)
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
 
-### Step 5a — Check incidents→checklists promotion gate (wrap-up)
+### Step 5a — Recurrence sweep + promotion gate (wrap-up)
 
-For each incident in `incidents/` touched (newly written or updated with `[Case N]` append) this session, evaluate the 3-criterion gate:
+**Recurrence sweep first.** For each bug / lesson this session produced, compare it against existing `incidents/` (`applies_to` overlap / same root cause):
+- **Clear same-incident match** → auto-append `## [Case N]` (with today's date) **and** bump that incident's `recurrences` frontmatter counter. No per-increment confirm — counting is AI-facing bookkeeping, and the consequential step (promotion) stays gated below.
+- **Ambiguous match** → ask the user before recording (the false-positive guard lives here).
 
-1. `[Case N] count ≥ 3`?
-2. Recurred across ≥ 2 distinct sessions?
+Then, **for each incident touched** (newly written, or recurrence-bumped) this session, evaluate the 3-criterion promotion gate:
+
+1. `recurrences ≥ 3`?
+2. Recurred across ≥ 2 distinct sessions (distinct `[Case N]` dates)?
 3. Remediation pattern stable across cases?
 
 If ALL three hold: prompt the user "Promote `incidents/<topic>.md` to `checklists/<topic>.md`?". On user confirmation, move the file. On user defer or reject, leave alone — the gate will fire again next time. **No automatic promotion** — the gate guards against false positives; the user always decides.

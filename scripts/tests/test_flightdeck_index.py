@@ -46,6 +46,34 @@ class FormatRowTest(unittest.TestCase):
             f"when_to_read: before X {DASH} applies_to: [a, b]",
         )
 
+    def test_incident_recur_shown_when_above_one(self):
+        fm = {
+            "status": "active",
+            "when_to_read": "before X",
+            "applies_to": "[a]",
+            "recurrences": "3",
+        }
+        row = format_row("incidents", "foo.md", fm)
+        self.assertEqual(
+            row,
+            f"- [foo.md](foo.md) {DASH} active {DASH} "
+            f"when_to_read: before X {DASH} applies_to: [a] {DASH} recur: 3",
+        )
+
+    def test_incident_recur_omitted_when_one_or_absent(self):
+        base = {"status": "active", "when_to_read": "before X", "applies_to": "[a]"}
+        self.assertNotIn("recur:", format_row("incidents", "foo.md", base))
+        self.assertNotIn("recur:", format_row("incidents", "foo.md", {**base, "recurrences": "1"}))
+
+    def test_checklists_never_show_recur(self):
+        fm = {
+            "status": "active",
+            "when_to_read": "before X",
+            "applies_to": "[a]",
+            "recurrences": "3",
+        }
+        self.assertNotIn("recur:", format_row("checklists", "foo.md", fm))
+
     def test_debriefs_kind_uses_reviewed_and_last_updated(self):
         fm = {
             "status": "active",

@@ -65,6 +65,7 @@ For each knowledge artifact NOT in `landed/`:
 - Files in `incidents/`, `checklists/`, `charts/`: MUST carry `when_to_read` + `applies_to` + `last_updated`. Any missing: **WARNING** — file is invisible to flightdeck routing.
 - Files in `debriefs/`: MUST carry `reviewed` + `last_updated`. Any missing: **WARNING**. (`debriefs/` does NOT use `when_to_read` / `applies_to`.)
 - Malformed values (e.g. `last_updated: potato`, empty `when_to_read`): **WARNING**.
+- `incidents/` only: the optional `recurrences` counter, if present, must be an int ≥ 1 and ≈ `1 + (count of "## [Case N]" blocks)`. A drift (counter ≠ narrative) is **INFO** — re-sync. Absent = treated as 1.
 
 Workflow artifacts (`sketches/`, `specs/`, `plans/`) are **out of scope here** — they carry no required routing fields. Their recommended `summary` / `last_updated` are checked at INFO in Audit 11.
 

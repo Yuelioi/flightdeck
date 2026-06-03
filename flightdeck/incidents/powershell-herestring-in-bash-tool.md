@@ -3,11 +3,12 @@ status: active
 when_to_read: before passing any multiline string (commit message, heredoc, file content) to a native command through the Bash tool on this dual-shell repo
 applies_to: [commit, git, bash, powershell, here-string, heredoc, multiline]
 last_updated: 2026-06-03
+recurrences: 3
 ---
 
 # PowerShell here-string (`@'...'@`) used in the Bash tool
 
-**Recurrences**: 3 — sessions: 2026-06-03 (recorded) + 2 prior (user-reported, dates unlogged — this incident is why counts now get logged). **Hits the ≥3 promotion gate.**
+**Cases**: 3 (this session recorded; 2 prior user-reported, dates unlogged — the under-counting gap that prompted auto-counting). **Hits the ≥3 promotion gate.**
 
 **Symptom**: ran `git commit -m @'…'@` through the **Bash** tool. Bash has no here-string, so it parsed `@` as a literal char followed by a single-quoted string. The commit subject became `@ chore(flightdeck): …` (stray `@` + a two-line subject) and a trailing `@` leaked into the body. Needed a `git commit --amend` (via the PowerShell tool) to fix.
 

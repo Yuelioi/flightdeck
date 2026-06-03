@@ -35,10 +35,20 @@ def format_row(kind, filename, fm):
     if kind in SUMMARY_KINDS:
         return f"{link} {DASH} {fm['status']} {DASH} {fm['summary']}"
     if kind in KNOWLEDGE_KINDS:
-        return (
+        row = (
             f"{link} {DASH} {fm['status']} {DASH} "
             f"when_to_read: {fm['when_to_read']} {DASH} applies_to: {fm['applies_to']}"
         )
+        # incidents carry a recurrence counter; surface it in the catalog row when
+        # it has fired (>1) so the promotion gate is visible without opening the file.
+        if kind == "incidents":
+            try:
+                n = int(fm.get("recurrences", "1"))
+            except (TypeError, ValueError):
+                n = 1
+            if n > 1:
+                row += f" {DASH} recur: {n}"
+        return row
     if kind == "debriefs":
         return (
             f"{link} {DASH} {fm['status']} {DASH} "

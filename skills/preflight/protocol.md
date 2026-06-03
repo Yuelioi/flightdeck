@@ -82,6 +82,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `when_to_read` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
 | `applies_to` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
 | `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
+| `recurrences` | incidents | optional (default 1) | INDEX-row render + promotion gate | landing/status (auto-bump on a clear recurrence) | int ≥ 1; ≈ 1 + `[Case N]` count |
 | `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
 | `reviewed` | debriefs | **required** | links to the reviewed spec/topic | author | debrief check |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | preflight/walkaround migration detection | preflight setup / auto-bump | Audit 10 |
@@ -162,7 +163,7 @@ Incidents and checklists **MUST** carry frontmatter with `when_to_read`, `applie
 
 ### Proactive incident resurfacing
 
-Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Do NOT auto-increment `[Case N]` — that only happens on a real, user-confirmed recurrence.
+Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Recording a recurrence happens at the **other** end of the session: at landing, a **clear** same-incident match auto-appends `[Case N]` + bumps `recurrences` (see [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up)); an **ambiguous** match asks the user. Auto-counting is safe because the consequential step — *promotion* — stays user-gated.
 
 ## Source-of-truth precedence (when sources disagree)
 
@@ -232,11 +233,11 @@ See [templates.md](templates.md) for `sketch` / `spec` / `plan` / `incident` / `
 ## Incident promotion gates
 
 Multi-criterion gate evaluated by `landing`. An incident reaches the **checklist promotion gate** when ALL three hold:
-1. `[Case N] count ≥ 3` in the incident file.
+1. `recurrences ≥ 3` (the frontmatter counter; ≈ 1 + `[Case N]` block count).
 2. Cases recurred across **≥ 2 distinct sessions** (same-session triple-hits don't count).
 3. Remediation pattern is **stable across cases** (the "next time avoid X" rule reads similarly across all cases — not 3 unrelated fixes papering over one symptom).
 
-The incident's `**Recurrences**: N — sessions: …` header (template field) surfaces criteria 1–2 inline, so the gate is visible at a glance — no need to count `[Case N]` blocks. Bump it on every recurrence.
+The `recurrences` frontmatter counter (auto-bumped at landing) plus the `[Case N]` block dates surface criteria 1–2; `recurrences` also renders into the `incidents/INDEX.md` row as `recur: N` (when > 1), so the gate is visible at catalog time without opening the file.
 
 When the gate fires, `landing` prompts: "Promote `incidents/X.md` to `checklists/X.md`?". User confirms — promotion is **never automatic**.
 
