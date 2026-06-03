@@ -5,7 +5,7 @@
 
 ## Next session — 3.0 发布前清单
 
-> **【3.0 核心·新增】model-v4 模型重构** [spec](specs/2026-06-03-model-v4-folder-state-cockpit-design.md)：folder 7→5 / 状态 6→4 / cockpit AI 全自动驱动，三方评审通过。下一步 writing-plans 拆实施 phase；下列清单将在 plan 落定后并入重排。
+> **【3.0 核心·新增】model-v4 模型重构** [spec](specs/2026-06-03-model-v4-folder-state-cockpit-design.md) / [rollout plan](plans/2026-06-03-model-v4-rollout.md)（6 phase）：folder 7→5 / 状态 6→4 / cockpit AI 全自动驱动，三方评审通过。下一步按 plan 执行 Phase 0；下列清单将在迁移（Phase 4）时并入重排。
 
 1. **重同步缓存 → 行为 dogfood（reload）** ← 发布前总闸：①3.0 软配置面（git/emit 推断、`### Autonomy overrides` 覆盖、2.3→3.0 迁移、when-to-land、walkaround 不报假阳性）②init 重做（干净目录首次建档全程）③**incident 复发 auto-count** [spec](specs/2026-06-03-incident-recurrence-autocount-design.md)（landing 自动 [Case N]+recur:N、晋级 gate）。
 2. **scriptable 机械层** [plan](plans/2026-06-03-scriptable-mechanical-layer-rollout.md) / [spec](specs/2026-06-03-scriptable-mechanical-layer-design.md)：Phase 2 把 INDEX-regen 接进 landing/walkaround/status 双轨；Phase 3 **lint 子命令**——status 合法性 / dangling-ref / stray / **结构块断言（=[structural-edit-guard](specs/2026-06-03-structural-edit-guard-design.md)，防多行 Edit 吞标题）** / recur 校验 / **untracked-spec（active|pending spec 未进 Next session 兜底）**。walkaround 压缩待此。
