@@ -245,6 +245,17 @@ Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — ne
 - **Knowledge folders** (`incidents/` `checklists/` `charts/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. `debriefs/`: reviewed spec + `last_updated`. (`charts/` rows show project/file count, not per-file status.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
+### Script fast path (optional accelerator)
+
+INDEX regeneration and the INDEX↔folder consistency check are fully mechanical — they read frontmatter and emit the rows above. flightdeck bundles `scripts/flightdeck_index.py` (pure Python, stdlib-only) that implements **exactly the Row format rule above**: `flightdeck_index.py <deck>` regenerates every folder + root `<!-- AUTO -->` block from frontmatter; `flightdeck_index.py <deck> --check` reports drift and exits non-zero (used by walkaround). `status`, `landing`, and `walkaround` MAY use it as a fast path.
+
+This is a **dual track**, not a dependency:
+
+- **Enabled** only when `rules.md` `scripts:` permits it (`scripts: off` forces manual; an absent key defaults to manual until the user opts in — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)) **and** a Python runtime + the bundled script are reachable.
+- **Fallback is always valid**: regenerate by hand from frontmatter exactly as described above. The markdown path is the source of truth; the script only saves tokens (it runs in a subprocess — its file reads never enter context) and adds determinism. A tool that cannot run it loses nothing but speed — which is what keeps flightdeck tool-agnostic.
+
+Never let the script make judgments (classification, status decisions, routing) — it only generates/checks the deterministic INDEX rows.
+
 ## Cockpit update — what changes
 
 ```

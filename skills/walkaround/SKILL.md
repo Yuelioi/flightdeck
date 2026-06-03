@@ -5,7 +5,7 @@ description: Use when explicitly invoking the flightdeck integrity audit — che
 
 # Flightdeck Walkaround
 
-User-triggered integrity audit of a flightdeck for protocol drift. The protocol is markdown + filesystem conventions; drift is the silent killer of advice systems. Walkaround surfaces drift loudly so the author can fix it. Implemented as a slash skill (markdown checklist the AI follows), NOT a CLI binary, to preserve flightdeck's plain-markdown + git bet.
+User-triggered integrity audit of a flightdeck for protocol drift. The protocol is markdown + filesystem conventions; drift is the silent killer of advice systems. Walkaround surfaces drift loudly so the author can fix it. Implemented as a slash skill (markdown checklist the AI follows) — the audit logic and every judgment live in markdown, never in a binary, preserving flightdeck's plain-markdown + git bet. The one purely mechanical audit (INDEX↔folder consistency, Audit 5) MAY use the bundled `flightdeck_index.py --check` as an optional fast path (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the markdown check is the always-valid fallback and source of truth, so the plain-markdown bet holds.
 
 ## When to invoke
 
@@ -84,6 +84,8 @@ For each file in `plans/` (NOT in `landed/`) with no `implements:` frontmatter f
 Do not flag files that carry `implements:` even if the target is also missing (that is caught by Audit 7 — dangling references).
 
 ### 5. INDEX ↔ folder consistency (WARNING)
+
+**Fast path** (when `rules.md` `scripts:` is enabled): `flightdeck_index.py --check <deck>` reports every drift below deterministically and exits non-zero — see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator). The manual checks below are the always-valid fallback and source of truth.
 
 For each artifact folder (`sketches/`, `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`):
 
