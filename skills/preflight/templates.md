@@ -166,6 +166,8 @@ knowledge: active → obsolete | superseded
 ```markdown
 # <one-line topic>
 
+**Recurrences**: 1 — sessions: YYYY-MM-DD   <!-- bump the count AND add the session date on every [Case N] append; count ≥3 across ≥2 sessions is the promotion-gate trigger, so this line is the at-a-glance tally -->
+
 **Symptom**: How the user / test / build actually observed it. Error text verbatim.
 
 **Root cause** (FORBIDDEN: "forgot", "careless", "didn't notice" — must be a wrong assumption / wrong model / wrong process):
@@ -184,7 +186,7 @@ I assumed X, but in reality Y.
 
 ### Rules
 
-- **One file per topic.** Recurrences append `## [Case N]`.
+- **One file per topic.** Recurrences append `## [Case N]` **and** bump the top `**Recurrences**:` header (increment the count, add the new session date). The header is the scannable tally — read the count without scrolling/counting Case blocks, and see both promotion-gate inputs (count + distinct sessions) inline.
 - **Forbidden root causes**: "forgot", "careless", "didn't notice", "rushed". These hide the real model error.
 - **Status field**:
   - `active` — still applies to the current codebase

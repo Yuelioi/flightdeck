@@ -69,3 +69,17 @@ BREAKING CHANGE: /login 响应去掉 token 字段, 改 accessToken + refreshToke
 ### 5. 不带 AI 署名
 
 不写 `Co-Authored-By: <AI>`, 不写 `🤖 Generated with ...`. 提交前 `git log` 扫一眼历史风格对齐.
+
+---
+
+## 项目覆盖 (本仓库专属)
+
+### 双 shell：多行 commit message 别串 shell
+
+本仓库同时挂 **Bash** 工具和 **PowerShell** 工具. 给原生命令(`git commit` 等)传多行串前, 先认清选的工具是哪个 shell:
+
+- **PowerShell 工具** → here-string `@'...'@`(结束 `'@` 必须顶列零缩进).
+- **Bash 工具** → 真 heredoc(`git commit -F - <<'EOF' … EOF`)或 `-F <file>`; **别用 `@'...'@`** —— bash 没有 here-string, `@` 会当字面量混进 subject(`@ chore: …`).
+- 最稳, 跨 shell 通用: 把信息写进文件, `git commit -F <file>`.
+
+→ 错题本 [incidents/powershell-herestring-in-bash-tool.md](../incidents/powershell-herestring-in-bash-tool.md)(已 3 次, 由 promotion gate 升级到此).

@@ -236,6 +236,8 @@ Multi-criterion gate evaluated by `landing`. An incident reaches the **checklist
 2. Cases recurred across **≥ 2 distinct sessions** (same-session triple-hits don't count).
 3. Remediation pattern is **stable across cases** (the "next time avoid X" rule reads similarly across all cases — not 3 unrelated fixes papering over one symptom).
 
+The incident's `**Recurrences**: N — sessions: …` header (template field) surfaces criteria 1–2 inline, so the gate is visible at a glance — no need to count `[Case N]` blocks. Bump it on every recurrence.
+
 When the gate fires, `landing` prompts: "Promote `incidents/X.md` to `checklists/X.md`?". User confirms — promotion is **never automatic**.
 
 A separate **project-rules upgrade gate** fires when a promoted incident continues to recur after promotion. Then add a one-liner to project agent rules and mark the incident `Status: upgraded → project rules`. Do not delete the incident.
