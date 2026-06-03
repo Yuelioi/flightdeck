@@ -6,5 +6,6 @@
 - [2026-06-03-preflight-tri-review-remediation.md](2026-06-03-preflight-tri-review-remediation.md) — active — preflight 三方审核(claude/ds/gpt)19 项整改总账 spec（由同名 sketch 提升）；减重 A1/A3/A4 已并入 token-reduction spec，纠错 B + 措辞 C 在本 spec 跟踪；记录每项处置/done/deferred
 - [2026-06-03-rules-simplification-design.md](2026-06-03-rules-simplification-design.md) — done — 溶解 rules.md 结构化 toggle 集（推断 / 默认+House Rules / 仅留 disabled_folders），House Rules 升为 flightdeck 局部权威覆盖并定职责边界，附 0 配置 when-to-land
 - [2026-06-03-scriptable-mechanical-layer-design.md](2026-06-03-scriptable-mechanical-layer-design.md) — active — 机械层（INDEX 重生 / walkaround lint / AGENTS emit / 对账）脚本化降 token、模型只留判断；单语言 Python stdlib + markdown fallback 双轨 + rules scripts 开关 + 机械-判断分界 + 字母序；INDEX-regen PoC 已交付，余见 rollout plan
+- [2026-06-03-structural-edit-guard-design.md](2026-06-03-structural-edit-guard-design.md) — pending — 抓 markdown 多行 Edit 的"静默结构丢失"（标题/区块被替换跨度吞掉，link/anchor 检查抓不到）；把结构检查并进 scriptable lint。动机=本会话 cockpit `## Next session` 标题被 reorder Edit 误删
 - [2026-06-03-token-reduction-design.md](2026-06-03-token-reduction-design.md) — active — 按 load 频率降 skill token + 治流程过长：常驻 SKILL 优先、dedup-to-canonical / defer-to-companion / script-owns / summarize；不改行为、保双轨 fallback。第一批已落（SKILL 瘦身 + 5 漂移修），余下分批
 <!-- /AUTO -->

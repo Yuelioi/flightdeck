@@ -6,8 +6,9 @@
 ## Next session
 
 1. **行为 dogfood（reload/重装插件后）—— 进入测试**：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、2.3→3.0 迁移改写、when-to-land signal 1/2、walkaround 不报假阳性；②init 重做——干净目录跑首次建档全程；③**incident 复发 auto-count**——landing 真的自动 append [Case N] + bump recurrences、INDEX 显 recur:N、晋级 gate 触发。
-2. **发布 3.0** [checklists/version-bump.md](checklists/version-bump.md)（marketplace + tag + 同步插件缓存），然后合并分支 → main。
-3. 仍开放：INDEX-row `—` 分隔符冲突 [incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)；spec §8 的 no-git HISTORY 格式；walkaround 压缩（归 [scriptable lint](specs/2026-06-03-scriptable-mechanical-layer-design.md)）。
+2. **结构性 Edit 守卫**（pending，下个对话启动）[specs/2026-06-03-structural-edit-guard-design.md](specs/2026-06-03-structural-edit-guard-design.md)：lint 加"必备结构块"断言，防多行 Edit 静默吞标题（本会话 cockpit `## Next session` 被误删的根因）。
+3. **发布 3.0** [checklists/version-bump.md](checklists/version-bump.md)（marketplace + tag + 同步插件缓存），然后合并分支 → main。
+4. 仍开放：INDEX-row `—` 分隔符冲突 [incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)；spec §8 的 no-git HISTORY 格式；walkaround 压缩（归 [scriptable lint](specs/2026-06-03-scriptable-mechanical-layer-design.md)）。
 
 ## Hanging tasks
 

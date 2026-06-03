@@ -10,8 +10,9 @@ flightdeck 3.0 分支 code-complete、未 push；preflight skill 整改 + token-
 ## Next session
 
 1. 行为 dogfood（reload/重装插件后）—— 进入测试：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、迁移改写、when-to-land、walkaround；②init 重做——干净目录首次建档全程；③incident 复发 auto-count——landing 自动 append [Case N]+bump recurrences、INDEX 显 recur:N、晋级 gate 触发。
-2. 发布 3.0（[checklists/version-bump.md](flightdeck/checklists/version-bump.md)）+ 合并分支 → main。
-3. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式；walkaround 压缩（归 scriptable lint）。
+2. 结构性 Edit 守卫（pending，下个对话启动）[specs/2026-06-03-structural-edit-guard-design.md](flightdeck/specs/2026-06-03-structural-edit-guard-design.md)：lint 加"必备结构块"断言，防多行 Edit 静默吞标题。
+3. 发布 3.0（[checklists/version-bump.md](flightdeck/checklists/version-bump.md)）+ 合并分支 → main。
+4. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式；walkaround 压缩（归 scriptable lint）。
 
 ## Hanging tasks
 
