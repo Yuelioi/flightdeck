@@ -1,5 +1,5 @@
 ---
-status: pending
+status: idea
 summary: 抓 markdown 多行 Edit 的"静默结构丢失"（标题/区块被替换跨度吞掉，link/anchor 检查抓不到）；把结构检查并进 scriptable lint。动机=本会话 cockpit `## Next session` 标题被 reorder Edit 误删
 last_updated: 2026-06-03
 ---

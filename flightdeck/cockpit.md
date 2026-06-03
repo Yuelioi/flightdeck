@@ -1,17 +1,22 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-03 by 月离 (本会话：tri-review 整改 + token-reduction（均完成→done）+ incident 复发 auto-count（实现+27 tests）+ structural-edit-guard spec（pending）；用新版 landing 演示 Step5a。**重建 Next session 为 3.0 发布前清单**——之前散落的 spec 全汇齐。待 reload dogfood。**本次归档完成簇**（4 spec + 2 plan + 2 debrief → landed/，关系边已改写）；**2 sketch 提升为 pending spec**（status-co-advance / silent-bump-nudge）。分支领先 main、未 push)
-**Active focus**: flightdeck 3.0 分支 code-complete、未 push；preflight 整改 + 减重 + auto-count 已完成、QA 通过；**发布前剩 dogfood + scriptable lint + 几个开放项**（见下），然后发布 → 合并 main。**新增 model-v4 模型重构（folder/状态/cockpit 简化）为 3.0 核心，设计经三方评审通过。**
+**Last updated**: 2026-06-04 by 月离 (model-v4 Phase 4：迁移本仓库 deck 到新模型——sketch v1x→specs(idea)、3 个 pending spec→idea、删空 sketches/debriefs、cockpit 改 status-projection 结构（`## 进行中` AUTO 派生）)
+**Active focus**: flightdeck 3.0 model-v4 实施中——folder 7→5 / 状态 6→4 / cockpit 为 active 集的派生视图；本仓库 deck 已迁到新模型，剩 Phase 5 验证收尾 + 发布。
 
-## Next session — 3.0 发布前清单
+## 进行中
 
-> **【3.0 核心·新增】model-v4 模型重构** [spec](specs/2026-06-03-model-v4-folder-state-cockpit-design.md) / [rollout plan](plans/2026-06-03-model-v4-rollout.md)（6 phase）：folder 7→5 / 状态 6→4 / cockpit AI 全自动驱动，三方评审通过。下一步按 plan 执行 Phase 0；下列清单将在迁移（Phase 4）时并入重排。
+<!-- AUTO:inprogress -->
+- [2026-06-03-incident-recurrence-autocount-design.md](specs/2026-06-03-incident-recurrence-autocount-design.md) — incident 复发计数升级——recurrences 提为 frontmatter 字段(从 body 头)、上 INDEX 行 recur:N、landing 自动维护；次数派生"待晋升/已晋级"，不加 status 值、不自动晋级、不 gate INDEX（避开 2.0 状态机红线）。已实现+27 tests 绿，待 dogfood 行为验证
+- [2026-06-03-model-v4-folder-state-cockpit-design.md](specs/2026-06-03-model-v4-folder-state-cockpit-design.md) — flightdeck 模型 v4——folder 7→5（sketches 并入 specs、删 debriefs）、workflow 状态 6→4（idea/active/done/scrapped）、cockpit 由 AI 全自动驱动（进行中区 AUTO 派生 + 下一步自动维护），并入 3.0
+- [2026-06-03-scriptable-mechanical-layer-design.md](specs/2026-06-03-scriptable-mechanical-layer-design.md) — 机械层（INDEX 重生 / walkaround lint / AGENTS emit / 对账）脚本化降 token、模型只留判断；单语言 Python stdlib + markdown fallback 双轨 + rules scripts 开关 + 机械-判断分界 + 字母序；INDEX-regen PoC 已交付，余见 rollout plan
+- [2026-06-03-model-v4-rollout.md](plans/2026-06-03-model-v4-rollout.md) — model-v4 分 6 phase 实施——数据模型真相源 → flightdeck_index 扩展(+测试) → 4 skill 行为 → scaffolds/emit/MIGRATION → dogfood 迁移本仓库 → 验证收尾；并入 3.0
+- [2026-06-03-scriptable-mechanical-layer-rollout.md](plans/2026-06-03-scriptable-mechanical-layer-rollout.md) — 机械层脚本化 rollout —— INDEX-regen 接进 landing/walkaround/status 双轨 + rules scripts 开关 + 版本 guard + walkaround lint 子命令；分 3 phase，INDEX-regen PoC 已交付
+<!-- /AUTO -->
 
-1. **重同步缓存 → 行为 dogfood（reload）** ← 发布前总闸：①3.0 软配置面（git/emit 推断、`### Autonomy overrides` 覆盖、2.3→3.0 迁移、when-to-land、walkaround 不报假阳性）②init 重做（干净目录首次建档全程）③**incident 复发 auto-count** [spec](specs/2026-06-03-incident-recurrence-autocount-design.md)（landing 自动 [Case N]+recur:N、晋级 gate）。
-2. **scriptable 机械层** [plan](plans/2026-06-03-scriptable-mechanical-layer-rollout.md) / [spec](specs/2026-06-03-scriptable-mechanical-layer-design.md)：Phase 2 把 INDEX-regen 接进 landing/walkaround/status 双轨；Phase 3 **lint 子命令**——status 合法性 / dangling-ref / stray / **结构块断言（=[structural-edit-guard](specs/2026-06-03-structural-edit-guard-design.md)，防多行 Edit 吞标题）** / recur 校验 / **untracked-spec（active|pending spec 未进 Next session 兜底）**。walkaround 压缩待此。
-3. **决策：recur≥3 已晋级在 INDEX 可见？** 现 INDEX 区分不出"待晋级 vs 已晋级"（晋级记在 body `Promoted:`）；定方案（promoted frontmatter 标 / 翻 superseded / 保持现状），归 [autocount spec](specs/2026-06-03-incident-recurrence-autocount-design.md)。
-4. **小开放项**：INDEX-row `—` 分隔符冲突 [incident](incidents/index-row-summary-delimiter.md)；no-git HISTORY 格式（scriptable spec §8）；**2 个提升 spec 待排期**——[status-co-advance](specs/2026-06-03-status-spec-co-advance-design.md)（status 翻 plan 时带动 spec）/ [silent-bump-nudge](specs/2026-06-03-preflight-silent-bump-nudge-design.md)（静默 bump 一行提示）。
-5. **发布 3.0**（最后）[checklists/version-bump.md](checklists/version-bump.md)：version-bump + marketplace + tag + 合并分支 → main。
+## 下一步
+
+- 完成 model-v4 实施：Phase 5 验证收尾（walkaround 零假阳性、reload dogfood 跑通 preflight/status/landing、复核 status-spec-co-advance 是否被 v4 吸收）。
+- 然后发布 3.0：version-bump + marketplace + tag + 合并分支 → main（见 checklists/version-bump.md）。
 
 ## Hanging tasks
 

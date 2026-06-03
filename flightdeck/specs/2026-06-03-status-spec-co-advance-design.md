@@ -1,5 +1,5 @@
 ---
-status: pending
+status: idea
 summary: status 只推进正在执行的工件，spec 会停在 pending 而其 plan 已 done；提议 plan 翻 done/awaiting-review 时 confirm-gated 地 offer 推进其 implements 的 spec，或交由 landing 对账。由 sketch 提升
 last_updated: 2026-06-03
 related: [landed/specs/2026-06-03-rules-simplification-design.md]
