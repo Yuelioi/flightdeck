@@ -7,7 +7,7 @@ summary: 三方审核 preflight 的问题盘点，按 减重/纠错/不紧急 �
 
 来源：`debriefs/claude.txt` `ds.txt` `gpt.txt`（同一轮 preflight skill 的三模型审核）。每条标 `[C]`=claude `[D]`=ds `[G]`=gpt 出处；多标=被交叉印证。gpt 自述只读了 2/3，但它的核心两条（拆 migration、status 扫描不可扩展）与读全的 ds/claude 重合，故非残缺读产物。
 
-**前置结论（已更新，2026-06-03）**：原写"不引入脚本"已被推翻。调研（见 [scriptable-mechanical-layer](scriptable-mechanical-layer.md)）确认脚本可作为**机械层加速器 + markdown fallback（官方双轨）**引入，不破坏工具无关性。但本清单的减重项**仍以内容架构为主**——脚本与重构正交：先做 A1/A2 等范围重构，机械层脚本化单独走那份 sketch。下列各项不依赖脚本。
+**前置结论（已更新，2026-06-03）**：原写"不引入脚本"已被推翻。调研（见 [scriptable-mechanical-layer](../specs/2026-06-03-scriptable-mechanical-layer-design.md)）确认脚本可作为**机械层加速器 + markdown fallback（官方双轨）**引入，不破坏工具无关性。但本清单的减重项**仍以内容架构为主**——脚本与重构正交：先做 A1/A2 等范围重构，机械层脚本化单独走那份 spec/plan。下列各项不依赖脚本。
 
 ---
 
