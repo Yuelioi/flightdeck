@@ -32,12 +32,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 **Override authority** (which config wins): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
 
-**Behavioral-override identification (穿针 — not a YAML toggle):**
-- `### Autonomy overrides` is a **literal heading**; a skill matches the **standard phrases** (table below) within that segment by **lenient substring**, not per-call semantic guessing → consistent across models (Claude/Gemini/Copilot/Codex), testable.
-- Matching **skips HTML-comment lines** (`<!-- ... -->`), so a `<!-- migrated from commit_mode:auto -->` provenance comment is never mis-matched.
-- If the `### Autonomy overrides` segment is absent → fall back to whole-House-Rules semantic reading (tolerant; never errors).
-- **Legacy-language compat**: the canonical phrases are English, but skills also recognize the **legacy Chinese equivalents** (right column) for decks authored before the English canon — same lenient-substring path.
-- **House Rules internal conflicts are the user's responsibility.** flightdeck does **not** auto-resolve contradictory overrides (no last-match-wins); a skill may passively flag an obvious contradiction but never silently picks one.
+**Behavioral-override matching:** within the literal `### Autonomy overrides` heading, skills match the standard phrases (table below) by **lenient substring** — not per-call semantic guessing (consistent + testable across models) — **skipping HTML-comment lines** (so a `<!-- migrated … -->` provenance note never mis-matches) and recognizing the **legacy Chinese** equivalents (right column). No `### Autonomy overrides` segment → fall back to tolerant whole-House-Rules reading. **Internal conflicts are the user's responsibility** — flightdeck never auto-resolves contradictory overrides (it may passively flag one, never silently pick).
 
 **Standard-phrase table** (canonical English; migration emits exactly these; hand-written overrides recommended to match):
 
