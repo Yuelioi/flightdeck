@@ -13,7 +13,7 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 ## Decisions（已锁，调研背书）
 
 - **单语言 Python，纯 stdlib，零依赖单文件**。多语言端口劝退（N×M 维护、语言间漂移；官方/标准无人这么干）。
-- **单 CLI 多子命令** `flightdeck.py <cmd>`（`regen-index` / `lint` / `emit-agents` …），单文件单测试套件单版本。
+- **形态**：暂按职责分多个纯 stdlib 脚本——`flightdeck_index.py`(INDEX regen/check)、`flightdeck_init.py`(scaffold deck)、`bump_version.py`(发布 manifest 同步,maintainer-only);各带 unittest。统一成单 `flightdeck.py <cmd>` 待脚本变多再做(YAGNI)。
 - **双轨 fallback**：脚本=快路径；模型手动（= 今天的 prose）=慢路径/通用路径。正是 Anthropic best-practices 的 "with code / without code" 双写模式，非妥协。模型本身就是"通用 runtime"，所以不需要多语言凑覆盖。
 - **分界线**：脚本**算事实**（generate / count / lint / extract），模型**做判断**（classify / match / decide / narrate）。docx skill 明文"编辑/判断 do NOT write Python scripts"。判断永不进脚本。
 - **`scripts` 是 House Rule（非 frontmatter toggle）**：默认 **manual**；`rules.md` `### Autonomy overrides` 写 `run scripts`（或 `run scripts with <runtime>` 钉死解释器）才 opt-in 快路径。**理由（执行期校正）**：3.0 明文"只保留 `disabled_folders` 一个结构化 toggle"（templates.md:38 / protocol.md:16），新 frontmatter toggle 会破坏该不变量；自动跑代码又是高信任动作 → 默认关、显式 opt-in。走 protocol 标准句表（lenient 子串匹配，跨四工具一致）。
@@ -25,6 +25,7 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 | 操作 | 归属 | 性质 |
 |---|---|---|
 | INDEX 重生（folder AUTO + root 计数） | script | generator（已交付） |
+| init / scaffold（copy 全布局 verbatim + seed cockpit） | script | generator（已交付，接进 preflight Branch-0；省 ~5k token + 灭 scaffold-ships-verbatim） |
 | walkaround 全量审计（Audit 1–10） | script | linter（最大收益，rollout Phase 3） |
 | emit-agents-md 标记间重生 | script | generator |
 | status 合法性 / 计数对账 | script | check（只读吐 JSON） |
@@ -39,7 +40,7 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 
 ## Delivered（PoC，已提交 `6e146c1`）
 
-`scripts/flightdeck_index.py`（纯 stdlib，166 行）+ `scripts/tests/`（unittest，**10 用例，TDD**）。`regen-index` 子命令从 frontmatter 重生 folder + root INDEX；`--check` 报漂移、exit 1。**当场在本 deck 抓出并修复 4 处 INDEX 漂移**（specs/plans/checklists/sketches 行偏离源 frontmatter）。
+`scripts/flightdeck_index.py`（纯 stdlib）+ `scripts/tests/`（unittest，TDD）。`regen-index` 从 frontmatter 重生 folder + root INDEX；`--check` 报漂移、exit 1。**当场在本 deck 抓出并修复 4 处 INDEX 漂移**。已扩展：`flightdeck_init.py`（preflight Branch-0 的 scaffold copy + cockpit seed，省 ~5k token，verbatim 灭 scaffold-ships-verbatim）+ `bump_version.py`（version-bump 的 5-manifest 同步 + `--check`）。全套 24 unittest。
 
 ## Remaining
 

@@ -13,6 +13,7 @@ last_updated: 2026-06-03
 
 - [x] exit-ritual § INDEX regeneration 加 "Script fast path" 双轨（单一真相）；walkaround Audit 5 + status Step 5 引用它；walkaround "not a CLI binary" 句改双轨措辞。
 - [x] 保留 prose 慢路径原文不动（= fallback）。
+- [x] **init 脚本化**（续）：`flightdeck_init.py` 接进 preflight Branch-0（双轨，门控=runtime 探测而非 House Rule，因 rules.md 此刻才建）；省 ~5k token + verbatim 灭 scaffold-ships-verbatim。
 - [x] **Verify**：默认走 prose（无 House Rule）；脚本路径 `--check` 抓漂移已实测；judgment 仍留 markdown。
 
 ## Phase 2 — rules `scripts:` 开关 + 版本 guard
