@@ -2,6 +2,7 @@
 status: active
 implements: specs/2026-06-03-scriptable-mechanical-layer-design.md
 summary: 机械层脚本化 rollout —— INDEX-regen 接进 landing/walkaround/status 双轨 + rules scripts 开关 + 版本 guard + walkaround lint 子命令；分 3 phase，INDEX-regen PoC 已交付
+last_updated: 2026-06-03
 ---
 
 # Scriptable mechanical layer — rollout

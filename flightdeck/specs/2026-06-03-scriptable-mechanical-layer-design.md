@@ -1,6 +1,7 @@
 ---
 status: active
 summary: 机械层（INDEX 重生 / walkaround lint / AGENTS emit / 对账）脚本化降 token、模型只留判断；单语言 Python stdlib + markdown fallback 双轨 + rules scripts 开关 + 机械-判断分界 + 字母序；INDEX-regen PoC 已交付，余见 rollout plan
+last_updated: 2026-06-03
 ---
 
 # Scriptable mechanical layer
