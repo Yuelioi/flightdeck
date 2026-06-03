@@ -271,4 +271,4 @@ Mechanics:
 
 ## See also
 
-[`SKILL.md` § Common mistakes](SKILL.md#common-mistakes--stop-and-reclassify) consolidates the per-symptom red flags and rationalizations to avoid.
+[`protocol.md` § Common mistakes](protocol.md#common-mistakes--stop-and-reclassify) consolidates the per-symptom red flags and rationalizations to avoid.

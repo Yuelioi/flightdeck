@@ -31,11 +31,20 @@ skill 文本 ~130KB ≈ ~32k token；每次调用进上下文。很多内容是�
 - **exit-ritual 内部去重**：决策树 Step 2 的 (a)–(i) 由逐条展开压成单行 + 指针「## Classification heuristics」（详情归专节）；Step 3 INDEX-scope 收成 gist + 指针；Step 3a status 箭头 → 指针 protocol §Status。**决策树 ~58→25 行**，不改行为。
 - **A3 git reconcile 降 heuristic**：SKILL Step 4/5 由"Mismatch handling"逐条改为"fuzzy 启发式信号——只报明确背离、不猜等价"，~12→4 行、降误报。
 
-## Remaining（分批，按价值/频率）
+## 结论 / 余项处置（2026-06-03，评估后定）
 
-- **templates.md（按需、优先级低）**：~210 行 body 模板 + 各 "### Rules" 段重述 protocol 字段语义 → 压成指针（body 模板保 paste-able 不动）。
-- **walkaround**：审计压缩 —— **前置**：`flightdeck_index.py` 目前只验 INDEX↔frontmatter 行一致、**不验 status 合法值**；要压 Audit 1/2/3 得先给脚本加 `lint` 子命令（= [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) Phase 3）。**阻塞**。
-- **流程（结构性，较大）**：A1 拆 migration 成「仅版本不符时加载的 companion」（轻路径，不加新命令）；A4 拆 protocol.md（**最低 ROI / 最高 anchor 改动风险**，待评估）。
+值得做的减重批 1+2 已落。剩余按证据定案：
+
+- **A1 拆 migration —— 关闭（moot）**：「重的嵌套迁移树」已不存在——批 1 把 SKILL Step 2 压成一段指针，迁移重步骤本在 `MIGRATION.md`（仅迁移时加载），protocol §Migration 仅 ~10 行检测逻辑。再抽第三个 companion 只会**碎片化**（检测/步骤分两处），不减负。当前结构（检测在 protocol、步骤在 MIGRATION.md）已是 A1 想要的形态。
+- **A4 拆 protocol —— 关闭（不划算）**：`protocol.md#anchor` 引用图（grep 全仓）显示高频锚点 `#rule-resolution-order`(×13)、`#frontmatter-field-reference`(×4)、`#status`、`#source-of-truth` 是**紧耦合核心、必须同处**；可独立外迁的只有 §Migration（=A1，已关）。4 路拆分 = 为接近零的常驻收益换 ~20 个跨 10 文件 anchor 断裂风险。
+- **templates.md `### Rules` —— 低 ROI，留**：load-on-demand 低频；body 块是 paste-able 价值所在；`### Rules` 是校验规则+少量语义重述混排，逐段抠收益微、易伤可读。已取最清晰一处（status-flow 图→指针）。
+- **walkaround 压缩 —— 改归 [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md)**：前置是 `flightdeck_index.py` 加 `lint` 子命令（验 status 合法值 + dangling-link/anchor 检查）。不属本 spec，归那份。
+
+## QA（2026-06-03）
+
+- **anchor/link 一致性全仓校验**（131 md）：发现并修 1 处**既存** dangling link——exit-ritual「See also」指 `SKILL.md#common-mistakes`，实际该节在 `protocol.md`。已修。
+- **脚本测试** `scripts/tests/`：24 passed。
+- **INDEX `--check`**：clean。
 
 ## 量级
 

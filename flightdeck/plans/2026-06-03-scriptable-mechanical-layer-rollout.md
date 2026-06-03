@@ -24,8 +24,8 @@ last_updated: 2026-06-03
 
 ## Phase 3 — walkaround lint 子命令（待前置）
 
-- [ ] **前置**：等 [preflight-tri-review-remediation](../specs/2026-06-03-preflight-tri-review-remediation.md) 的范围重构（A1 拆 migration 等）落定，避免脚本化一坨又被重构掉。
-- [ ] `flightdeck.py lint`：把 Audit 1–10 的机械项（INDEX↔文件夹一致性、orphan、dangling ref、stray file、status 合法性）脚本化，吐 JSON；模型读结果做判断/叙述。
+- [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
+- [ ] `flightdeck.py lint`：把 Audit 1–10 的机械项（INDEX↔文件夹一致性、orphan、dangling ref、stray file、status 合法性）脚本化，吐 JSON；模型读结果做判断/叙述。**anchor/link 检查已有 PoC**——2026-06-03 一个 ~40 行 Python（全仓扫 `[..](x.md#anchor)` vs 标题 slug）当场抓到一处既存 dangling link；把它并进 `lint` 的 dangling-ref 项。
 - [ ] **Verify**：lint 输出与现 walkaround 人工审计结论一致；token 实测对比。
 
 ## Notes
