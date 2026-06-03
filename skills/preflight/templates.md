@@ -18,7 +18,7 @@ disabled_folders: []     # the one structured toggle: listed folders never sugge
 
 ### Project conventions
 
-Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not create sketches/").
+Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not use charts/").
 General project conventions (code style, "branch before committing") belong in CLAUDE.md / AGENTS.md, NOT here.
 
 ### Autonomy overrides
@@ -56,19 +56,20 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **dele
 
 ---
 
-## spec / sketch frontmatter
+## spec frontmatter
 
 ```markdown
 ---
-status: active        # spec: pending/active/awaiting-review/blocked/done/scrapped — sketch: active/scrapped only
+status: idea          # idea / active / done / scrapped (idea = unstarted, no date prefix; flip to active to start)
 summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines (use commas/dashes). Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a real change (not typos)
+note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pending reason). Rendered in cockpit 进行中 + walkaround as [note: …]
 supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
 related: [<path>, ...]       # optional; weak links — shared premise / blast-radius, NOT supersedes or implements
 ---
 ```
 
-(A sketch usually carries only `status` + `summary`; the rest are for longer-lived specs.)
+(An idea-stage spec usually carries only `status: idea` + `summary`; the rest are for longer-lived active specs.)
 
 ---
 
@@ -76,9 +77,10 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 
 ```markdown
 ---
-status: active
+status: active               # idea / active / done / scrapped
 summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing
+note: <one-line diagnostic>  # optional; "why it hasn't moved". Rendered in cockpit 进行中 + walkaround as [note: …]
 implements: specs/<x>.md     # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"
 supersedes: <path>           # optional; forward edge to the artifact this replaces
 related: [<path>, ...]       # optional; weak cross-links
@@ -103,20 +105,6 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## debrief frontmatter
-
-```markdown
----
-status: active            # active / obsolete / superseded
-reviewed: specs/<x>.md    # the spec/topic this review covers
-last_updated: YYYY-MM-DD
----
-```
-
-(A debrief is retrieved by the spec/topic it reviewed + date, not by a trigger — so no `when_to_read`/`applies_to`.)
-
----
-
 ## INDEX.md — per folder
 
 ```markdown
@@ -129,7 +117,7 @@ last_updated: YYYY-MM-DD
 <!-- optional hand-maintained area (grouping notes for multi-file topics); AI does not touch -->
 ```
 
-For a workflow row (`sketches/` `specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `charts/` add `when_to_read` / `applies_to`. `debriefs/` rows show reviewed spec + date. `implements`, `supersedes`, `related` do NOT go into the INDEX.
+For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `charts/` add `when_to_read` / `applies_to`. `implements`, `supersedes`, `related`, `note` do NOT go into the INDEX. (`specs/INDEX` groups its AUTO region by status and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).)
 
 ---
 
@@ -139,13 +127,11 @@ For a workflow row (`sketches/` `specs/` `plans/`) the `<one-line summary>` is t
 # flightdeck — INDEX
 
 <!-- AUTO:root -->
-- specs/ — 3 (2 active, 1 done)
-- plans/ — 2 (1 active, 1 blocked)
+- specs/ — 5 (1 idea, 2 active, 2 done)
+- plans/ — 2 (2 active)
 - incidents/ — 1 active
 - checklists/ — 1 active
 - charts/ — 2 projects imported
-- debriefs/ — 1 active
-- sketches/ — 4
 <!-- /AUTO -->
 ```
 
@@ -229,52 +215,24 @@ I assumed X, but in reality Y.
 
 ---
 
-## sketch body
+## spec body (idea stage)
 
 ```markdown
 # <rough idea>
 
-<one-line gist; promote to a spec when it's worth starting>
+<one-line gist; flip status idea → active when it's worth starting>
 ```
 
 ### Rules
 
-- Sketches have no status progression — they are either acted on (promote to a `spec`) or scrapped.
-- If the sketch has been sitting > 6 months and no trigger has fired, consider scrapping. An idea that never finds its moment is not high-signal.
+- An idea-stage spec (`status: idea`) is a one-liner — no date prefix, no `implements:`. Starting it = flip `status: idea → active` (auto-adds the `YYYY-MM-DD-` prefix); a fuller design body grows in once active.
+- If an idea has been sitting > 6 months and no trigger has fired, consider `status: scrapped` (stays in `specs/`, excluded from INDEX). An idea that never finds its moment is not high-signal.
 
 ---
 
-## debrief body
+## External review feedback (no template)
 
-```markdown
-# <spec or topic> — <reviewer> review
-
-**Date**: YYYY-MM-DD
-**Reviewer**: <name / model>
-**Reviewed**: [link to the spec or artifact](../specs/YYYY-MM-DD-foo-design.md)
-
-## Raw feedback
-
-<Reviewer's full text — pasted verbatim. If summarized from a conversation, mark "(paraphrased by user)" at top.>
-
-## Disposition (per review point — every point must carry a tag)
-
-1. **[adopt]** <review point in 1 line> — <what specifically to change in the spec / code>
-2. **[reject]** <review point in 1 line> — <one-line why>
-3. **[defer]** <review point in 1 line> — <link to follow-up cockpit item / sketch / new spec>
-4. **[adopt]** <next point> — <change>
-   ...
-
-(Every numbered point ends with `[adopt]` / `[reject]` / `[defer]`. No bare points.)
-```
-
-### Rules
-
-- **Every review point carries exactly one of `[adopt]` / `[reject]` / `[defer]`.** No bullet may exist without a tag. A bullet without a tag = the file is incomplete.
-- **Completion gate**: a debrief file is "complete" iff every numbered point has a tag. Incomplete file = exit-blocking hanging task in `cockpit.md` ("finish disposition of `debriefs/<file>`"). The hanging task does not clear until the file is complete.
-- **`[defer]` must point somewhere**: link to a `cockpit.md` future-work item or a sketch. Defer without a target is silently lost — that's the failure mode the tag exists to prevent.
-- **Long reviews (>1000 words)**: keep raw verbatim. Disposition section may grow long too — that's fine. The constraint is per-point tagging, not brevity.
-- **Splitting one review point into multiple**: allowed (and encouraged when one bullet bundles `[adopt]` + `[defer]` halves). Just enumerate each as its own line.
+There is **no debrief template** — `debriefs/` was removed. External review feedback is transient: keep the raw text in project-root `tmp/` (gitignored), then fold the **disposition** (adopt / reject / defer) into the reviewed spec's own `## 评审纪要` section. The raw feedback is discarded once dispositioned. See [folder-semantics § External review feedback](folder-semantics.md#external-review-feedback-no-folder).
 
 ---
 
@@ -286,22 +244,29 @@ I assumed X, but in reality Y.
 **Last updated**: YYYY-MM-DD by <who> (<one-line state summary>)
 **Active focus**: <current main thread, 5–15 words>
 
-## Next session
+## 进行中
 
-1. <first concrete action — executable by reading cockpit only>
-2. <second>
+<!-- AUTO:inprogress -->
+- [<spec/plan>](<path>) — <one-line summary> [note: <if present>]
+<!-- /AUTO -->
+
+## 下一步
+
+<next concrete single action — start an idea, or advance an active artifact>
 
 ## Hanging tasks
 
-- [ ] Finish disposition of [debriefs/...](debriefs/...)
+- [ ] <open item blocking a clean landing>
 ```
 
 ### Rules
 
-- **Length cap: 80 lines hard ceiling.** Past 80, trim immediately.
+- **`## 进行中` is an AUTO region** — derived from every `status: active` spec/plan (same `<!-- AUTO -->` mechanism as INDEX, regenerated by `status` / `landing`). **Do not hand-edit** it; a hand edit is overwritten on the next regen. The literal marker is `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` (Phase 1's `flightdeck_index.py` emits exactly this string). Each row mirrors the INDEX row format; if a file carries `note:`, append `[note: …]`.
+- **`## 下一步` is the next concrete *single* action** — AI-maintained, auto-written at landing (and on `idea→active` / a milestone). It is finer-grained than `Active focus` (the coarse session main thread): the two do not overlap. The user adjusts it by directing the AI, not by hand-editing.
+- **Length cap: 80 lines hard ceiling.** Past 80, trim immediately. `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal (walkaround INFO, never blocks).
 - **`Active focus` is current state**, not history.
 - **Hanging tasks block landing** — resolve, or explicitly defer with a date.
-- **History does not live in cockpit.** Durable record = `landed/` archive + `git log` (+ `landed/HISTORY.md` when `git: false`). A finished item leaves `Next session`; it is not logged in cockpit.
+- **History does not live in cockpit.** Durable record = `landed/` archive + `git log` (+ `landed/HISTORY.md` when `git: false`). A landed artifact leaves `## 进行中` automatically; it is not logged in cockpit.
 - **No metric tracking duplicated elsewhere** — link to the single source.
 - **No version stamp in cockpit.** The deck-conformance version lives in `rules.md` `version:`; migration detection compares it against `MIGRATION.md` (`current` + `layout_need_update`). cockpit is pure focus.
 
@@ -316,7 +281,7 @@ I assumed X, but in reality Y.
      Required when rules.md sets git: false; optional otherwise.
      Lives under landed/ — outside the routing graph; never read at session start. -->
 
-- YYYY-MM-DD — <what landed this session>; next: <pointer to next session item>
+- YYYY-MM-DD — <what landed this session>; next: <pointer to the 下一步 action>
 ```
 
 ### Rules
@@ -348,7 +313,7 @@ Why this matters:
 
 ## Spec evolution markers (optional convention)
 
-When amending a long-lived spec — especially **backlog specs** that gain items over multiple sessions, or **specs revised after debrief disposition** — mark new / modified / removed items with prefix tags so the change history is grep-able and merge-friendly:
+When amending a long-lived spec — especially **backlog specs** that gain items over multiple sessions, or **specs revised after review disposition** (external feedback folded into the spec's `## 评审纪要`) — mark new / modified / removed items with prefix tags so the change history is grep-able and merge-friendly:
 
 - **`ADDED:`** — new item or section.
 - **`MODIFIED:`** — existing item changed. Note the old + new state inline if the change isn't self-evident.
@@ -364,7 +329,7 @@ Example from a revised backlog spec:
 
 ### Rules
 
-- **Optional.** Small one-shot specs (single-session, no debrief round) don't need delta markers. The cost of adding them outweighs the benefit at that scale.
+- **Optional.** Small one-shot specs (single-session, no review round) don't need delta markers. The cost of adding them outweighs the benefit at that scale.
 - **Apply only to substantive changes.** Typo fixes don't earn a marker; an item's scope shifting does.
 - **REMOVED keeps history.** Strike-through preserves the audit trail; outright deletion makes it impossible to see "what we considered and rejected". The audit trail is the whole point.
-- **Markers compose with `status:` frontmatter.** A spec can be `status: blocked` AND have an `ADDED:` line in its body. Status applies to the artifact; markers apply to items within.
+- **Markers compose with `status:` frontmatter.** A spec can be `status: active` (with a `note:` blocker reason) AND have an `ADDED:` line in its body. Status applies to the artifact; markers apply to items within.

@@ -8,7 +8,7 @@ As of 3.x, both `preflight` first-time setup and `install --scaffold` lay the **
 
 | Concept | What it means |
 | --- | --- |
-| **Full layout** (what init creates) | all folders (`sketches/ specs/ plans/ incidents/ checklists/ charts/ debriefs/ landed/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` + `landed/HISTORY.md` |
+| **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ charts/ landed/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` + `landed/HISTORY.md` |
 | **3-file contract** (validation floor) | `rules.md` + `cockpit.md` + `landed/HISTORY.md` must exist (walkaround CRITICAL if missing) — the *floor*, not a scaffold variant |
 
 **Empty is the normal initial state.** A freshly scaffolded deck has empty folders + empty `INDEX.md` files — expected, not an anti-pattern. Under the full layout a **missing** known folder is the anomaly (walkaround flags it); an **empty-but-present** folder / `INDEX.md` is fine and never flagged. (This reverses the pre-3.x "add folders on demand" guidance.)
@@ -25,13 +25,12 @@ Classify by lifecycle — the folder is the kind, so files carry no type field:
 
 | What you have | Goes in |
 | --- | --- |
-| Uncommitted idea (not yet ready to act on) | `sketches/` |
-| Design to review or implement | `specs/` |
+| Idea / design — unstarted (`status: idea`, no date prefix) or active to implement | `specs/` |
 | Implementation plan (optionally `implements:` a spec) | `plans/` |
 | Bug + root cause worth not repeating | `incidents/` |
 | Repeated procedure (second run = pattern) | `checklists/` |
 | Imported external material (competitor code, RFCs, articles) | `charts/` |
-| External review / AI critique + disposition | `debriefs/` |
+| External review / AI critique | disposition folds into the reviewed spec's `## 评审纪要`; raw feedback → project-root `tmp/` |
 
 The common mistake is keeping an evergreen reference in `specs/` or `plans/`. A spec/plan is a *design or plan you intend to build and then archive*; an evergreen standard you consult repeatedly belongs in `checklists/`. (`checklists/` = authored operational reference; `charts/` = imported external material — keep that split clear.)
 
@@ -43,9 +42,7 @@ flightdeck/
 ├── rules.md            # Mandatory file (3-file contract); content optional — read first by every entry skill
 ├── INDEX.md            # Root index: subfolder directory + global status summary
 │
-├── sketches/           # Uncommitted ideas (status: active / scrapped)
-│   └── INDEX.md
-├── specs/              # Designs to review or implement
+├── specs/              # Designs & ideas (status: idea / active / done / scrapped)
 │   └── INDEX.md
 ├── plans/              # Implementation plans (carry optional implements:)
 │   └── INDEX.md
@@ -54,8 +51,6 @@ flightdeck/
 ├── checklists/         # Operational reference (procedures, conventions, standards)
 │   └── INDEX.md
 ├── charts/             # Imported external material (may hold an external project tree)
-│   └── INDEX.md
-├── debriefs/           # External review feedback + disposition
 │   └── INDEX.md
 │
 └── landed/             # Archive umbrella — mirrors source structure on demand
@@ -73,10 +68,11 @@ The 80-line ceiling is cognitive-load engineering for the human + AI reading coc
 Contains:
 - `Last updated: YYYY-MM-DD by <who> (<one-line>)`
 - `Active focus: <current main thread>`
-- `## Next session` — 1–5 concrete items.
+- `## 进行中` — AUTO region derived from every `status: active` spec/plan (machine-maintained; not hand-written).
+- `## 下一步` — the next concrete single action (AI-maintained, auto-written at landing).
 - `## Hanging tasks` — open items blocking a clean landing (hand-maintained; decoupled from INDEX auto-summaries).
 
-`cockpit.md` is the pure focus layer: "what am I working on now". Status visibility is delegated to INDEX — look at the relevant folder's INDEX (or the root INDEX) to see the full picture.
+`cockpit.md` is no longer a hand-maintained workspace — it is a **status projection** of the active set: `## 进行中` is derived from `status: active`, so an artifact is in cockpit iff it is active. Full structure + AUTO markers: [templates.md § cockpit.md](templates.md#cockpitmd).
 
 ### `rules.md` — project config (mandatory file, optional content)
 
@@ -90,13 +86,11 @@ The root `flightdeck/INDEX.md` is a subfolder directory plus global status summa
 # flightdeck — INDEX
 
 <!-- AUTO:root -->
-- specs/ — 3 (2 active, 1 done)
-- plans/ — 2 (1 active, 1 blocked)
+- specs/ — 5 (1 idea, 2 active, 2 done)
+- plans/ — 2 (2 active)
 - incidents/ — 1 active
 - checklists/ — 1 active
 - charts/ — 2 imported
-- debriefs/ — 1 active
-- sketches/ — 4
 <!-- /AUTO -->
 ```
 
@@ -112,7 +106,7 @@ Lives under `landed/`, so it is **outside the routing graph** (never read at ses
 
 ## INDEX.md (per-folder)
 
-Every artifact folder — including `sketches/` — has its own `INDEX.md`. This is the derived index for that folder: one row per file showing file, status, and a one-line summary. `incidents/`, `checklists/`, `charts/` rows add `when_to_read` / `applies_to`; `debriefs/` rows instead show the reviewed spec/topic + date (no trigger routing).
+Every artifact folder has its own `INDEX.md`. This is the derived index for that folder: one row per file showing file, status, and a one-line summary. `incidents/`, `checklists/`, `charts/` rows add `when_to_read` / `applies_to`. `specs/INDEX` groups its AUTO region by status — see [`specs/`](#specs--designs) below.
 
 Structure:
 
@@ -136,27 +130,19 @@ Rules (canonical elsewhere — pointers, not restated here):
 
 > Per-folder frontmatter **blocks** live in [templates.md](templates.md); field **semantics** (required-ness, who reads/writes) are canonical in [protocol.md § Frontmatter field reference](protocol.md#frontmatter-field-reference-canonical). The sections below describe folder *purpose* and *lifecycle* only.
 
-### `sketches/` — uncommitted ideas
-
-Unstarted ideas waiting for a trigger. `status: active` or `scrapped`. **The folder is the kind — files carry no type field; no `implements:`.**
-
-Naming: `<topic>.md` (no date prefix — ideas are timeless until acted on).
-
-**Promote** a sketch to a spec when it becomes actionable: move `sketches/foo.md → specs/foo.md` and set `status: pending`. The sketch leaves `sketches/` on promotion.
-
-**Scrap** a sketch (`status: scrapped`) when the idea is abandoned. A scrapped sketch stays in `sketches/` (marked `status: scrapped`); it is **never archived to `landed/`**. Delete by hand at will — `walkaround` does not flag deletions of scrapped sketches.
-
-Transient session scratch belongs at project-root `tmp/` (gitignored), not here.
-
 ### `specs/` — designs
 
-Committed design documents to review or implement. A spec captures the *what* and *why* of a change; it is the output of the brainstorming / design stage.
+Design documents **and** unstarted ideas — one folder, status tells them apart. A spec captures the *what* and *why* of a change; it is the output of the brainstorming / design stage. An unstarted idea is just a spec at `status: idea`.
 
-Naming: `YYYY-MM-DD-<topic>.md` (date helps order by recency; specs are time-bound designs).
+**`status: idea`** = an unstarted thought / design (the to-start pool). No date prefix — ideas are timeless until acted on (`<topic>.md`). Starting it is a single field flip `idea → active`, which **adds the `YYYY-MM-DD-` prefix** (date helps order active/done by recency) and surfaces it in cockpit `## 进行中`. No folder move, no relation-edge rewrite — that is the whole point of merging sketches in.
+
+**`status: scrapped`** = the idea / design is abandoned. A scrapped spec **stays in `specs/` in place** — never archived to `landed/`, and **not** moved to a `graveyard/` subfolder (subfolders inside `specs/` are forbidden — see below). It is **excluded from `specs/INDEX`** so it does not pollute the to-start pool; list it by hand in a `## 已否决` area if you want it visible. Delete by hand at will — `walkaround` does not flag deletions of scrapped specs. Keeping it records "considered, rejected" so the AI does not re-raise a settled-against direction.
 
 The folder is the kind — files carry no type field. No `implements:` (that goes on the plan side).
 
 Lifecycle: when a spec is done and all its plans are complete, `land` it — move to `landed/specs/foo.md`. The spec leaves the active routing set but its history is preserved.
+
+**`specs/INDEX` status grouping**: idea files have no date prefix, so mixing them with the `YYYY-MM-DD-` active/done files would sort badly. The INDEX AUTO region **groups by status**: `待启动（idea）` and `进行中·完成（active·done）` — active/done by date descending, idea alphabetically; `scrapped` never appears.
 
 ### `plans/` — implementation plans
 
@@ -196,15 +182,11 @@ Naming: `<source>-<topic>.md` (e.g. `boltframe-shape-layer.md`, `rfc-6749.md`).
 
 **Imported external project tree**: `charts/` is the only folder where a subdirectory is permitted. When importing an entire external project (competitor code, an RFC suite, a large article series), place it at `charts/<project>/` and add a `charts/<project>/INDEX.md` as a human-readable guide to the project's contents. The root `charts/INDEX.md` row for that project shows project count + "imported" rather than a status count (imported files do not carry uniform flightdeck frontmatter).
 
-### `debriefs/` — external review feedback
+### External review feedback (no folder)
 
-Raw feedback from reviewers (other AIs, colleagues) + your **disposition** (adopt / reject / defer).
+There is **no `debriefs/` folder**. External review feedback (other AIs, colleagues) is a **transient input**: keep the raw text in project-root `tmp/` (gitignored), read it, and fold its **disposition** (adopt / reject / defer) into the reviewed spec's own section — conventionally `## 评审纪要`. The raw feedback is discarded once dispositioned; only the decision survives, inside the spec it shaped.
 
-Naming: `YYYY-MM-DD-<spec-or-topic>-<reviewer>.md`.
-
-Retrieved by the spec/topic reviewed + date (`reviewed:` field), not by a trigger — so no `when_to_read`/`applies_to`.
-
-Disposition rule: no debrief can exist in `debriefs/` without a disposition section. If disposition is incomplete, add a hanging task to `cockpit.md` ("finish disposition of `<file>`") and do not close the session.
+`tmp/` itself is **the user's habit — flightdeck does not regulate its structure or cleanup**. flightdeck only mandates: external-feedback disposition lands in the reviewed spec. Where the raw input lives and how long it stays is up to the user.
 
 ### `landed/` — archive umbrella
 
@@ -212,7 +194,7 @@ Top-level archive for completed or retired work. `landed/` **mirrors any source 
 
 - `landed/specs/` — specs archived after the work is done.
 - `landed/plans/` — plans archived after execution.
-- `landed/incidents/`, `landed/checklists/`, `landed/charts/`, `landed/debriefs/` — obsolete-but-historical reference moved out of the active set.
+- `landed/incidents/`, `landed/checklists/`, `landed/charts/` — obsolete-but-historical reference moved out of the active set. (A pre-3.0 deck may still carry a historical `landed/debriefs/` — left in place, not regenerated.)
 - `landed/HISTORY.md` — append-only landing log.
 
 Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `landed/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `landed/`.
@@ -223,7 +205,7 @@ Archived files are **exempt from status and INDEX audits** — `walkaround` does
 
 When one topic needs several files (a multi-chapter reference, a large spec), keep **all files in the same folder**. Group them in that folder's `INDEX.md` hand area (outside the `<!-- AUTO -->` region) with a label like `### Auth redesign (3 files)`.
 
-**Do NOT create subfolders inside `specs/`, `plans/`, `incidents/`, `checklists/`, or `debriefs/`.** Subfolders reintroduce the "what kind is the subfolder" question and break the flat routing model.
+**Do NOT create subfolders inside `specs/`, `plans/`, `incidents/`, or `checklists/`.** Subfolders reintroduce the "what kind is the subfolder" question and break the flat routing model. (This also rules out a `specs/graveyard/` for scrapped specs — they stay in place, see [`specs/`](#specs--designs).)
 
 The sole exception is `charts/`: an imported external project may carry its own directory tree — see the `charts/` section above.
 
@@ -241,7 +223,7 @@ The repository-root `README.md` (the GitHub project intro) is a standard project
 | Same fact duplicated across folders | Drift → trust collapses | One authoritative source; others link |
 | Incident report files named `2026-05-23-bug.md` | Date noise; impossible to find by topic | Use `<topic>.md` |
 | `tmp/` placed inside `flightdeck/` | Junk gets committed | `tmp/` lives at project root, gitignored |
-| Subfolders inside `specs/` / `plans/` / `incidents/` / `checklists/` / `debriefs/` | Breaks flat routing; "what kind is the subfolder?" | Keep all files in the folder; group in INDEX hand area |
+| Subfolders inside `specs/` / `plans/` / `incidents/` / `checklists/` | Breaks flat routing; "what kind is the subfolder?" | Keep all files in the folder; group in INDEX hand area |
 | Using `README.md` inside flightdeck conventions | Bundle README approach retired | Use `INDEX.md` (repo-root `README.md` is unaffected) |
 | Plan with no `implements:` and no explanation | Orphan plan is invisible to spec→plan tracing | Add `implements:` or note "standalone" in the plan body |
 | Checklist or incident without `when_to_read` | Invisible to skill routing | Add `when_to_read` frontmatter |
