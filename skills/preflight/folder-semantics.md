@@ -127,11 +127,10 @@ Structure:
 <!-- Optional hand area: grouping notes, multi-file topic labeling, etc. AI does not touch this. -->
 ```
 
-Rules:
-- **Minimum columns**: `[filename](filename) — status — one-line summary`. `incidents/`, `checklists/`, `charts/` rows add `when_to_read` / `applies_to`; `debriefs/` rows instead show the reviewed spec/topic + date (no trigger routing). The `implements:` field does NOT appear in the INDEX (kept lightweight; reverse-lookup by scanning `plans/INDEX.md`).
-- **`<!-- AUTO -->` region is machine-maintained**: the AI regenerates this region from each file's frontmatter. Content outside this region is a hand area — the AI never modifies it. This rule is written into `rules.md` / the skill to prevent different sessions from appending rather than regenerating.
-- **Regeneration scope**: `landing` regenerates only the INDEX of folders that had file changes this session (new, modified, moved, landed, or status-changed files). Other folders' INDEXes are left untouched. `walkaround` does a full INDEX↔frontmatter consistency check across all folders.
-- **Commands read INDEX first**: all commands follow "read INDEX first, drill into individual files only on demand" — this is the primary token saving (cost scales with folder count, not file count). `preflight` reads folder INDEXes (or the root INDEX) to get `when_to_read`/`applies_to` + status; it only reads a full file when it is about to apply it. `walkaround` reads INDEXes for the initial scan, drilling down only to verify suspects.
+Rules (canonical elsewhere — pointers, not restated here):
+- **Row format** + the build-from-frontmatter-never-body rule → [exit-ritual § Row format](exit-ritual.md#row-format--how-each-auto-row-is-built-single-source-of-truth) (the bundled `flightdeck_index.py` implements it).
+- **Regeneration scope** (landing = changed folders only; walkaround = full check) + the **read-INDEX-first** token saving → [protocol § INDEX](protocol.md).
+- The hand area **outside** `<!-- AUTO -->` is never touched by the AI.
 
 ## Folder details
 
@@ -216,7 +215,7 @@ Top-level archive for completed or retired work. `landed/` **mirrors any source 
 - `landed/incidents/`, `landed/checklists/`, `landed/charts/`, `landed/debriefs/` — obsolete-but-historical reference moved out of the active set.
 - `landed/HISTORY.md` — append-only landing log.
 
-Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `landed/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [authority order](SKILL.md#authority-order-when-sources-disagree). Routing already excludes everything under `landed/`.
+Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `landed/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `landed/`.
 
 Archived files are **exempt from status and INDEX audits** — `walkaround` does not check `landed/`.
 
@@ -233,18 +232,6 @@ The sole exception is `charts/`: an imported external project may carry its own 
 Within flightdeck conventions, always use `INDEX.md` — never `README.md`. `INDEX.md` precisely communicates "directory navigation" (as opposed to "project introduction").
 
 The repository-root `README.md` (the GitHub project intro) is a standard project file and is **not affected** by this rule.
-
-## Naming convention table
-
-| Folder | Filename pattern | Reason |
-| --- | --- | --- |
-| `sketches/` | `<topic>.md` | Ideas are timeless until acted on |
-| `specs/` | `YYYY-MM-DD-<topic>.md` | Date helps order by recency; specs are time-bound designs |
-| `plans/` | `YYYY-MM-DD-<topic>.md` | Date helps order by recency; plans are time-bound |
-| `incidents/` | `<topic>.md` | Stable reference — date noise hurts findability |
-| `checklists/` | `<topic>.md` | Stable resource — date noise hurts |
-| `charts/` | `<source>-<topic>.md` | External source is the key identifier |
-| `debriefs/` | `YYYY-MM-DD-<spec>-<reviewer>.md` | Date + reviewer identify uniqueness |
 
 ## Anti-patterns
 

@@ -30,7 +30,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 **deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
 
-**Authority order** (when sources disagree): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
+**Override authority** (which config wins): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
 
 **Behavioral-override identification (穿针 — not a YAML toggle):**
 - `### Autonomy overrides` is a **literal heading**; a skill matches the **standard phrases** (table below) within that segment by **lenient substring**, not per-call semantic guessing → consistent across models (Claude/Gemini/Copilot/Codex), testable.
@@ -169,7 +169,7 @@ Incidents and checklists **MUST** carry frontmatter with `when_to_read`, `applie
 
 Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Do NOT auto-increment `[Case N]` — that only happens on a real, user-confirmed recurrence.
 
-## Authority order (when sources disagree)
+## Source-of-truth precedence (when sources disagree)
 
 Project agent rules > `rules.md` > `cockpit.md` > active folders (`specs/` `plans/` `incidents/` `checklists/` `charts/` `debriefs/`) > `landed/`
 

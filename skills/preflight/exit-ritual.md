@@ -76,11 +76,12 @@ Step 3a: Suggest status for affected artifacts
          change status to any legal value at any time — the AI does not block.
          (Status is a label — no table, no verbs. The AI suggests; the user decides.)
 
-         Bump last_updated: for each workflow artifact (sketches/specs/plans)
-         changed substantively this session — body OR frontmatter, not a
-         typo/wording-only edit — set its `last_updated:` to today before
-         regenerating that folder's INDEX. A confirmed status flip already
-         counts as substantive (its last_updated is today). This is the landing
+         Bump last_updated: for each spec/plan changed substantively this
+         session — body OR frontmatter, not a typo/wording-only edit — set its
+         `last_updated:` to today before regenerating that folder's INDEX. A
+         confirmed status flip already counts as substantive. **Sketches**: bump
+         only if the file already carries `last_updated` — don't *add* it to a
+         bare sketch (its `status` + `summary` suffice). This is the landing
          anchor for the recommended-but-not-required workflow `last_updated`;
          knowledge artifacts already carry their own required `last_updated`.
 
@@ -239,7 +240,7 @@ Walkaround is responsible for the **full-consistency check** — it regenerates 
 
 ### Row format — how each AUTO row is built (single source of truth)
 
-Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (this read-frontmatter-not-body rule is the main token saving). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
+Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (a further token saving, complementing read-INDEX-first). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
 
 - **Workflow folders** (`sketches/` `specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` are never shown in the INDEX (reverse links are grep-derived).
 - **Knowledge folders** (`incidents/` `checklists/` `charts/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. `debriefs/`: reviewed spec + `last_updated`. (`charts/` rows show project/file count, not per-file status.)
