@@ -56,7 +56,7 @@ A `flightdeck/` directory layout your AI reads and writes by convention:
 ```
 flightdeck/
 ├── cockpit.md          # Must-read every session entry (≤ 80 lines)
-├── rules.md            # Optional: project config (toggles + house rules)
+├── rules.md            # Project config (mandatory): version + disabled_folders + house rules
 ├── INDEX.md            # Global status summary — derived index across all folders
 │
 ├── sketches/           # Early ideas, scratchpad
@@ -271,7 +271,7 @@ Run `/flightdeck:preflight`. It:
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` between fenced markers from `cockpit.md`. |
 | `/flightdeck:status` | Auto-flip one artifact's lifecycle `status:` + its INDEX row (model-invocable; opt-in via `rules.md`). |
 
-By default the commands fire only on an explicit slash — never auto-triggered from conversation context, and nothing loads on session start. This is a **per-project soft gate**: each ritual checks `flightdeck/rules.md`'s `model_invocable` list (default `[]` = all manual) before allowing model self-invocation. Opt rituals in to make flightdeck self-driving — full recipe in [Configuration](#configuration).
+Nothing loads on session start and there's no background process. On a 3.0 deck the AI **may self-invoke** these rituals when it judges the moment right (commit stays a confirm checkpoint); an explicit `/flightdeck:<ritual>` always works too. Restrict any ritual to manual with an `### Autonomy overrides` House Rule — see [Configuration](#configuration).
 
 ### Routing — what triggers what
 
@@ -297,55 +297,41 @@ Run `/flightdeck:landing` (the [landing ritual](skills/preflight/exit-ritual.md)
 
 The next session — even a different AI, even a different developer — picks up exactly where this one stopped.
 
-> On autonomous runs you don't have to type this. With `model_invocable: [landing]` in `rules.md`, the AI runs the wrap itself when the session ends — see [Configuration](#configuration).
+> On autonomous runs you don't have to type this — by default the AI runs the wrap itself when the session ends. Restrict it via an `### Autonomy overrides` House Rule to drive landing by hand — see [Configuration](#configuration).
 
 ## Configuration
 
-`flightdeck/rules.md` is the per-project control panel. It became **mandatory in 2.2** (it also carries the deck `version`), and every ritual reads it on entry. All keys but `version` are optional — omit one to take its default.
+`flightdeck/rules.md` is the per-project control panel — **mandatory** (it carries the deck `version`). As of **3.0** it holds just two structured fields plus free-prose house rules:
 
 ```yaml
 ---
-version: 2.2              # deck-conformance version — drives migration detection (not a toggle)
-git: true                 # false → skip all git reconcile/commit steps
-emit_agents_md: true      # false → /flightdeck:emit-agents-md produces nothing
-disabled_folders: []      # folders to treat as off — not suggested, not audited
-disabled_gates: []        # named gates to skip (e.g. the debrief-disposition exit block)
-model_invocable: []       # ← the autonomy switch (see below)
-status_auto: []           # which optional status transitions auto-fire: start, land
-commit_mode: confirm      # landing's commit step: manual / confirm / auto
+version: 3.0
+disabled_folders: []     # folders to treat as off — not suggested, not audited
 ---
+
+## House rules
+
+### Project conventions
+# deck-local conventions (e.g. "specs in Chinese", "don't create sketches/")
+
+### Autonomy overrides
+# behavioral overrides via standard phrases; omit = defaults
 ```
 
-| Key | Default | What it does |
-| --- | --- | --- |
-| `version` | *(required)* | Deck-conformance version; `preflight` / `walkaround` compare it against `MIGRATION.md` to offer migrations. Not a behavior toggle. |
-| `git` | `true` | `false` → skip git reconcile/commit; landing logs a line to `landed/HISTORY.md` instead. For non-git decks. |
-| `emit_agents_md` | `true` | `false` → the AGENTS.md emitter is inert (project wants no cross-tool bridge file). |
-| `disabled_folders` | `[]` | Folders flightdeck ignores — never suggested in fallback, never audited. |
-| `disabled_gates` | `[]` | Named gates to skip. |
-| `model_invocable` | `[]` | **The autonomy switch** — which rituals the AI may invoke *itself*, without you typing the slash. `[]` = every ritual is manual-only. |
-| `status_auto` | `[]` | Which *optional* `status` transitions auto-fire: `start` (→ `active` when work begins) and `land` (archive to `landed/` on `done`). The core `create→pending` / `finish→awaiting-review` are always automatic. |
-| `commit_mode` | `confirm` | Landing's commit step: `manual` (run but never commit), `confirm` (generate the commit, then ask — default), `auto` (commit with no prompt). Only applies when `git: true`. |
+| Field | What it does |
+| --- | --- |
+| `version` | Deck-conformance version; `preflight` / `walkaround` compare it against `MIGRATION.md` to offer migrations. |
+| `disabled_folders` | Folders flightdeck ignores — never suggested, never audited. |
+| `### Project conventions` | Deck-local prose conventions every ritual honors. |
+| `### Autonomy overrides` | Behavioral overrides via standard phrases. |
+
+**Everything else is inferred or defaulted** — `git` / `AGENTS.md`-regen from `.git` / `AGENTS.md` presence; every ritual self-invocable and `status` auto-advancing; `commit` asks first. Override per behavior with a standard phrase under `### Autonomy overrides`, e.g. `landing: don't self-invoke; I run it manually`, `commit without asking`, `this deck doesn't use git`. Pre-3.0 toggles (`model_invocable`, `status_auto`, `commit_mode`, …) are read for compat through 3.x.
 
 ### Autonomous operation
 
-**New decks ship full-auto.** When flightdeck scaffolds a `flightdeck/` for you — via `/flightdeck:preflight` first-time setup or `install --scaffold` — the generated `rules.md` turns on self-invocation for every ritual plus auto-status:
+A freshly scaffolded 3.0 deck is **full-auto by default**: the AI keeps each artifact's `status` current, auto-archives finished ones to `landed/`, and runs the full landing ritual when a session wraps (refresh `cockpit.md`, regenerate `AGENTS.md`) — no manual slash needed. `commit` stays the one human checkpoint (it asks first; add `commit without asking` to skip).
 
-```yaml
-model_invocable: [preflight, landing, walkaround, emit-agents-md, status]
-status_auto: [start, land]
-commit_mode: confirm
-```
-
-So out of the box the AI, on its own:
-
-- keeps each artifact's `status` current as work moves and **auto-archives** finished ones to `landed/` (`status_auto: [start, land]`);
-- **runs the full landing ritual when a session wraps** — classify new knowledge, refresh `cockpit.md`, regenerate `AGENTS.md` — with no manual `/flightdeck:landing`;
-- so the next session (or the next loop iteration) re-enters via `preflight` against a clean, current deck.
-
-`commit_mode: confirm` keeps **one human checkpoint**: the AI does everything else itself, then asks before committing. Set `commit_mode: auto` for fully unattended runs, `manual` to never commit. To go fully hands-on, empty the lists: `model_invocable: []` + `status_auto: []`.
-
-**This is a *scaffold* default, not a gate default.** The underlying gate fallback stays manual — a deck with no `rules.md` or an empty `model_invocable` self-invokes nothing, and an explicit `/flightdeck:<ritual>` always works. **There is no hook and no background process**: "autonomous" means the AI is *permitted* to self-invoke these rituals when it judges the moment is right, not that anything fires behind your back. (The legacy SessionStart auto-load hook was removed in 2.0.)
+**There is no hook and no background process** — "autonomous" means the AI is *permitted* to self-invoke these rituals when it judges the moment right, not that anything fires behind your back. (The legacy SessionStart auto-load hook was removed in 2.0.) To go hands-on, add the relevant `### Autonomy overrides`, e.g. `landing: don't self-invoke; I run it manually`. Full resolution rules: [protocol § Rule resolution order](skills/preflight/protocol.md#rule-resolution-order).
 
 ## Compatibility
 
@@ -470,7 +456,7 @@ flightdeck is also durable in ways embeddings aren't: it's plain text that survi
 | --- | --- |
 | [skills/preflight/SKILL.md](skills/preflight/SKILL.md) | `/flightdeck:preflight` — the single entry ritual (init-or-read) |
 | [skills/preflight/protocol.md](skills/preflight/protocol.md) | The protocol textbook — data model, authority order, lifecycle, routing, write gate |
-| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | What each folder holds and why; minimal-vs-full setup; future expansion slots |
+| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | What each folder holds and why; deck layout (full, always); future expansion slots |
 | [skills/preflight/templates.md](skills/preflight/templates.md) | incident / checklist / sketch / debrief / cockpit templates with frontmatter rules |
 | [skills/preflight/exit-ritual.md](skills/preflight/exit-ritual.md) | The landing ritual — classification heuristics, red flags, promotion gates |
 | [skills/landing/SKILL.md](skills/landing/SKILL.md) | `/flightdeck:landing` — explicit landing ritual |
@@ -499,7 +485,7 @@ The most valuable issue you can open: **a transcript of an AI that wriggled out 
 
 ## Roadmap
 
-**Shipped:** lifecycle model + strict write gate (1.0–1.2) · single-entry `preflight` with no auto-load (2.0) · per-project soft-config gating + the high-frequency `status` ritual (2.1) · metadata-model consolidation + workflow frontmatter enrichment (2.2). Full history in [CHANGELOG.md](CHANGELOG.md); skill-test status in [TEST_PLAN.md](TEST_PLAN.md).
+**Shipped:** lifecycle model + strict write gate (1.0–1.2) · single-entry `preflight` with no auto-load (2.0) · soft-config gating + the `status` ritual (2.1) · metadata-model consolidation (2.2) · autonomy defaults + `commit_mode` (2.3) · **rules.md simplification — inference + House Rules replace the toggle set (3.0)**. Full history in [CHANGELOG.md](CHANGELOG.md).
 
 **Next:**
 

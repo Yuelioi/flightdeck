@@ -56,7 +56,7 @@
 ```
 flightdeck/
 ├── cockpit.md          # 每次会话必读入口（≤ 80 行）
-├── rules.md            # 可选：项目配置（开关 + 项目规范）
+├── rules.md            # 项目配置（必需）：version + disabled_folders + 项目规范
 ├── INDEX.md            # 全局状态汇总 —— 跨所有文件夹的衍生索引
 │
 ├── sketches/           # 早期想法、草稿
@@ -100,7 +100,7 @@ flowchart LR
     subgraph FD [flightdeck/]
         direction TB
         Cockpit[cockpit.md<br/>≤80 行 · 必读]
-        Rules[rules.md<br/>可选配置]
+        Rules[rules.md<br/>必需配置]
         Index[INDEX.md<br/>全局状态汇总]
         Folders[sketches/ · specs/ · plans/<br/>incidents/ · checklists/<br/>charts/ · debriefs/]
         Archive[landed/]
@@ -271,7 +271,7 @@ cd my-project
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 在 fenced markers 之间重生 `AGENTS.md`。 |
 | `/flightdeck:status` | 自动翻转单个 artifact 的生命周期 `status:` + 其 INDEX 行（model-invocable；经 `rules.md` opt-in）。 |
 
-默认情况下，命令只在用户显式打 slash 时触发 —— 不会从对话上下文自动触发，会话开始也不加载任何东西。这是一个 **per-project 软门栓**：每个仪式在允许模型自调前，先读 `flightdeck/rules.md` 的 `model_invocable` 列表（默认 `[]` = 全部手动）。把仪式 opt-in 进去就能让 flightdeck 自驱 —— 完整配方见[配置](#配置)。
+会话开始不加载任何东西，也没有后台进程。3.0 deck 上 AI **可以自调**这些仪式（它判断合适时；commit 仍是 confirm 检查点）；显式 `/flightdeck:<ritual>` 也永远能用。想把某个仪式限为手动，在 `### Autonomy overrides` 写一句 House Rule —— 见[配置](#配置)。
 
 ### 路由表 —— 什么情况下进哪个文件夹
 
@@ -297,55 +297,41 @@ cd my-project
 
 下一次会话 —— 哪怕换了 AI、换了开发者 —— 能从上次结束的位置无缝接着干。
 
-> 全自动场景下不必手打这条。`rules.md` 里配了 `model_invocable: [landing]`，AI 会在会话结束时自己跑收尾 —— 见[配置](#配置)。
+> 全自动场景下不必手打这条 —— 默认 AI 会在会话结束时自己跑收尾。想自己手动 land，就在 `### Autonomy overrides` 写一句 House Rule —— 见[配置](#配置)。
 
 ## 配置
 
-`flightdeck/rules.md` 是按项目的控制面板。它在 **2.2 起转为必选**（同时承载 deck 的 `version`），每个仪式入场都会读它。除 `version` 外所有键都可选 —— 省略即取默认值。
+`flightdeck/rules.md` 是按项目的控制面板 —— **必需**（承载 deck 的 `version`）。**3.0 起**它只保留两个结构化字段 + 自由散文 house rules：
 
 ```yaml
 ---
-version: 2.2              # deck 遵循的发布版本 —— 驱动迁移检测（非 toggle）
-git: true                 # false → 跳过所有 git 对账/commit 步骤
-emit_agents_md: true      # false → /flightdeck:emit-agents-md 不输出
-disabled_folders: []      # 关掉的文件夹 —— 不建议、不审计
-disabled_gates: []        # 关掉的 gate（如 debrief 处置的退出阻断）
-model_invocable: []       # ← 自动化开关（见下）
-status_auto: []           # status 哪些可选转换自动触发：start, land
-commit_mode: confirm      # landing 的提交步：manual / confirm / auto
+version: 3.0
+disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
 ---
+
+## House rules
+
+### Project conventions
+# deck 局部约定（如 "specs 用中文"、"不建 sketches/"）
+
+### Autonomy overrides
+# 用标准句做行为覆盖；省略 = 默认
 ```
 
-| 键 | 默认 | 作用 |
-| --- | --- | --- |
-| `version` | *（必填）* | deck 遵循的版本；`preflight` / `walkaround` 拿它对比 `MIGRATION.md` 来提示迁移。非行为开关。 |
-| `git` | `true` | `false` → 跳过 git 对账/commit；landing 改为往 `landed/HISTORY.md` 追加一行。用于非 git deck。 |
-| `emit_agents_md` | `true` | `false` → AGENTS.md emitter 不输出（项目不需要跨工具桥接文件）。 |
-| `disabled_folders` | `[]` | flightdeck 忽略的文件夹 —— 不在 fallback 里建议、不审计。 |
-| `disabled_gates` | `[]` | 关掉的具名 gate。 |
-| `model_invocable` | `[]` | **自动化开关** —— 哪些仪式 AI 可以*自己*调（不用你打 slash）。`[]` = 每个仪式都手动。 |
-| `status_auto` | `[]` | `status` 哪些*可选*转换自动触发：`start`（开工 → `active`）和 `land`（`done` 时归档到 `landed/`）。核心的 `create→pending` / `finish→awaiting-review` 永远自动。 |
-| `commit_mode` | `confirm` | landing 的提交步：`manual`（跑完但不提交）、`confirm`（生成提交后问你 —— 默认）、`auto`（不问直接提交）。仅在 `git: true` 时生效。 |
+| 字段 | 作用 |
+| --- | --- |
+| `version` | deck 遵循的版本；`preflight` / `walkaround` 拿它对比 `MIGRATION.md` 提示迁移。 |
+| `disabled_folders` | flightdeck 忽略的文件夹 —— 不建议、不审计。 |
+| `### Project conventions` | deck 局部的散文约定，每个仪式都遵守。 |
+| `### Autonomy overrides` | 用标准句做行为覆盖。 |
+
+**其余全靠推断或默认** —— `git` / `AGENTS.md` regen 由 `.git` / `AGENTS.md` 是否存在推断；每个仪式默认可自调、`status` 默认自动推进；`commit` 先问你。要改就在 `### Autonomy overrides` 里写标准句，如 `landing: don't self-invoke; I run it manually`、`commit without asking`、`this deck doesn't use git`。3.0 前的 toggle（`model_invocable`、`status_auto`、`commit_mode` …）整个 3.x 兼容读。
 
 ### 全自动运行
 
-**新 deck 默认全自动。** flightdeck 给你建 `flightdeck/` 时 —— 经 `/flightdeck:preflight` 首次建档或 `install --scaffold` —— 生成的 `rules.md` 会开启所有仪式自调 + 自动 status：
+新建的 3.0 deck **默认全自动**：AI 自己保持每个工件 `status` 新鲜、把完成的自动归档到 `landed/`、并在会话收尾时跑完整 landing 仪式（刷新 `cockpit.md`、重生 `AGENTS.md`）—— 不用手打 slash。`commit` 保留唯一人工确认点（先问你；加 `commit without asking` 跳过）。
 
-```yaml
-model_invocable: [preflight, landing, walkaround, emit-agents-md, status]
-status_auto: [start, land]
-commit_mode: confirm
-```
-
-于是开箱即用，AI 会自己：
-
-- 随工作推进保持每个工件的 `status` 新鲜，并把完成的**自动归档**到 `landed/`（`status_auto: [start, land]`）；
-- 在会话收尾时**自己跑完整的 landing 仪式** —— 分类新知识、刷新 `cockpit.md`、重生 `AGENTS.md` —— 不用手打 `/flightdeck:landing`；
-- 于是下一次会话（或下一轮循环）经 `preflight` 重新入场时，面对的是干净、最新的 deck。
-
-`commit_mode: confirm` 保留**唯一一个人工确认点**：别的 AI 全自己干，到提交前问你一句。纯无人值守改 `commit_mode: auto`，永不提交用 `manual`。想完全手动，把列表清空：`model_invocable: []` + `status_auto: []`。
-
-**这是 *scaffold* 默认，不是 gate 默认。** 底层 gate fallback 仍是手动 —— 没有 `rules.md` 或 `model_invocable` 为空的 deck 不会自调任何东西，显式 `/flightdeck:<ritual>` 永远能用。**没有 hook、没有后台进程**：这里的"全自动"指 AI 被*允许*在它判断合适时自调这些仪式，而不是有什么东西在背后偷偷触发。（旧的 SessionStart 自动加载 hook 已在 2.0 移除。）
+**没有 hook、没有后台进程** —— "全自动"指 AI 被*允许*在它判断合适时自调这些仪式，而不是有东西在背后偷偷触发。（旧的 SessionStart 自动加载 hook 已在 2.0 移除。）想手动，就在 `### Autonomy overrides` 里加对应标准句，如 `landing: don't self-invoke; I run it manually`。完整解析规则见 [protocol § Rule resolution order](skills/preflight/protocol.md#rule-resolution-order)。
 
 ## 兼容性
 
@@ -470,7 +456,7 @@ flightdeck 在 embedding 做不到的方面也更耐用：纯文本，能扛过�
 | --- | --- |
 | [skills/preflight/SKILL.md](skills/preflight/SKILL.md) | `/flightdeck:preflight` —— 唯一入场 ritual（init-or-read） |
 | [skills/preflight/protocol.md](skills/preflight/protocol.md) | 协议教科书 —— 数据模型、权威序、生命周期、路由、写入门控 |
-| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | 每个文件夹的语义和职责；minimal vs full；future expansion slots |
+| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | 每个文件夹的语义和职责；deck 布局（恒为 full）；future expansion slots |
 | [skills/preflight/templates.md](skills/preflight/templates.md) | incident / checklist / sketch / debrief / cockpit 模板含 frontmatter 规则 |
 | [skills/preflight/exit-ritual.md](skills/preflight/exit-ritual.md) | Landing ritual —— 分类启发式、red flags、晋升门 |
 | [skills/landing/SKILL.md](skills/landing/SKILL.md) | `/flightdeck:landing` —— 显式 landing ritual |
@@ -499,7 +485,7 @@ Codex / Cursor / Gemini 的 manifest 都到位了，但**行为没测过**。当
 
 ## Roadmap
 
-**已发布：** 生命周期模型 + 严格写入门控（1.0–1.2）· 单一入口 `preflight`、不再自动加载（2.0）· 按项目的软配置门控 + 高频 `status` 仪式（2.1）· 元数据模型归一 + workflow frontmatter 富化（2.2）。完整历史见 [CHANGELOG.md](CHANGELOG.md)；skill 测试状态见 [TEST_PLAN.md](TEST_PLAN.md)。
+**已发布：** 生命周期模型 + 严格写入门控（1.0–1.2）· 单一入口 `preflight`、不再自动加载（2.0）· 软配置门控 + `status` 仪式（2.1）· 元数据模型归一（2.2）· autonomy 默认 + `commit_mode`（2.3）· **rules.md 简化 —— 推断 + House Rules 取代 toggle 集（3.0）**。完整历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 **接下来：**
 
