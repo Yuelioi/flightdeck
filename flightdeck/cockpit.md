@@ -5,7 +5,7 @@
 
 ## Next session
 
-1. **行为 dogfood 3.0**（reload/重装插件到 3.0 后）：scratch deck 上验 git/emit 推断、`### Autonomy overrides` 标准句覆盖、2.3→3.0 迁移改写、when-to-land signal 1/2；跑 walkaround 不报假阳性。
+1. **行为 dogfood（reload/重装插件后）**：①3.0——scratch deck 验 git/emit 推断、`### Autonomy overrides` 标准句覆盖、2.3→3.0 迁移改写、when-to-land signal 1/2、walkaround 不报假阳性；②init 重做——干净目录跑首次建档（git 检测+copy 全布局+interview+AGENTS 询问+onboarding 教程+cleanup），walkaround 容忍空 INDEX。
 2. **发布 3.0** [checklists/version-bump.md](checklists/version-bump.md)（marketplace + tag + 同步插件缓存），然后合并分支 `flightdeck-3.0-rules-simplification` → main。
 3. 仍开放：INDEX-row `—` 分隔符冲突 [incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)（3.0 未触及）；spec §8 的 no-git HISTORY 格式 + scaffold 门实测。
 

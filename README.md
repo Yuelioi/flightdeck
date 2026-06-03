@@ -227,14 +227,14 @@ cd flightdeck
 ### Scaffold a `flightdeck/` in your project
 
 ```powershell
-.\install.ps1 -Scaffold minimal     # minimal contract: rules.md + cockpit.md + landed/HISTORY.md
-.\install.ps1 -Scaffold full        # all subdirs + the 3-file contract
+.\install.ps1 -Scaffold full        # full layout + the 3-file contract
 ```
 
 ```bash
-./install.sh --scaffold=minimal
-./install.sh --scaffold=full
+./install.sh --scaffold             # full layout + the 3-file contract
 ```
+
+> The installer always lays the **full** layout. The `--scaffold` *value* (`minimal`/`full`) is deprecated and ignored in 3.x; the flag is removed in 4.0. Prefer `/flightdeck:preflight` first-time setup, which scaffolds + interviews + offers a guided tour.
 
 ## Usage
 
@@ -247,7 +247,7 @@ cd my-project
 /flightdeck:preflight
 ```
 
-With no `flightdeck/cockpit.md` yet, `/flightdeck:preflight` asks to create one, runs a two-question interview (Active focus, first Next session item), writes the 3-file minimal contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`), and stops. Every later session, run `/flightdeck:preflight` again to read it back and resume.
+With no `flightdeck/cockpit.md` yet, `/flightdeck:preflight` runs first-time setup: it checks for git (and offers `git init` if absent), copies the **full** scaffold layout, runs a two-question interview (Active focus, first Next session item), asks whether to generate `AGENTS.md`, and offers a skippable 2-minute guided tour — then stops. Every later session, run `/flightdeck:preflight` again to read it back and resume.
 
 **Already have an older `flightdeck/`?** On entry, `/flightdeck:preflight` (and the `walkaround` audit) read the deck `version` (in `rules.md`) and offer a guided migration to the current release — see [MIGRATION.md](MIGRATION.md). Migration is never silent: you confirm before anything moves.
 

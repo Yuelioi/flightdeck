@@ -227,14 +227,14 @@ cd flightdeck
 ### 在项目里创建一个 `flightdeck/` 骨架
 
 ```powershell
-.\install.ps1 -Scaffold minimal     # 最小契约：rules.md + cockpit.md + landed/HISTORY.md
-.\install.ps1 -Scaffold full        # 完整子目录 + 三件套契约
+.\install.ps1 -Scaffold full        # 完整布局 + 三件套契约
 ```
 
 ```bash
-./install.sh --scaffold=minimal
-./install.sh --scaffold=full
+./install.sh --scaffold             # 完整布局 + 三件套契约
 ```
+
+> 安装器始终铺**完整**布局。`--scaffold` 的**取值**（`minimal`/`full`）在 3.x 已弃用并被忽略，旗标 4.0 删除。推荐用 `/flightdeck:preflight` 首次建档——它会建档 + 访谈 + 提供可跳过的上手教程。
 
 ## 用法
 
@@ -247,7 +247,7 @@ cd my-project
 /flightdeck:preflight
 ```
 
-当还没有 `flightdeck/cockpit.md` 时，`/flightdeck:preflight` 会征询确认，通过两个简短问题（Active focus、Next session 第一条）生成最小契约三件套（`rules.md` + `cockpit.md` + `landed/HISTORY.md`），然后停下。之后每次会话，再运行一次 `/flightdeck:preflight` 即可读回并续上。
+当还没有 `flightdeck/cockpit.md` 时，`/flightdeck:preflight` 会跑首次建档：检测 git（无则提议 `git init`）、copy **完整**布局骨架、两个简短问题访谈（Active focus、Next session 第一条）、询问是否生成 `AGENTS.md`、并提供一个可跳过的 2 分钟上手教程 —— 然后停下。之后每次会话，再运行一次 `/flightdeck:preflight` 即可读回并续上。
 
 **已经有一个旧版 `flightdeck/`？** 入场时 `/flightdeck:preflight`（以及 `walkaround` 审计）会读取 deck 的 `version`（在 `rules.md`），并在确认后引导你迁移到当前发布版本 —— 详见 [MIGRATION.md](MIGRATION.md)。迁移绝不静默：任何文件移动前都先征得你同意。
 

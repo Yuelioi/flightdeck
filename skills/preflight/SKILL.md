@@ -29,46 +29,13 @@ Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](p
    Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract, so this also covers a half-initialized `flightdeck/` that has no cockpit).
 
    - **`flightdeck/cockpit.md` does NOT exist** → run **First-time setup**:
-     1. Ask: **"No `flightdeck/` deck here. Create one? (minimal contract: `rules.md` + `cockpit.md` + `landed/HISTORY.md`)"** — wait for confirmation.
-     2. Short interview: "Active focus — current main thread (5–15 words)?" / "First 'next session' item — one concrete action?".
-     3. Write the three contract files (today's date, answers substituted; `<current>` = `MIGRATION.md` `current`). `flightdeck/cockpit.md` from this template:
-
-        ```markdown
-        # Cockpit — <project name>
-
-        **Last updated**: <YYYY-MM-DD> by <user>
-        **Active focus**: <from interview>
-
-        ## Next session
-
-        1. <from interview>
-
-        ## Hanging tasks
-
-        - (none)
-        ```
-
-        Also write `flightdeck/rules.md` (3.0 minimal — defaults are full-auto: every ritual self-invocable, `status_auto` fully on, `commit` confirm-gated, git/emit inferred from `.git` / `AGENTS.md` presence. Tell the user that behavior is tuned via the `### Autonomy overrides` House-Rules segment with standard phrases, not toggles — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)):
-
-        ```markdown
-        ---
-        version: <current>
-        disabled_folders: []
-        ---
-
-        ## House rules
-
-        ### Project conventions
-
-        (none yet)
-
-        ### Autonomy overrides
-
-        (none — using defaults)
-        ```
-
-        And create `flightdeck/landed/HISTORY.md` (add-only log, header comment only).
-     4. Do NOT pre-create other folders — the three contract files (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) are the minimal deck. **Then STOP** — the next `/preflight` takes the read path below.
+     1. **git check** — does the deck root (cwd) contain `.git`? If **no**: tell the user "no git here — flightdeck still works, but staleness/history fall back to `landed/HISTORY.md`", and **offer to run `git init`? (y/N)**. If yes, run it. (Non-blocking either way.)
+     2. Ask: **"Create a flightdeck deck here? (full layout + 3-file contract)"** — wait for confirmation.
+     3. **Copy the scaffold verbatim** from this skill's `../../scaffolds/full/flightdeck/` (resolve relative to this skill's base directory; the plugin packages `scaffolds/`) into `./flightdeck/` — every folder + each `INDEX.md` + the **commented** `rules.md` + `cockpit.md` + `landed/HISTORY.md`. **Copy, do NOT re-author** — this is what preserves the `rules.md` comments. Then substitute today's date + `<user>` into `cockpit.md`; the scaffold `rules.md` `version` should equal `MIGRATION.md` `current` — bump it if the scaffold is behind.
+     4. **Interview (2 Q)** → replace the cockpit placeholders: "Active focus — current main thread (5–15 words)?" → replace `<ACTIVE_FOCUS …>`; "First 'next session' item — one concrete action?" → replace `<FIRST_NEXT_ITEM …>`.
+     5. **AGENTS.md** — ask "Generate `AGENTS.md` (cross-tool bridge from cockpit)? (Y/n)". If yes, run `/flightdeck:emit-agents-md`. (Opt-in; creating it now is the bootstrap — matches the 3.0 emit-on-presence rule.)
+     6. **Tutorial** — ask "Run a 2-minute guided tour? It creates a throwaway sample and cleans it up. (y/N)". If yes, follow [onboarding.md](onboarding.md); if no, skip.
+     7. **Then STOP** — the next `/preflight` takes the read path below.
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
 1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
@@ -184,6 +151,7 @@ Resolve which?
 The operational entry ritual is above. The protocol "textbook" lives in companions — read on demand:
 
 - [protocol.md](protocol.md) — data model · status · INDEX · folder map · routing · authority order · write gate · lifecycle · promotion gates · common mistakes
-- [folder-semantics.md](folder-semantics.md) — what each folder holds; minimal-vs-full setup
+- [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout (full, always)
 - [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
-- [exit-ritual.md](exit-ritual.md) — the landing ritual (run by `/flightdeck:landing`)
+- [exit-ritual.md](exit-ritual.md) — the landing ritual (run by `/flightdeck:landing`) + Land-readiness check
+- [onboarding.md](onboarding.md) — optional first-run guided tour (demonstration; auto-cleaned)

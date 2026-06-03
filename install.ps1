@@ -14,8 +14,8 @@
     Stub (PRs welcome):  codex, cursor, gemini
 
 .PARAMETER Scaffold
-    Scaffold a flightdeck/ directory in the current working directory.
-    Values: none (default), minimal, full
+    Scaffold a flightdeck/ directory (full layout) in the current working directory.
+    Values: none (default), full. (minimal is deprecated/ignored in 3.x; the -Scaffold value is removed in 4.0.)
 
 .PARAMETER Force
     Overwrite an existing install without prompting.
@@ -25,8 +25,8 @@
     Auto-detects AI tool and installs the skill.
 
 .EXAMPLE
-    .\install.ps1 -Tool claude -Scaffold minimal
-    Installs the Claude adapter and scaffolds a minimal flightdeck/ in cwd.
+    .\install.ps1 -Tool claude -Scaffold full
+    Installs the Claude adapter and scaffolds a full flightdeck/ in cwd.
 #>
 
 [CmdletBinding()]
@@ -146,7 +146,10 @@ switch ($Tool) {
 }
 
 if ($Scaffold -ne 'none') {
-    Invoke-Scaffold -Variant $Scaffold
+    if ($Scaffold -ne 'full') {
+        Write-Warning "-Scaffold $Scaffold is deprecated (3.x) and ignored; the full layout is always installed; the -Scaffold value is removed in 4.0."
+    }
+    Invoke-Scaffold -Variant 'full'
 }
 
 Write-Host ""

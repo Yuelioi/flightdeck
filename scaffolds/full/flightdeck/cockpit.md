@@ -1,13 +1,11 @@
 # Cockpit — [project name]
 
 **Last updated**: YYYY-MM-DD by [who] (one-line state)
-**Active focus**: [current main thread]
+**Active focus**: <ACTIVE_FOCUS — filled by preflight first-time-setup>
 
 ## Next session
 
-1. [first concrete action — executable just by reading this]
-2. [optional second]
-3. [optional third]
+1. <FIRST_NEXT_ITEM — filled by preflight first-time-setup>
 
 ## Hanging tasks
 

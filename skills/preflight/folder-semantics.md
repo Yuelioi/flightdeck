@@ -2,20 +2,16 @@
 
 Reference for every `flightdeck/` subdirectory: what it holds, naming convention, lifecycle, and links to related folders.
 
-## Minimal vs full setup
+## Deck layout (3.x: full, always)
 
-Not every project needs every folder. Start with just `cockpit.md`. Add folders **when the need appears**, not preemptively.
+As of 3.x, both `preflight` first-time setup and `install --scaffold` lay the **full layout** — every folder with its `INDEX.md`, plus the 3-file contract. There is no longer a minimal/full choice (the `scaffolds/minimal` variant was removed).
 
-| Setup | What exists |
+| Concept | What it means |
 | --- | --- |
-| **Minimal** | `flightdeck/cockpit.md` only |
-| **+ design** | add `specs/` when first design doc is worth writing |
-| **+ planning** | add `plans/` when first implementation plan is needed |
-| **+ knowledge** | add `incidents/` when first lesson is worth keeping |
-| **+ procedures** | add `checklists/` when a multi-step process is run a second time |
-| **Full** | all folders, each with its `INDEX.md`, + `cockpit.md` (+ optional `rules.md`) |
+| **Full layout** (what init creates) | all folders (`sketches/ specs/ plans/ incidents/ checklists/ charts/ debriefs/ landed/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` + `landed/HISTORY.md` |
+| **3-file contract** (validation floor) | `rules.md` + `cockpit.md` + `landed/HISTORY.md` must exist (walkaround CRITICAL if missing) — the *floor*, not a scaffold variant |
 
-Premature folder creation is an anti-pattern. Empty directories signal "this should be filled" and create pressure to write low-signal content.
+**Empty is the normal initial state.** A freshly scaffolded deck has empty folders + empty `INDEX.md` files — expected, not an anti-pattern. Under the full layout a **missing** known folder is the anomaly (walkaround flags it); an **empty-but-present** folder / `INDEX.md` is fine and never flagged. (This reverses the pre-3.x "add folders on demand" guidance.)
 
 ## Routing model
 

@@ -205,5 +205,5 @@ Walkaround never auto-fixes. The author decides.
 - Don't auto-fix any finding — walkaround surfaces, author resolves.
 - Don't run walkaround against other repositories or foreign `flightdeck/` directories — false drift signals.
 - Don't include `landed/` archived files in most audits — they're history, not subject to current-state rules (except Audit 6).
-- Don't fail loudly on optional missing folders — a project with no `debriefs/` directory is fine.
+- **Don't flag empty-but-present folders / `INDEX.md`** — a freshly scaffolded full-layout deck (3.x) has empty folders + empty INDEX files; emptiness is the normal initial state, never an anomaly. (Under the full layout, a *missing* known folder is the mild anomaly instead — **INFO** "folder `<x>/` missing — full layout expects it", not CRITICAL; skip any folder in `disabled_folders`.)
 - Don't bump cockpit `Last updated` from running walkaround — walkaround is read-only by design.

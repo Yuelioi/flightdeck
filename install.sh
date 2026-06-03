@@ -6,7 +6,7 @@
 # Usage:
 #   ./install.sh                          # auto-detect AI tool, install skills
 #   ./install.sh --tool=claude            # explicit AI tool
-#   ./install.sh --scaffold=minimal       # also scaffold flightdeck/ in cwd
+#   ./install.sh --scaffold               # also scaffold flightdeck/ (full layout; --scaffold value deprecated/ignored in 3.x, flag removed in 4.0)
 #   ./install.sh --tool=claude --force    # overwrite existing install
 #
 # Supported (active):  claude
@@ -144,7 +144,10 @@ case "$tool" in
 esac
 
 if [[ "$scaffold" != "none" ]]; then
-    invoke_scaffold "$scaffold"
+    if [[ "$scaffold" != "full" ]]; then
+        echo "warning: --scaffold=$scaffold is deprecated (3.x) and ignored; the full layout is always installed; the --scaffold flag is removed in 4.0." >&2
+    fi
+    invoke_scaffold "full"
 fi
 
 echo ""

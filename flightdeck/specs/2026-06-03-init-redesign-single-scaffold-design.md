@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 summary: 删 minimal scaffold（留 scaffolds/full 目录名）；install 与 preflight 首次建档统一为 copy-the-scaffold（修注释丢失 + 消双流程）；加可跳过的演示式 onboarding 教程（样例 spec，结束清理）；init 加 git 检测提醒 + AGENTS.md opt-in 询问
 last_updated: 2026-06-03
 related: [specs/2026-06-03-rules-simplification-design.md]
@@ -74,11 +74,12 @@ flightdeck 有**两条初始化路径**，且对"minimal/full"处理不一致：
 - `skills/preflight/folder-semantics.md` —— 简化 minimal-vs-full 一节为"单一 scaffold + 校验地板"。
 - `README.md` / `README.zh.md` —— 安装/init 说明更新（去 minimal、加 git 检测/AGENTS/教程）。
 
-## 6. 风险 / 开放问题
+## 6. 风险 / 开放问题（已随 review 收敛）
 
-- **空 INDEX 文件清单（7 个）**：全布局新 deck 一上来带 7 个空 `INDEX.md`。已接受（换单一流程 + 更好教学）；walkaround 不应把"空 INDEX"报成问题。
-- **copy 源定位**：`preflight` 运行时如何找到 `scaffolds/full/`（插件安装路径）？实施时确认相对/绝对路径解析（各 adapter 安装位不同）。
-- **教程样例与真 artifact 混淆**：样例明标 throwaway + 结束清理；若用户中途中断教程，残留样例由下次 preflight/walkaround 作为 stray 提示。
+- **copy 源定位 —— 已解决**：`preflight` 运行时按**自身 base 目录**解析——`<skill-base>/../../scaffolds/full/flightdeck/`。已核实**插件包内含 `scaffolds/`**（`.../flightdeck/<ver>/scaffolds/full/...`），故 copy-the-scaffold 可行；各 adapter 安装位不同但"相对 base"解析统一。
+- **空 INDEX（7 个）**：全布局新 deck 一上来带 7 个空 `INDEX.md`。已接受（换单一流程 + 更好教学）。**实施须确认 walkaround 不把"空 INDEX / 空但存在的文件夹"报成异常**——全布局下"缺文件夹"才是异常。
+- **教程中断残留**：样例 `specs/hello-flightdeck.md` 是**合法 spec**，中断后不会被 walkaround 当 stray（在已知文件夹、frontmatter 合法）。缓解：样例 body 带 `<!-- tutorial sample — safe to delete -->` 标记 + cleanup **幂等**（可重复跑、能识别并清掉残留）。
+- **与 3.0 首次建档重叠**：本 spec 用 copy-the-scaffold **取代** 3.0 里 preflight 内联现写 rules.md 的首次建档段（3.0 的 inline 版是过渡）。
 
 ## 实施分期（给 writing-plans 的提示）
 
