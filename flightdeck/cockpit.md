@@ -1,14 +1,16 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-03 by 月离 (本会话：tri-review 整改 + token-reduction（均完成→done）+ incident 复发 auto-count（实现+27 tests）+ structural-edit-guard spec（pending）；用新版 landing 演示 Step5a。**重建 Next session 为 3.0 发布前清单**——之前散落的 spec 全汇齐。待 reload dogfood。分支领先 main、未 push)
-**Active focus**: flightdeck 3.0 分支 code-complete、未 push；preflight 整改 + 减重 + auto-count 已完成、QA 通过；**发布前剩 dogfood + scriptable lint + 几个开放项**（见下），然后发布 → 合并 main。
+**Last updated**: 2026-06-03 by 月离 (本会话：tri-review 整改 + token-reduction（均完成→done）+ incident 复发 auto-count（实现+27 tests）+ structural-edit-guard spec（pending）；用新版 landing 演示 Step5a。**重建 Next session 为 3.0 发布前清单**——之前散落的 spec 全汇齐。待 reload dogfood。**本次归档完成簇**（4 spec + 2 plan + 2 debrief → landed/，关系边已改写）；**2 sketch 提升为 pending spec**（status-co-advance / silent-bump-nudge）。分支领先 main、未 push)
+**Active focus**: flightdeck 3.0 分支 code-complete、未 push；preflight 整改 + 减重 + auto-count 已完成、QA 通过；**发布前剩 dogfood + scriptable lint + 几个开放项**（见下），然后发布 → 合并 main。**新增 model-v4 模型重构（folder/状态/cockpit 简化）为 3.0 核心，设计经三方评审通过。**
 
 ## Next session — 3.0 发布前清单
+
+> **【3.0 核心·新增】model-v4 模型重构** [spec](specs/2026-06-03-model-v4-folder-state-cockpit-design.md)：folder 7→5 / 状态 6→4 / cockpit AI 全自动驱动，三方评审通过。下一步 writing-plans 拆实施 phase；下列清单将在 plan 落定后并入重排。
 
 1. **重同步缓存 → 行为 dogfood（reload）** ← 发布前总闸：①3.0 软配置面（git/emit 推断、`### Autonomy overrides` 覆盖、2.3→3.0 迁移、when-to-land、walkaround 不报假阳性）②init 重做（干净目录首次建档全程）③**incident 复发 auto-count** [spec](specs/2026-06-03-incident-recurrence-autocount-design.md)（landing 自动 [Case N]+recur:N、晋级 gate）。
 2. **scriptable 机械层** [plan](plans/2026-06-03-scriptable-mechanical-layer-rollout.md) / [spec](specs/2026-06-03-scriptable-mechanical-layer-design.md)：Phase 2 把 INDEX-regen 接进 landing/walkaround/status 双轨；Phase 3 **lint 子命令**——status 合法性 / dangling-ref / stray / **结构块断言（=[structural-edit-guard](specs/2026-06-03-structural-edit-guard-design.md)，防多行 Edit 吞标题）** / recur 校验 / **untracked-spec（active|pending spec 未进 Next session 兜底）**。walkaround 压缩待此。
 3. **决策：recur≥3 已晋级在 INDEX 可见？** 现 INDEX 区分不出"待晋级 vs 已晋级"（晋级记在 body `Promoted:`）；定方案（promoted frontmatter 标 / 翻 superseded / 保持现状），归 [autocount spec](specs/2026-06-03-incident-recurrence-autocount-design.md)。
-4. **小开放项**：INDEX-row `—` 分隔符冲突 [incident](incidents/index-row-summary-delimiter.md)；no-git HISTORY 格式（scriptable spec §8）。
+4. **小开放项**：INDEX-row `—` 分隔符冲突 [incident](incidents/index-row-summary-delimiter.md)；no-git HISTORY 格式（scriptable spec §8）；**2 个提升 spec 待排期**——[status-co-advance](specs/2026-06-03-status-spec-co-advance-design.md)（status 翻 plan 时带动 spec）/ [silent-bump-nudge](specs/2026-06-03-preflight-silent-bump-nudge-design.md)（静默 bump 一行提示）。
 5. **发布 3.0**（最后）[checklists/version-bump.md](checklists/version-bump.md)：version-bump + marketplace + tag + 合并分支 → main。
 
 ## Hanging tasks
