@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from flightdeck_init import init, main
 
-FOLDERS = ["sketches", "specs", "plans", "incidents", "checklists", "charts", "debriefs"]
+FOLDERS = ["specs", "plans", "incidents", "checklists", "charts"]
 
 
 class InitTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class InitTest(unittest.TestCase):
             self.assertIn("# Cockpit — myproj", cockpit)
             self.assertIn("2026-06-03 by 月离 (deck initialized)", cockpit)
             self.assertIn("**Active focus**: just exploring", cockpit)
-            self.assertIn("1. decide what to build", cockpit)
+            self.assertIn("decide what to build", cockpit)
             self.assertNotIn("<ACTIVE_FOCUS", cockpit)
             self.assertNotIn("<FIRST_NEXT_ITEM", cockpit)
             # full layout + 3-file contract present

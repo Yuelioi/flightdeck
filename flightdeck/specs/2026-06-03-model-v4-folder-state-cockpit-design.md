@@ -76,7 +76,7 @@ idea  →  active  →  done
 
 **scrapped 的归宿（评审 A）**：`scrapped` 文件**留在 `specs/` 原位**——不移 `landed/`、**不建 `graveyard/` 子文件夹**（后者违背"减文件夹"主旨，且 folder-semantics 禁止 `specs/` 子目录）。`flightdeck_index.py` 生成 `specs/INDEX` 时**跳过 `scrapped`**，使其不污染待启动池；需要时仅在单独 hand 区 `## 已否决` 列出。
 
-**`specs/INDEX` 状态分组（评审 D）**：idea 文件无日期前缀，与 active/done 的 `YYYY-MM-DD-` 文件混排会乱。INDEX AUTO 区**按状态分组**：`待启动（idea）` 与 `进行中 / 已完成（active·done）` 两组；组内 active/done 按日期降序、idea 按字母序，`scrapped` 不出现。
+**`specs/INDEX` 状态分组（评审 D）**：idea 文件无日期前缀，与 active/done 的 `YYYY-MM-DD-` 文件混排会乱。INDEX AUTO 区**按状态分组**：`待启动（idea）` 与 `进行中·完成（active·done）` 两组；组内 active/done 按日期降序、idea 按字母序，`scrapped` 不出现。
 
 ## 2. cockpit 由 AI 全自动驱动
 
