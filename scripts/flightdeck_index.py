@@ -18,15 +18,15 @@ from collections import Counter
 from pathlib import Path
 
 # Workflow status lifecycle order — drives the mixed-status root summary breakdown.
-STATUS_ORDER = ["pending", "active", "awaiting-review", "blocked", "done", "scrapped"]
+STATUS_ORDER = ["idea", "active", "done", "scrapped"]
 
 DASH = "—"  # em dash — the INDEX row delimiter
 
-SUMMARY_KINDS = {"specs", "plans", "sketches"}
+SUMMARY_KINDS = {"specs", "plans"}
 KNOWLEDGE_KINDS = {"checklists", "incidents"}
 
 # Canonical root-INDEX folder order (not alphabetical — a designed reading order).
-FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "charts", "debriefs", "sketches"]
+FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "charts"]
 
 
 def format_row(kind, filename, fm):
@@ -49,11 +49,6 @@ def format_row(kind, filename, fm):
             if n > 1:
                 row += f" {DASH} recur: {n}"
         return row
-    if kind == "debriefs":
-        return (
-            f"{link} {DASH} {fm['status']} {DASH} "
-            f"reviewed: {fm['reviewed']} {DASH} {fm['last_updated']}"
-        )
     raise ValueError(f"unknown folder kind: {kind}")
 
 
@@ -90,16 +85,22 @@ def folder_summary(folder):
     """`<count> <status>` for a deck folder's root-INDEX row.
 
     Status is the shared `status:` across artifacts, or "mixed" if they differ.
+
+    In `specs/`, `scrapped` files are skipped (model-v4 §1.4): they stay on disk
+    but never show in the specs INDEX, so the root count must match the visible
+    rows and exclude them too.
     """
     folder = Path(folder)
     names = [p for p in folder.glob("*.md") if p.name != "INDEX.md"]
-    total = len(names)
-    if total == 0:
-        return "0"
     statuses = [
         parse_frontmatter(p.read_text(encoding="utf-8")).get("status", "")
         for p in names
     ]
+    if folder.name == "specs":
+        statuses = [s for s in statuses if s != "scrapped"]
+    total = len(statuses)
+    if total == 0:
+        return "0"
     if len(set(statuses)) == 1:
         return f"{total} {statuses[0]}"
     counts = Counter(statuses)
@@ -135,18 +136,72 @@ def regen_root_index(deck):
 def regen_folder_index(folder):
     """Regenerate the `<!-- AUTO:<kind> -->` block for one deck folder.
 
-    Rows are ordered alphabetically by filename (the canonical order; the
+    Most folders list rows alphabetically by filename (the canonical order; the
     pre-script hand-append order is NOT reproducible from the filesystem).
+
+    `specs/` is special (model-v4 §1.4): idea files are timeless (no date
+    prefix) and would sort badly mixed with the dated active/done files, so the
+    block is split into two in-AUTO subgroups — `### 待启动（idea）` (idea,
+    alphabetical) and `### 进行中·完成（active·done）` (active/done, by filename
+    date descending). `scrapped` files stay on disk but never appear (they must
+    not pollute the to-start pool, and the root count excludes them too).
     """
     folder = Path(folder)
     kind = folder.name
     names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+    if kind == "specs":
+        return f"<!-- AUTO:{kind} -->\n{_specs_grouped_body(folder, names)}\n{AUTO_END}"
     rows = [
         format_row(kind, name, parse_frontmatter((folder / name).read_text(encoding="utf-8")))
         for name in names
     ]
     body = "\n".join(rows)
     return f"<!-- AUTO:{kind} -->\n{body}\n{AUTO_END}"
+
+
+def _specs_grouped_body(folder, names):
+    """Render the specs AUTO body as status-grouped subsections (see caller)."""
+    fms = {name: parse_frontmatter((folder / name).read_text(encoding="utf-8")) for name in names}
+    ideas = [n for n in names if fms[n].get("status") == "idea"]
+    active_done = [n for n in names if fms[n].get("status") in ("active", "done")]
+    ideas.sort()  # idea: alphabetical (timeless, no date prefix)
+    active_done.sort(reverse=True)  # active/done: filename date descending
+    groups = []
+    if ideas:
+        rows = "\n".join(format_row("specs", n, fms[n]) for n in ideas)
+        groups.append(f"### 待启动（idea）\n{rows}")
+    if active_done:
+        rows = "\n".join(format_row("specs", n, fms[n]) for n in active_done)
+        groups.append(f"### 进行中·完成（active·done）\n{rows}")
+    return "\n\n".join(groups)
+
+
+def regen_cockpit_inprogress(deck):
+    """Regenerate the cockpit `<!-- AUTO:inprogress -->` block (model-v4 §2).
+
+    cockpit is a status projection of the active set: the `## 进行中` region is
+    derived from every `status: active` spec/plan, walked specs-then-plans, each
+    alphabetically by filename. Each row mirrors the INDEX row (link + summary),
+    with the folder prefix in the link path; an optional `note:` is appended as
+    ` — [note: …]`. Empty when nothing is active.
+    """
+    deck = Path(deck)
+    rows = []
+    for kind in ("specs", "plans"):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+        for name in names:
+            fm = parse_frontmatter((folder / name).read_text(encoding="utf-8"))
+            if fm.get("status") != "active":
+                continue
+            row = f"- [{name}]({kind}/{name}) {DASH} {fm['summary']}"
+            if fm.get("note"):
+                row += f" {DASH} [note: {fm['note']}]"
+            rows.append(row)
+    body = "\n".join(rows)
+    return f"<!-- AUTO:inprogress -->\n{body}\n{AUTO_END}"
 
 
 # charts/ folder INDEX is hand-maintained (external imports); only its root row is derived.
@@ -183,6 +238,9 @@ def _index_targets(deck):
         if folder.is_dir():
             yield name, folder / "INDEX.md", regen_folder_index(folder)
     yield "root", deck / "INDEX.md", regen_root_index(deck)
+    cockpit = deck / "cockpit.md"
+    if cockpit.is_file() and "<!-- AUTO:inprogress -->" in cockpit.read_text(encoding="utf-8"):
+        yield "cockpit", cockpit, regen_cockpit_inprogress(deck)
 
 
 def main(argv=None):

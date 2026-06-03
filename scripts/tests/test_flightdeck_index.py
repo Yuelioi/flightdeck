@@ -5,6 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import flightdeck_index
 from flightdeck_index import (
     parse_frontmatter,
     format_row,
@@ -13,10 +14,29 @@ from flightdeck_index import (
     replace_auto_block,
     charts_summary,
     regen_root_index,
+    regen_cockpit_inprogress,
     main,
+    STATUS_ORDER,
+    SUMMARY_KINDS,
+    FOLDER_ORDER,
 )
 
 DASH = "—"  # em dash, the INDEX row delimiter
+
+
+class ModelV4ConstantsTest(unittest.TestCase):
+    def test_status_order_is_four_states(self):
+        self.assertEqual(STATUS_ORDER, ["idea", "active", "done", "scrapped"])
+
+    def test_summary_kinds_drops_sketches(self):
+        self.assertEqual(SUMMARY_KINDS, {"specs", "plans"})
+
+    def test_folder_order_is_five_no_debriefs_no_sketches(self):
+        self.assertEqual(
+            FOLDER_ORDER, ["specs", "plans", "incidents", "checklists", "charts"]
+        )
+        self.assertNotIn("debriefs", FOLDER_ORDER)
+        self.assertNotIn("sketches", FOLDER_ORDER)
 
 
 class ParseFrontmatterTest(unittest.TestCase):
@@ -30,7 +50,7 @@ class ParseFrontmatterTest(unittest.TestCase):
 class FormatRowTest(unittest.TestCase):
     def test_summary_kind_uses_status_then_summary(self):
         fm = {"status": "active", "summary": "hello"}
-        row = format_row("sketches", "foo.md", fm)
+        row = format_row("specs", "foo.md", fm)
         self.assertEqual(row, f"- [foo.md](foo.md) {DASH} active {DASH} hello")
 
     def test_knowledge_kind_uses_when_to_read_and_applies_to(self):
@@ -74,18 +94,10 @@ class FormatRowTest(unittest.TestCase):
         }
         self.assertNotIn("recur:", format_row("checklists", "foo.md", fm))
 
-    def test_debriefs_kind_uses_reviewed_and_last_updated(self):
-        fm = {
-            "status": "active",
-            "reviewed": "specs/x.md",
-            "last_updated": "2026-06-02",
-        }
-        row = format_row("debriefs", "foo.md", fm)
-        self.assertEqual(
-            row,
-            f"- [foo.md](foo.md) {DASH} active {DASH} "
-            f"reviewed: specs/x.md {DASH} 2026-06-02",
-        )
+    def test_debriefs_kind_is_no_longer_known(self):
+        # model-v4 dropped debriefs/ — format_row must reject it.
+        with self.assertRaises(ValueError):
+            format_row("debriefs", "foo.md", {"status": "active"})
 
 
 class RegenFolderIndexTest(unittest.TestCase):
@@ -115,6 +127,59 @@ class RegenFolderIndexTest(unittest.TestCase):
             self.assertEqual(regen_folder_index(folder), expected)
 
 
+class SpecsGroupingTest(unittest.TestCase):
+    def _specs(self, d):
+        folder = Path(d) / "specs"
+        folder.mkdir()
+        # idea: no date prefix, timeless
+        (folder / "zeta-idea.md").write_text(
+            "---\nstatus: idea\nsummary: z idea\n---\n", encoding="utf-8"
+        )
+        (folder / "alpha-idea.md").write_text(
+            "---\nstatus: idea\nsummary: a idea\n---\n", encoding="utf-8"
+        )
+        # active / done: dated
+        (folder / "2026-06-01-old-active.md").write_text(
+            "---\nstatus: active\nsummary: old active\n---\n", encoding="utf-8"
+        )
+        (folder / "2026-06-03-new-done.md").write_text(
+            "---\nstatus: done\nsummary: new done\n---\n", encoding="utf-8"
+        )
+        # scrapped: physically present but must not appear
+        (folder / "2026-05-01-rejected.md").write_text(
+            "---\nstatus: scrapped\nsummary: rejected\n---\n", encoding="utf-8"
+        )
+        (folder / "INDEX.md").write_text("stale\n", encoding="utf-8")
+        return folder
+
+    def test_specs_index_groups_by_status_and_drops_scrapped(self):
+        with tempfile.TemporaryDirectory() as d:
+            folder = self._specs(d)
+            expected = (
+                "<!-- AUTO:specs -->\n"
+                "### 待启动（idea）\n"
+                f"- [alpha-idea.md](alpha-idea.md) {DASH} idea {DASH} a idea\n"
+                f"- [zeta-idea.md](zeta-idea.md) {DASH} idea {DASH} z idea\n"
+                "\n"
+                "### 进行中·完成（active·done）\n"
+                f"- [2026-06-03-new-done.md](2026-06-03-new-done.md) {DASH} done {DASH} new done\n"
+                f"- [2026-06-01-old-active.md](2026-06-01-old-active.md) {DASH} active {DASH} old active\n"
+                "<!-- /AUTO -->"
+            )
+            self.assertEqual(regen_folder_index(folder), expected)
+
+    def test_specs_index_omits_empty_idea_group(self):
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "specs"
+            folder.mkdir()
+            (folder / "2026-06-01-a.md").write_text(
+                "---\nstatus: active\nsummary: a\n---\n", encoding="utf-8"
+            )
+            out = regen_folder_index(folder)
+            self.assertNotIn("待启动", out)
+            self.assertIn("进行中·完成（active·done）", out)
+
+
 class ReplaceAutoBlockTest(unittest.TestCase):
     def test_swaps_block_preserving_header_and_trailer(self):
         text = "# title\n\n<!-- AUTO:specs -->\nold row\n<!-- /AUTO -->\n\ntrailer\n"
@@ -133,15 +198,15 @@ class RegenRootIndexTest(unittest.TestCase):
             (deck / "specs" / "a.md").write_text(
                 "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
             )
-            (deck / "sketches").mkdir()
-            (deck / "sketches" / "b.md").write_text(
+            (deck / "plans").mkdir()
+            (deck / "plans" / "b.md").write_text(
                 "---\nstatus: active\nsummary: y\n---\n", encoding="utf-8"
             )
-            # plans/incidents/checklists/charts/debriefs absent -> skipped
+            # incidents/checklists/charts absent -> skipped
             expected = (
                 "<!-- AUTO:root -->\n"
                 f"- specs/ {DASH} 1 done\n"
-                f"- sketches/ {DASH} 1 active\n"
+                f"- plans/ {DASH} 1 active\n"
                 "<!-- /AUTO -->"
             )
             self.assertEqual(regen_root_index(deck), expected)
@@ -177,6 +242,36 @@ class FolderSummaryTest(unittest.TestCase):
             # active before done (lifecycle order), per folder-semantics example
             self.assertEqual(folder_summary(folder), "3 (1 active, 2 done)")
 
+    def test_specs_scrapped_excluded_from_root_count(self):
+        # scrapped specs stay on disk but are invisible in the specs INDEX, so
+        # they must not be counted in the root summary either — the root count
+        # must equal the number of visible INDEX rows.
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "specs"
+            folder.mkdir()
+            (folder / "2026-06-01-a.md").write_text(
+                "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
+            )
+            (folder / "2026-05-01-r.md").write_text(
+                "---\nstatus: scrapped\nsummary: r\n---\n", encoding="utf-8"
+            )
+            (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
+            # 1 visible (active); scrapped excluded
+            self.assertEqual(folder_summary(folder), "1 active")
+
+    def test_non_specs_folder_counts_all_statuses(self):
+        # the scrapped exclusion is specs-only; other folders count everything.
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "plans"
+            folder.mkdir()
+            (folder / "a.md").write_text(
+                "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
+            )
+            (folder / "b.md").write_text(
+                "---\nstatus: scrapped\nsummary: y\n---\n", encoding="utf-8"
+            )
+            self.assertEqual(folder_summary(folder), "2 (1 active, 1 scrapped)")
+
     def test_empty_folder_is_zero(self):
         with tempfile.TemporaryDirectory() as d:
             folder = Path(d) / "specs"
@@ -195,6 +290,62 @@ class FolderSummaryTest(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(charts_summary(folder), "1 project imported")
+
+
+class CockpitInprogressTest(unittest.TestCase):
+    def _deck(self, d):
+        deck = Path(d)
+        specs = deck / "specs"
+        specs.mkdir()
+        plans = deck / "plans"
+        plans.mkdir()
+        return deck, specs, plans
+
+    def test_derives_active_rows_from_specs_and_plans(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck, specs, plans = self._deck(d)
+            (specs / "2026-06-01-s.md").write_text(
+                "---\nstatus: active\nsummary: spec work\n---\n", encoding="utf-8"
+            )
+            (specs / "idea.md").write_text(
+                "---\nstatus: idea\nsummary: not yet\n---\n", encoding="utf-8"
+            )
+            (plans / "2026-06-02-p.md").write_text(
+                "---\nstatus: active\nsummary: plan work\n---\n", encoding="utf-8"
+            )
+            (plans / "2026-05-01-done.md").write_text(
+                "---\nstatus: done\nsummary: finished\n---\n", encoding="utf-8"
+            )
+            expected = (
+                "<!-- AUTO:inprogress -->\n"
+                f"- [2026-06-01-s.md](specs/2026-06-01-s.md) {DASH} spec work\n"
+                f"- [2026-06-02-p.md](plans/2026-06-02-p.md) {DASH} plan work\n"
+                "<!-- /AUTO -->"
+            )
+            self.assertEqual(regen_cockpit_inprogress(deck), expected)
+
+    def test_empty_when_no_active(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck, specs, plans = self._deck(d)
+            (specs / "idea.md").write_text(
+                "---\nstatus: idea\nsummary: not yet\n---\n", encoding="utf-8"
+            )
+            expected = "<!-- AUTO:inprogress -->\n\n<!-- /AUTO -->"
+            self.assertEqual(regen_cockpit_inprogress(deck), expected)
+
+    def test_note_appended_to_row(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck, specs, plans = self._deck(d)
+            (specs / "2026-06-01-s.md").write_text(
+                "---\nstatus: active\nsummary: spec work\nnote: 等迁移定稿\n---\n",
+                encoding="utf-8",
+            )
+            expected = (
+                "<!-- AUTO:inprogress -->\n"
+                f"- [2026-06-01-s.md](specs/2026-06-01-s.md) {DASH} spec work {DASH} [note: 等迁移定稿]\n"
+                "<!-- /AUTO -->"
+            )
+            self.assertEqual(regen_cockpit_inprogress(deck), expected)
 
 
 class MainCliTest(unittest.TestCase):
@@ -231,6 +382,33 @@ class MainCliTest(unittest.TestCase):
 
             # --check again: clean
             self.assertEqual(main([str(deck), "--check"]), 0)
+
+
+class CockpitWiredIntoMainTest(unittest.TestCase):
+    def test_main_regenerates_cockpit_inprogress(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            specs = deck / "specs"
+            specs.mkdir()
+            (specs / "2026-06-01-a.md").write_text(
+                "---\nstatus: active\nsummary: real work\n---\n", encoding="utf-8"
+            )
+            (specs / "INDEX.md").write_text(
+                "# specs\n\n<!-- AUTO:specs -->\nstale\n<!-- /AUTO -->\n", encoding="utf-8"
+            )
+            (deck / "INDEX.md").write_text(
+                "# root\n\n<!-- AUTO:root -->\nstale\n<!-- /AUTO -->\n", encoding="utf-8"
+            )
+            (deck / "cockpit.md").write_text(
+                "# Cockpit\n\n## 进行中\n\n<!-- AUTO:inprogress -->\nSTALE\n<!-- /AUTO -->\n\n## 下一步\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(main([str(deck), "--check"]), 1)
+            self.assertEqual(main([str(deck)]), 0)
+            cockpit = (deck / "cockpit.md").read_text(encoding="utf-8")
+            self.assertNotIn("STALE", cockpit)
+            self.assertIn("real work", cockpit)
+            self.assertIn("## 下一步", cockpit)  # hand region preserved
 
 
 class VersionGuardTest(unittest.TestCase):
