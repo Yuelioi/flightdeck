@@ -5,14 +5,13 @@
 
 ## Current focus
 
-flightdeck 3.0 分支 code-complete、未 push；机械层脚本化(INDEX/init/release) + skill token-reduction 进行中（第一批已落：preflight SKILL 158→127 拆 setup.md、5 漂移修、去重）。**未做 runtime dogfood**（本会话加载的是旧 2.3 skill），待 reload 后验证、发布、合并。
+flightdeck 3.0 分支 code-complete、未 push；preflight skill 整改 + token-reduction 已完成、QA 通过（全仓 anchor 校验 / 脚本测试 24 passed / INDEX --check 全绿）。**未做 runtime dogfood**（本会话加载的是旧 2.3 skill），待 reload 后验证、发布、合并。
 
 ## Next session
 
-1. 行为 dogfood（reload/重装插件后）：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、迁移改写、when-to-land、walkaround；②init 重做——干净目录首次建档全程。
+1. 行为 dogfood（reload/重装插件后）—— 减重完成，进入测试：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、迁移改写、when-to-land、walkaround；②init 重做——干净目录首次建档全程。
 2. 发布 3.0（[checklists/version-bump.md](flightdeck/checklists/version-bump.md)）+ 合并分支 → main。
-3. token-reduction 余下批次（[specs/2026-06-03-token-reduction-design.md](flightdeck/specs/2026-06-03-token-reduction-design.md)）：Tier 2 去重、templates、walkaround(待脚本 lint)、A1 拆 migration / A3 git heuristic / A4 拆 protocol（preflight 整改 B/C 已全完成，仅余这些减重项）。
-4. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式。
+3. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式；walkaround 压缩（归 scriptable lint）。
 
 ## Hanging tasks
 
