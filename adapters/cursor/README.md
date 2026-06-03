@@ -42,9 +42,11 @@ Cursor's skill / rules discovery has evolved across versions. The manifest follo
 ## Call-source detection (model_invocable gate)
 
 **Mode: degraded (until verified).** This platform's manifest carries no per-skill
-manual-only switch — the `disable-model-invocation` field is Claude-Code-only — so the
-soft gate ships via the shared `SKILL.md` body. Whether this platform lets the skill body
-distinguish a user invocation from a model self-invoke is **unverified**; until confirmed,
-the gate runs degraded: a ritual NOT in `rules.md` `model_invocable` is treated as
-manual-only and will prompt even on an explicit user invocation. Opt in per-project with
-`model_invocable: [<ritual>]`. Flip this note to "formal" with a transcript when verified.
+manual-only switch, so the soft gate ships via the shared `SKILL.md` body. Whether this
+platform lets the skill body distinguish a user invocation from a model self-invoke is
+**unverified**. Under 3.0 the default is **self-invocable**, so the common case needs no
+detection; only a House-Rules restriction (`<ritual>: don't self-invoke; I run it manually`, or a pre-3.0
+`model_invocable` omission honored for compat) needs source detection. Until verified, a
+restricted ritual runs degraded — treated as manual-only, prompting even on an explicit
+user invocation. See [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
+Flip this note to "formal" with a transcript when verified.

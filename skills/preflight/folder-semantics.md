@@ -84,7 +84,7 @@ Contains:
 
 ### `rules.md` — optional project config
 
-Read first by every entry skill. Carries a closed set of toggles (`git`, `emit_agents_md`, `disabled_folders`, `disabled_gates`, `model_invocable`, `status_auto`) plus free-prose house rules. Absent = defaults (git on, emit on, all folders active, all rituals manual). Full schema: [templates.md § rules.md](templates.md#rulesmd).
+Read first by every entry skill. As of 3.0 it carries `version` + `disabled_folders` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit from `.git` / `AGENTS.md` presence) or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). Absent / minimal = full-auto defaults. Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
 ### `INDEX.md` — root index
 

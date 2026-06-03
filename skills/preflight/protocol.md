@@ -8,22 +8,49 @@
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection). It also carries a closed set of structured toggles plus free-prose house rules. *Omitted toggle fields* default (git on, emit on, all folders/gates active, all rituals manual, commit confirm-gated) — only the file's existence + `version` are required, not every key.
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal 3-file contract** (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and must carry a `version` field (the deck-conformance version that drives migration detection).
 
-Toggles: `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode`; plus the required `version` identity field (not a toggle — see [migration detection](#migration-detection)). Full schema + degradation rules: [templates.md § rules.md](templates.md#rulesmd).
+As of **3.0**, `rules.md` carries only two structured fields plus free-prose house rules:
 
-### Key admission policy (anti-sprawl)
+- `version` — required identity field (drives [migration detection](#migration-detection); not a behavior toggle).
+- `disabled_folders` — the one surviving structured toggle: listed folders are never suggested and never flagged as orphans.
+- **House rules** — free prose in two recommended subsections: `### Project conventions` (deck-local conventions) and `### Autonomy overrides` (behavioral overrides).
 
-The toggle set is **closed**: an unknown key is ignored with a one-line warning, so config never grows by accident (a typo can't add behavior). It grows only by a deliberate decision — and a proposed new key MUST pass **all four** of these, or it does not belong in `rules.md`:
+Everything that used to be a toggle is now **inferred from the environment** (`git`, `emit_agents_md`) or a **default that House Rules can override** (`commit` confirm, all rituals self-invocable, all `status_auto` transitions on). The pre-3.0 keys (`git` · `emit_agents_md` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode`) are **read for compatibility through 3.x and removed at 4.0** — a deck still carrying them is honored, and `preflight` offers to migrate it (see [migration detection](#migration-detection)). Re-adding a structured toggle still faces a high bar (per-project-varying + real-demand-now + not-inferable + not-foldable); almost everything belongs in House Rules or inference instead. Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
 
-1. **Per-project varying** — it encodes a preference/policy that genuinely differs from project to project, not a universal default everyone would set the same way.
-2. **Not a protocol contract** — it is NOT a structural contract. The `<!-- AUTO -->` region mechanics, graph-reachability rules, folder kinds, and the *semantics* of the existing toggles stay hard-coded. (`version` lives in `rules.md` but is a required **identity** field, not a behavior toggle — it is exempt from this admission policy.) `rules.md` tunes behavior; it never redefines the protocol.
-3. **Real demand now** — a concrete project has actually hit the wall (YAGNI). No speculative keys: park the idea in a spec backlog until a real need appears (e.g. `cockpit_max_lines` / `staleness_days` remain backlog precisely because nothing has needed them yet).
-4. **Not foldable** — it cannot be expressed through an existing key. No redundant or overlapping toggles.
+## Rule resolution order
 
-A key that fails any point is either hard-coded protocol, a backlog item, or redundant — not a `rules.md` toggle.
+Every skill resolves each behavior in this order — **first hit wins**:
 
-When `git: false`, skills skip all git reconcile/commit steps and use `landed/HISTORY.md` for the staleness check and history. `commit_mode` tunes *how* landing commits when `git: true` (`manual`/`confirm`/`auto`); `git: false` overrides it (no commit at all). When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan. Honor house-rules prose, but it cannot override the toggles or the project's own agent rules.
+1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
+2. **Environment inference** — `git`: does deck root contain `.git`?; `emit_agents_md`: does deck root already have `AGENTS.md`?
+3. **Built-in default** — `commit` = confirm; every ritual self-invocable; `status_auto` = `start` + `land` both on.
+
+(Pre-3.0 structured keys, when still present on a not-yet-migrated deck, are read between steps 1 and 2 — honored for 3.x compatibility, removed at 4.0.)
+
+**deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
+
+**Authority order** (when sources disagree): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
+
+**Behavioral-override identification (穿针 — not a YAML toggle):**
+- `### Autonomy overrides` is a **literal heading**; a skill matches the **standard phrases** (table below) within that segment by **lenient substring**, not per-call semantic guessing → consistent across models (Claude/Gemini/Copilot/Codex), testable.
+- Matching **skips HTML-comment lines** (`<!-- ... -->`), so a `<!-- migrated from commit_mode:auto -->` provenance comment is never mis-matched.
+- If the `### Autonomy overrides` segment is absent → fall back to whole-House-Rules semantic reading (tolerant; never errors).
+- **Legacy-language compat**: the canonical phrases are English, but skills also recognize the **legacy Chinese equivalents** (right column) for decks authored before the English canon — same lenient-substring path.
+- **House Rules internal conflicts are the user's responsibility.** flightdeck does **not** auto-resolve contradictory overrides (no last-match-wins); a skill may passively flag an obvious contradiction but never silently picks one.
+
+**Standard-phrase table** (canonical English; migration emits exactly these; hand-written overrides recommended to match):
+
+| Behavior | Standard phrase (canonical English) | Legacy Chinese (compat) |
+| --- | --- | --- |
+| commit automatically | `commit without asking` | `提交不必询问，直接 commit` |
+| commit manually (never) | `don't auto-commit; leave changes for me / CI` | `不要自动 commit，留给我或 CI` |
+| a ritual must not self-invoke | `<ritual>: don't self-invoke; I run it manually` | `<ritual> 不要自调，我手动跑` |
+| a status transition off | `status: don't auto <transition>` | `status 不要自动 <transition>` |
+| no git | `this deck doesn't use git; history in landed/HISTORY.md` | `本 deck 不走 git，历史记 landed/HISTORY.md` |
+| has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
+
+When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan.
 
 ## Migration detection
 
@@ -62,7 +89,8 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
 | `reviewed` | debriefs | **required** | links to the reviewed spec/topic | author | debrief check |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | preflight/walkaround migration detection | preflight setup / auto-bump | Audit 10 |
-| `git` · `emit_agents_md` · `disabled_folders` · `disabled_gates` · `model_invocable` · `status_auto` | `rules.md` | optional (defaulted) | all entry skills | user | — |
+| `disabled_folders` | `rules.md` | optional (defaulted `[]`) | all entry skills | user | — |
+| `git` · `emit_agents_md` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode` | `rules.md` (pre-3.0) | **removed in 3.0** — inferred / House-Rules / default (see [Rule resolution order](#rule-resolution-order)); read for 3.x compat only | all entry skills | — | — |
 
 `cockpit.md` header lines (`Last updated` / `Active focus` / `Next session` / `Hanging tasks`) are board fields, not YAML frontmatter.
 
@@ -175,7 +203,7 @@ A scrapped sketch stays in `sketches/` (marked `status: scrapped`), never archiv
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + `Next session` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when `git: false`; then commit per `commit_mode` (`confirm` default; skipped entirely when `git: false`). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Last updated` + `Next session` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when no-git; then commit per the commit override (`confirm` default; skipped entirely under no-git). landing regenerates the INDEX of any folders changed this session.
 
 ## Write gate
 

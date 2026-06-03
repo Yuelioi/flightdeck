@@ -10,43 +10,47 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 
 ```markdown
 ---
-version: 2.3              # REQUIRED — flightdeck release this deck conforms to; drives migration detection (not a toggle)
-git: true                 # false → skills skip all git reconcile/commit steps
-emit_agents_md: true      # false → the emit-agents-md skill exits without writing
-disabled_folders: []      # e.g. [charts, debriefs] → never suggested; not flagged as orphans
-disabled_gates: []        # e.g. [debrief-disposition]
-model_invocable: []       # rituals the model may self-invoke; [] = all manual. e.g. [landing]
-status_auto: []           # optional status transitions; [] = none. add `start` (→active) / `land` (done+land)
-commit_mode: confirm      # landing's commit step: manual (never commit) / confirm (ask Y/n, default) / auto (commit, no prompt). Only when git: true
+version: 3.0             # REQUIRED — flightdeck release this deck conforms to; drives migration detection
+disabled_folders: []     # the one structured toggle: listed folders never suggested / not flagged as orphans
 ---
 
 ## House rules
 
-Free-prose project conventions every flightdeck skill must honor
-(e.g. "specs written in Chinese", "do not create sketches/", "always branch before committing").
+### Project conventions
+
+Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not create sketches/").
+General project conventions (code style, "branch before committing") belong in CLAUDE.md / AGENTS.md, NOT here.
+
+### Autonomy overrides
+
+Omit = defaults (commit confirm · all rituals self-invocable · status_auto fully on ·
+git & emit inferred from `.git` / `AGENTS.md` presence). To override, uncomment a standard phrase:
+<!-- commit without asking -->
+<!-- landing: don't self-invoke; I run it manually -->
+<!-- this deck doesn't use git; history in landed/HISTORY.md -->
+<!-- has AGENTS.md but don't auto-regen -->
 ```
 
 ### Rules
 
-- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. *Omitted toggle fields* still default (git on, emit on, all folders/gates active, all rituals manual, commit confirm-gated) — only the file's existence + `version` are required, not every key.
-- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. It is NOT part of the closed toggle set and is exempt from the key-admission policy.
-- **Closed toggle set** — only these seven keys are honored. An unknown key is ignored with a one-line warning (typos must not silently change behavior):
+- **Mandatory file** — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Must exist and carry `version`. Omitted `disabled_folders` defaults `[]`; all behavior not pinned here resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default).
+- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations.
+- **One structured toggle (3.0).** Only `disabled_folders` remains structured:
 
-  | Key | Type | Default | Effect when changed |
+  | Key | Type | Default | Effect |
   | --- | --- | --- | --- |
-  | `git` | bool | `true` | `false` → skip git branch/status/stash/log reconcile; never auto-commit; staleness + history use `landed/HISTORY.md`. |
-  | `emit_agents_md` | bool | `true` | `false` → `emit-agents-md` refuses and reports "disabled via rules.md". |
   | `disabled_folders` | list | `[]` | Listed folders never suggested by fallback/exit classification; not flagged as orphans by `walkaround`. |
-  | `disabled_gates` | list | `[]` | Named gates skipped. Known: `debrief-disposition`, `frontmatter-required`. |
-  | `model_invocable` | list | `[]` | Rituals (`landing`/`preflight`/`walkaround`/`emit-agents-md`/`status`) the model may self-invoke via the skill tool. `[]` = all manual (explicit `/flightdeck:<x>` only). Each ritual's Step-0 gate enforces it. |
-  | `status_auto` | list | `[]` | Optional lifecycle transitions the `status` skill may auto-apply once invoked. `[]` = none; the two core transitions (create→pending, finish→awaiting-review) are always automatic and are NOT in this list. Members: `start` (→active), `land` (done + confirm-gated land). |
-  | `commit_mode` | enum | `confirm` | Landing's commit step (step 7). `manual` → landing runs fully but never commits (leaves changes for you / CI); `confirm` → generate the commit, then ask Y/n (default; the pre-2.2 behavior); `auto` → commit without prompting. **Applies only when `git: true`** — under `git: false` there is no commit regardless. |
 
-- **`git` vs `commit_mode`** — `git` decides whether git is used at all (reconcile, staleness, history); `commit_mode` only tunes *how landing commits* when git is on. `git: false` wins: no reconcile, history via `landed/HISTORY.md`, no commit whatever `commit_mode` says.
-- **`disabled_gates: [frontmatter-required]` is dangerous** — it makes routed files invisible to grep-routing. Warn the user when honoring it.
-- **House rules are advisory prose** the AI honors, but they cannot redefine the six toggle keys.
-- **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail (a broken `rules.md` must not brick the entry ritual).
-- **Read first**: every entry skill (`preflight`, `walkaround`, `landing`, `emit-agents-md`, `status`) reads `rules.md` before acting and branches on the toggles.
+- **Everything else is inference / default / House Rules** (canonical resolution in protocol):
+  - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in landed/HISTORY.md` overrides.
+  - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
+  - `commit` → defaults `confirm`; House Rules `commit without asking` (auto) / `don't auto-commit; leave changes for me / CI` (manual). Under no-git there is no commit regardless.
+  - ritual self-invocation → defaults **on**; House Rule `<ritual>: don't self-invoke; I run it manually` restricts one.
+  - `status_auto` → defaults `start` + `land` **on**; House Rule `status: don't auto <transition>` restricts one.
+- **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
+- **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`model_invocable`/`status_auto`/`commit_mode`) are **read and honored through 3.x**, removed at 4.0; `preflight` offers to migrate a deck still carrying them.
+- **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
+- **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
 
 ---
 

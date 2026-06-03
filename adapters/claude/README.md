@@ -101,8 +101,9 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:U
 **Mode: formal.** Claude Code injects a `<command-name>/flightdeck:<ritual></command-name>`
 marker when the user types the slash, and omits it on a model self-invoke (Skill tool).
 The Step-0 gate keys off this marker: explicit user invocations are always allowed;
-model self-invocation is allowed only when the ritual is listed in `rules.md`
-`model_invocable`. Default (`model_invocable: []`) ⇒ identical to the old
-`disable-model-invocation: true`.
+model self-invocation is **allowed by default (3.0)** and blocked only when the deck's
+House Rules `### Autonomy overrides` segment carries `<ritual>: don't self-invoke; I run it manually` (or a pre-3.0
+deck's `model_invocable` list, honored for 3.x compat, omits the ritual). See
+[protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
 
-The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate: it self-invokes only when `model_invocable` lists `status`. No manifest edit is needed to add it.
+The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate. No manifest edit is needed to add it.

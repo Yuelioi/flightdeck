@@ -15,20 +15,19 @@ AGENTS.md is the cross-tool standard for project-level AI instructions, stewarde
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `emit-agents-md` is self-invocable** — continue.
 
-- If **`emit-agents-md` is in `model_invocable`** → allowed; continue this ritual normally.
-- Else (`emit-agents-md` not listed):
-  - If you can tell this run was an **explicit user `/flightdeck:emit-agents-md`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
-  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`emit-agents-md` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [emit-agents-md]` to `flightdeck/rules.md`." Run no further step.
+- **Restricted** only if House Rules `### Autonomy overrides` says `emit-agents-md: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `emit-agents-md`):
+  - explicit user `/flightdeck:emit-agents-md` (e.g. a `<command-name>` marker) → allowed; continue.
+  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`emit-agents-md` is manual-only in this project (House Rule). Remove the `emit-agents-md: don't self-invoke` line to allow model self-invoke." Run no further step.
 
-This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
+(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 
 ## Run this checklist
 
 ### Step 0a: Apply `flightdeck/rules.md` toggles
 
-If present: when `emit_agents_md: false`, do nothing and report "AGENTS.md emit disabled via rules.md" — skip all remaining steps. When `git: false`, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do".
+This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` (the bootstrap path; the "auto-regen only if `AGENTS.md` already exists" rule applies to *landing*'s call, not to this command). Under no-git, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do". (Compat: a pre-3.0 `emit_agents_md: false`, or the House Rule `has AGENTS.md but don't auto-regen`, only suppresses the *automatic* landing-time regen — never this explicit command.)
 
 ### Step 1: Read `flightdeck/cockpit.md`
 

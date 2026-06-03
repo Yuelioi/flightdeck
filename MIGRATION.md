@@ -1,6 +1,6 @@
 ---
-current: 2.3
-layout_need_update: [2.2]   # releases requiring a deck migration; deck.version < any listed (or no version) → non-silent migration offer
+current: 3.0
+layout_need_update: [2.2, 3.0]   # releases requiring a deck migration; deck.version < any listed (or no version) → non-silent migration offer
 ---
 
 # Migration
@@ -8,6 +8,33 @@ layout_need_update: [2.2]   # releases requiring a deck migration; deck.version 
 This document records breaking migrations for the maintainer's reference.
 
 > **Migration detection reads this frontmatter.** `current` = latest release; `layout_need_update` = releases that changed deck structure. `preflight`/`walkaround` compare a deck's `rules.md` `version` against it: version below any `layout_need_update` entry (or no `version` at all) → non-silent migration offer; otherwise preflight silently bumps the deck's `version` to `current`. (Replaces the old cockpit `**Layout**` string check.)
+
+## 2.3 → 3.0 — rules.md simplification (BREAKING)
+
+3.0 dissolves the structured toggle set. `rules.md` keeps only `version` + `disabled_folders` + free-prose House Rules; `git`/`emit_agents_md` become **environment inference**, and `commit`/`model_invocable`/`status_auto` become **defaults overridable via the House-Rules `### Autonomy overrides` segment**. See [protocol § Rule resolution order](skills/preflight/protocol.md#rule-resolution-order).
+
+**Compatibility:** pre-3.0 keys are **read and honored through all of 3.x**; removed at 4.0.
+
+**Migration (`preflight` offers it; never silent):** on a deck with `version < 3.0` or any removed key still present, `preflight` proposes rewriting `rules.md`:
+
+1. Set `version: 3.0`, keep `disabled_folders`.
+2. Translate each **non-default** removed value into a House-Rules `### Autonomy overrides` standard phrase (canonical English), each prefixed with a `<!-- migrated from <key>:<value> -->` provenance comment (never delete the comment — it shows provenance).
+3. Drop keys left at their default (they're now the default — nothing to carry).
+
+**Translation table** (non-default → standard phrase):
+
+| Removed key/value | House Rule (`### Autonomy overrides`, canonical English) |
+|---|---|
+| `commit_mode: auto` | `commit without asking` |
+| `commit_mode: manual` | `don't auto-commit; leave changes for me / CI` |
+| `model_invocable` omits a ritual | `<ritual>: don't self-invoke; I run it manually` |
+| `status_auto` omits `start`/`land` | `status: don't auto <transition>` |
+| `git: false` | `this deck doesn't use git; history in landed/HISTORY.md` |
+| `emit_agents_md: false` **and** deck has `AGENTS.md` | `has AGENTS.md but don't auto-regen` |
+| `emit_agents_md: false` **and** no `AGENTS.md` | (drop — inference already equivalent; **expected**, not a lost-config bug) |
+| `disabled_gates: [...]` | (drop — removed in 3.0; if genuinely used, convert per-gate to prose or keep a warning) |
+
+After rewriting, **reinstall/sync the plugin-cache copy** to load the 3.0 skills.
 
 ## 2.2 → 2.3 — autonomy defaults + `commit_mode` (additive, no migration)
 

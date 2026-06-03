@@ -1,12 +1,13 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-03 by 月离 (2.3.0 dogfooded end-to-end on a throwaway full-auto scratch deck — status auto-flip, observable `last_updated` bump, `commit_mode: auto`, and the collect-then-migrate co-land of a mutual spec↔plan cluster all verified; filed 3 follow-up findings: 1 incident + 2 sketches)
-**Active focus**: flightdeck 2.3.0 shipped and now dogfood-verified (migration + full-auto feature surface both pass); remaining work is triaging the 3 dogfood findings and the deferred-folder backlog.
+**Last updated**: 2026-06-03 by 月离 (rules.md 3.0 简化 designed (spec + two tri-review rounds, disposition complete) AND implemented on branch `flightdeck-3.0-rules-simplification` — 21 files: toggle 集溶解为推断+House Rules、删 disabled_gates、autonomy 默认全开、迁移、when-to-land；本 deck 已自迁移到 3.0)
+**Active focus**: flightdeck 3.0 (rules.md 简化) 已在分支上落地实现；**未做行为级 dogfood**（本会话加载的是缓存里的旧 2.3 skill），待按 3.0 reload 插件后验证，再发布 + 合并。
 
 ## Next session
 
-1. Triage the 3 dogfood findings — fix the INDEX-row `—` delimiter collision ([incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)); decide whether [sketches/preflight-upgrade-nudge.md](sketches/preflight-upgrade-nudge.md) and [sketches/status-spec-lags-plan.md](sketches/status-spec-lags-plan.md) promote to specs or defer.
-2. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
+1. **行为 dogfood 3.0**（reload/重装插件到 3.0 后）：scratch deck 上验 git/emit 推断、`### Autonomy overrides` 标准句覆盖、2.3→3.0 迁移改写、when-to-land signal 1/2；跑 walkaround 不报假阳性。
+2. **发布 3.0** [checklists/version-bump.md](checklists/version-bump.md)（marketplace + tag + 同步插件缓存），然后合并分支 `flightdeck-3.0-rules-simplification` → main。
+3. 仍开放：INDEX-row `—` 分隔符冲突 [incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)（3.0 未触及）；spec §8 的 no-git HISTORY 格式 + scaffold 门实测。
 
 ## Hanging tasks
 

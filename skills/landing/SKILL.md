@@ -13,20 +13,19 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `landing` is self-invocable** — continue.
 
-- If **`landing` is in `model_invocable`** → allowed; continue this ritual normally.
-- Else (`landing` not listed):
-  - If you can tell this run was an **explicit user `/flightdeck:landing`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
-  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`landing` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [landing]` to `flightdeck/rules.md`." Run no further step.
+- **Restricted** only if House Rules `### Autonomy overrides` says `landing: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `landing`):
+  - explicit user `/flightdeck:landing` (e.g. a `<command-name>` marker) → allowed; continue.
+  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`landing` is manual-only in this project (House Rule). Remove the `landing: don't self-invoke` line to allow model self-invoke." Run no further step.
 
-This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
+(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 
 ## Run this checklist
 
 The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md). Skeleton:
 
-0. **Read `flightdeck/rules.md`** if present. When `git: false`: skip the commit step (step 7), and instead append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <result>; next: <pointer>`, newest first). Note `commit_mode` (default `confirm`) — it drives step 7 when `git: true`. Honor `disabled_gates` (e.g. skip the debrief-disposition gate if disabled).
+0. **Read `flightdeck/rules.md`** if present; resolve config per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides). When no-git: skip the commit step (step 7), and instead append one line to `landed/HISTORY.md` (`YYYY-MM-DD — <result>; next: <pointer>`, newest first). The commit override (House Rules `commit without asking` = auto / `don't auto-commit; leave changes for me / CI` = manual; default `confirm`) drives step 7 under git. (Pre-3.0 `commit_mode` / `disabled_gates`, if present, are honored for compat.)
 1. **Resolve hanging tasks first** — incomplete debrief dispositions block clean exit. See [exit-ritual.md § Hanging tasks](../preflight/exit-ritual.md#hanging-tasks--block-session-exit). If one is genuinely blocking, list it and pause for the user before running steps 2–7.
 2. **Classify new knowledge** — apply heuristics (a)–(h), first-match wins. Folders: `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`, `sketches/`. Each written artifact carries a `status` field in frontmatter. No new knowledge is a valid outcome — don't manufacture a classification just to complete landing. See [exit-ritual.md § Classification heuristics](../preflight/exit-ritual.md#classification-heuristics).
 3. **Regenerate INDEX for changed folders** — at session end, regenerate the `<!-- AUTO -->` region of `INDEX.md` only for folders where a file was added, modified, moved, landed, or had its status changed this session. Leave other folders' INDEX untouched. If any folder's counts changed, also refresh the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. See [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules).
@@ -39,7 +38,7 @@ The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md)
    - **Missing frontmatter `status`**: a new flat file in any knowledge folder lacking a `status` field → flag.
    - **Known folders (1.2)**: `sketches/`, `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`, and `landed/`. Files placed outside these known folders or directly under `flightdeck/` root (other than `cockpit.md` / `INDEX.md` / `rules.md`) are stray.
    Surface any hit **before** the commit prompt so junk isn't committed; the user decides whether to fix now or proceed.
-7. **Commit** — per `commit_mode` (rules.md; default `confirm`): `manual` → don't commit, leave the changes for the user / CI; `confirm` → generate the commit then ask "Commit now? (Y/n)"; `auto` → commit without prompting. (`git: false` already skipped this step at step 0.) Use `checklists/commits.md` style if it exists; otherwise terse imperative subject + reasoning in body.
+7. **Commit** — per the commit override (House Rules; default `confirm`): `manual` (`don't auto-commit…`) → don't commit, leave the changes for the user / CI; `confirm` (default) → generate the commit then ask "Commit now? (Y/n)"; `auto` (`commit without asking`) → commit without prompting. (No-git already skipped this step at step 0.) Use `checklists/commits.md` style if it exists; otherwise terse imperative subject + reasoning in body.
 
 ## Length check (runs right after step 4)
 

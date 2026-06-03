@@ -97,11 +97,11 @@ Step 4: Update cockpit.md
         - Update Hanging tasks: add new blocking items, clear resolved ones
         - Cockpit is focus only — artifact status lives in the folder `INDEX.md` files
 
-Step 5: Commit — honor `commit_mode` (rules.md; default `confirm`)
-        - manual  → do NOT commit; leave the changes for you / CI
-        - confirm → generate the commit, then ask "Commit now? (Y/n)"  (default)
-        - auto    → commit without prompting
-        - git: false overrides all three → no commit (landing already logged landed/HISTORY.md)
+Step 5: Commit — honor the commit override (House Rules; default `confirm`)
+        - manual (`don't auto-commit…`)  → do NOT commit; leave the changes for you / CI
+        - confirm (default) → generate the commit, then ask "Commit now? (Y/n)"
+        - auto (`commit without asking`)    → commit without prompting
+        - no-git overrides all three → no commit (landing already logged landed/HISTORY.md)
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
 
@@ -256,7 +256,7 @@ Last updated:     ONLY in these cases (otherwise leave alone):
 Active focus:     update if main thread shifted (otherwise leave)
 Next session:     always update — at minimum confirm the first item is still right
 Hanging tasks:    hand-maintained list — add new blocking items, clear resolved ones
-HISTORY.md:       when git: false, append one line per landing (YYYY-MM-DD — result; next: pointer)
+HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — result; next: pointer)
 ```
 
 **`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests.
@@ -277,9 +277,22 @@ Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifact
 2. **Move.** For each entry in `M`, move `<folder>/<file>` → `landed/<folder>/<file>`, creating `landed/<folder>/` if absent.
 3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
 4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region, then recompute the affected folders' count lines in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
-5. When `rules.md` sets `git: false`, append one line per landing to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+5. When no-git (deck root has no `.git`, or a House Rule says so), append one line per landing to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
 
 **There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
+
+## Land-readiness check
+
+Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2:
+
+- **signal 1** — this `status` invocation just flipped an artifact to `done` / `awaiting-review`.
+- **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
+
+Mechanics:
+- signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
+- signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
+- Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
+- **Deliberate gap (YAGNI):** a long single session that churns without ever flipping a status is not nudged mid-session (caught at next entry). No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `landed/HISTORY.md` mtime / line growth.
 
 ## See also
 

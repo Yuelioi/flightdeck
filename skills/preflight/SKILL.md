@@ -15,14 +15,13 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): `preflight` is self-invocable** — continue.
 
-- If **`preflight` is in `model_invocable`** → allowed; continue this ritual normally.
-- Else (`preflight` not listed):
-  - If you can tell this run was an **explicit user `/flightdeck:preflight`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
-  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`preflight` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [preflight]` to `flightdeck/rules.md`." Run no further step.
+- **Restricted** only if House Rules `### Autonomy overrides` says `preflight: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `preflight`):
+  - explicit user `/flightdeck:preflight` (e.g. a `<command-name>` marker) → allowed; continue.
+  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`preflight` is manual-only in this project (House Rule). Remove the `preflight: don't self-invoke` line to allow model self-invoke." Run no further step.
 
-This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.) Once past this gate, the checklist's **Branch-0 (deck existence) still runs first** within the ritual.
+(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.) Once past this gate, the checklist's **Branch-0 (deck existence) still runs first** within the ritual.
 
 ## Run this checklist exactly
 
@@ -49,30 +48,30 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
         - (none)
         ```
 
-        Also write `flightdeck/rules.md` (ships **full-auto** — every ritual self-invocable + auto-status; `commit` stays the one human checkpoint. Tell the user, and that emptying `model_invocable` / `status_auto` reverts to manual):
+        Also write `flightdeck/rules.md` (3.0 minimal — defaults are full-auto: every ritual self-invocable, `status_auto` fully on, `commit` confirm-gated, git/emit inferred from `.git` / `AGENTS.md` presence. Tell the user that behavior is tuned via the `### Autonomy overrides` House-Rules segment with standard phrases, not toggles — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)):
 
         ```markdown
         ---
         version: <current>
-        git: true
-        emit_agents_md: true
         disabled_folders: []
-        disabled_gates: []
-        model_invocable: [preflight, landing, walkaround, emit-agents-md, status]
-        status_auto: [start, land]
-        commit_mode: confirm
         ---
 
         ## House rules
 
+        ### Project conventions
+
         (none yet)
+
+        ### Autonomy overrides
+
+        (none — using defaults)
         ```
 
         And create `flightdeck/landed/HISTORY.md` (add-only log, header comment only).
      4. Do NOT pre-create other folders — the three contract files (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) are the minimal deck. **Then STOP** — the next `/preflight` takes the read path below.
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
-1. **Read `flightdeck/rules.md`** if present. Apply its toggles for the whole ritual: when `git: false`, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback).
+1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
 
 2. **Check version (migration detection; non-silent on mismatch).** Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](protocol.md#migration-detection):
 
@@ -85,11 +84,11 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
 
 3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; do not re-read either during the ritual.
 
-4. **(skip entirely when `rules.md` sets `git: false`) Reconcile against repo state.** Run these checks independently (in parallel where supported):
+4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state.** Run these checks independently (in parallel where supported):
    - `git branch --show-current` — matches `Active focus` in cockpit?
    - `git status --short` — does the first "Next session" item show up as in-progress files?
    - `git stash list` — any entries not mentioned in cockpit?
-   - `git log -1 --format=%cs` — is `Last updated` more than ~14 days behind the most recent commit? (When `git: false`, compare against the newest `landed/HISTORY.md` entry instead.)
+   - `git log -1 --format=%cs` — is `Last updated` more than ~14 days behind the most recent commit? (When no-git, compare against the newest `landed/HISTORY.md` entry instead.)
 
    Cross-check cockpit's `## Next session` against reality (branch, tree state). Flag any mismatch.
 
@@ -114,6 +113,8 @@ This gate defaults to manual-only: with no `model_invocable` key, behavior is id
    List all findings before offering fixes. Offer once: "Fix all flagged files?" — do not fix any until the user confirms.
 
 8. **All reconciled → report item #1, then STOP.** Read-only recon doesn't fly the mission. State the item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
+
+   **Land-readiness (signal 2), as the FINAL output line / a dedicated `## Land-readiness` block** (never mid-report): run the [Land-readiness check](exit-ritual.md#land-readiness-check) — if `git status` shows **≥ 5** changed files under `flightdeck/` (skip entirely under no-git), append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
 
 ## Fallback when "Next session" is empty
 

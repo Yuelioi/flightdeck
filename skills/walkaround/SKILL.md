@@ -22,18 +22,17 @@ User-triggered integrity audit of a flightdeck for protocol drift. The protocol 
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and look at its `model_invocable` list (absent key or `[]` = empty).
+Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `walkaround` is self-invocable** — continue.
 
-- If **`walkaround` is in `model_invocable`** → allowed; continue this ritual normally.
-- Else (`walkaround` not listed):
-  - If you can tell this run was an **explicit user `/flightdeck:walkaround`** invocation (e.g. the platform injected a `<command-name>` marker for it) → allowed; continue.
-  - Otherwise — you reached this skill by **model self-invocation** (skill tool), **or you cannot tell the call source** → **STOP immediately.** Report: "`walkaround` is manual-only in this project. To let the model self-invoke it, add `model_invocable: [walkaround]` to `flightdeck/rules.md`." Run no further step.
+- **Restricted** only if House Rules `### Autonomy overrides` says `walkaround: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `walkaround`):
+  - explicit user `/flightdeck:walkaround` (e.g. a `<command-name>` marker) → allowed; continue.
+  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`walkaround` is manual-only in this project (House Rule). Remove the `walkaround: don't self-invoke` line to allow model self-invoke." Run no further step.
 
-This gate defaults to manual-only: with no `model_invocable` key, behavior is identical to the former `disable-model-invocation: true`. (Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
+(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
 
 ## Audits
 
-Run all 12 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray) and `disabled_gates` (do not flag a disabled gate). For each, report findings with the severity tag.
+Run all 12 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray). Resolve other behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order); do not flag the absence of pre-3.0 toggle keys as an error (3.0 removed them — inferred / House-Rules now). (Compat: a pre-3.0 `disabled_gates` still suppresses its gate through 3.x.) For each, report findings with the severity tag.
 
 **Field validity is governed by [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical)** — that table is the source of truth for which fields are required per kind. The audits below check against it; if they disagree, the canonical table wins.
 
