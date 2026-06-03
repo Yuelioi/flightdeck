@@ -1,7 +1,7 @@
 ---
-status: active
-summary: 机械层（INDEX 重生 / walkaround lint / AGENTS emit / 对账）脚本化降 token、模型只留判断；单语言 Python stdlib + markdown fallback 双轨 + rules scripts 开关 + 机械-判断分界 + 字母序；INDEX-regen PoC 已交付，余见 rollout plan
-last_updated: 2026-06-03
+status: done
+summary: 机械层（INDEX 重生 / walkaround lint / AGENTS emit / 对账）脚本化降 token、模型只留判断；单语言 Python stdlib + markdown fallback 双轨 + rules scripts 开关 + 机械-判断分界 + 字母序；全 rollout 完成（index/init/bump/lint 四脚本）
+last_updated: 2026-06-04
 ---
 
 # Scriptable mechanical layer
@@ -42,9 +42,11 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 
 `scripts/flightdeck_index.py`（纯 stdlib）+ `scripts/tests/`（unittest，TDD）。`regen-index` 从 frontmatter 重生 folder + root INDEX；`--check` 报漂移、exit 1。**当场在本 deck 抓出并修复 4 处 INDEX 漂移**。已扩展：`flightdeck_init.py`（preflight Branch-0 的 scaffold copy + cockpit seed，省 ~5k token，verbatim 灭 scaffold-ships-verbatim）+ `bump_version.py`（version-bump 的 5-manifest 同步 + `--check`）。全套 24 unittest。
 
-## Remaining
+## Delivered（全部完成 2026-06-04）
 
-见 [plan：rollout](../plans/2026-06-03-scriptable-mechanical-layer-rollout.md)（接 skill 双轨 / rules 开关 / 版本 guard / walkaround lint）。
+四脚本全交付（纯 stdlib）：`flightdeck_index.py`（INDEX/cockpit 重生 + `--check` + `index_drift`）、`flightdeck_init.py`（scaffold）、`bump_version.py`（发布同步）、`flightdeck_lint.py`（机械审计 Audit 1/4/5/7/8 → JSON）。skill 双轨 + rules `run scripts` 开关 + 版本 guard 均接入（见 [plan：rollout](../plans/2026-06-03-scriptable-mechanical-layer-rollout.md)）。判断永留模型；markdown 慢路径恒为真相源 + fallback。
+
+**未实施（有意）**：单 `flightdeck.py <cmd>` 统一入口仍按 YAGNI 推迟；`walkaround` 全量 prose 压缩（用 lint 替机械段）留作后续独立优化，不阻塞本 spec 收尾。
 
 ## Related
 

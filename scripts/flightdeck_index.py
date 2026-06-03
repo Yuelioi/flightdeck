@@ -243,6 +243,27 @@ def _index_targets(deck):
         yield "cockpit", cockpit, regen_cockpit_inprogress(deck)
 
 
+def index_drift(deck):
+    """Return the labels of every INDEX target whose AUTO block is stale.
+
+    Read-only (writes nothing) and version-guard-agnostic — drift detection is
+    a comparison, not a regeneration. A target whose INDEX.md is missing or has
+    no `<!-- AUTO -->` block counts as drift (its label is returned), mirroring
+    walkaround's "missing INDEX" finding. Reused by `flightdeck_lint.py`.
+    """
+    labels = []
+    for label, path, new_block in _index_targets(deck):
+        try:
+            current = path.read_text(encoding="utf-8")
+            cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
+        except (OSError, ValueError):
+            labels.append(label)
+            continue
+        if cur_block != new_block:
+            labels.append(label)
+    return labels
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Regenerate flightdeck INDEX AUTO blocks from artifact frontmatter."

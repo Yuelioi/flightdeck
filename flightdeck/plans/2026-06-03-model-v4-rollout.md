@@ -21,6 +21,10 @@ last_updated: 2026-06-03
 
 **依据 spec：** `specs/2026-06-03-model-v4-folder-state-cockpit-design.md`（§ 编号下引用其条款）。
 
+## 实施进度（2026-06-04）
+
+Phase 0–4 已实施并提交（见 git log `model-v4 Phase 0..5`）；Phase 5.1 全量 walkaround 无 CRITICAL；Phase 5.3 co-advance 复核完成（结论：`status-spec-co-advance` 保留 `idea`，详见 spec §6）。**剩 Phase 5.2「reload 后行为 dogfood」——必须重载 plugin 缓存 + 新会话才能验证（= 用户测试项），及其后 5.4/5.5 收尾。** 故本 plan 暂留 `active`，待 dogfood 通过后翻 `done` 并 Land。
+
 ---
 
 ## Phase 0 — 数据模型真相源（先行，后续全部引用它）

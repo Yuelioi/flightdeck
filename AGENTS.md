@@ -5,15 +5,18 @@
 
 ## Current focus
 
-flightdeck 3.0 分支 code-complete、未 push；preflight 整改 + 减重 + auto-count 已完成、QA 通过（anchor / 27 tests / INDEX 全绿）。**发布前剩 dogfood + scriptable lint + 几个开放项**（见下）。**未做 runtime dogfood**（本会话加载旧 2.3 skill），待 reload。
+flightdeck 3.0 收尾——model-v4 与 scriptable 机械层(lint) 均实施完成、本仓库 deck 已迁新模型且 lint 干净；剩发布前 reload 后行为 dogfood 验证（用户测试项：preflight/status/landing）+ AGENTS emit + 发布 → 合并 main。
 
-## Next session — 3.0 发布前清单
+## 进行中
 
-1. 重同步缓存 → 行为 dogfood（reload）← 发布前总闸：①3.0 软配置面（git/emit 推断、`### Autonomy overrides`、2.3→3.0 迁移、when-to-land、walkaround 不报假阳性）②init 重做（干净目录首次建档）③incident 复发 auto-count [spec](flightdeck/specs/2026-06-03-incident-recurrence-autocount-design.md)（landing 自动 [Case N]+recur:N、晋级 gate）。
-2. scriptable 机械层 [plan](flightdeck/plans/2026-06-03-scriptable-mechanical-layer-rollout.md) / [spec](flightdeck/specs/2026-06-03-scriptable-mechanical-layer-design.md)：Phase 2 接 landing/walkaround/status；Phase 3 lint 子命令——status 合法性 / dangling-ref / stray / 结构块断言（=[structural-edit-guard](flightdeck/specs/2026-06-03-structural-edit-guard-design.md)）/ recur 校验 / untracked-spec（active|pending spec 未进 Next session 兜底）。walkaround 压缩待此。
-3. 决策：recur≥3 已晋级在 INDEX 可见？（待晋级 vs 已晋级分不出，晋级记 body）定方案，归 [autocount spec](flightdeck/specs/2026-06-03-incident-recurrence-autocount-design.md)。
-4. 小开放项：INDEX-row `—` 分隔符冲突 [incident](flightdeck/incidents/index-row-summary-delimiter.md)；no-git HISTORY 格式。
-5. 发布 3.0（最后）[checklists/version-bump.md](flightdeck/checklists/version-bump.md)：version-bump + marketplace + tag + 合并分支 → main。
+- [2026-06-03-incident-recurrence-autocount-design.md](flightdeck/specs/2026-06-03-incident-recurrence-autocount-design.md) — incident 复发计数升级——recurrences 提为 frontmatter 字段(从 body 头)、上 INDEX 行 recur:N、landing 自动维护；次数派生"待晋升/已晋级"，不加 status 值、不自动晋级、不 gate INDEX（避开 2.0 状态机红线）。已实现+27 tests 绿，待 dogfood 行为验证
+- [2026-06-03-model-v4-folder-state-cockpit-design.md](flightdeck/specs/2026-06-03-model-v4-folder-state-cockpit-design.md) — flightdeck 模型 v4——folder 7→5（sketches 并入 specs、删 debriefs）、workflow 状态 6→4（idea/active/done/scrapped）、cockpit 由 AI 全自动驱动（进行中区 AUTO 派生 + 下一步自动维护），并入 3.0
+- [2026-06-03-model-v4-rollout.md](flightdeck/plans/2026-06-03-model-v4-rollout.md) — model-v4 分 6 phase 实施——数据模型真相源 → flightdeck_index 扩展(+测试) → 4 skill 行为 → scaffolds/emit/MIGRATION → dogfood 迁移本仓库 → 验证收尾；并入 3.0
+
+## 下一步
+
+- 发布前验证：reload（重载 plugin）后 dogfood 跑通 model-v4 行为（preflight 读新 cockpit / status idea→active 带动 `## 进行中` / landing 自动写两区）；重跑 `/flightdeck:emit-agents-md` 消除 AGENTS.md drift。
+- 发布 3.0：version-bump + marketplace + tag + 合并分支 → main（见 [checklists/version-bump.md](flightdeck/checklists/version-bump.md)）。
 
 ## Hanging tasks
 

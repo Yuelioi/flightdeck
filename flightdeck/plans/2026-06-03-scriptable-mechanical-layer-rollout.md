@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 implements: specs/2026-06-03-scriptable-mechanical-layer-design.md
-summary: 机械层脚本化 rollout —— INDEX-regen 接进 landing/walkaround/status 双轨 + rules scripts 开关 + 版本 guard + walkaround lint 子命令；分 3 phase，INDEX-regen PoC 已交付
-last_updated: 2026-06-03
+summary: 机械层脚本化 rollout —— INDEX-regen 接进 landing/walkaround/status 双轨 + rules scripts 开关 + 版本 guard + walkaround lint 子命令；3 phase 全完成（lint=flightdeck_lint.py，Audit 1/4/5/7/8）
+last_updated: 2026-06-04
 ---
 
 # Scriptable mechanical layer — rollout
@@ -25,9 +25,9 @@ last_updated: 2026-06-03
 ## Phase 3 — walkaround lint 子命令（待前置）
 
 - [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../landed/specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
-- [ ] `flightdeck.py lint`：把 Audit 1–10 的机械项（INDEX↔文件夹一致性、orphan、dangling ref、stray file、status 合法性）脚本化，吐 JSON；模型读结果做判断/叙述。**anchor/link 检查已有 PoC**——2026-06-03 一个 ~40 行 Python（全仓扫 `[..](x.md#anchor)` vs 标题 slug）当场抓到一处既存 dangling link；把它并进 `lint` 的 dangling-ref 项。
-- [ ] **lint 候选：untracked outstanding spec**（本会话教训）—— `active` / `pending` 的 spec（或开放设计问题）**没被 cockpit `## Next session` 引用** → INFO「untracked 发布前工作」。**教训**：本会话一路建 spec / 提开放问题，却没当场汇进 Next session，攒到用户点破才补；规矩 = 建 spec / 提问题**当场**进 Next session，lint 兜底抓漏。**误报注意**：in-progress 但焦点在别处的 active spec 未必该在 Next session —— 需判据（如只查 `pending` + 未 landed 的 `done`，或带 release 标记的）。与 [structural-edit-guard](../specs/2026-06-03-structural-edit-guard-design.md) 同属 lint 的「维护者流程守卫」类（结构块断言也归这）。
-- [ ] **Verify**：lint 输出与现 walkaround 人工审计结论一致；token 实测对比。
+- [x] **lint 子命令**（2026-06-04）：交付为 `scripts/flightdeck_lint.py`（**分立脚本**，非 `flightdeck.py <cmd>`——遵 spec「职责分多脚本、统一待脚本变多 YAGNI」的已锁决策）。覆盖机械子集 Audit **1/4/5/7/8**（status 合法性 / orphan plan / INDEX↔folder drift〔复用 `flightdeck_index.index_drift`〕/ dangling ref / stray file 无歧义子集），吐 `{"findings":[…]}` JSON、有 CRITICAL/WARNING 时 exit≠0；判断项（知识分类 / migration / AGENTS 语义 drift / stray 完整可达性）留模型。dangling-ref 加**代码区剥离**（fenced/inline code 内的链接例不误报）。30 unittest（TDD）。已配线进 [exit-ritual § Script fast path](../../skills/preflight/exit-ritual.md) + walkaround intro。
+- [x] **lint 候选：untracked outstanding spec —— 由 model-v4 吸收，不再实现**（2026-06-04 决策）：model-v4 把 cockpit `## 进行中` 改为「从每个 `status: active` spec/plan **AUTO 派生**」，故「active spec 未被 cockpit 追踪」结构上不可能；walkaround Audit 13（进行中 AUTO 区一致性）已确定性兜底该不变量。原痛点（本会话 spec 没当场汇进 Next session）的根因——cockpit 手维护——已消失。结构块断言守卫仍是独立的 [structural-edit-guard](../specs/2026-06-03-structural-edit-guard-design.md)（idea），与本项无关。
+- [x] **Verify**（2026-06-04）：在本仓库 deck 实跑 `flightdeck_lint.py flightdeck`——当场抓出 3 处**真实** dangling ref（`CHANGELOG.md` 指向已归档进 `landed/specs/` 的 3 个 2026-06-02 spec，旧路径未改写），与人工 Audit 7 结论一致；已修 CHANGELOG 链接，deck 现 lint 干净（findings: []）。token 实测：脚本读文件在子进程、不进上下文，模型只见一行 JSON。
 
 ## Notes
 
