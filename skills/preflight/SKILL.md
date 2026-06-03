@@ -15,41 +15,19 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 ## Step 0 — model-invocation gate (run before any other step)
 
-Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): `preflight` is self-invocable** — continue.
-
-- **Restricted** only if House Rules `### Autonomy overrides` says `preflight: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `preflight`):
-  - explicit user `/flightdeck:preflight` (e.g. a `<command-name>` marker) → allowed; continue.
-  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`preflight` is manual-only in this project (House Rule). Remove the `preflight: don't self-invoke` line to allow model self-invoke." Run no further step.
-
-(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.) Once past this gate, the checklist's **Branch-0 (deck existence) still runs first** within the ritual.
+Resolve `preflight` self-invocability per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): self-invocable — continue.** Restricted only if House Rules say `preflight: don't self-invoke` (or a pre-3.0 deck omits `preflight` from `model_invocable`): then an explicit user `/flightdeck:preflight` → continue; model self-invocation or unknown call source → **STOP immediately** and report "`preflight` is manual-only (House Rule). Remove the `preflight: don't self-invoke` line to allow self-invoke." Branch-0 (deck existence) still runs first.
 
 ## Run this checklist exactly
 
 0. **Branch-0 — deck existence (MUST run first; layout detection MUST NOT run before this).**
    Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract, so this also covers a half-initialized `flightdeck/` that has no cockpit).
 
-   - **`flightdeck/cockpit.md` does NOT exist** → run **First-time setup**:
-     1. **git check** — does the deck root (cwd) contain `.git`? If **no**: tell the user "no git here — flightdeck still works, but staleness/history fall back to `landed/HISTORY.md`", and **offer to run `git init`? (y/N)**. If yes, run it. (Non-blocking either way.)
-     2. Ask: **"Create a flightdeck deck here? (full layout + 3-file contract)"** — wait for confirmation.
-     3. **Interview (2 Q)** — gather these *before* creating the deck: "Active focus — current main thread (5–15 words)?" and "First 'next session' item — one concrete action?"
-     4. **Create the deck — copy the scaffold verbatim + seed the cockpit.**
-        - **Fast path** (preferred when a Python runtime is reachable — no House Rule needed, `rules.md` doesn't exist yet): run the bundled initializer against the current dir, e.g. `uv run <flightdeck-pkg>/scripts/flightdeck_init.py . --name <project> --user <user> --date <today> --focus "<answer 1>" --next "<answer 2>"`. It copies `scaffolds/full/flightdeck/` into `./flightdeck/` (every folder + each `INDEX.md` + the **commented** `rules.md` + `cockpit.md` + `landed/HISTORY.md`) and seeds the cockpit in one deterministic step. Being a verbatim copy it **cannot re-author or drop the `rules.md` comments** — which hand-copying does. It refuses if a deck already exists.
-        - **Fallback** (no runtime): copy by hand from this skill's `../../scaffolds/full/flightdeck/` into `./flightdeck/` — **copy, do NOT re-author** (this is what preserves the `rules.md` comments) — then substitute today's date / `<user>` / the two interview answers into `cockpit.md` (`<ACTIVE_FOCUS …>` / `<FIRST_NEXT_ITEM …>`).
-        - Either way: the scaffold `rules.md` `version` should equal `MIGRATION.md` `current` — bump it if the scaffold is behind.
-     5. **AGENTS.md** — ask "Generate `AGENTS.md` (cross-tool bridge from cockpit)? (Y/n)". If yes, run `/flightdeck:emit-agents-md`. (Opt-in; creating it now is the bootstrap — matches the 3.0 emit-on-presence rule.)
-     6. **Then STOP** — the next `/preflight` takes the read path below.
+   - **`flightdeck/cockpit.md` does NOT exist** → **first-time setup**: load [setup.md](setup.md) and run it (git check → confirm → 2-Q interview → scaffold-copy via `flightdeck_init.py` or by hand → AGENTS.md opt-in → STOP).
    - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
 
 1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
 
-2. **Check version (migration detection; non-silent on mismatch).** Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](protocol.md#migration-detection):
-
-   - **`version == current`** → up to date; continue silently (report nothing).
-   - **`version` < some `layout_need_update` entry** → "deck on `<version>`, migration `<v>` applies — migrate now?"; follow the matching [MIGRATION.md](../../MIGRATION.md) section; do not proceed until the user decides.
-   - **`version` < `current`, no newer `layout_need_update` entry** → silently bump `rules.md` `version` to `current`; continue.
-   - **No `version` / no `rules.md`** (pre-2.2 deck, incl. a cockpit-only deck) → "pre-2.2 deck detected — run the 2.2 migration? (create `rules.md` with `version`, ensure `landed/HISTORY.md`, drop the cockpit `**Layout**` line)" per [MIGRATION.md](../../MIGRATION.md). If legacy 1.x markers exist (`manifest.md`/`logbook.md`/`kneeboard/`/`flight-plans/`/`incident-reports/`/`safety-reviews/`), route to the 1.x→1.2 migration first.
-
-   Never migrate (or stamp) silently — always ask the user first.
+2. **Migration detection (non-silent).** Compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`) and act per [protocol § Migration detection](protocol.md#migration-detection): `== current` → continue; `< a layout_need_update` entry → offer that migration ([MIGRATION.md](../../MIGRATION.md)); older-but-compatible → silently bump `version` to `current`; no `version`/`rules.md` → offer the pre-2.2 migration; legacy 1.x markers (`manifest.md`/`logbook.md`/`kneeboard/`/…) → 1.x migration first. **Never migrate or stamp silently — always ask.**
 
 3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; do not re-read either during the ritual.
 
@@ -73,13 +51,7 @@ Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](p
    - If either INDEX is missing or obviously stale (file count in INDEX differs from root INDEX count), note it: "⚠ `<folder>/INDEX.md` missing or stale — walkaround owns the fix." This is non-blocking.
    - **Do NOT read individual checklist or incident files** at catalog time. The folder INDEX is the catalog. Only drill into an individual file when a trigger actually matches the current task (i.e. at execution time, not preflight time).
 
-7. **Status sanity (from INDEX).** Scan each folder INDEX row for a missing `status` or an illegal status value for that folder's kind; report and offer to fix, non-silent. (Deeper file audits belong to walkaround.)
-
-   Valid status values by folder:
-   - Workflow folders (`sketches/`, `specs/`, `plans/`): `pending / active / awaiting-review / blocked / done / scrapped` (sketches: typically only `active / scrapped`)
-   - Knowledge folders (`incidents/`, `checklists/`, `charts/`, `debriefs/`): `active / obsolete / superseded`
-
-   List all findings before offering fixes. Offer once: "Fix all flagged files?" — do not fix any until the user confirms.
+7. **Status sanity (loaded folders only).** For the catalog folders just read (`checklists/`, `incidents/`), flag any INDEX row with a missing or illegal `status` for its kind (legal values: [protocol § Status](protocol.md#status-label--recommended-flow)). List all findings, then offer once "Fix all flagged?" — don't fix until confirmed. Global per-file audits across all folders belong to `walkaround`.
 
 8. **All reconciled → report item #1, then STOP.** Read-only recon doesn't fly the mission. State the item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
 
@@ -139,19 +111,16 @@ Resolve which?
 
 ## Don't do
 
-- Don't run the layout check (step 2) before the deck-existence check (step 0).
-- Don't auto-execute item #1 — report and stop.
 - Don't auto-pick a fallback when `Next session` is empty — always ask.
-- Don't bump `Last updated` — entry doesn't modify cockpit (the First-time-setup write is the one exception).
-- Don't glob individual checklist/incident files or read per-file frontmatter for the catalog — read folder INDEX files only.
-- Don't drill into individual files until a trigger matches at execution time.
+- Don't bump `Last updated` — entry doesn't modify cockpit (first-time setup is the one exception).
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
-- Don't migrate (or initialize, or stamp) silently — always ask the user first.
+- Don't drill into individual files until a trigger matches at execution time (read folder INDEX only).
 
 ## Protocol knowledge (load on demand)
 
 The operational entry ritual is above. The protocol "textbook" lives in companions — read on demand:
 
+- [setup.md](setup.md) — first-time setup (run by Branch-0 when no deck exists)
 - [protocol.md](protocol.md) — data model · status · INDEX · folder map · routing · authority order · write gate · lifecycle · promotion gates · common mistakes
 - [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout (full, always)
 - [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
