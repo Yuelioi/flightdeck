@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: preflight 三方审核(claude/ds/gpt)19 项整改总账 spec（由同名 sketch 提升）；减重 A1/A3/A4 已并入 token-reduction spec，纠错 B + 措辞 C 在本 spec 跟踪；记录每项处置/done/deferred
 last_updated: 2026-06-03
 ---

@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 按 load 频率降 skill token + 治流程过长：常驻 SKILL 优先、dedup-to-canonical / defer-to-companion / script-owns / summarize；不改行为、保双轨 fallback。第一批已落（SKILL 瘦身 + 5 漂移修），余下分批
 last_updated: 2026-06-03
 ---

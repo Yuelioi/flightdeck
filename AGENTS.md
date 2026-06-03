@@ -5,14 +5,15 @@
 
 ## Current focus
 
-flightdeck 3.0 分支 code-complete、未 push；preflight skill 整改 + token-reduction + incident 复发 auto-count 已完成、QA 通过（全仓 anchor 校验 / 脚本测试 27 passed / INDEX --check 全绿）。**未做 runtime dogfood**（本会话加载的是旧 2.3 skill），待 reload 后验证、发布、合并。
+flightdeck 3.0 分支 code-complete、未 push；preflight 整改 + 减重 + auto-count 已完成、QA 通过（anchor / 27 tests / INDEX 全绿）。**发布前剩 dogfood + scriptable lint + 几个开放项**（见下）。**未做 runtime dogfood**（本会话加载旧 2.3 skill），待 reload。
 
-## Next session
+## Next session — 3.0 发布前清单
 
-1. 行为 dogfood（reload/重装插件后）—— 进入测试：①3.0——git/emit 推断、`### Autonomy overrides` 标准句覆盖、迁移改写、when-to-land、walkaround；②init 重做——干净目录首次建档全程；③incident 复发 auto-count——landing 自动 append [Case N]+bump recurrences、INDEX 显 recur:N、晋级 gate 触发。
-2. 结构性 Edit 守卫（pending，下个对话启动）[specs/2026-06-03-structural-edit-guard-design.md](flightdeck/specs/2026-06-03-structural-edit-guard-design.md)：lint 加"必备结构块"断言，防多行 Edit 静默吞标题。
-3. 发布 3.0（[checklists/version-bump.md](flightdeck/checklists/version-bump.md)）+ 合并分支 → main。
-4. 仍开放：INDEX-row `—` 分隔符 ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md))；no-git HISTORY 格式；walkaround 压缩（归 scriptable lint）。
+1. 重同步缓存 → 行为 dogfood（reload）← 发布前总闸：①3.0 软配置面（git/emit 推断、`### Autonomy overrides`、2.3→3.0 迁移、when-to-land、walkaround 不报假阳性）②init 重做（干净目录首次建档）③incident 复发 auto-count [spec](flightdeck/specs/2026-06-03-incident-recurrence-autocount-design.md)（landing 自动 [Case N]+recur:N、晋级 gate）。
+2. scriptable 机械层 [plan](flightdeck/plans/2026-06-03-scriptable-mechanical-layer-rollout.md) / [spec](flightdeck/specs/2026-06-03-scriptable-mechanical-layer-design.md)：Phase 2 接 landing/walkaround/status；Phase 3 lint 子命令——status 合法性 / dangling-ref / stray / 必备结构块断言（=[structural-edit-guard](flightdeck/specs/2026-06-03-structural-edit-guard-design.md)）/ recur 校验。walkaround 压缩待此。
+3. 决策：recur≥3 已晋级在 INDEX 可见？（待晋级 vs 已晋级分不出，晋级记 body）定方案，归 [autocount spec](flightdeck/specs/2026-06-03-incident-recurrence-autocount-design.md)。
+4. 小开放项：INDEX-row `—` 分隔符冲突 [incident](flightdeck/incidents/index-row-summary-delimiter.md)；no-git HISTORY 格式。
+5. 发布 3.0（最后）[checklists/version-bump.md](flightdeck/checklists/version-bump.md)：version-bump + marketplace + tag + 合并分支 → main。
 
 ## Hanging tasks
 
