@@ -24,7 +24,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
 2. **Environment inference** — `git`: does deck root contain `.git`?; `emit_agents_md`: does deck root already have `AGENTS.md`?
-3. **Built-in default** — `commit` = confirm; every ritual self-invocable; `status_auto` = `start` + `land` both on.
+3. **Built-in default** — `commit` = confirm; every ritual self-invocable; `status_auto` = `start` + `land` both on; `scripts` = manual (no bundled-script execution — INDEX regen / consistency by hand).
 
 (Pre-3.0 structured keys, when still present on a not-yet-migrated deck, are read between steps 1 and 2 — honored for 3.x compatibility, removed at 4.0.)
 
@@ -49,6 +49,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 | a status transition off | `status: don't auto <transition>` | `status 不要自动 <transition>` |
 | no git | `this deck doesn't use git; history in landed/HISTORY.md` | `本 deck 不走 git，历史记 landed/HISTORY.md` |
 | has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
+| run the INDEX-regen fast-path script | `run scripts` (or `run scripts with <runtime>`) | `跑脚本`（或 `跑脚本，用 <runtime>`） |
 
 When a folder is in `disabled_folders`, it is never suggested and never flagged as an orphan.
 

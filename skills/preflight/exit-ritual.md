@@ -251,7 +251,7 @@ INDEX regeneration and the INDEX↔folder consistency check are fully mechanical
 
 This is a **dual track**, not a dependency:
 
-- **Enabled** only when `rules.md` `scripts:` permits it (`scripts: off` forces manual; an absent key defaults to manual until the user opts in — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)) **and** a Python runtime + the bundled script are reachable.
+- **Enabled** only when the `run scripts` House Rule is set in `rules.md` `### Autonomy overrides` (absent → manual by default — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)) **and** a Python runtime + the bundled script are reachable. `run scripts with <runtime>` pins the interpreter.
 - **Fallback is always valid**: regenerate by hand from frontmatter exactly as described above. The markdown path is the source of truth; the script only saves tokens (it runs in a subprocess — its file reads never enter context) and adds determinism. A tool that cannot run it loses nothing but speed — which is what keeps flightdeck tool-agnostic.
 
 Never let the script make judgments (classification, status decisions, routing) — it only generates/checks the deterministic INDEX rows.

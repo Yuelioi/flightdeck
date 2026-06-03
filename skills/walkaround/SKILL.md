@@ -85,7 +85,7 @@ Do not flag files that carry `implements:` even if the target is also missing (t
 
 ### 5. INDEX ↔ folder consistency (WARNING)
 
-**Fast path** (when `rules.md` `scripts:` is enabled): `flightdeck_index.py --check <deck>` reports every drift below deterministically and exits non-zero — see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator). The manual checks below are the always-valid fallback and source of truth.
+**Fast path** (when the `run scripts` House Rule is set): `flightdeck_index.py --check <deck>` reports every drift below deterministically and exits non-zero — see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator). The manual checks below are the always-valid fallback and source of truth.
 
 For each artifact folder (`sketches/`, `specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`, `debriefs/`):
 

@@ -15,7 +15,7 @@ flightdeck 本质上一半是 **linter + generator**：walkaround 审计、landi
 - **单 CLI 多子命令** `flightdeck.py <cmd>`（`regen-index` / `lint` / `emit-agents` …），单文件单测试套件单版本。
 - **双轨 fallback**：脚本=快路径；模型手动（= 今天的 prose）=慢路径/通用路径。正是 Anthropic best-practices 的 "with code / without code" 双写模式，非妥协。模型本身就是"通用 runtime"，所以不需要多语言凑覆盖。
 - **分界线**：脚本**算事实**（generate / count / lint / extract），模型**做判断**（classify / match / decide / narrate）。docx skill 明文"编辑/判断 do NOT write Python scripts"。判断永不进脚本。
-- **rules.md `scripts: auto | off | <runtime>`**：`auto`（默认，探测一次钉进 rules）/ `off`（信任逃生口——markdown skill 自动跑代码是高信任动作）/ 钉死解释器。首次 opt-in 提示。因原生开关全工具私有，自定义 rules 标记是唯一跨四工具的办法。
+- **`scripts` 是 House Rule（非 frontmatter toggle）**：默认 **manual**；`rules.md` `### Autonomy overrides` 写 `run scripts`（或 `run scripts with <runtime>` 钉死解释器）才 opt-in 快路径。**理由（执行期校正）**：3.0 明文"只保留 `disabled_folders` 一个结构化 toggle"（templates.md:38 / protocol.md:16），新 frontmatter toggle 会破坏该不变量；自动跑代码又是高信任动作 → 默认关、显式 opt-in。走 protocol 标准句表（lenient 子串匹配，跨四工具一致）。
 - **版本钉死**：脚本编码 layout 结构/status 合法值，须对 `MIGRATION.md current`；不符则拒跑、退化手动。
 - **INDEX 行序 = 文件名字母序**（canonical；手工 append 序无法从文件系统复现）。
 

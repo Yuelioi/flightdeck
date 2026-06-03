@@ -135,6 +135,28 @@ def regen_folder_index(folder):
 REGEN_FOLDERS = [name for name in FOLDER_ORDER if name != "charts"]
 
 
+def _fm_field(path, field):
+    try:
+        return parse_frontmatter(Path(path).read_text(encoding="utf-8")).get(field)
+    except OSError:
+        return None
+
+
+def version_mismatch(deck):
+    """Return (deck_version, script_version) if they disagree, else None.
+
+    The script encodes a layout version; running it against a deck on a
+    different version risks corrupting it. Compares the deck's `rules.md`
+    `version` against the bundled `MIGRATION.md` `current`. Either side
+    missing → no comparison (None).
+    """
+    deck_v = _fm_field(Path(deck) / "rules.md", "version")
+    script_v = _fm_field(Path(__file__).resolve().parent.parent / "MIGRATION.md", "current")
+    if deck_v and script_v and deck_v != script_v:
+        return (deck_v, script_v)
+    return None
+
+
 def _index_targets(deck):
     """Yield (label, index_path, new_block) for every regenerable INDEX."""
     deck = Path(deck)
@@ -155,7 +177,20 @@ def main(argv=None):
         action="store_true",
         help="report drift and write nothing; exit 1 if any INDEX is stale",
     )
+    ap.add_argument(
+        "--force",
+        action="store_true",
+        help="bypass the version guard (deck version != script version)",
+    )
     args = ap.parse_args(argv)
+
+    mismatch = version_mismatch(args.deck)
+    if mismatch and not args.force:
+        print(
+            f"version guard: deck version {mismatch[0]} != script expects {mismatch[1]}; "
+            "regenerate by hand (manual fallback) or pass --force"
+        )
+        return 2
 
     drift = []
     for label, path, new_block in _index_targets(args.deck):

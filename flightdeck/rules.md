@@ -17,3 +17,4 @@ preflight: don't self-invoke; I run it manually.
 landing: don't self-invoke; I run it manually.
 walkaround: don't self-invoke; I run it manually.
 emit-agents-md: don't self-invoke; I run it manually.
+run scripts with python3.

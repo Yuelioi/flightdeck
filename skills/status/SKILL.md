@@ -56,7 +56,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 
 ## Step 5 — sync the INDEX
 
-After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when `rules.md` `scripts:` is enabled, `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
+After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when the `run scripts` House Rule is set, `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
 
 1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone).
 2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.

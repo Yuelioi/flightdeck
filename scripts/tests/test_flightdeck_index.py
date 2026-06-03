@@ -205,5 +205,44 @@ class MainCliTest(unittest.TestCase):
             self.assertEqual(main([str(deck), "--check"]), 0)
 
 
+class VersionGuardTest(unittest.TestCase):
+    def _deck_with_version(self, root, version):
+        deck = Path(root)
+        (deck / "rules.md").write_text(
+            f"---\nversion: {version}\n---\n", encoding="utf-8"
+        )
+        specs = deck / "specs"
+        specs.mkdir()
+        (specs / "a.md").write_text(
+            "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
+        )
+        (specs / "INDEX.md").write_text(
+            "# s\n\n<!-- AUTO:specs -->\nOLD\n<!-- /AUTO -->\n", encoding="utf-8"
+        )
+        (deck / "INDEX.md").write_text(
+            "# r\n\n<!-- AUTO:root -->\nOLD\n<!-- /AUTO -->\n", encoding="utf-8"
+        )
+        return deck
+
+    def test_refuses_and_writes_nothing_on_version_mismatch(self):
+        # the bundled MIGRATION.md current is 3.0; a 2.2 deck must be refused
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck_with_version(d, "2.2")
+            self.assertEqual(main([str(deck)]), 2)
+            self.assertIn("OLD", (deck / "specs" / "INDEX.md").read_text(encoding="utf-8"))
+
+    def test_force_bypasses_version_guard(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck_with_version(d, "2.2")
+            self.assertEqual(main([str(deck), "--force"]), 0)
+            self.assertNotIn("OLD", (deck / "specs" / "INDEX.md").read_text(encoding="utf-8"))
+
+    def test_matching_version_proceeds(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck_with_version(d, "3.0")
+            self.assertEqual(main([str(deck)]), 0)
+            self.assertNotIn("OLD", (deck / "specs" / "INDEX.md").read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()

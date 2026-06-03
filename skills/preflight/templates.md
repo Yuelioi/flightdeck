@@ -29,6 +29,7 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To override, uncomment 
 <!-- landing: don't self-invoke; I run it manually -->
 <!-- this deck doesn't use git; history in landed/HISTORY.md -->
 <!-- has AGENTS.md but don't auto-regen -->
+<!-- run scripts with python3 -->
 ```
 
 ### Rules
@@ -47,6 +48,7 @@ git & emit inferred from `.git` / `AGENTS.md` presence). To override, uncomment 
   - `commit` → defaults `confirm`; House Rules `commit without asking` (auto) / `don't auto-commit; leave changes for me / CI` (manual). Under no-git there is no commit regardless.
   - ritual self-invocation → defaults **on**; House Rule `<ritual>: don't self-invoke; I run it manually` restricts one.
   - `status_auto` → defaults `start` + `land` **on**; House Rule `status: don't auto <transition>` restricts one.
+  - `scripts` → defaults **manual** (INDEX regen / consistency checks done by hand). House Rule `run scripts [with <runtime>]` opts into the bundled `flightdeck_index.py` fast path; the markdown path is always the valid fallback, so a runtime-less tool loses only speed. Runs code → a higher-trust action → opt-in, never on by default. See [exit-ritual § Script fast path](exit-ritual.md#script-fast-path-optional-accelerator).
 - **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
 - **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`model_invocable`/`status_auto`/`commit_mode`) are **read and honored through 3.x**, removed at 4.0; `preflight` offers to migrate a deck still carrying them.
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
