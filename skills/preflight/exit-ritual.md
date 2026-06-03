@@ -89,14 +89,10 @@ Step 3a: Suggest status for affected artifacts
          single shared Land Routine (see "## Land Routine" below) —
          do not inline the move/INDEX/HISTORY steps here.
 
-Step 4: Update cockpit.md
-        - Bump Last updated ONLY on real progress (new artifact written,
-          artifact landed, blocker resolved, Active focus shifted, or
-          Next session content changes — NOT for grep/read/explore-only sessions)
-        - Update Active focus if main thread shifted (otherwise leave)
-        - Update Next session: 1–5 concrete items (always confirm first item is still right)
-        - Update Hanging tasks: add new blocking items, clear resolved ones
-        - Cockpit is focus only — artifact status lives in the folder `INDEX.md` files
+Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
+        below. Gist: bump Last updated only on the 4 sanctioned triggers;
+        always refresh Next session; Active focus / Hanging tasks as needed;
+        cockpit is focus, not status. Then run the Length check (§ below).
 
 Step 5: Commit — honor the commit override (House Rules; default `confirm`)
         - manual (`don't auto-commit…`)  → do NOT commit; leave the changes for you / CI
