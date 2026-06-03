@@ -1,13 +1,12 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-03 by 月离 (Land Routine rewritten to collect-then-migrate — builds a full land-set remap before moving, then rewrites `implements`/`supersedes`/`related` across active tree + moved set; fixes the co-land mutual-cluster gap hit while landing the 2.2.0 metadata-model artifacts)
-**Active focus**: flightdeck 2.2.0 shipped — single canonical frontmatter field table; deck `version` now in the mandatory `rules.md` (3-file contract); workflow artifacts gain `summary`/`last_updated`/`supersedes`/`related` (INDEX rows derive from `summary`).
+**Last updated**: 2026-06-03 by 月离 (2.3.0 dogfooded end-to-end on a throwaway full-auto scratch deck — status auto-flip, observable `last_updated` bump, `commit_mode: auto`, and the collect-then-migrate co-land of a mutual spec↔plan cluster all verified; filed 3 follow-up findings: 1 incident + 2 sketches)
+**Active focus**: flightdeck 2.3.0 shipped and now dogfood-verified (migration + full-auto feature surface both pass); remaining work is triaging the 3 dogfood findings and the deferred-folder backlog.
 
 ## Next session
 
-1. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
+1. Triage the 3 dogfood findings — fix the INDEX-row `—` delimiter collision ([incidents/index-row-summary-delimiter.md](incidents/index-row-summary-delimiter.md)); decide whether [sketches/preflight-upgrade-nudge.md](sketches/preflight-upgrade-nudge.md) and [sketches/status-spec-lags-plan.md](sketches/status-spec-lags-plan.md) promote to specs or defer.
 2. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](sketches/v1x-deferred-ideas.md).
-3. **Cut 2.2.1** to publish the Land Routine collect-then-migrate fix (run [checklists/version-bump.md](checklists/version-bump.md)): bump `rules.md` / `MIGRATION.md` `current`, marketplace, tag. Skill-behavior change only — **no** deck migration (`layout_need_update` untouched).
 
 ## Hanging tasks
 

@@ -5,13 +5,12 @@
 
 ## Current focus
 
-flightdeck 2.2.0 shipped — single canonical frontmatter field table; deck `version` now in the mandatory `rules.md` (3-file contract); workflow artifacts gain `summary`/`last_updated`/`supersedes`/`related` (INDEX rows derive from `summary`).
+flightdeck 2.3.0 shipped and now dogfood-verified (migration + full-auto feature surface both pass); remaining work is triaging the 3 dogfood findings and the deferred-folder backlog.
 
 ## Next session
 
-1. Dogfood v2.2 on a real existing deck — run the 2.1→2.2 migration (add `rules.md` `version`, drop the cockpit `Layout` line) and exercise `summary`/`last_updated` auto-bump; classify friction at landing.
+1. Triage the 3 dogfood findings — fix the INDEX-row `—` delimiter collision ([incidents/index-row-summary-delimiter.md](flightdeck/incidents/index-row-summary-delimiter.md)); decide whether [sketches/preflight-upgrade-nudge.md](flightdeck/sketches/preflight-upgrade-nudge.md) and [sketches/status-spec-lags-plan.md](flightdeck/sketches/status-spec-lags-plan.md) promote to specs or defer.
 2. Reassess deferred folders — see [sketches/v1x-deferred-ideas.md](flightdeck/sketches/v1x-deferred-ideas.md).
-3. **Cut 2.2.1** to publish the Land Routine collect-then-migrate fix (run [checklists/version-bump.md](flightdeck/checklists/version-bump.md)): bump `rules.md` / `MIGRATION.md` `current`, marketplace, tag. Skill-behavior change only — **no** deck migration (`layout_need_update` untouched).
 
 ## Hanging tasks
 
