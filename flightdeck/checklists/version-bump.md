@@ -2,7 +2,7 @@
 status: active
 last_updated: 2026-06-02
 when_to_read: before cutting a new flightdeck release / bumping the version number
-applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.json, CHANGELOG.md, MIGRATION.md]
+applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.json, CHANGELOG.md, MIGRATION.md, scripts/bump_version.py]
 ---
 
 # Version bump checklist
@@ -11,13 +11,22 @@ applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.jso
 
 Whenever the version number changes — shipping a release, or correcting a version. Flightdeck carries the version in **five** manifest files plus `CHANGELOG.md`; they must agree, or different platforms advertise different versions.
 
+## Fast path (script)
+
+The mechanical parts — bumping all five manifests and verifying they agree — are scripted in `scripts/bump_version.py` (pure stdlib; run with `uv run` or `python`):
+
+- **`bump_version.py set X.Y.Z`** — write the version into all five manifests at once (kills the "forgot one manifest" pitfall below).
+- **`bump_version.py --check`** — verify the five agree and match the `CHANGELOG.md` top heading; exit non-zero on drift.
+
+It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate two-part *layout* version, not the release semver) or write the CHANGELOG. Everything in Steps 1, 3–6 that needs judgment stays manual.
+
 ## Steps
 
 1. **Pick the semver level** (current → next):
    - **patch** (`x.y.Z`) — backward-compatible fixes / wording / reliability hardening of existing skills. No new folders, fields, or commands.
    - **minor** (`x.Y.0`) — new backward-compatible capability (new folder, frontmatter field, audit, skill).
    - **major** (`X.0.0`) — breaking change (renamed folder/command, removed field). Post-v1.0 these need a migration note.
-2. **Bump the version string in all five manifests** (keep them identical):
+2. **Bump the version string in all five manifests** (keep them identical) — or run `uv run scripts/bump_version.py set X.Y.Z`:
    - `.claude-plugin/plugin.json`
    - `.claude-plugin/marketplace.json`
    - `.codex-plugin/plugin.json`
@@ -31,7 +40,7 @@ Whenever the version number changes — shipping a release, or correcting a vers
 
 ## Verification
 
-- All five manifests agree: `grep -rn '"version"' .claude-plugin .codex-plugin .cursor-plugin gemini-extension.json` shows one value.
+- All five manifests agree + match the CHANGELOG: `uv run scripts/bump_version.py --check` (or `grep -rn '"version"' .claude-plugin .codex-plugin .cursor-plugin gemini-extension.json` for one value).
 - `CHANGELOG.md` top entry matches that value and carries today's date.
 - `git tag --points-at HEAD` shows `vX.Y.Z`.
 - `git status` clean and `main` not ahead of `origin/main` after push.
