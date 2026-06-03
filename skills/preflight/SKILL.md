@@ -1,6 +1,6 @@
 ---
 name: preflight
-description: Use when explicitly invoking the flightdeck entry ritual — the single entry point. Initializes `flightdeck/` when absent (no cockpit.md); otherwise reconciles cockpit.md against repo state via root INDEX.md, loads a routing catalog from folder INDEX files, and reports the first "next session" item. Triggered by `/flightdeck:preflight`.
+description: Use when explicitly invoking the flightdeck entry ritual — the single entry point. Initializes `flightdeck/` when absent (no cockpit.md); otherwise reconciles cockpit.md against repo state via root INDEX.md, loads a routing catalog from folder INDEX files, and reports the cockpit `## 下一步` item. Triggered by `/flightdeck:preflight`.
 ---
 
 # Flightdeck Preflight
@@ -29,7 +29,9 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
 
 2. **Migration detection (non-silent).** Compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`) and act per [protocol § Migration detection](protocol.md#migration-detection): `== current` → continue; `< a layout_need_update` entry → offer that migration ([MIGRATION.md](../../MIGRATION.md)); older-but-compatible → silently bump `version` to `current`; no `version`/`rules.md` → offer the pre-2.2 migration; legacy 1.x markers (`manifest.md`/`logbook.md`/`kneeboard/`/…) → 1.x migration first. **Never apply a *structural* migration silently — always ask; a compatible version bump is the one allowed silent stamp.**
 
-3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, and the `## Next session` section. These two reads together are the reconcile baseline; read each once and treat as cached for the rest of the ritual (no need to re-open).
+   **Unmigrated model-v4 deck (structural signals beyond `version`).** Independently of the version compare, if the deck shows pre-model-v4 structure — a `sketches/` or `debriefs/` folder still present, or any workflow file carrying a retired status (`pending` / `awaiting-review` / `blocked`, or a sketch's `active`), or a `cockpit.md` with a hand-written `## Next session` and no `## 进行中` AUTO region — **surface it and offer the model-v4 migration** (point at the matching [MIGRATION.md](../../MIGRATION.md) section; the concrete step-by-step lives there). Trigger + point only — do not perform the moves/remaps here. Never silent.
+
+3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), and the `## 下一步` action. These two reads together are the reconcile baseline; read each once and treat as cached for the rest of the ritual (no need to re-open). `preflight` **reads** `## 进行中` / `## 下一步` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
 
 4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state — heuristic signals, not hard checks.** Gather independently (parallel where supported): `git branch --show-current`, `git status --short`, `git stash list`, `git log -1 --format=%cs` (no-git: newest `landed/HISTORY.md` entry). These are **fuzzy** — a branch name rarely equals an `Active focus` sentence, so only surface a **clear** divergence, never a guessed equality.
 
@@ -48,13 +50,13 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
 
    **Land-readiness (signal 2), as the FINAL output line / a dedicated `## Land-readiness` block** (never mid-report): run the [Land-readiness check](exit-ritual.md#land-readiness-check) — if `git status` shows **≥ 5** changed files under `flightdeck/` (skip entirely under no-git), append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
 
-## Fallback when "Next session" is empty
+## Fallback when `## 下一步` is empty
 
 Don't auto-start anything. Search in order (a missing directory counts as empty), present candidates to the user:
 
-1. `flightdeck/plans/` — surface `pending` / `blocked` / `active` plans (read `plans/INDEX.md`), most actionable first; a `done`-but-unlanded plan → offer to land it.
-2. `flightdeck/specs/` — `active` / `pending` designs not yet turned into a plan (read `specs/INDEX.md`); ask which to plan next.
-3. `flightdeck/sketches/` — unstarted ideas (read `sketches/INDEX.md`); ask which (if any) to promote to a spec.
+1. `flightdeck/plans/` — surface `active` plans (read `plans/INDEX.md`), most actionable first; a `done`-but-unlanded plan → offer to land it.
+2. `flightdeck/specs/` — `active` designs not yet turned into a plan (read `specs/INDEX.md`); ask which to plan next.
+3. `flightdeck/specs/` **to-start pool** — `status: idea` specs (the `待启动（idea）` group in `specs/INDEX.md`); ask which (if any) to start (flip `idea → active`). Ideas are *not* orphans and not in cockpit — this fallback is their surfacing point.
 
 > **Done-but-unlanded (any folder):** an artifact whose `status: done` but which still sits in its source folder (not yet under `landed/`) is *done-but-unlanded* — the `status` skill produces these when its `land` confirm is declined. Offer to land it via the [Land Routine](exit-ritual.md#land-routine). This applies to `specs/`, `plans/`, and any workflow folder, not just plans.
 
@@ -81,7 +83,7 @@ Routing catalog (from folder INDEX files — know-what-exists, not read-all):
 [Catalog notes]  (omitted when clean)
 - ⚠ incidents/INDEX.md missing — walkaround owns the fix
 
-Next session item #1: <item description>
+下一步 (item #1): <item description>
 
 Preflight complete (read-only). Catalog is know-what-exists only — NOT a substitute for /flightdeck:walkaround, and does not mean these files were read. Bodies load on demand, when execution begins and a trigger matches.
 
@@ -102,7 +104,7 @@ Resolve which?
 
 ## Don't do
 
-- Don't auto-pick a fallback when `Next session` is empty — always ask.
+- Don't auto-pick a fallback when `## 下一步` is empty — always ask.
 - Don't bump `Last updated` — entry doesn't modify cockpit (first-time setup is the one exception).
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
 - Don't drill into individual files until a trigger matches at execution time (read folder INDEX only).
