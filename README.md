@@ -45,8 +45,6 @@ flightdeck/
 └── landed/             # archive of completed work
 ```
 
-The folder a file lives in declares what it is; `status` is the one required frontmatter field, advancing as work moves (`sketch → spec → plan → landed`). Every folder has an `INDEX.md` — a derived table (file · status · one-line summary) the AI reads before opening any file.
-
 ### cockpit.md — the one must-read file
 
 Read first every session, hard-capped at 80 lines:
@@ -194,14 +192,9 @@ On entry, `/flightdeck:preflight` (and `walkaround`) read the deck `version` and
 
 ## Documentation
 
-| File | What it covers |
-| --- | --- |
-| [skills/preflight/SKILL.md](skills/preflight/SKILL.md) | `/flightdeck:preflight` — the single entry ritual |
-| [skills/preflight/protocol.md](skills/preflight/protocol.md) | The protocol textbook — data model, authority order, lifecycle, routing, write gate |
-| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | What each folder holds; deck layout |
-| [skills/preflight/templates.md](skills/preflight/templates.md) | Per-file templates + frontmatter rules |
-| [skills/preflight/exit-ritual.md](skills/preflight/exit-ritual.md) | The landing ritual — classification heuristics, promotion gates |
-| [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md) | Version upgrades · history |
+**Guides** — go deeper in [`docs/`](docs/): [Lifecycle & execution flow](docs/lifecycle.md) · [Architecture](docs/architecture.md) · [Design philosophy](docs/philosophy.md) · [How it compares](docs/comparison.md)
+
+**Protocol reference** (canonical, AI-facing): [protocol.md](skills/preflight/protocol.md) · [folder semantics](skills/preflight/folder-semantics.md) · [templates](skills/preflight/templates.md) · [the landing ritual](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 
 ## Contributing
 

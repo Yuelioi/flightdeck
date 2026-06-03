@@ -45,8 +45,6 @@ flightdeck/
 └── landed/             # 完成工作的归档
 ```
 
-文件所在的文件夹就声明了它是什么；`status` 是唯一必填的 frontmatter 字段，随工作推进（`sketch → spec → plan → landed`）。每个文件夹都有一个 `INDEX.md` —— 衍生表格（文件 · 状态 · 一行摘要），AI 在打开任何文件前先读它。
-
 ### cockpit.md —— 唯一必读文件
 
 每次会话首先读取，硬上限 80 行：
@@ -194,14 +192,9 @@ disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
 
 ## 文档
 
-| 文件 | 覆盖内容 |
-| --- | --- |
-| [skills/preflight/SKILL.md](skills/preflight/SKILL.md) | `/flightdeck:preflight` —— 唯一入场仪式 |
-| [skills/preflight/protocol.md](skills/preflight/protocol.md) | 协议教科书 —— 数据模型、权威序、生命周期、路由、写入门控 |
-| [skills/preflight/folder-semantics.md](skills/preflight/folder-semantics.md) | 每个文件夹装什么；deck 布局 |
-| [skills/preflight/templates.md](skills/preflight/templates.md) | 各文件模板 + frontmatter 规则 |
-| [skills/preflight/exit-ritual.md](skills/preflight/exit-ritual.md) | Landing 仪式 —— 分类启发式、晋升门 |
-| [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md) | 版本升级 · 历史 |
+**深入指南** —— 见 [`docs/`](docs/)：[生命周期与执行流程](docs/lifecycle.md) · [架构](docs/architecture.md) · [设计哲学](docs/philosophy.md) · [横向对比](docs/comparison.md)
+
+**协议参考**（canonical，AI 向）：[protocol.md](skills/preflight/protocol.md) · [文件夹语义](skills/preflight/folder-semantics.md) · [模板](skills/preflight/templates.md) · [landing 仪式](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 
 ## 贡献
 
