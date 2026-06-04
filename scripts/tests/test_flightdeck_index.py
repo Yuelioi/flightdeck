@@ -460,5 +460,51 @@ class VersionGuardTest(unittest.TestCase):
             self.assertNotIn("OLD", (deck / "specs" / "INDEX.md").read_text(encoding="utf-8"))
 
 
+class LayoutVerdictTest(unittest.TestCase):
+    def _deck(self, root, version="3.0"):
+        deck = Path(root)
+        (deck / "rules.md").write_text(
+            f"---\nversion: {version}\n---\n", encoding="utf-8"
+        )
+        specs = deck / "specs"
+        specs.mkdir()
+        (specs / "2026-06-01-a.md").write_text(
+            "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
+        )
+        (deck / "cockpit.md").write_text(
+            "# Cockpit\n## 进行中\n<!-- AUTO:inprogress -->\n\n<!-- /AUTO -->\n## 下一步\n",
+            encoding="utf-8",
+        )
+        return deck
+
+    def test_sketches_dir_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "sketches").mkdir()
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_debriefs_dir_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "debriefs").mkdir()
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_retired_status_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "specs" / "2026-06-02-b.md").write_text(
+                "---\nstatus: awaiting-review\nsummary: y\n---\n", encoding="utf-8"
+            )
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_cockpit_missing_auto_region_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "cockpit.md").write_text(
+                "# Cockpit\n## Next session\n- do thing\n", encoding="utf-8"
+            )
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+
 if __name__ == "__main__":
     unittest.main()

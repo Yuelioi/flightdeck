@@ -222,6 +222,60 @@ def _fm_field(path, field):
         return None
 
 
+RETIRED_STATUSES = {"pending", "awaiting-review", "blocked"}
+
+
+def _migration_layout():
+    """(current, [need_update]) read from bundled MIGRATION.md frontmatter."""
+    mig = Path(__file__).resolve().parent.parent / "MIGRATION.md"
+    fm = parse_frontmatter(mig.read_text(encoding="utf-8"))
+    current = (fm.get("current") or "").split("#")[0].strip() or None
+    raw = (fm.get("layout_need_update") or "[]").split("#")[0]
+    need = [v.strip() for v in raw.strip().strip("[]").split(",") if v.strip()]
+    return current, need
+
+
+def _vtuple(v):
+    try:
+        return tuple(int(x) for x in str(v).strip().split("."))
+    except (ValueError, AttributeError):
+        return None
+
+
+def _workflow_fms(deck):
+    """Yield parsed frontmatter dicts for every spec/plan file (skip INDEX)."""
+    for kind in ("specs", "plans"):
+        folder = Path(deck) / kind
+        if folder.is_dir():
+            for p in folder.glob("*.md"):
+                if p.name != "INDEX.md":
+                    yield parse_frontmatter(p.read_text(encoding="utf-8"))
+
+
+def _structural_signal(deck):
+    """True if the deck shows any pre-model-v4 structural signal (version-agnostic)."""
+    deck = Path(deck)
+    if (deck / "sketches").is_dir() or (deck / "debriefs").is_dir():
+        return True
+    if any(fm.get("status") in RETIRED_STATUSES for fm in _workflow_fms(deck)):
+        return True
+    cockpit = deck / "cockpit.md"
+    if cockpit.is_file() and "<!-- AUTO:inprogress -->" not in cockpit.read_text(encoding="utf-8"):
+        return True
+    return False
+
+
+def layout_verdict(deck):
+    """Machine verdict on a deck's layout currency.
+
+    One of: 'structural-behind' | 'malformed' | 'compatible-behind' | 'current'.
+    Read-only. Version data comes from MIGRATION.md frontmatter (not prose).
+    """
+    if _structural_signal(deck):
+        return "structural-behind"
+    return "current"
+
+
 def version_mismatch(deck):
     """Return (deck_version, script_version) if they disagree, else None.
 
