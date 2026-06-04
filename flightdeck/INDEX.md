@@ -4,7 +4,7 @@
 
 <!-- AUTO:root -->
 - specs/ — 8 (4 idea, 3 active, 1 done)
-- plans/ — 2 (1 active, 1 done)
+- plans/ — 3 (2 active, 1 done)
 - incidents/ — 3 active
 - checklists/ — 3 active
 - charts/ — 1 project imported

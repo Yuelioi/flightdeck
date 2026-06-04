@@ -83,9 +83,9 @@ related: [specs/2026-06-03-model-v4-folder-state-cockpit-design.md, specs/2026-0
 
 ### C. 配套改动
 
-- **插件清单注册新命令**：`.claude-plugin/` / `.codex-plugin/` / `.cursor-plugin/` / `gemini-extension.json` 加 `launch` 命令条目（与现有 4 命令同构）。
-- **交叉引用改写**：`protocol.md` / `MIGRATION.md` / `README` / `CHANGELOG.md` 中凡引用 preflight「Branch-0 首次创建 / setup.md」之处，改指向 `/flightdeck:launch`。`MIGRATION.md` 不需要新增 deck 迁移段（不改 deck 数据结构）。
-- **CHANGELOG 用户行为变更条目**：preflight 行为变了（deckless 不再自动建 deck、不再阻塞式 reconcile），CHANGELOG 须把「原 Branch-0 自动初始化 → 现需显式 `/flightdeck:launch`」作为一条**显式用户行为变更**写出，附一行过渡说明（首次在空目录跑 preflight 会看到重定向提示，不再静默建 deck）。否则用户首遇 deckless 重定向会困惑。
+- **插件清单无需注册新命令**（plan 期核实修正）：四个清单（`.claude-plugin/plugin.json` / `.codex-plugin/plugin.json` / `.cursor-plugin/plugin.json` / `gemini-extension.json`）均以 `"skills": "./skills/"` 目录指针**自动发现** skill，无逐命令列表 → 建好 `skills/launch/SKILL.md` 后 `/flightdeck:launch` 自动可用。可选（非必须、纯展示）：把 `launch` 加进 `keywords` / `description`，留待发布。
+- **交叉引用改写**：`protocol.md`（L90 version 来源行、L220 routing 表「first-time setup excepted」）/ `folder-semantics.md`（L7「preflight first-time setup」）/ `README.md` + `README.zh.md`（多处「preflight 创建 deck / 首次 setup / 接管即建」）/ `adapters/claude/README.md` `adapters/gemini/README.md` 中凡述 preflight「Branch-0 首次创建 / setup.md / 接管时建 deck」之处，改述为 preflight 重定向 + `/flightdeck:launch` 建 deck。**不改 `MIGRATION.md` 的历史段**（2.0/2.2/2.3 段如实记录当时行为，是历史不是现状）；也不新增 deck 迁移段（不改 deck 数据结构）。
+- **CHANGELOG 在发布时写**（plan 期核实修正）：`bump_version.py --check` 要求 CHANGELOG 顶部标题与清单 semver 一致（现 `2.3.0`），故**本次不动 `CHANGELOG.md`**——否则破坏 `--check`。用户行为变更（deckless 不再自动建 deck、不再阻塞式 reconcile、原 Branch-0 自动初始化 → 现需显式 `/flightdeck:launch`，附过渡说明）作为一条**显式条目**写进**发布时**新建的 `## [3.0.0]` CHANGELOG 段（version-bump 清单 step 3）。本 plan 末尾留发布提醒。
 - **SKILL.md description（定稿，影响 AI 路由）**：
   - preflight：`Use when explicitly invoking the flightdeck entry ritual — reads INDEX/cockpit and reports the next step, warms the routing catalog, and gives a passive note on obvious git/version misalignment. No deck (no cockpit.md) → points to /flightdeck:launch and stops. Triggered by /flightdeck:preflight.`
   - launch：`Use when explicitly creating a flightdeck deck for the first time in a project that has none — copies the full-layout scaffold and seeds cockpit.md (zero prompts), then stops. Refuses if cockpit.md already exists. Triggered by /flightdeck:launch.`
@@ -115,9 +115,10 @@ related: [specs/2026-06-03-model-v4-folder-state-cockpit-design.md, specs/2026-0
 
 1. 新建 `skills/launch/SKILL.md`（搬 setup.md 内容 + 终态报告）。
 2. preflight Branch-0 改重定向；删 setup.md；删 preflight 的迁移探测/catalog 体检/阻塞 reconcile；catalog 降两列；git 降被动一行。
-3. 4 个插件清单注册 launch；改 description。
-4. 交叉引用改写（protocol/MIGRATION/README/CHANGELOG）。
-5. 测试 + dogfood 验证。
+3. 改两条 description（preflight + launch，定稿见 C）。清单无需注册（自动发现）。
+4. 交叉引用改写（protocol / folder-semantics / README / README.zh / adapters）。不动 MIGRATION 历史段、不动 CHANGELOG。
+5. 测试（`uv run pytest scripts/tests/`）+ `flightdeck_index.py --check` + dogfood + walkaround 干净。
+6. 发布提醒：3.0 CHANGELOG 段写入 deckless 行为变更条目（version-bump 清单 step 3）。
 
 ## 评审纪要
 
