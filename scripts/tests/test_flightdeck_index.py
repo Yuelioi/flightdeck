@@ -99,6 +99,16 @@ class FormatRowTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             format_row("debriefs", "foo.md", {"status": "active"})
 
+    def test_summary_kind_missing_summary_does_not_raise(self):
+        # 缺 summary 的 workflow 文件不应让 regen 崩；用可见哨兵占位。
+        row = format_row("specs", "foo.md", {"status": "active"})
+        self.assertIn("foo.md", row)
+        self.assertIn("⚠", row)
+
+    def test_summary_kind_missing_status_does_not_raise(self):
+        row = format_row("specs", "foo.md", {"summary": "x"})
+        self.assertIn("foo.md", row)
+
 
 class RegenFolderIndexTest(unittest.TestCase):
     def test_regenerates_alphabetical_block_from_frontmatter(self):

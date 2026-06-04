@@ -30,14 +30,21 @@ FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "charts"]
 
 
 def format_row(kind, filename, fm):
-    """Render one folder-INDEX row for an artifact, by folder kind."""
+    """Render one folder-INDEX row for an artifact, by folder kind.
+
+    Missing required fields are rendered with a visible sentinel rather than
+    raising, so a malformed file never crashes a regen (it is surfaced as a
+    `malformed` verdict by `layout_verdict` instead).
+    """
     link = f"- [{filename}]({filename})"
+    status = fm.get("status", "?")
     if kind in SUMMARY_KINDS:
-        return f"{link} {DASH} {fm['status']} {DASH} {fm['summary']}"
+        return f"{link} {DASH} {status} {DASH} {fm.get('summary', '⚠ summary 缺失')}"
     if kind in KNOWLEDGE_KINDS:
         row = (
-            f"{link} {DASH} {fm['status']} {DASH} "
-            f"when_to_read: {fm['when_to_read']} {DASH} applies_to: {fm['applies_to']}"
+            f"{link} {DASH} {status} {DASH} "
+            f"when_to_read: {fm.get('when_to_read', '⚠ 缺失')} {DASH} "
+            f"applies_to: {fm.get('applies_to', '[]')}"
         )
         # incidents carry a recurrence counter; surface it in the catalog row when
         # it has fired (>1) so the promotion gate is visible without opening the file.
