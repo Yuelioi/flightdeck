@@ -58,6 +58,8 @@ def new(deck, kind, slug, title, status=None, summary="", implements=None,
         )
     if not title:
         raise ValueError("title is required")
+    if kind in WORKFLOW and not summary:
+        raise ValueError(f"{kind} requires --summary (drives the INDEX row; required by flightdeck_index)")
     if kind in KNOWLEDGE and (not when_to_read or not applies_to):
         raise ValueError(f"{kind} requires --when-to-read and --applies-to (required routing fields)")
     if implements and kind not in WORKFLOW:
@@ -78,3 +80,44 @@ def new(deck, kind, slug, title, status=None, summary="", implements=None,
     if regen:
         flightdeck_index.main([str(deck)])
     return path
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Create a new flightdeck deck artifact (frontmatter + naming + INDEX/cockpit regen)."
+    )
+    ap.add_argument("deck", help="path to the flightdeck/ deck root")
+    ap.add_argument("kind", choices=sorted(KIND_FOLDER))
+    ap.add_argument("--slug", required=True, help="filename slug: ^[a-z0-9-]+$")
+    ap.add_argument("--title", required=True, help="human title (becomes the H1)")
+    ap.add_argument("--status", default=None,
+                    choices=["idea", "active", "done", "scrapped", "obsolete", "superseded"])
+    ap.add_argument("--summary", default="", help="one-line gist (drives the INDEX row)")
+    ap.add_argument("--implements", default=None, help="workflow only: specs/<x>.md")
+    ap.add_argument("--when-to-read", dest="when_to_read", default=None)
+    ap.add_argument("--applies-to", dest="applies_to", default=None, help="comma-separated tags")
+    ap.add_argument("--date", default=None, help="YYYY-MM-DD (default: today; override for backfill)")
+    args = ap.parse_args(argv)
+
+    applies = [t.strip() for t in args.applies_to.split(",")] if args.applies_to else None
+    try:
+        path = new(args.deck, args.kind, slug=args.slug, title=args.title,
+                   status=args.status, summary=args.summary, implements=args.implements,
+                   when_to_read=args.when_to_read, applies_to=applies, date=args.date)
+    except (ValueError, FileExistsError) as e:
+        print(f"refused: {e}")
+        return 2
+
+    status = args.status or _DEFAULT_STATUS[args.kind]
+    print(f"created {args.kind} at {path}")
+    if args.kind in WORKFLOW and status == "idea":
+        print("INDEX updated; cockpit unchanged (status=idea)")
+    elif args.kind in WORKFLOW:
+        print("INDEX + cockpit (## 进行中) updated")
+    else:
+        print("folder INDEX updated")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

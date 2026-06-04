@@ -22,10 +22,11 @@ class NewHappyPathTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)
             path = new(deck, "spec", slug="my-idea", title="My Idea",
-                       status="idea", regen=False)
+                       status="idea", summary="an idea gist", regen=False)
             self.assertEqual(path, deck / "specs" / "my-idea.md")
             text = path.read_text(encoding="utf-8")
             self.assertIn("status: idea", text)
+            self.assertIn("summary: an idea gist", text)
             self.assertNotIn("last_updated:", text)   # idea omits last_updated
             self.assertIn("# My Idea", text)
 
@@ -43,7 +44,7 @@ class NewHappyPathTest(unittest.TestCase):
     def test_plan_carries_implements(self):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)
-            path = new(deck, "plan", slug="roll-it", title="Roll It",
+            path = new(deck, "plan", slug="roll-it", title="Roll It", summary="roll gist",
                        status="active", implements="specs/x.md", date="2026-06-04", regen=False)
             self.assertEqual(path, deck / "plans" / "2026-06-04-roll-it.md")
             self.assertIn("implements: specs/x.md", path.read_text(encoding="utf-8"))
@@ -81,6 +82,12 @@ class NewValidationTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 new(deck, "spec", slug="x", title="", regen=False)
 
+    def test_workflow_without_summary_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "spec", slug="x", title="X", status="idea", regen=False)
+
     def test_knowledge_without_routing_fields_raises(self):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)
@@ -97,9 +104,26 @@ class NewValidationTest(unittest.TestCase):
     def test_refuses_if_exists(self):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)
-            new(deck, "spec", slug="dup", title="Dup", status="idea", regen=False)
+            new(deck, "spec", slug="dup", title="Dup", summary="g", status="idea", regen=False)
             with self.assertRaises(FileExistsError):
-                new(deck, "spec", slug="dup", title="Dup", status="idea", regen=False)
+                new(deck, "spec", slug="dup", title="Dup", summary="g", status="idea", regen=False)
+
+
+class NewRegenTest(unittest.TestCase):
+    def _full_deck(self, d):
+        """A deck with the INDEX/cockpit files regen needs (copy from scaffold)."""
+        import shutil
+        scaffold = Path(__file__).resolve().parent.parent.parent / "scaffolds" / "full" / "flightdeck"
+        deck = Path(d) / "flightdeck"
+        shutil.copytree(scaffold, deck)
+        return deck
+
+    def test_regen_after_active_spec_leaves_index_clean(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._full_deck(d)
+            new(deck, "spec", slug="demo", title="Demo",
+                status="active", summary="demo gist", date="2026-06-04", regen=True)
+            self.assertEqual(flightdeck_index.index_drift(deck), [])
 
 
 if __name__ == "__main__":
