@@ -69,19 +69,50 @@ last_updated: 2026-06-04
 
 覆盖**全部工件种类**（spec/plan/incident/checklist/chart）——机制统一，每种的 frontmatter 脚本都知道。注：knowledge 工件主要由 `landing` 创建（已内置约定），故 new 入口对它们是"也可用"而非主战场；不改 landing 的现有创建逻辑（避免职责重叠，二者都走同一套 frontmatter 真相源即可）。**并入 3.0**（未发布）。
 
+## 实现约定（评审采纳，钉死——同时是 SKILL 契约面的内容）
+
+**kind → folder（单一常量表，脚本与文档共用，不各自隐含）**
+
+| kind | folder |
+|---|---|
+| spec | `specs/` |
+| plan | `plans/` |
+| incident | `incidents/` |
+| checklist | `checklists/` |
+| chart | `charts/` |
+
+**参数与校验（非法即报错退出，与 lint 哲学一致）**
+- `--title` 必填（→ H1 + summary 起草）；`--slug` 必填、必须匹配 `^[a-z0-9-]+$`，非法（含中文/空格/大写/下划线）→ **报错** + 打印合法示例。**不**自动从 title 派生 slug（避免中英转换歧义）；SKILL fallback 给统一 slugify 规则（去非 ascii、空格→`-`、转小写、仅留 `a-z0-9-`）供无 runtime 手做时一致。
+- 文件名日期 = `--date`（仅覆盖/补录历史用），缺省取**系统当天**；格式钉死 `YYYY-MM-DD`。
+- `--implements` 仅 workflow（spec/plan）合法；knowledge kind 传入 → **报错**。
+- knowledge（incident/checklist/chart）**必须**传 `--when-to-read` + `--applies-to`（required 路由字段，缺失 → **报错**；不自动填 "TBD" 占位）。
+- 非法 `kind` → **报错**（不静默生成错文件）。
+- 目标文件已存在 → **拒绝**（初期不做 `--force`；批量 `--no-regen` 同属未来、YAGNI 不做）；SKILL fallback 写明"已存在请先手动删/改名"。
+- 默认 status：workflow=`idea`、knowledge=`active`（knowledge 天生是可消费知识 → 默认 active；SKILL 注明此差异的理由，免后人疑惑）。
+
+**命名（SKILL 里也钉死、带负例）**：`[<date>-]<slug>.md`，`status≠idea` 加日期前缀。**不自动追加 `-design`**——`new-artifact.md` ✓；要带 "design" 须自己写进 slug，脚本绝不替你加。
+
+**regen 与 stdout（消除 idea 建壳的误导）**：建壳后调 `flightdeck_index`，stdout 按 status 区分——active workflow → `INDEX + cockpit 进行中 已更新`；idea → `INDEX 已更新；cockpit 不变（status=idea）`；knowledge → `folder INDEX 已更新`。
+
+**description（定稿，发现钩子用）**：`Create a new flightdeck deck artifact (spec / plan / incident / checklist / chart) with correct per-kind frontmatter, naming, and auto-regenerated INDEX/cockpit — use this instead of hand-writing the file. Triggered by /flightdeck:new.`
+
+**landing 关系（SKILL 写明）**：`landing` 已内置 knowledge 约定；`new` 对 knowledge **可用但非必须路径**。二者走同一套 frontmatter 真相源；`new` 会填全部可选字段，`landing` 遵循自身字段集——兼容（缺的非必填字段不影响系统）。plan 期校验 `landing` 实际填的 knowledge 字段集。
+
 ## 验证
 
 - `test_flightdeck_new.py`：建 spec（idea→dateless / active→dated）、建 plan（带 implements）、建 knowledge（带 when_to_read/applies_to）、拒绝已存在、regen 后 `flightdeck_index --check` clean。
-- dogfood：`/flightdeck:new spec --slug demo --status active` 在本仓库建壳 → 确认路径/frontmatter/cockpit 投影正确 → 删除。
+- **错误路径测试**：非法 kind、空/纯空格/含中文 slug、缺 `--title`、knowledge 缺 `--when-to-read`/`--applies-to`、workflow 字段 `--implements` 传给 knowledge —— 一律**报错退出**而非生成文件。
+- dogfood：`/flightdeck:new spec --slug demo --title "Demo" --status active` 在本仓库建壳 → 确认路径/frontmatter/cockpit 投影正确 → 删除 → **删除后 `flightdeck_index --check` 仍 clean**。
 - `flightdeck_lint.py` / walkaround 对新建工件无 findings。
 
 ## 实现顺序（交给 writing-plans 细化）
 
 1. `scripts/flightdeck_new.py` + `test_flightdeck_new.py`（机械层：命名/frontmatter/落目录/调 regen）。
 2. `skills/new/SKILL.md`（fast path + 权威撰写契约 fallback + 交接说明）。
-3. 发现钩子：protocol.md "Authoring" 节 + emit-agents-md 模板行 + 校 description。
-4. 文档：README/README.zh 命令表加 `/flightdeck:new`；adapters 命令清单加 `new`。
-5. 验证 + dogfood；发布提醒：3.0 CHANGELOG 写新命令（version-bump step 3，本次不动 CHANGELOG）。
+3. 发现钩子：protocol.md "Authoring" 节 + emit-agents-md 模板行 + 定稿 description。
+4. 验证 + dogfood（先验证再更新对外文档，避免文档指向未稳接口）。
+5. 文档：README.md / README.zh.md 命令表加 `/flightdeck:new`；`adapters/claude/README.md` + `adapters/gemini/README.md` 命令清单加 `new`。
+6. 发布提醒：3.0 CHANGELOG 写新命令（version-bump step 3，本次不动 CHANGELOG）。
 
 ## 评审纪要
 
@@ -90,3 +121,9 @@ last_updated: 2026-06-04
 - **暴露形态**：用户选 **`/flightdeck:new` skill 包脚本**（仿 launch）。
 - **痛点收窄（用户校正）**：位置实践中已可靠落对，**不是**痛点；真正的税是 frontmatter/命名/regen 推导。据此**砍掉**"防写 `docs/`"的 guard 框定，发现钩子改框为"用入口而非手搓"。
 - **时序**：并入 3.0（未发布前所有新工作归 3.0，已记为常驻规则）。
+
+### 第二轮（三份外部 review，approve + minor amendments）
+
+采纳并钉进「实现约定」节：kind→folder 常量表 · 日期默认系统当天/格式 `YYYY-MM-DD` · `--slug` 必填+正则校验+SKILL 统一 slugify · `--title` 必填 · `--implements` 仅 workflow（误传报错）· knowledge 必填 when_to_read/applies_to（不 TBD）· 非法 kind 报错 · 已存在拒绝 · regen stdout 按 status 区分（消 idea 误导）· `-design` 负例 · knowledge=active 理由 · landing 与 new 的关系一句 · 定稿 description · 错误路径测试 + dogfood 删后 --check · 实现顺序验证前置于文档 · adapters 路径写明。
+
+拒绝/不做：`--force`、`--no-regen`、`--auto-slug`（均 YAGNI，无当前用例，未来需要再加且不破兼容）；knowledge 字段默认 "TBD"（改为必填报错，更干净）。
