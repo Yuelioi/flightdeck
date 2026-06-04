@@ -290,7 +290,16 @@ def layout_verdict(deck):
         return "structural-behind"
     current, need = _migration_layout()
     deck_v = _fm_field(Path(deck) / "rules.md", "version")
-    return _classify_version(deck_v, current, need)
+    vclass = _classify_version(deck_v, current, need)
+    if vclass == "structural-behind":
+        return vclass
+    # 版本不落后 → 再查 malformed（缺必需 workflow 字段）
+    for fm in _workflow_fms(deck):
+        if fm.get("status") == "scrapped":
+            continue
+        if "status" not in fm or "summary" not in fm:
+            return "malformed"
+    return vclass
 
 
 def version_mismatch(deck):

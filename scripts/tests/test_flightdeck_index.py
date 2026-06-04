@@ -540,6 +540,22 @@ class LayoutVerdictTest(unittest.TestCase):
             "structural-behind",
         )
 
+    def test_missing_summary_on_current_deck_is_malformed(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d, version="3.0")
+            (deck / "specs" / "2026-06-02-bad.md").write_text(
+                "---\nstatus: active\n---\n", encoding="utf-8"  # 缺 summary
+            )
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "malformed")
+
+    def test_scrapped_missing_summary_not_malformed(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d, version="3.0")
+            (deck / "specs" / "2026-05-01-r.md").write_text(
+                "---\nstatus: scrapped\n---\n", encoding="utf-8"
+            )
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "current")
+
 
 if __name__ == "__main__":
     unittest.main()
