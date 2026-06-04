@@ -30,7 +30,9 @@ class InitTest(unittest.TestCase):
             self.assertTrue((deck / "rules.md").exists())
             self.assertTrue((deck / "landed" / "HISTORY.md").exists())
             # rules.md copied verbatim (a scaffold token survives — not re-authored)
-            self.assertIn("disabled_folders", (deck / "rules.md").read_text(encoding="utf-8"))
+            rules = (deck / "rules.md").read_text(encoding="utf-8")
+            self.assertIn("status: don't auto start", rules)  # cheat-sheet phrase, scaffold-only
+            self.assertNotIn("disabled_folders", rules)  # removed in the autonomy-convergence pass
 
     def test_no_git_keeps_history(self):
         # target without .git → no-git deck → HISTORY.md is the history substrate, kept
