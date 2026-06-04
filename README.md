@@ -110,6 +110,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | --- | --- |
 | `/flightdeck:launch` | **First-time deck creation** — copies the scaffold, seeds `cockpit.md` (zero prompts). Refuses if a deck already exists. |
 | `/flightdeck:preflight` | **Session-entry takeover** — reads `cockpit.md`, glances at git, reports the next item. Deckless → points to `/flightdeck:launch`. |
+| `/flightdeck:new` | Author a deck artifact (spec/plan/incident/checklist/chart) — stamps frontmatter + naming, regenerates INDEX/cockpit. Use instead of hand-writing. |
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |

@@ -48,6 +48,8 @@ After install:
 └── exit-ritual.md
 ~/.claude/skills/launch/                # /flightdeck:launch — first-time deck creation
 └── SKILL.md
+~/.claude/skills/new/                    # /flightdeck:new — author a deck artifact
+└── SKILL.md
 ~/.claude/skills/landing/               # /flightdeck:landing explicit trigger
 └── SKILL.md
 ~/.claude/skills/walkaround/            # /flightdeck:walkaround integrity audit
@@ -90,12 +92,12 @@ Direct path:
 
 ```bash
 # macOS / Linux
-rm -rf ~/.claude/skills/{preflight,launch,landing,walkaround,emit-agents-md,status}
+rm -rf ~/.claude/skills/{preflight,launch,new,landing,walkaround,emit-agents-md,status}
 ```
 
 ```powershell
 # Windows
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\new", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
 ```
 
 ## Call-source detection (model_invocable gate)

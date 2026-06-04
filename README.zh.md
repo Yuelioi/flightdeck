@@ -110,6 +110,7 @@ flightdeck/
 | --- | --- |
 | `/flightdeck:launch` | **首次建 deck** —— 复制脚手架、播种 `cockpit.md`（零提问）。deck 已存在则拒绝。 |
 | `/flightdeck:preflight` | **会话入口接管** —— 读 `cockpit.md`、瞥一眼 git、报告下一项。无 deck → 指向 `/flightdeck:launch`。 |
+| `/flightdeck:new` | 撰写 deck 工件（spec/plan/incident/checklist/chart）—— 盖 frontmatter + 命名、重生 INDEX/cockpit。代替手搓。 |
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
