@@ -32,7 +32,7 @@
 ```
 flightdeck/
 ├── cockpit.md          # 必读入口 —— Active focus / Next session / Hanging tasks
-├── rules.md            # 项目配置 —— version + disabled_folders + house rules
+├── rules.md            # 项目配置 —— version + 自由散文 house rules
 ├── INDEX.md            # 跨所有文件夹的全局状态汇总
 │
 ├── sketches/           # 早期想法、草稿
@@ -115,7 +115,7 @@ flightdeck/
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
 
-工件 `status` **自动**推进（idea→active）。默认 AI 可自调 `preflight` / `walkaround` / `emit-agents-md` / `status`，但 **`landing` 是手动的** —— 它会归档 + 提交，所以由你来跑（或在 `rules.md` 里打开自动）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
+工件 `status` **自动**推进（idea→active→done）。五个仪式（`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`）都可自调；`landing` 按判断决定归档（被 active 工件交叉引用的 `done` 工件留在原地）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
 
 ### 路由 —— 什么触发什么
 
@@ -134,30 +134,30 @@ flightdeck/
 
 ```yaml
 ---
-version: <release>
-disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
+version: <release>       # 唯一的结构化字段
 ---
 
 ## House rules
 
 ### Project conventions
-# deck 局部约定，如 "specs 用中文"、"不建 sketches/"
+# deck 局部约定，如 "specs 用中文"、"不用 charts/"
 
 ### Autonomy overrides
-# 行为覆盖；省略 = 默认（landing 手动；不经你同意不归档/提交）
+# 行为覆盖；省略 = 默认（本地 commit 自动、push 才先问；仪式都可自调）
 ```
 
-其余未在此固定的，全靠**推断或默认**：
+`version` 是唯一的结构化字段。其余全靠**推断、默认或 skill 判断**：
 
 - **git** —— 由是否有 `.git` 目录推断。
 - **AGENTS.md** 重生 —— 由是否有 `AGENTS.md` 文件推断。
-- **仪式**默认可自调，**唯独 `landing` 手动**（它会归档 + 提交）；**`status`** 自动推进 idea→active，但**不**自动归档；**`commit`** 先问你（人工确认点）。
+- **脚本** —— 由是否能跑到 `uv`/`python` 推断（否则走 markdown 兜底）。
+- **仪式** —— 五个都可自调；**`status`** 自动推进 idea→active→done，但**从不归档**（归档是 `landing` 按交叉引用的判断）；**`commit`** 本地自动、**push 才先问**。
 
 要改其中任何一条，在 `### Autonomy overrides` 里写一句标准句：
 
-- `landing: self-invoke` —— 让 AI 自己跑 landing（默认手动）· `status: auto land` —— flip 成 done 时自动归档
-- `commit without asking` —— 或 `don't auto-commit; leave changes for me / CI`
-- `this deck doesn't use git`
+- `commit: ask`（每次本地 commit 前先问）· `don't auto-commit; leave changes for me / CI`
+- `status: don't auto start` —— 不自动 flip idea→active
+- `this deck doesn't use git` · `has AGENTS.md but don't auto-regen`
 
 ## 为什么需要它
 

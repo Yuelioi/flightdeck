@@ -32,7 +32,7 @@ A `flightdeck/` directory your AI reads and writes by convention:
 ```
 flightdeck/
 ├── cockpit.md          # must-read entry — Active focus / Next session / Hanging tasks
-├── rules.md            # project config — version + disabled_folders + house rules
+├── rules.md            # project config — version + free-prose house rules
 ├── INDEX.md            # global status summary across all folders
 │
 ├── sketches/           # early ideas, scratchpad
@@ -115,7 +115,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
 
-Artifact `status` advances **automatically** (idea→active). By default the AI may self-invoke `preflight` / `walkaround` / `emit-agents-md` / `status`, but **`landing` is manual** — it archives + commits, so you run it (or opt into auto in `rules.md`). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
+Artifact `status` advances **automatically** (idea→active→done). All five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) may self-invoke; `landing` decides archiving by judgment (it keeps a `done` artifact in place while active work still references it). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
 
 ### Routing — what triggers what
 
@@ -134,30 +134,30 @@ Artifact `status` advances **automatically** (idea→active). By default the AI 
 
 ```yaml
 ---
-version: <release>
-disabled_folders: []     # folders to treat as off — not suggested, not audited
+version: <release>       # the only structured field
 ---
 
 ## House rules
 
 ### Project conventions
-# deck-local conventions, e.g. "specs in Chinese", "don't create sketches/"
+# deck-local conventions, e.g. "specs in Chinese", "don't use charts/"
 
 ### Autonomy overrides
-# behavioral overrides; omit = defaults (landing manual; nothing archives/commits unprompted)
+# behavioral overrides; omit = defaults (local commit auto, push asks; rituals self-invoke)
 ```
 
-Everything not pinned here is **inferred or defaulted**:
+`version` is the only structured field. Everything else is **inferred, defaulted, or skill judgment**:
 
 - **git** — inferred from a `.git` directory.
 - **AGENTS.md** regeneration — inferred from an `AGENTS.md` file being present.
-- **rituals** self-invoke *except `landing`* (manual — it archives + commits); **`status`** auto-advances idea→active but does **not** auto-archive; **`commit`** asks first (the human checkpoint).
+- **scripts** — inferred from a `uv`/`python` runtime being reachable (else the markdown fallback).
+- **rituals** — all five self-invoke; **`status`** auto-advances idea→active→done but **never archives** (archiving is `landing`'s cross-reference-aware judgment); **`commit`** is local-auto, **push asks**.
 
 Override any of these with a one-line standard phrase under `### Autonomy overrides`:
 
-- `landing: self-invoke` — let the AI run landing · `status: auto land` — auto-archive on a `done` flip
-- `commit without asking` — or `don't auto-commit; leave changes for me / CI`
-- `this deck doesn't use git`
+- `commit: ask` (confirm before each local commit) · `don't auto-commit; leave changes for me / CI`
+- `status: don't auto start` — don't auto-flip idea→active
+- `this deck doesn't use git` · `has AGENTS.md but don't auto-regen`
 
 ## Why it exists
 

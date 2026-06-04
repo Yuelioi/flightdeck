@@ -39,15 +39,6 @@ Cursor's skill / rules discovery has evolved across versions. The manifest follo
    - Pastes the verification transcript here.
    - Notes token cost observations and whether a "lite" mode is needed.
 
-## Call-source detection (model_invocable gate)
+## Invocation (no gate as of 3.0)
 
-**Mode: degraded (until verified).** This platform's manifest carries no per-skill
-manual-only switch, so the soft gate ships via the shared `SKILL.md` body. Whether this
-platform lets the skill body distinguish a user invocation from a model self-invoke is
-**unverified**. Under 3.0 most rituals default **self-invocable**, so the common case needs no
-detection; only a restricted ritual needs source detection — that includes **`landing`, which defaults to
-manual** (it archives + commits; enable with `landing: self-invoke`), plus any House-Rules restriction
-(`<ritual>: don't self-invoke; I run it manually`, or a pre-3.0 `model_invocable` omission honored for compat). Until verified, a
-restricted ritual runs degraded — treated as manual-only, prompting even on an explicit
-user invocation. See [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
-Flip this note to "formal" with a transcript when verified.
+3.0 removed the model-invocation gate: all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) **always self-invoke**, so no call-source detection is needed on this platform. (Pre-3.0 `model_invocable` lists are read but ignored.) See [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).

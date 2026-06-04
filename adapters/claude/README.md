@@ -100,15 +100,8 @@ rm -rf ~/.claude/skills/{preflight,launch,new,landing,walkaround,emit-agents-md,
 Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\new", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
 ```
 
-## Call-source detection (model_invocable gate)
+## Invocation (no gate as of 3.0)
 
-**Mode: formal.** Claude Code injects a `<command-name>/flightdeck:<ritual></command-name>`
-marker when the user types the slash, and omits it on a model self-invoke (Skill tool).
-The Step-0 gate keys off this marker: explicit user invocations are always allowed;
-model self-invocation is **allowed by default (3.0)** for `preflight` / `walkaround` / `emit-agents-md` / `status`,
-and blocked only when the deck's House Rules `### Autonomy overrides` segment carries `<ritual>: don't self-invoke; I run it manually`
-(or a pre-3.0 deck's `model_invocable` list, honored for 3.x compat, omits the ritual). **Exception — `landing` defaults to manual**
-(it archives + commits): model self-invoke is blocked unless House Rules carry `landing: self-invoke` (same marker logic, inverted default). See
-[protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
+All five flightdeck rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) **always self-invoke** — 3.0 removed the model-invocation gate, so there is no call-source check. Claude Code still injects a `<command-name>/flightdeck:<ritual></command-name>` marker on explicit user invocation, but flightdeck no longer keys any behavior off it. (Pre-3.0 `model_invocable` lists are read but ignored.)
 
-The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate. No manifest edit is needed to add it. `launch` (first-time deck creation) is likewise auto-discovered from `skills/launch/` — no manifest entry; it is an explicit one-time command, not part of the model self-invoke default set.
+The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest); `launch` (first-time deck creation) likewise from `skills/launch/`. No manifest edit is needed to add either.
