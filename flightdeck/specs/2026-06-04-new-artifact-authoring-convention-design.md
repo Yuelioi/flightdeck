@@ -1,5 +1,5 @@
 ---
-status: idea
+status: active
 summary: flightdeck 只有"管理既有工件"的仪式，没有"撰写新工件"的入口——撰写发生在外部 skill（如 brainstorming），而约定（位置在 commits.md、frontmatter 在 templates.md、INDEX/cockpit 归属在协议正文）分散无单一权威源、且不在撰写开始时被加载，导致 agent 每次"现翻"重推。修法方向：把"撰写新工件的位置+frontmatter"集中成单一权威且写时被指向的源 / 或加轻量 new-artifact 入口盖 frontmatter+落目录 / 或在 preflight 把"产出 spec/plan→一律写 flightdeck/<folder>/、用此 frontmatter、绝不写 docs/"作常驻覆盖注入
 last_updated: 2026-06-04
 ---
