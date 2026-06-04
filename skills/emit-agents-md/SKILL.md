@@ -13,19 +13,9 @@ User-triggered regeneration of `AGENTS.md` at repo root from the current state o
 
 AGENTS.md is the cross-tool standard for project-level AI instructions, stewarded by the Agentic AI Foundation under the Linux Foundation; ~60k+ repos adopted by mid-2026 with measurable 28.6% runtime / 16.6% token wins. Flightdeck tracks the same information (current focus, next actions, hanging tasks) in `flightdeck/cockpit.md`. The emitter is the bridge: flightdeck authors maintain this file, and AI tools that don't speak flightdeck natively read the auto-regenerated `AGENTS.md`.
 
-## Step 0 — model-invocation gate (run before any other step)
-
-Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `emit-agents-md` is self-invocable** — continue.
-
-- **Restricted** only if House Rules `### Autonomy overrides` says `emit-agents-md: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `emit-agents-md`):
-  - explicit user `/flightdeck:emit-agents-md` (e.g. a `<command-name>` marker) → allowed; continue.
-  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`emit-agents-md` is manual-only in this project (House Rule). Remove the `emit-agents-md: don't self-invoke` line to allow model self-invoke." Run no further step.
-
-(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
-
 ## Run this checklist
 
-### Step 0a: Apply `flightdeck/rules.md` toggles
+### Step 0: Apply `flightdeck/rules.md` toggles
 
 This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` (the bootstrap path; the "auto-regen only if `AGENTS.md` already exists" rule applies to *landing*'s call, not to this command). Under no-git, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do". (Compat: a pre-3.0 `emit_agents_md: false`, or the House Rule `has AGENTS.md but don't auto-regen`, only suppresses the *automatic* landing-time regen — never this explicit command.)
 
