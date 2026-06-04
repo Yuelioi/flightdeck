@@ -1,27 +1,17 @@
 ---
 name: status
-description: Keep a flightdeck artifact's lifecycle status fresh and its folder INDEX row + cockpit `## 进行中` in sync. Identify the target artifact with high confidence (currently-edited file → current executing-plan → most-recent unambiguous creation); if none is unambiguous, do nothing. Always-auto (when self-invoked, unless a House Rule restricts `status`): right after writing a new spec/plan into `flightdeck/{specs,plans}` set `idea`. Default-on (unless a House Rule `status: don't auto …` disables it): `start` → when beginning work on an idea, flip `idea → active` (add the `YYYY-MM-DD-` prefix + regen cockpit `## 进行中`); `land` → when the user approves/signs off set `done` (or `scrapped`), then run the shared Land Routine. Reads/writes the optional `note:` diagnostic. Never fires on ordinary edits (typo/wording fixes); forward-only, never downgrades. Triggered automatically or by `/flightdeck:status`.
+description: Keep a flightdeck artifact's lifecycle status fresh and its folder INDEX row + cockpit `## 进行中` in sync. Identify the target artifact with high confidence (currently-edited file → current executing-plan → most-recent unambiguous creation); if none is unambiguous, do nothing. Always-auto: right after writing a new spec/plan into `flightdeck/{specs,plans}` set `idea`. Default-on (unless a House Rule `status: don't auto …` disables it): `start` → when beginning work on an idea, flip `idea → active` (add the `YYYY-MM-DD-` prefix + regen cockpit `## 进行中`); on user approval/sign-off set `done`. Archiving is `/flightdeck:landing`'s smart judgment, not status's. Reads/writes the optional `note:` diagnostic. Never fires on ordinary edits (typo/wording fixes); forward-only, never downgrades. Triggered automatically or by `/flightdeck:status`.
 ---
 
 # Flightdeck Status — lifecycle auto-flip
 
 The only **high-frequency, lightweight, model-invocable** flightdeck ritual. It keeps a single artifact's lifecycle `status:` honest mid-session, so state doesn't drift and the next `preflight` reads truth from the INDEX. It is complementary to `landing`, not a replacement: `landing` is the low-frequency batch wrap-up; `status` is the in-flight keep-fresh.
 
-It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md` (+ that folder's count in the root INDEX). On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## 进行中` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it); when `land` is enabled it additionally archives via the shared Land Routine (confirm-gated). Beyond regenerating `## 进行中`, it does **not** touch `cockpit.md` (`Active focus` / `## 下一步` / `Hanging tasks`), does **not** commit, does **not** run length / AGENTS.md regeneration.
-
-## Step 0 — model-invocation gate (run before any other step)
-
-Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `status` is self-invocable** — continue.
-
-- **Restricted** only if House Rules `### Autonomy overrides` says `status: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `status`):
-  - explicit user `/flightdeck:status` (e.g. a `<command-name>` marker) → allowed; continue.
-  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`status` is manual-only in this project (House Rule). Remove the `status: don't self-invoke` line to allow model self-invoke." Run no further step.
-
-Manual `/flightdeck:status` always bypasses this gate (it only restricts model self-invoke).
+It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md` (+ that folder's count in the root INDEX). On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## 进行中` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it). Beyond regenerating `## 进行中`, it does **not** touch `cockpit.md` (`Active focus` / `## 下一步` / `Hanging tasks`), does **not** archive (archiving is `landing`'s smart judgment), does **not** commit, does **not** run length / AGENTS.md regeneration.
 
 ## Step 1 — read config
 
-**Default (3.0): `start` is on, `land` is off.** `start` (idea→active when work begins) fires automatically; `land` (auto-archive on a `done` flip) is **opt-in** — enable it with a House Rule `status: auto land`. A House Rule `status: don't auto start` turns `start` off; on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat (enabling only its members). The **core** create→`idea` transition below always runs. (Rationale: archiving is the consequential write — like the `landing` ritual it stays off until the user opts in.)
+**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off (on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat). The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `landed/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
 
 ## Step 2 — identify the target artifact (confidence rule)
 
@@ -40,24 +30,24 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 |---|---|---|---|
 | Wrote a **new spec/plan** into `flightdeck/{specs,plans}` | `idea` (a captured-but-unstarted thought) | core | always |
 | **Began work** on an idea (start executing / fleshing it out) | `idea → active` (+ date prefix + regen cockpit `## 进行中`) | default-on `start` | unless House Rule `status: don't auto start` |
-| User **approved / signed off** | `done` → land | **opt-in `land`** | only if House Rule `status: auto land`; then `done` auto, land confirm-gated |
+| User **approved / signed off** | `active → done` (+ regen cockpit `## 进行中`) | core | always — **status sets `done` only; it does not archive** |
 
 - Fire only at **new-artifact writes** and **clear status-semantic moments** — never on ordinary edits (typo/wording fixes).
 - A new spec/plan that is *already* being worked on (not merely captured) may go straight to `active` — see the direct-jump note in Step 4.
-- For the last trigger, `land` is **off by default** — do nothing (leave the `done` flip + archive to `landing` or the user). Only when House Rule `status: auto land` is set do you auto-set `done` and run the Land Routine.
+- For the last trigger, status flips `done` and regenerates `## 进行中` (the artifact leaves the active set). **Archiving is not status's job** — `/flightdeck:landing` decides whether to move a `done` artifact into `landed/` by cross-reference-aware judgment.
 
 ## Step 4 — forward-only state machine
 
 - Chain: `idea → active → done`. **Direct jumps allowed**: a new spec/plan that is *already* being worked on may go straight to `active` (skipping the captured `idea` stage) — this is legal.
 - **Forward-only / idempotent**: if the target status equals the current one or is *earlier* in the chain → **no-op** (never downgrade, never error). E.g. user manually set a new file to `active`; the create→`idea` trigger is a no-op.
 - **idea has no date prefix.** A `status: idea` spec is timeless (`<topic>.md`). The `idea → active` flip is the **one** transition that renames the file to add the `YYYY-MM-DD-` prefix — do the rename and the cockpit `## 进行中` regen (Step 5a) in the **same action** so no intermediate state is left behind.
-- `scrapped` is an **explicit human** action — never auto-set it (it records a settled-against direction; the AI must not unilaterally abandon work). `done` is auto-set only on the `land` trigger.
+- `scrapped` is an **explicit human** action — never auto-set it (it records a settled-against direction; the AI must not unilaterally abandon work). `done` is auto-set on user approval/sign-off (the last trigger) — a flip only, no archive.
 - **Bump `last_updated` on every flip.** Whenever this skill changes `status:` (any transition above, including the create→`idea` write), set the same artifact's `last_updated:` to today. A status flip is by definition a substantive change. This is the auto-bump anchor for the case where the user (or model) edited the body and `status` performs the flip — `status` writes `last_updated` so no one has to remember a second field. Adding `last_updated` to a spec/plan that lacked it is fine (it's recommended). Do **not** bump `last_updated` on a no-op (when the flip is skipped per forward-only). **Idea exception:** do not *add* `last_updated` to a bare `status: idea` spec that lacks it — an idea usually carries only `status` + `summary`; if it already has the field, bump it as usual.
 - **`note:` field.** When the user gives a "why it hasn't moved" reason (a blocker / waiting-on note), write it to the artifact's optional `note:` frontmatter (the merged `active` state's diagnostic carrier — see [protocol § Status](../preflight/protocol.md#status-label--recommended-flow)); clear it when the reason resolves. `note:` never gates a flip — it is advisory text rendered as `[note: …]` in cockpit `## 进行中` + walkaround.
 
 ## Step 5 — sync the INDEX
 
-After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when the `run scripts` House Rule is set, `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
+After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when a script runtime is available (inferred — `uv`/`python` reachable), `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
 
 1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) and skips `scrapped` — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs).
 2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.
@@ -73,12 +63,12 @@ A `status: active` spec/plan is **visible in cockpit iff it is active** — cock
 
 A create→`idea` write does **not** change the active set → no `## 进行中` regen. This is the only cockpit region `status` touches; `Active focus` / `## 下一步` / `Hanging tasks` stay landing's / the user's.
 
-## Step 6 — done + land (skipped only when a House Rule disables `land`)
+## Step 6 — set `done` on approval (status flips only; no archive)
 
-When the user approves and `land` is enabled:
+When the user approves / signs off:
 
-1. **Set `done` automatically** — "review passed" is an asserted fact; do not ask to confirm `done` itself.
-2. **Ask to confirm the archive** (destructive: moves files). On confirm → run the shared **[Land Routine](../preflight/exit-ritual.md#land-routine)** (do not reimplement it). On decline → leave the artifact at `done` **but un-archived** (done-but-unlanded); `preflight`/`landing` will surface and offer to land it later. **Never** revert `done` because the land confirm was declined.
+1. **Set `done` automatically** — "review passed" is an asserted fact; do not ask to confirm `done` itself. Regenerate the cockpit `## 进行中` region (the artifact leaves the active set — see Step 5a).
+2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unlanded). Whether to move it into `landed/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it keeps a `done` artifact in place when an `active` artifact still references it). Emit the land-readiness nudge (Step 7) so the user / model knows landing is available.
 
 ## Step 7 — land-readiness (signal 1)
 
@@ -88,6 +78,6 @@ If this invocation flipped an artifact to `done` / `scrapped`, run the shared [L
 
 - Don't touch `cockpit.md` **beyond** the `## 进行中` AUTO region on an active-set-changing flip (Step 5a) — no `Last updated` bump, no `Active focus` / `## 下一步` / `Hanging tasks` edits. Those are landing's / the user's.
 - Don't commit, don't run length checks or AGENTS.md regeneration.
-- Don't downgrade a status; don't auto-set `scrapped` (or `done` outside the `land` trigger).
-- Don't reimplement the land steps — call the shared Land Routine.
+- Don't downgrade a status; don't auto-set `scrapped` (or `done` outside user approval/sign-off).
+- Don't archive — moving a `done` artifact into `landed/` is `/flightdeck:landing`'s judgment, not status's.
 - Don't act when the target artifact is ambiguous.
