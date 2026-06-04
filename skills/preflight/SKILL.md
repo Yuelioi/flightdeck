@@ -1,120 +1,110 @@
 ---
 name: preflight
-description: Use when explicitly invoking the flightdeck entry ritual — the single entry point. Initializes `flightdeck/` when absent (no cockpit.md); otherwise reconciles cockpit.md against repo state via root INDEX.md, loads a routing catalog from folder INDEX files, and reports the cockpit `## 下一步` item. Triggered by `/flightdeck:preflight`.
+description: Use when explicitly invoking the flightdeck entry ritual — reads INDEX/cockpit and reports the next step, warms the routing catalog, and gives a passive note on obvious git/version misalignment. No deck (no cockpit.md) → points to /flightdeck:launch and stops. Triggered by /flightdeck:preflight.
 ---
 
 # Flightdeck Preflight
 
-The **single explicit entry point** for flightdeck. Nothing loads on its own — you run `/flightdeck:preflight` at the start of a working session. It either **initializes** a new `flightdeck/` (when none exists) or **reconciles** the existing one against repo state and **reports** the next item, then stops. It does not execute the item; that's the next turn's job. Use it when:
+The **session-entry takeover** for flightdeck. Run `/flightdeck:preflight` at the start of a working session: it reads the cockpit, reports the next item, and stops — **read-only**. It does **not** create decks (that is `/flightdeck:launch`) and does **not** audit deck integrity (that is `/flightdeck:walkaround`). Use it when:
 
-- Starting a working session in a project that has (or should have) a `flightdeck/`.
+- Starting a working session in a project that already has a `flightdeck/`.
 - Re-anchoring a long session that has drifted away from the cockpit.
-- You want a clean, read-only starting point before delegating to other skills.
 
 The protocol "textbook" (data model, folder semantics, routing, write gate, lifecycle) is in [protocol.md](protocol.md) — load it on demand; see the index at the bottom.
 
-## Gate — model-invocation check (run before the checklist)
-
-Resolve `preflight` self-invocability per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): self-invocable — continue.** Restricted only if House Rules say `preflight: don't self-invoke` (or a pre-3.0 deck omits `preflight` from `model_invocable`): then an explicit user `/flightdeck:preflight` → continue; model self-invocation or unknown call source → **STOP immediately** and report "`preflight` is manual-only (House Rule). Remove the `preflight: don't self-invoke` line to allow self-invoke." Branch-0 (deck existence) still runs first.
-
 ## Run this checklist exactly
 
-0. **Branch-0 — deck existence (MUST run first; layout detection MUST NOT run before this).**
-   Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract, so this also covers a half-initialized `flightdeck/` that has no cockpit).
+0. **Branch-0 — deck existence (MUST run first, before the Gate and before reading anything).**
+   Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract).
 
-   - **`flightdeck/cockpit.md` does NOT exist** → **first-time setup**: load [setup.md](setup.md) and run it (zero prompts — detect a Python runtime → scaffold-copy via `flightdeck_init.py` or by hand → STOP; no git/interview/AGENTS.md questions).
-   - **`flightdeck/cockpit.md` exists** → continue to step 1 (read path).
+   - **Does NOT exist** → report one line: "No flightdeck deck here — run `/flightdeck:launch` to create one." then **STOP**. Read nothing else: no `rules.md`, no repo listing, no `git`, no migration probe. (Deckless = immediate stop — this guardrail keeps preflight from re-growing into an installer. Deck creation lives in `/flightdeck:launch`.)
+   - **Exists** → continue to the Gate, then step 1.
 
-1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides) — when no-git, skip step 4's git reconcile entirely; honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
+## Gate — model-invocation check (after Branch-0, before step 1)
 
-2. **Migration detection (non-silent).** Compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`) and act per [protocol § Migration detection](protocol.md#migration-detection): `== current` → continue; `< a layout_need_update` entry → offer that migration ([MIGRATION.md](../../MIGRATION.md)); older-but-compatible → silently bump `version` to `current`; no `version`/`rules.md` → offer the pre-2.2 migration; legacy 1.x markers (`manifest.md`/`logbook.md`/`kneeboard/`/…) → 1.x migration first. **Never apply a *structural* migration silently — always ask; a compatible version bump is the one allowed silent stamp.**
+Resolve `preflight` self-invocability per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): self-invocable — continue.** Restricted only if House Rules say `preflight: don't self-invoke` (or a pre-3.0 deck omits `preflight` from `model_invocable`): then an explicit user `/flightdeck:preflight` → continue; model self-invocation or unknown call source → **STOP immediately** and report "`preflight` is manual-only (House Rule). Remove the `preflight: don't self-invoke` line to allow self-invoke."
 
-   **Unmigrated model-v4 deck (structural signals beyond `version`).** Independently of the version compare, if the deck shows pre-model-v4 structure — a `sketches/` or `debriefs/` folder still present, or any workflow file carrying a retired status (`pending` / `awaiting-review` / `blocked`, or a sketch's `active`), or a `cockpit.md` with a hand-written `## Next session` and no `## 进行中` AUTO region — **surface it and offer the model-v4 migration** (point at the matching [MIGRATION.md](../../MIGRATION.md) section; the concrete step-by-step lives there). Trigger + point only — do not perform the moves/remaps here. Never silent.
+1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides — when no-git, skip step 4's git note); honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
 
-3. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — it carries the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), and the `## 下一步` action. These two reads together are the reconcile baseline; read each once and treat as cached for the rest of the ritual (no need to re-open). `preflight` **reads** `## 进行中` / `## 下一步` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
+   **Version handling (two mutually exclusive branches — the only write preflight makes):** compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`); preflight and walkaround read the **same** list, so the verdict agrees.
+   - **Compatible-behind** (`version < current` **and** not `< any layout_need_update` entry) → **silently bump `version` to `current`. No message.** (Protocol's one allowed silent stamp.)
+   - **Structural-behind** (`version <` some `layout_need_update` entry, or no `version`/`rules.md`) → **do NOT bump.** Emit the passive note in step 4 (`ℹ deck version is structurally behind — run /flightdeck:walkaround for the migration`). The migration itself is walkaround's job (Audit 10); preflight never offers or performs it.
 
-4. **(skip entirely when no-git — deck root has no `.git`, or a House Rule says so) Reconcile against repo state — heuristic signals, not hard checks.** Gather independently (parallel where supported): `git branch --show-current`, `git status --short`, `git stash list`, `git log -1 --format=%cs` (no-git: newest `landed/HISTORY.md` entry). These are **fuzzy** — a branch name rarely equals an `Active focus` sentence, so only surface a **clear** divergence, never a guessed equality.
+2. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), and the `## 下一步` action. These are the reconcile baseline; read each once and treat as cached. `preflight` **reads** `## 进行中` / `## 下一步` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
 
-5. **When a signal looks clearly off — surface as a question, never auto-act** (one per real divergence): branch vs `Active focus`; tree clean but cockpit says in-progress ("did it ship?"); stash not on cockpit ("pick up / drop / note?"); `Last updated` > ~14 days behind newest commit ("cockpit may be stale — refresh first?"). No divergence → say nothing.
+3. **Catalog warm-up (priming, NOT audit).** Read the folder INDEX files so the session knows what routed knowledge exists — do NOT glob individual files or read per-file frontmatter, and do NOT audit them:
+   - Read `flightdeck/checklists/INDEX.md` and `flightdeck/incidents/INDEX.md`. List each entry as **File + when_to_read (two columns only)** — drop `applies_to` / `status` (those live in the INDEX file; read on demand when a trigger matches). Append the footnote `(状态/合法性审计见 /flightdeck:walkaround)`.
+   - **Do NOT** check status legality or INDEX↔folder consistency — that is `walkaround` (Audits 1/5). preflight only surfaces *what exists*.
+   - `charts/` is deliberately out of the catalog (imported external material is browsed on purpose, not surfaced every preflight).
+   - Do NOT drill into individual checklist/incident bodies — only when a trigger matches at execution time.
 
-6. **Load the routing catalog** (know-what-exists, NOT read-all). Read the folder INDEX files — do NOT glob individual files or read per-file frontmatter:
-   - Read `flightdeck/checklists/INDEX.md` — it already lists each checklist's `when_to_read`, `applies_to`, and `status`.
-   - Read `flightdeck/incidents/INDEX.md` — same structure for incident files.
-   - If either INDEX is missing or obviously stale (file count in INDEX differs from root INDEX count), note it: "⚠ `<folder>/INDEX.md` missing or stale — walkaround owns the fix." This is non-blocking.
-   - **Do NOT read individual checklist or incident files** at catalog time. The folder INDEX is the catalog. Only drill into an individual file when a trigger actually matches the current task (i.e. at execution time, not preflight time).
-   - **`charts/` is deliberately out of the auto-routing catalog** — even though its files may carry `when_to_read`/`applies_to`, imported external material is browsed on purpose (the "need outside perspective" scenario), not surfaced every preflight, and a chart may be a large imported tree. `walkaround` still audits it.
+4. **Passive git/version note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
 
-7. **Status sanity (loaded folders only).** For the catalog folders just read (`checklists/`, `incidents/`), flag any INDEX row with a missing or illegal `status` for its kind (legal values: [protocol § Status](protocol.md#status-label--recommended-flow)). List all findings, then offer once "Fix all flagged?" — don't fix until confirmed. Global per-file audits across all folders belong to `walkaround`.
+   | Signal | Trigger? | Note |
+   |---|---|---|
+   | current branch token clearly mismatches `Active focus` | yes | `⚠ git state looks off (branch ≠ Active focus) — review before continuing` |
+   | detached HEAD | yes | `⚠ git state looks off (detached HEAD) — review before continuing` |
+   | structural-behind version (from step 1) | yes | `ℹ deck version is structurally behind — run /flightdeck:walkaround for the migration` |
+   | uncommitted changes / ahead-behind / multiple stashes | no | (say nothing — day-to-day state, not preflight's concern) |
 
-8. **All reconciled → report item #1, then STOP.** Read-only recon doesn't fly the mission. State the item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
+   Git-state notes say **"review before continuing"**, not "run walkaround" — walkaround is a read-only file audit and does not read live git. Only the **version** note points at walkaround.
 
-   **Land-readiness (signal 2), as the FINAL output line / a dedicated `## Land-readiness` block** (never mid-report): run the [Land-readiness check](exit-ritual.md#land-readiness-check) — if `git status` shows **≥ 5** changed files under `flightdeck/` (skip entirely under no-git), append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
+5. **Report item #1, then STOP.** Read-only recon doesn't fly the mission. State the `## 下一步` item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
+
+   **Land-readiness as the FINAL output line** (skip under no-git): if `git status` shows **≥ 5** changed files under `flightdeck/`, append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
 
 ## Fallback when `## 下一步` is empty
 
-Don't auto-start anything. Search in order (a missing directory counts as empty), present candidates to the user:
+Don't auto-start anything. The data source is the **folder INDEX rows** (which carry `status`) — not file mtime, not a re-audit. Search in order (a missing directory counts as empty), present candidates to the user:
 
-1. `flightdeck/plans/` — surface `active` plans (read `plans/INDEX.md`), most actionable first; a `done`-but-unlanded plan → offer to land it.
-2. `flightdeck/specs/` — `active` designs not yet turned into a plan (read `specs/INDEX.md`); ask which to plan next.
-3. `flightdeck/specs/` **to-start pool** — `status: idea` specs (the `待启动（idea）` group in `specs/INDEX.md`); ask which (if any) to start (flip `idea → active`). Ideas are *not* orphans and not in cockpit — this fallback is their surfacing point.
+1. `flightdeck/plans/INDEX.md` — `active` rows, most actionable first; a `done`-but-unlanded plan → offer to land it.
+2. `flightdeck/specs/INDEX.md` — `active` designs not yet turned into a plan; ask which to plan next.
+3. `flightdeck/specs/INDEX.md` **to-start pool** — the `待启动（idea）` group; ask which (if any) to start (flip `idea → active`).
 
-> **Done-but-unlanded (any folder):** an artifact whose `status: done` but which still sits in its source folder (not yet under `landed/`) is *done-but-unlanded* — the `status` skill produces these when its `land` confirm is declined. Offer to land it via the [Land Routine](exit-ritual.md#land-routine). This applies to `specs/`, `plans/`, and any workflow folder, not just plans.
+> **Done-but-unlanded (any folder):** an artifact whose `status: done` but still sits in its source folder is *done-but-unlanded*. Offer to land it via the [Land Routine](exit-ritual.md#land-routine). This applies to `specs/`, `plans/`, and any workflow folder.
 
 ## Output format
 
-Report concisely:
-
 ```
 Root INDEX: specs/ — 2 (1 active, 1 done) | plans/ — 1 active | incidents/ — 1 active | checklists/ — 2 active
-Cockpit reconciled (Last updated: 2026-05-25; Active focus: <X>; tree clean)
+Cockpit (Last updated: 2026-05-25; Active focus: <X>)
 
-Routing catalog (from folder INDEX files — know-what-exists, not read-all):
+Routing catalog (know-what-exists — read on demand; status audit → /flightdeck:walkaround):
 
 [Checklists]
-| File | when_to_read | applies_to | status |
-|---|---|---|---|
-| checklists/comments.md | before writing or editing any source-code comment | comments, code-style | active |
+| File | when_to_read |
+|---|---|
+| checklists/comments.md | before writing or editing any source-code comment |
 
 [Incidents]
-| File | when_to_read | applies_to | status |
-|---|---|---|---|
-| incidents/parser-recursion.md | before designing a recursive parser | parser, recursion | active |
+| File | when_to_read |
+|---|---|
+| incidents/parser-recursion.md | before designing a recursive parser |
 
-[Catalog notes]  (omitted when clean)
-- ⚠ incidents/INDEX.md missing — walkaround owns the fix
+(状态/合法性审计见 /flightdeck:walkaround)
 
 下一步 (item #1): <item description>
 
-Preflight complete (read-only). Catalog is know-what-exists only — NOT a substitute for /flightdeck:walkaround, and does not mean these files were read. Bodies load on demand, when execution begins and a trigger matches.
-
-→ Say "go" to execute item #1.
+Preflight complete (read-only). → Say "go" to execute item #1.
 ```
 
-Omit any table group with no entries. If both folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`.
-
-Or if blocked:
-
-```
-Reconcile flagged:
-- <mismatch 1>
-- <mismatch 2>
-
-Resolve which?
-```
+Omit any table group with no entries. If both folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line, and the Land-readiness line last.
 
 ## Don't do
 
+- Don't create a deck — deckless → point at `/flightdeck:launch` and STOP (Branch-0).
+- Don't audit — status legality, INDEX↔folder consistency, cockpit drift, migration offers all belong to `/flightdeck:walkaround`.
+- Don't run the blocking "Resolve which?" git reconcile — git divergence is a passive one-liner now.
 - Don't auto-pick a fallback when `## 下一步` is empty — always ask.
-- Don't bump `Last updated` — entry doesn't modify cockpit (first-time setup is the one exception).
+- Don't bump `Last updated` — entry doesn't modify cockpit.
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
-- Don't drill into individual files until a trigger matches at execution time (read folder INDEX only).
+- Don't drill into individual checklist/incident files until a trigger matches at execution time (read folder INDEX only).
 
 ## Protocol knowledge (load on demand)
 
-The operational entry ritual is above. The protocol "textbook" lives in companions — read on demand:
-
-- [setup.md](setup.md) — first-time setup (run by Branch-0 when no deck exists)
 - [protocol.md](protocol.md) — data model · status · INDEX · folder map · routing · authority order · write gate · lifecycle · promotion gates · common mistakes
 - [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout (full, always)
 - [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
 - [exit-ritual.md](exit-ritual.md) — the landing ritual (run by `/flightdeck:landing`) + Land-readiness check
+
+(First-time deck creation lives in `/flightdeck:launch`.)
