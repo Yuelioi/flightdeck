@@ -267,13 +267,17 @@ A separate **project-rules upgrade gate** fires when a promoted incident continu
 | Incident / checklist with `last_updated` > 1 year in a fast-moving project | Likely stale advice. Bump after re-verifying or flip to `status: obsolete`. |
 | "Save in case it's useful later" | No. Gate strictly. |
 
+## Authoring new artifacts
+
+Producing a new deck artifact (spec / plan / incident / checklist / chart) — including from an external authoring skill (brainstorming / writing-plans) — goes through **`/flightdeck:new`** (script: `scripts/flightdeck_new.py`), which stamps the correct per-kind frontmatter + naming and regenerates INDEX/cockpit. The full contract (kind→folder, naming, per-kind frontmatter, default status, slug rule) lives in `skills/new/SKILL.md` — the single authority, so the shape is never re-derived from scattered docs. **Shell-first**: create the shell via `new` first, then write the body into the returned path; do not hand-derive a path or write to `docs/`.
+
 ## Cross-references
 
 The flightdeck convention describes WHAT to write and WHERE; the tool that produces the content is up to you (hand-write, use any AI skill, or ad-hoc LLM).
 
 **Optional companions** (Claude Code with the `superpowers` plugin installed):
-- `superpowers:brainstorming` → produces well-structured designs that fit `specs/`.
-- `superpowers:writing-plans` → produces task lists that fit `plans/`. Plan files use `- [ ]` checkboxes for executing-plans tracking; **flightdeck does not require flipping these** — progress lives in `cockpit.md` + commit log.
+- `superpowers:brainstorming` → produces well-structured designs that fit `specs/`; hand the design off to `/flightdeck:new spec` (shell-first) so frontmatter/naming/regen are stamped, not re-derived.
+- `superpowers:writing-plans` → produces task lists that fit `plans/` (via `/flightdeck:new plan`). Plan files use `- [ ]` checkboxes for executing-plans tracking; **flightdeck does not require flipping these** — progress lives in `cockpit.md` + commit log.
 
 These are convenient but **not required** — flightdeck accepts content from any source.
 

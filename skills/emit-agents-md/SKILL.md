@@ -81,6 +81,8 @@ The block to insert between markers (or as the whole new file body if AGENTS.md 
 
 For full project state, read `flightdeck/cockpit.md`, the folder `INDEX.md` files, and the linked artifacts.
 
+To author a new deck artifact (spec/plan/incident/checklist/chart), run `/flightdeck:new` — it stamps the correct frontmatter + naming and regenerates INDEX/cockpit. Don't hand-write deck artifacts or place them under `docs/`.
+
 <!-- END: flightdeck -->
 ```
 
