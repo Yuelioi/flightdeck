@@ -5,6 +5,7 @@
 - [2026-06-03-preflight-silent-bump-nudge-design.md](2026-06-03-preflight-silent-bump-nudge-design.md) — idea — preflight 静默 bump 版本时新的 autonomy/commit 默认对升级者不可见；提议在静默 bump 的那一回合打一行一次性提示，指向对应 MIGRATION 段。由 sketch 提升
 - [2026-06-03-status-spec-co-advance-design.md](2026-06-03-status-spec-co-advance-design.md) — idea — status 只推进正在执行的工件，spec 会停在 pending 而其 plan 已 done；提议 plan 翻 done/awaiting-review 时 confirm-gated 地 offer 推进其 implements 的 spec，或交由 landing 对账。由 sketch 提升
 - [2026-06-03-structural-edit-guard-design.md](2026-06-03-structural-edit-guard-design.md) — idea — 抓 markdown 多行 Edit 的"静默结构丢失"（标题/区块被替换跨度吞掉，link/anchor 检查抓不到）；把结构检查并进 scriptable lint。动机=本会话 cockpit `## Next session` 标题被 reorder Edit 误删
+- [new-artifact-authoring-convention.md](new-artifact-authoring-convention.md) — idea — flightdeck 只有"管理既有工件"的仪式，没有"撰写新工件"的入口——撰写发生在外部 skill（如 brainstorming），而约定（位置在 commits.md、frontmatter 在 templates.md、INDEX/cockpit 归属在协议正文）分散无单一权威源、且不在撰写开始时被加载，导致 agent 每次"现翻"重推。修法方向：把"撰写新工件的位置+frontmatter"集中成单一权威且写时被指向的源 / 或加轻量 new-artifact 入口盖 frontmatter+落目录 / 或在 preflight 把"产出 spec/plan→一律写 flightdeck/<folder>/、用此 frontmatter、绝不写 docs/"作常驻覆盖注入
 - [v1x-deferred-ideas.md](v1x-deferred-ideas.md) — idea — v1.x 长期想法暂存（MCP server、boomerang 子 agent、continuance benchmark、spec 压缩、可选文件夹）；找到时机再促成 spec
 
 ### 进行中·完成（active·done）
