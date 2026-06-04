@@ -49,6 +49,20 @@ def _frontmatter(kind, status, date, summary, implements, when_to_read, applies_
 def new(deck, kind, slug, title, status=None, summary="", implements=None,
         when_to_read=None, applies_to=None, date=None, regen=True):
     """Create one deck artifact; return its Path. Raises ValueError/FileExistsError."""
+    if kind not in KIND_FOLDER:
+        raise ValueError(f"unknown kind: {kind!r} (one of: {', '.join(sorted(KIND_FOLDER))})")
+    if not slug or not SLUG_RE.match(slug):
+        raise ValueError(
+            f"illegal slug: {slug!r} — must match ^[a-z0-9-]+$ "
+            "(lowercase ascii / digits / hyphens, e.g. new-artifact-entrypoint)"
+        )
+    if not title:
+        raise ValueError("title is required")
+    if kind in KNOWLEDGE and (not when_to_read or not applies_to):
+        raise ValueError(f"{kind} requires --when-to-read and --applies-to (required routing fields)")
+    if implements and kind not in WORKFLOW:
+        raise ValueError(f"--implements is workflow-only; not valid for kind {kind!r}")
+
     date = date or datetime.date.today().isoformat()
     status = status or _DEFAULT_STATUS[kind]
 

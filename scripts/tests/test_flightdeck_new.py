@@ -61,5 +61,46 @@ class NewHappyPathTest(unittest.TestCase):
             self.assertIn("applies_to: [a, b]", text)
 
 
+class NewValidationTest(unittest.TestCase):
+    def test_unknown_kind_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "widget", slug="x", title="X", regen=False)
+
+    def test_illegal_slug_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            for bad in ["Has Space", "中文", "Upper", "under_score", ""]:
+                with self.assertRaises(ValueError):
+                    new(deck, "spec", slug=bad, title="X", regen=False)
+
+    def test_missing_title_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "spec", slug="x", title="", regen=False)
+
+    def test_knowledge_without_routing_fields_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "incident", slug="x", title="X", regen=False)
+
+    def test_implements_on_knowledge_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "incident", slug="x", title="X", when_to_read="w",
+                    applies_to=["a"], implements="specs/x.md", regen=False)
+
+    def test_refuses_if_exists(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            new(deck, "spec", slug="dup", title="Dup", status="idea", regen=False)
+            with self.assertRaises(FileExistsError):
+                new(deck, "spec", slug="dup", title="Dup", status="idea", regen=False)
+
+
 if __name__ == "__main__":
     unittest.main()
