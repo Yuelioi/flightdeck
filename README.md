@@ -23,7 +23,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-Run `/flightdeck:preflight` at the start of a session — the single entry point. In an existing project it reads `flightdeck/cockpit.md`, reconciles against `git status`, and reports where you left off. In a fresh one it bootstraps a deck in one step — zero prompts. Nothing loads on its own; you invoke it.
+Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which bootstraps a deck in one step — zero prompts. Nothing loads on its own; you invoke it.
 
 ## What it is
 
@@ -90,17 +90,17 @@ Update: re-run `/plugin install`. Uninstall: `/plugin uninstall flightdeck`. No 
 
 </details>
 
-You don't scaffold the deck by hand — `/flightdeck:preflight` creates it on first run.
+You don't scaffold the deck by hand — run `/flightdeck:launch` once and it creates the deck.
 
 ## Usage
 
 **Session start** — run `/flightdeck:preflight`. It:
 
 1. Reads `flightdeck/cockpit.md`.
-2. Reconciles against `git status` (branch, uncommitted, stashes).
-3. Reports the next item — say "go" to execute, or it surfaces a mismatch and asks.
+2. Glances at `git status` (branch / version) — a passive one-line note only when something looks off, never a blocking prompt.
+3. Reports the next item — say "go" to execute.
 
-On a brand-new project (no `cockpit.md`) it runs first-time setup instead: it copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
+On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
 
 **Session end** — run `/flightdeck:landing`. It classifies new knowledge (bug → `incidents/`, procedure → `checklists/`, one-off → discard), refreshes `cockpit.md`, and commits. The next session — even a different AI or developer — picks up exactly here.
 
@@ -108,12 +108,13 @@ On a brand-new project (no `cockpit.md`) it runs first-time setup instead: it co
 
 | Command | Purpose |
 | --- | --- |
-| `/flightdeck:preflight` | **The single entry point.** Creates the deck when absent; otherwise reconciles `cockpit.md` against git and reports the next item. |
+| `/flightdeck:launch` | **First-time deck creation** — copies the scaffold, seeds `cockpit.md` (zero prompts). Refuses if a deck already exists. |
+| `/flightdeck:preflight` | **Session-entry takeover** — reads `cockpit.md`, glances at git, reports the next item. Deckless → points to `/flightdeck:launch`. |
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
 
-Artifact `status` advances **automatically** (idea→active). By default the AI may self-invoke `preflight` / `walkaround` / `emit-agents-md` / `status`, but **`landing` is manual** — it archives + commits, so you run it (or opt into auto in `rules.md`). Nothing fires on session start; there's no background process.
+Artifact `status` advances **automatically** (idea→active). By default the AI may self-invoke `preflight` / `walkaround` / `emit-agents-md` / `status`, but **`landing` is manual** — it archives + commits, so you run it (or opt into auto in `rules.md`). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
 
 ### Routing — what triggers what
 
@@ -186,7 +187,7 @@ Skill content under [`skills/`](skills/) is **tool-agnostic markdown**; manifest
 <details>
 <summary><b>I have an older <code>flightdeck/</code> — how do I upgrade?</b></summary>
 
-On entry, `/flightdeck:preflight` (and `walkaround`) read the deck `version` and offer a guided migration — never silent; you confirm before anything moves. See [MIGRATION.md](MIGRATION.md).
+`/flightdeck:walkaround` reads the deck `version` and offers a guided migration — never silent; you confirm before anything moves. `/flightdeck:preflight` only flags a structurally-behind version and points you there (it silently stamps a compatible-but-behind version). See [MIGRATION.md](MIGRATION.md).
 
 </details>
 

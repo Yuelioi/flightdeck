@@ -40,12 +40,14 @@ For users who don't want to use the plugin marketplace, the installers at the re
 After install:
 
 ```
-~/.claude/skills/preflight/             # /flightdeck:preflight — the single entry (init-or-read)
+~/.claude/skills/preflight/             # /flightdeck:preflight — session-entry takeover (read-only; deckless → launch)
 ├── SKILL.md
 ├── protocol.md
 ├── folder-semantics.md
 ├── templates.md
 └── exit-ritual.md
+~/.claude/skills/launch/                # /flightdeck:launch — first-time deck creation
+└── SKILL.md
 ~/.claude/skills/landing/               # /flightdeck:landing explicit trigger
 └── SKILL.md
 ~/.claude/skills/walkaround/            # /flightdeck:walkaround integrity audit
@@ -62,7 +64,7 @@ After install (either path), in a Claude Code session:
 
 1. Start a session in any project directory.
 2. The `preflight` skill should appear in the available skills list with description starting "Use when explicitly invoking the flightdeck entry ritual...".
-3. Force-invoke with `/flightdeck:preflight` and confirm the entry ritual runs (init-or-read).
+3. Force-invoke with `/flightdeck:preflight` and confirm the takeover runs (read-only; in a deckless dir it points to `/flightdeck:launch`).
 4. Force-invoke `/flightdeck:landing` and `/flightdeck:walkaround` — these should run the corresponding rituals explicitly.
 
 If the skill does not appear:
@@ -73,7 +75,7 @@ If the skill does not appear:
 ## How invocation works
 
 - **Nothing loads automatically** — flightdeck installs no startup hook. You run `/flightdeck:preflight` to begin a session.
-- `/flightdeck:preflight` is the single entry point: it initializes `flightdeck/` when absent (no `cockpit.md`), otherwise reconciles and reports the next item.
+- `/flightdeck:preflight` is the session-entry takeover: it reads `cockpit.md`, reconciles against git (passive note only), and reports the next item. In a deckless dir (no `cockpit.md`) it points you to `/flightdeck:launch` and stops — deck creation lives there.
 - Flightdeck is **self-contained**: it does not require any other plugin to function. If you also have `superpowers` installed, the SKILL.md mentions its `brainstorming` / `writing-plans` skills as optional companions — fine if present, fine if absent.
 
 ## Uninstall
@@ -88,12 +90,12 @@ Direct path:
 
 ```bash
 # macOS / Linux
-rm -rf ~/.claude/skills/{preflight,landing,walkaround,emit-agents-md,status}
+rm -rf ~/.claude/skills/{preflight,launch,landing,walkaround,emit-agents-md,status}
 ```
 
 ```powershell
 # Windows
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
 ```
 
 ## Call-source detection (model_invocable gate)
@@ -107,4 +109,4 @@ and blocked only when the deck's House Rules `### Autonomy overrides` segment ca
 (it archives + commits): model self-invoke is blocked unless House Rules carry `landing: self-invoke` (same marker logic, inverted default). See
 [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
 
-The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate. No manifest edit is needed to add it.
+The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest) and goes through the same gate. No manifest edit is needed to add it. `launch` (first-time deck creation) is likewise auto-discovered from `skills/launch/` — no manifest entry; it is an explicit one-time command, not part of the model self-invoke default set.

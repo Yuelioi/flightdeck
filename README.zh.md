@@ -23,7 +23,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 唯一入口。已有项目里它读 `flightdeck/cockpit.md`、对账 `git status`、报告你上次停在哪。全新项目里它一步建好一个 deck —— 零提问。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch`，一步建好一个 deck —— 零提问。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
@@ -90,17 +90,17 @@ flightdeck/
 
 </details>
 
-你不用手动建 deck —— `/flightdeck:preflight` 首次运行时帮你建。
+你不用手动建 deck —— 跑一次 `/flightdeck:launch` 就帮你建好。
 
 ## 用法
 
 **会话开始** —— 运行 `/flightdeck:preflight`。它：
 
 1. 读 `flightdeck/cockpit.md`。
-2. 对账 `git status`（分支、未提交、stash）。
-3. 报告下一项 —— 说 "go" 执行，或它发现不一致就问你。
+2. 瞥一眼 `git status`（分支 / 版本）—— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
+3. 报告下一项 —— 说 "go" 执行。
 
-全新项目（没有 `cockpit.md`）则跑首次建档：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## 下一步`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
+全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## 下一步`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
 
 **会话结束** —— 运行 `/flightdeck:landing`。它把新知识分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）、刷新 `cockpit.md`、提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
@@ -108,12 +108,13 @@ flightdeck/
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:preflight` | **唯一入口。** deck 不存在时建好；否则把 `cockpit.md` 对账 git 并报告下一项。 |
+| `/flightdeck:launch` | **首次建 deck** —— 复制脚手架、播种 `cockpit.md`（零提问）。deck 已存在则拒绝。 |
+| `/flightdeck:preflight` | **会话入口接管** —— 读 `cockpit.md`、瞥一眼 git、报告下一项。无 deck → 指向 `/flightdeck:launch`。 |
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
 
-工件 `status` **自动**推进（idea→active）。默认 AI 可自调 `preflight` / `walkaround` / `emit-agents-md` / `status`，但 **`landing` 是手动的** —— 它会归档 + 提交，所以由你来跑（或在 `rules.md` 里打开自动）。会话开始不加载任何东西，也没有后台进程。
+工件 `status` **自动**推进（idea→active）。默认 AI 可自调 `preflight` / `walkaround` / `emit-agents-md` / `status`，但 **`landing` 是手动的** —— 它会归档 + 提交，所以由你来跑（或在 `rules.md` 里打开自动）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
 
 ### 路由 —— 什么触发什么
 
@@ -186,7 +187,7 @@ disabled_folders: []     # 关掉的文件夹 —— 不建议、不审计
 <details>
 <summary><b>我有个旧的 <code>flightdeck/</code> —— 怎么升级？</b></summary>
 
-入场时 `/flightdeck:preflight`（和 `walkaround`）读 deck 的 `version`、并提示引导式迁移 —— 绝不静默，任何移动前都先征得你同意。见 [MIGRATION.md](MIGRATION.md)。
+`/flightdeck:walkaround` 读 deck 的 `version`、并提示引导式迁移 —— 绝不静默，任何移动前都先征得你同意。`/flightdeck:preflight` 只在版本结构落后时提示并指向它（兼容但落后的版本由它静默 stamp）。见 [MIGRATION.md](MIGRATION.md)。
 
 </details>
 

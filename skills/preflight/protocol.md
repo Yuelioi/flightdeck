@@ -87,7 +87,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
 | `recurrences` | incidents | optional (default 1) | INDEX-row render + promotion gate | landing/status (auto-bump on a clear recurrence) | int ≥ 1; ≈ 1 + `[Case N]` count |
 | `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
-| `version` | `rules.md` (root) | **required** (rules.md is mandatory) | preflight/walkaround migration detection | preflight setup / auto-bump | Audit 10 |
+| `version` | `rules.md` (root) | **required** (rules.md is mandatory) | walkaround migration detection; preflight version compare (silent bump / passive note) | launch (init) / preflight auto-bump | Audit 10 |
 | `disabled_folders` | `rules.md` | optional (defaulted `[]`) | all entry skills | user | — |
 | `git` · `emit_agents_md` · `disabled_gates` · `model_invocable` · `status_auto` · `commit_mode` | `rules.md` (pre-3.0) | **removed in 3.0** — inferred / House-Rules / default (see [Rule resolution order](#rule-resolution-order)); read for 3.x compat only | all entry skills | — | — |
 
@@ -217,7 +217,7 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 
 | Ritual | Role | Writes? | Cockpit 80-line trim | INDEX | Deep per-file audit |
 | --- | --- | --- | --- | --- | --- |
-| `preflight` | read-only recon at session start | no (first-time setup excepted) | reads only — flags staleness, never trims | reads folder INDEX as catalog | no — only shallow root-count sanity |
+| `preflight` | read-only takeover at session start | no (silent version bump only) — deckless redirects to /flightdeck:launch | reads only — passive note on git/version drift | reads folder INDEX as catalog | no — audits belong to walkaround |
 | `landing` | write the session's outcome | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
 | `walkaround` | integrity audit on demand | no (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
 

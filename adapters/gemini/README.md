@@ -57,4 +57,4 @@ Flip this note to "formal" with a transcript when verified.
 
 ## Ritual coverage (GEMINI.md)
 
-`GEMINI.md` `@`-includes only the **preflight** bundle (SKILL.md + protocol/folder-semantics/templates/exit-ritual). The non-preflight rituals — `landing`, `walkaround`, `emit-agents-md`, and now `status` — are **not** individually `@`-included, so their skill bodies aren't loaded on Gemini. This is a pre-existing, untested gap (the manifest is "behaviorally untested"), not specific to `status`. Wiring all rituals into `GEMINI.md` is tracked separately; `status` inherits the same posture as its siblings.
+`GEMINI.md` `@`-includes only the **preflight** bundle (SKILL.md + protocol/folder-semantics/templates/exit-ritual). The non-preflight rituals — `launch`, `landing`, `walkaround`, `emit-agents-md`, and `status` — are **not** individually `@`-included, so their skill bodies aren't loaded on Gemini. This is a pre-existing, untested gap (the manifest is "behaviorally untested"), not specific to any one ritual. Wiring all rituals into `GEMINI.md` is tracked separately; `launch` and `status` inherit the same posture as their siblings.

@@ -4,7 +4,7 @@ Reference for every `flightdeck/` subdirectory: what it holds, naming convention
 
 ## Deck layout (3.x: full, always)
 
-As of 3.x, both `preflight` first-time setup and `install --scaffold` lay the **full layout** — every folder with its `INDEX.md`, plus the minimal contract files. There is no longer a minimal/full choice (the `scaffolds/minimal` variant was removed).
+As of 3.x, both `/flightdeck:launch` (first-time deck creation) and `install --scaffold` lay the **full layout** — every folder with its `INDEX.md`, plus the minimal contract files. There is no longer a minimal/full choice (the `scaffolds/minimal` variant was removed).
 
 | Concept | What it means |
 | --- | --- |
