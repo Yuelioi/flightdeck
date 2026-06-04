@@ -505,6 +505,41 @@ class LayoutVerdictTest(unittest.TestCase):
             )
             self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
 
+    def test_version_below_need_entry_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d, version="2.3")  # 2.3 < 3.0（need 项）
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_no_version_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "rules.md").write_text("---\n---\n", encoding="utf-8")  # 无 version
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_current_version_clean_is_current(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d, version="3.0")
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "current")
+
+    def test_compatible_behind_logic(self):
+        # 直接验证比对逻辑，不依赖真实 MIGRATION
+        self.assertEqual(
+            flightdeck_index._classify_version("3.0", "3.1", ["2.2", "3.0"]),
+            "compatible-behind",
+        )
+        self.assertEqual(
+            flightdeck_index._classify_version("2.5", "3.0", ["2.2", "3.0"]),
+            "structural-behind",
+        )
+        self.assertEqual(
+            flightdeck_index._classify_version("3.0", "3.0", ["2.2", "3.0"]),
+            "current",
+        )
+        self.assertEqual(
+            flightdeck_index._classify_version(None, "3.0", ["2.2", "3.0"]),
+            "structural-behind",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

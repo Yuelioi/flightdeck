@@ -265,6 +265,21 @@ def _structural_signal(deck):
     return False
 
 
+def _classify_version(deck_v, current, need):
+    """Pure version-number classifier (no filesystem)."""
+    dv = _vtuple(deck_v)
+    if deck_v is None or dv is None:
+        return "structural-behind"  # 无 version / 不可解析 → 需迁移
+    for n in need:
+        nv = _vtuple(n)
+        if nv and dv < nv:
+            return "structural-behind"
+    cv = _vtuple(current)
+    if cv and dv < cv:
+        return "compatible-behind"
+    return "current"
+
+
 def layout_verdict(deck):
     """Machine verdict on a deck's layout currency.
 
@@ -273,7 +288,9 @@ def layout_verdict(deck):
     """
     if _structural_signal(deck):
         return "structural-behind"
-    return "current"
+    current, need = _migration_layout()
+    deck_v = _fm_field(Path(deck) / "rules.md", "version")
+    return _classify_version(deck_v, current, need)
 
 
 def version_mismatch(deck):
