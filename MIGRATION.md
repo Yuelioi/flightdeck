@@ -7,15 +7,15 @@ layout_need_update: [2.2, 3.0]   # releases requiring a deck migration; deck.ver
 
 This document records breaking migrations for the maintainer's reference.
 
-> **Migration detection reads this frontmatter.** `current` = latest release; `layout_need_update` = releases that changed deck structure. `preflight`/`walkaround` compare a deck's `rules.md` `version` against it: version below any `layout_need_update` entry (or no `version` at all) → non-silent migration offer; otherwise preflight silently bumps the deck's `version` to `current`. (Replaces the old cockpit `**Layout**` string check.)
+> **Migration detection reads this frontmatter.** `current` = latest release; `layout_need_update` = releases that changed deck structure. `preflight`/`walkaround` compare a deck's `rules.md` `version` against it: version below any `layout_need_update` entry (or no `version` at all) → non-silent migration offer; otherwise `walkaround` bumps the deck's `version` to `current` (preflight only reads and reports the verdict — it never writes `version`). (Replaces the old cockpit `**Layout**` string check.)
 
 ## 2.3 → 3.0 — rules.md simplification (BREAKING)
 
-3.0 dissolves the structured toggle set. `rules.md` keeps only `version` + `disabled_folders` + free-prose House Rules; `git`/`emit_agents_md` become **environment inference**, and `commit`/`model_invocable`/`status_auto` become **defaults overridable via the House-Rules `### Autonomy overrides` segment**. See [protocol § Rule resolution order](skills/preflight/protocol.md#rule-resolution-order).
+3.0 dissolves the structured toggle set. `rules.md` keeps only `version` + free-prose House Rules; `git`/`emit_agents_md`/`scripts` become **environment inference**, `commit` becomes a **default overridable via the House-Rules `### Autonomy overrides` segment**, and `model_invocable`/`status_auto`/`disabled_folders` are dropped entirely (see the autonomy-convergence subsection below). See [protocol § Rule resolution order](skills/preflight/protocol.md#rule-resolution-order).
 
 **Compatibility:** pre-3.0 keys are **read and honored through all of 3.x**; removed at 4.0.
 
-**Migration (`preflight` offers it; never silent):** on a deck with `version < 3.0` or any removed key still present, `preflight` proposes rewriting `rules.md`:
+**Migration (`walkaround` offers it; never silent):** on a deck with `version < 3.0` or any removed key still present, `walkaround` proposes rewriting `rules.md`:
 
 1. Set `version: 3.0`, keep `disabled_folders`.
 2. Translate each **non-default** removed value into a House-Rules `### Autonomy overrides` standard phrase (canonical English), each prefixed with a `<!-- migrated from <key>:<value> -->` provenance comment (never delete the comment — it shows provenance).
@@ -40,14 +40,14 @@ After rewriting, **reinstall/sync the plugin-cache copy** to load the 3.0 skills
 
 Folded into 3.0 (still in `layout_need_update`, so the offer is non-silent). model-v4 collapses `sketches/`+`specs/`→`specs/`, deletes `debriefs/`, narrows workflow status to four values (`idea`/`active`/`done`/`scrapped`), and turns `cockpit.md` from a hand-maintained workspace into a **status projection of the active set** (a machine-derived `## 进行中` AUTO region). See the design in `flightdeck/specs/2026-06-03-model-v4-folder-state-cockpit-design.md` §1–4.
 
-**Detection (preflight step 2 — structural, independent of the `version` number).** A deck is flagged unmigrated when it shows **any** pre-model-v4 signal:
+**Detection (the layout verdict — structural signals, independent of the `version` number).** A deck is flagged unmigrated when it shows **any** pre-model-v4 signal:
 - a `sketches/` or `debriefs/` folder still present;
 - any workflow file carrying a retired status — `pending` / `awaiting-review` / `blocked`, or a sketch's `active`;
 - a `cockpit.md` with a hand-written `## Next session` and **no** `## 进行中` AUTO region.
 
-`preflight` surfaces it and offers this migration; it never performs the moves/remaps itself.
+`walkaround` surfaces it and offers this migration (author-confirmed); `preflight` only reads and reports the verdict. The migration's file moves/remaps are never performed silently.
 
-**Migration (`preflight` offers it; never silent):**
+**Migration (`walkaround` offers it; never silent):**
 
 1. **`sketches/*` → `specs/`.** Move each sketch file into `specs/`. A sketch `status: active` (an unstarted idea) becomes `status: idea`; a sketch `status: scrapped` stays `scrapped`. idea-stage files keep their date-less `<topic>.md` name (the `YYYY-MM-DD-` prefix is added only on the eventual `idea → active` flip). Delete the empty `sketches/` folder.
 2. **`debriefs/` → removed.** For each **un-archived** debrief, fold its **disposition** (adopt / reject / defer) into the reviewed spec's own `## 评审纪要` section, then discard the raw text (it is transient — keep raw external feedback in project-root `tmp/`, gitignored, going forward). Anything already under `landed/debriefs/` is **kept as history** (not touched). Delete the now-empty `debriefs/` folder.
@@ -55,6 +55,24 @@ Folded into 3.0 (still in `layout_need_update`, so the offer is non-silent). mod
 4. **cockpit.** Insert a `## 进行中` section with an empty `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` region above `## 下一步`, then **regen it once** (script fast path: `flightdeck_index.py` now emits this region from every `status: active` spec/plan; markdown path otherwise). Split the old hand-written `## Next session` into the new pair: the active artifacts it listed are now derived into `## 进行中` (do not hand-copy them — the regen fills it), and the single next concrete action becomes the `## 下一步` body. `Active focus` and `## Hanging tasks` carry over unchanged.
 
 `current` stays `3.0`; `3.0` is already in `layout_need_update`, so a deck whose structure still matches a pre-model-v4 signal gets the non-silent offer even though the version string may already read `3.0`. After migrating, **reinstall/sync the plugin-cache copy** to load the model-v4 skills.
+
+### 3.0 — autonomy convergence + scriptable layout verdict (BEHAVIORAL — no structural migration)
+
+Folded into 3.0. This batch removes nearly all autonomy toggles in favor of good defaults + environment inference + skill judgment, and scripts the version/layout check. It is **behavioral, not structural** — existing decks keep their files unchanged, so `3.0` is **not** re-added to `layout_need_update` for it and no file moves are required. Removed/changed keys are **read but ignored**.
+
+| Pre-3.0 key / behavior | 3.0 |
+|---|---|
+| `model_invocable` (self-invoke gate) | **removed** — all five rituals (`preflight`/`landing`/`walkaround`/`emit-agents-md`/`status`) always self-invoke; no opt-out |
+| `disabled_folders` | **removed** — empty/unused folders are simply not flagged (walkaround tolerant); read but ignored |
+| `status_auto` `land` / `status: auto land` | **removed** — archiving is now `landing`'s cross-reference-aware judgment, not a toggle |
+| `run scripts` | **removed as a toggle** — script use is **inferred** from runtime availability (`uv`/`python` reachable) |
+| `commit_mode` | **removed** — replaced by the new commit default + the `commit:` House-Rule phrases |
+
+**⚠ commit default change (affects everyone):** out of the box flightdeck now **commits locally on its own** (local commits are reversible — reset/amend) and **only asks before `push`** (push is outward / not easily reversed). This **replaces** the pre-3.0 "out of the box nothing commits without you" default. To restore the old behavior, add a House Rule under `### Autonomy overrides`: `commit: ask` (confirm before each local commit) or `don't auto-commit; leave changes for me / CI` (never commit). Authority chain unchanged: **CLAUDE.md > rules House Rule > default**.
+
+**Version handling moved:** the layout currency check is now a machine **verdict** (`flightdeck_index.py --verdict`, fallback reads this file's frontmatter + structural signals). `preflight` only **reads and reports** it; **`walkaround` is the sole command that writes `version`** (the `compatible-behind` bump + structural migration). The old "preflight silently bumps on entry" behavior is gone.
+
+**Action required:** none to keep working (removed keys are ignored). If you relied on the conservative commit default, add the `commit:` House Rule above. After upgrading, **reinstall/sync the plugin-cache copy** to load the 3.0 skills.
 
 ## 2.2 → 2.3 — autonomy defaults + `commit_mode` (additive, no migration)
 
