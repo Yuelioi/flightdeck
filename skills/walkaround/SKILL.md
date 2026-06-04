@@ -20,19 +20,9 @@ User-triggered integrity audit of a flightdeck for protocol drift. The protocol 
 - **WARNING** — drift that will accumulate (e.g., stale INDEX rows, missing routing fields, legacy paths). Fix soon, before the next release.
 - **INFO** — heads-up that may or may not need action (e.g., orphan plan with no `implements`, a long-stale `active` with no `note:`). Judge per item.
 
-## Step 0 — model-invocation gate (run before any other step)
-
-Read `flightdeck/rules.md` and resolve per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). **Default (3.0): `walkaround` is self-invocable** — continue.
-
-- **Restricted** only if House Rules `### Autonomy overrides` says `walkaround: don't self-invoke; I run it manually` (or a pre-3.0 deck's `model_invocable` list omits `walkaround`):
-  - explicit user `/flightdeck:walkaround` (e.g. a `<command-name>` marker) → allowed; continue.
-  - model self-invocation, or you cannot tell the call source → **STOP immediately.** Report: "`walkaround` is manual-only in this project (House Rule). Remove the `walkaround: don't self-invoke` line to allow model self-invoke." Run no further step.
-
-(Tool-agnostic — ships to every platform via this body. See the adapter READMEs for per-platform formal/degraded mode.)
-
 ## Audits
 
-Run all 13 in order. First read `flightdeck/rules.md` if present: honor `disabled_folders` (do not flag a disabled folder as orphan/stray). Resolve other behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order); do not flag the absence of pre-3.0 toggle keys as an error (3.0 removed them — inferred / House-Rules now). (Compat: a pre-3.0 `disabled_gates` still suppresses its gate through 3.x.) For each, report findings with the severity tag.
+Run all 13 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Do not flag the absence of pre-3.0 toggle keys as an error (3.0 removed them — inferred / House-Rules now); pre-3.0 keys (`disabled_folders` / `model_invocable` / `commit_mode` / `status_auto` / `disabled_gates`) are read but ignored. **Empty or unused folders are not findings** — emptiness is normal; only genuinely misplaced content is flagged (see Audit 8). For each, report findings with the severity tag.
 
 **Field validity is governed by [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical)** — that table is the source of truth for which fields are required per kind. The audits below check against it; if they disagree, the canonical table wins.
 
@@ -84,7 +74,7 @@ Do not flag files that carry `implements:` even if the target is also missing (t
 
 ### 5. INDEX ↔ folder consistency (WARNING)
 
-**Fast path** (when the `run scripts` House Rule is set): `flightdeck_index.py --check <deck>` reports every drift below deterministically and exits non-zero — see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator). The manual checks below are the always-valid fallback and source of truth.
+**Fast path** (when a script runtime is reachable — `uv`/`python`, inferred): `flightdeck_index.py --check <deck>` reports every drift below deterministically and exits non-zero — see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator). The manual checks below are the always-valid fallback and source of truth.
 
 For each artifact folder (`specs/`, `plans/`, `incidents/`, `checklists/`, `charts/`):
 
@@ -135,16 +125,18 @@ If `AGENTS.md` exists at repo root with flightdeck markers (`<!-- BEGIN: flightd
 
 If `AGENTS.md` doesn't exist or has no flightdeck markers: skip (the project hasn't dogfooded the emitter yet; that's optional).
 
-### 10. Version / migration detection (CRITICAL / WARNING / INFO)
+### 10. Version / migration detection — walkaround is the sole version writer (CRITICAL / WARNING / INFO)
 
-Read `flightdeck/rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`); apply [protocol.md § Migration detection](../preflight/protocol.md#migration-detection).
+Get the **layout verdict**: fast path `flightdeck_index.py <deck> --verdict`; fallback read `rules.md` `version` + `MIGRATION.md` frontmatter (`current` + `layout_need_update`) and self-check the structural signals — both yield the same verdict (see [protocol.md § Migration detection](../preflight/protocol.md#migration-detection)). **walkaround is the only command that writes `version`** — preflight only reports the verdict, landing only guards on it. Act on it:
 
-- **No `flightdeck/rules.md`, or `rules.md` has no `version`** → **CRITICAL** — `rules.md` + `version` are part of the minimal contract (`rules.md` + `cockpit.md`; `landed/HISTORY.md` only under no-git). (A cockpit-only / pre-2.2 deck → point to the 2.2 migration in [MIGRATION.md](../../MIGRATION.md).)
-- **`version` < some `layout_need_update` entry** → **WARNING** — a structural migration applies; point to the matching [MIGRATION.md](../../MIGRATION.md) section.
-- **Legacy 1.x markers present** (`flightdeck/manifest.md` · `logbook.md` · `kneeboard/` · `flight-plans/` · `incident-reports/` · `safety-reviews/`) → **WARNING** — legacy 1.x deck; route to the 1.x→1.2 migration first.
-- **Pre-model-v4 structure present** (a `flightdeck/sketches/` or `flightdeck/debriefs/` folder in the *active* tree — not `landed/`; or a workflow file carrying a retired status `pending` / `awaiting-review` / `blocked`; or a `cockpit.md` with a hand-written `## Next session` and no `## 进行中` AUTO region) → **WARNING** — unmigrated model-v4 deck; route to the matching model-v4 section of [MIGRATION.md](../../MIGRATION.md). Report once here, not also as stray (Audit 8) or illegal-status (Audit 1 already points at the same migration).
+- **`malformed`** → **CRITICAL** — a required workflow frontmatter field is missing (e.g. a `specs/`/`plans/` file lacking `summary` or `status`); name the file(s) and fix per Audit 1/11 before other work.
+- **`structural-behind`** → **WARNING** — a structural migration applies; point to the matching [MIGRATION.md](../../MIGRATION.md) section and **offer to perform it** (the moves/remaps are judgment — confirm with the author; don't silently move files). This subsumes the legacy/model-v4 markers below.
+  - Legacy 1.x markers (`flightdeck/manifest.md` · `logbook.md` · `kneeboard/` · `flight-plans/` · `incident-reports/` · `safety-reviews/`) → route to the 1.x→1.2 migration first.
+  - Pre-model-v4 structure (a `flightdeck/sketches/` or `flightdeck/debriefs/` folder in the *active* tree — not `landed/`; or a workflow file carrying a retired status `pending` / `awaiting-review` / `blocked`; or a `cockpit.md` with a hand-written `## Next session` and no `## 进行中` AUTO region) → route to the matching model-v4 section. Report once here, not also as stray (Audit 8) or illegal-status (Audit 1).
+- **`compatible-behind`** → **bump `rules.md` `version` to `current`** (the one safe version write — a number stamp, no structural change) and report it as **INFO** ("version stamped to current"). This is walkaround's sanctioned write; it replaces the old preflight silent bump.
+- **No `flightdeck/rules.md`, or `rules.md` has no `version`** → **CRITICAL** — `rules.md` + `version` are part of the minimal contract (the verdict reports `structural-behind` for the no-version case). A cockpit-only / pre-2.2 deck → point to the 2.2 migration in [MIGRATION.md](../../MIGRATION.md).
 - **A stray `**Layout**` line still in `cockpit.md`** → **INFO** — leftover from a pre-2.2 deck; the 2.2 migration removes it (version lives in `rules.md` now).
-- **`version` < `current` but no newer `layout_need_update` entry**, or **`version == current`** → pass; report nothing (preflight silently bumps the compatible-but-behind case).
+- **`current`** → pass; report nothing.
 
 Only report once per path — do not also flag these as stray/orphan in Audit 8.
 
@@ -217,8 +209,8 @@ Walkaround never auto-fixes. The author decides.
 
 ## Don't do
 
-- Don't auto-fix any finding — walkaround surfaces, author resolves.
+- Don't auto-fix any finding — walkaround surfaces, author resolves. **One exception:** the `compatible-behind` version bump in Audit 10 (a trivial, safe number stamp) — walkaround is the sole version writer. Structural migrations are still author-confirmed, never silent.
 - Don't run walkaround against other repositories or foreign `flightdeck/` directories — false drift signals.
 - Don't include `landed/` archived files in most audits — they're history, not subject to current-state rules (except Audit 6).
-- **Don't flag empty-but-present folders / `INDEX.md`** — a freshly scaffolded full-layout deck (3.x) has empty folders + empty INDEX files; emptiness is the normal initial state, never an anomaly. (Under the full layout, a *missing* known folder is the mild anomaly instead — **INFO** "folder `<x>/` missing — full layout expects it", not CRITICAL; skip any folder in `disabled_folders`.)
-- Don't bump cockpit `Last updated` from running walkaround — walkaround is read-only by design.
+- **Don't flag empty-but-present folders / `INDEX.md`** — a freshly scaffolded full-layout deck (3.x) has empty folders + empty INDEX files; emptiness is the normal initial state, never an anomaly. (Under the full layout, a *missing* known folder is the mild anomaly instead — **INFO** "folder `<x>/` missing — full layout expects it", not CRITICAL.)
+- Don't touch `cockpit.md` (no `Last updated` bump) — walkaround's only sanctioned write is the Audit 10 version bump; everything else it surfaces, the author resolves.
