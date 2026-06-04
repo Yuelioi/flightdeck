@@ -366,7 +366,16 @@ def main(argv=None):
         action="store_true",
         help="bypass the version guard (deck version != script version)",
     )
+    ap.add_argument(
+        "--verdict",
+        action="store_true",
+        help="print the deck's layout verdict (current/compatible-behind/structural-behind/malformed) and exit",
+    )
     args = ap.parse_args(argv)
+
+    if args.verdict:
+        print(layout_verdict(args.deck))
+        return 0
 
     mismatch = version_mismatch(args.deck)
     if mismatch and not args.force:

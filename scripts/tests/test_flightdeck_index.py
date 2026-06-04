@@ -557,5 +557,29 @@ class LayoutVerdictTest(unittest.TestCase):
             self.assertEqual(flightdeck_index.layout_verdict(deck), "current")
 
 
+class VerdictCliTest(unittest.TestCase):
+    def test_verdict_flag_prints_and_writes_nothing(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
+            specs = deck / "specs"
+            specs.mkdir()
+            (specs / "2026-06-01-a.md").write_text(
+                "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
+            )
+            (deck / "cockpit.md").write_text(
+                "## 进行中\n<!-- AUTO:inprogress -->\n\n<!-- /AUTO -->\n", encoding="utf-8"
+            )
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = main([str(deck), "--verdict"])
+            self.assertEqual(rc, 0)
+            self.assertIn("current", buf.getvalue().strip())
+            # 只读：不应创建 INDEX.md
+            self.assertFalse((deck / "INDEX.md").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
