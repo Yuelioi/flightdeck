@@ -64,11 +64,13 @@ Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
         regen the ## 进行中 AUTO region from status:active; auto-write ## 下一步;
         Active focus / Hanging tasks as needed. Then run the Length check (§ below).
 
-Step 5: Commit — honor the commit override (House Rules; default `confirm`)
-        - manual (`don't auto-commit…`)  → do NOT commit; leave the changes for you / CI
-        - confirm (default) → generate the commit, then ask "Commit now? (Y/n)"
-        - auto (`commit without asking`)    → commit without prompting
-        - no-git overrides all three → no commit (landing already logged landed/HISTORY.md)
+Step 5: Commit (local) + push (ask) — default: commit locally without asking
+        (local commits are reversible); NEVER push without asking (push is outward).
+        - default        → generate the message + `git commit` locally, no prompt
+        - `commit: ask`  → ask "Commit now? (Y/n)" before the local commit
+        - `don't auto-commit…` → do NOT commit; leave the changes for you / CI
+        - no-git overrides all → no commit (landing already logged landed/HISTORY.md)
+        - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
 
@@ -216,7 +218,7 @@ A second script, `scripts/flightdeck_lint.py` (pure stdlib), covers the **mechan
 
 This is a **dual track**, not a dependency:
 
-- **Enabled** only when the `run scripts` House Rule is set in `rules.md` `### Autonomy overrides` (absent → manual by default — see [protocol § Rule resolution order](protocol.md#rule-resolution-order)) **and** a Python runtime + the bundled script are reachable. `run scripts with <runtime>` pins the interpreter.
+- **Enabled** whenever a Python runtime (`uv`/`python`) + the bundled script are reachable — script use is **inferred**, not a toggle (see [protocol § Rule resolution order](protocol.md#rule-resolution-order)). No runtime → fall back to the manual markdown path.
 - **Fallback is always valid**: regenerate by hand from frontmatter exactly as described above. The markdown path is the source of truth; the script only saves tokens (it runs in a subprocess — its file reads never enter context) and adds determinism. A tool that cannot run it loses nothing but speed — which is what keeps flightdeck tool-agnostic.
 
 Never let the script make judgments (classification, status decisions, routing) — it only generates/checks the deterministic INDEX rows.

@@ -11,7 +11,6 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 ```markdown
 ---
 version: 3.0             # REQUIRED — flightdeck release this deck conforms to; drives migration detection
-disabled_folders: []     # the one structured toggle: listed folders never suggested / not flagged as orphans
 ---
 
 ## House rules
@@ -23,34 +22,28 @@ General project conventions (code style, "branch before committing") belong in C
 
 ### Autonomy overrides
 
-Omit = defaults (commit confirm · preflight/walkaround/emit/status self-invoke · **landing manual** · status auto-`start` but **not** auto-`land` · git & emit inferred from `.git` / `AGENTS.md` presence). To activate one, **delete its `<!-- -->` wrapper** — commented lines are skipped by phrase-matching:
-<!-- landing: self-invoke -->                  <!-- let me run landing (default: manual) -->
-<!-- status: auto land -->                     <!-- auto-archive on a done flip (default: off) -->
-<!-- commit without asking -->
-<!-- this deck doesn't use git; history in landed/HISTORY.md -->
-<!-- has AGENTS.md but don't auto-regen -->
-<!-- run scripts with uv run -->   <!-- runtime is any of: uv run · python3 · python · a pinned path -->
+Omit = defaults (local commit auto · push asks · all five rituals self-invoke · landing archives by judgment · status auto-`start` · git / emit / scripts inferred). To change one, type its phrase on a line under this heading:
+commit: ask                                   # confirm before each local commit (default: auto local)
+don't auto-commit; leave changes for me / CI  # never commit at all
+status: don't auto start                       # don't auto-flip idea→active when work begins
+this deck doesn't use git; history in landed/HISTORY.md
+has AGENTS.md but don't auto-regen
 ```
 
 ### Rules
 
-- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version`. Omitted `disabled_folders` defaults `[]`; all behavior not pinned here resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default).
-- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations.
-- **One structured toggle (3.0).** Only `disabled_folders` remains structured:
-
-  | Key | Type | Default | Effect |
-  | --- | --- | --- | --- |
-  | `disabled_folders` | list | `[]` | Listed folders never suggested by fallback/exit classification; not flagged as orphans by `walkaround`. |
-
-- **Everything else is inference / default / House Rules** (canonical resolution in protocol):
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
+- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; the layout verdict (`flightdeck_index.py --verdict`, fallback reads `MIGRATION.md` frontmatter) compares it against `current` + `layout_need_update` to detect migrations. `preflight` reads/reports the verdict; **`walkaround` is the only command that writes `version`**.
+- **No structured toggles remain (3.0).** `version` is the sole frontmatter field; everything else is inference / default / skill-judgment / House-Rule phrase:
   - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in landed/HISTORY.md` overrides.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
-  - `commit` → defaults `confirm`; House Rules `commit without asking` (auto) / `don't auto-commit; leave changes for me / CI` (manual). Under no-git there is no commit regardless.
-  - ritual self-invocation → `preflight`/`walkaround`/`emit-agents-md`/`status` default **on** (House Rule `<ritual>: don't self-invoke; I run it manually` restricts one); **`landing` defaults off (manual)** — it archives + commits — enabled by House Rule `landing: self-invoke`.
-  - `status_auto` → `start` defaults **on** (House Rule `status: don't auto start` turns it off); **`land` defaults off** — auto-archive on a `done` flip is opt-in via House Rule `status: auto land`.
-  - `scripts` → defaults **manual** (INDEX regen / consistency checks done by hand). House Rule `run scripts [with <runtime>]` opts into the bundled `flightdeck_index.py` fast path; the markdown path is always the valid fallback, so a runtime-less tool loses only speed. Runs code → a higher-trust action → opt-in, never on by default. See [exit-ritual § Script fast path](exit-ritual.md#script-fast-path-optional-accelerator).
+  - `commit` → defaults to **local commit auto, push asks** (local commits are reversible; push is outward). House Rules `commit: ask` (confirm before each local commit) / `don't auto-commit; leave changes for me / CI` (never). Under no-git there is no commit regardless.
+  - ritual self-invocation → **all five rituals (`preflight`/`landing`/`walkaround`/`emit-agents-md`/`status`) always self-invoke**; there is no opt-out.
+  - status → `start` (idea→active) defaults **on** (House Rule `status: don't auto start` turns it off); `done` flips on approval. **Archiving is not a toggle** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment.
+  - `scripts` → **inferred** from runtime availability (`uv`/`python` reachable → use the bundled `flightdeck_index.py` fast path; else the markdown fallback, which is always valid). No toggle.
+  - folder suppression → **none** (no `disabled_folders`); empty/unused folders are simply not flagged by `walkaround`.
 - **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
-- **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`model_invocable`/`status_auto`/`commit_mode`) are **read and honored through 3.x**, removed at 4.0; `preflight` offers to migrate a deck still carrying them.
+- **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`disabled_folders`/`model_invocable`/`status_auto`/`commit_mode`) are **read but ignored through 3.x**, removed at 4.0; `walkaround` offers any structural migration for a deck still carrying them.
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
 
