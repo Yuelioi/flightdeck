@@ -14,21 +14,11 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 ## Run this checklist exactly
 
-0. **Branch-0 — deck existence (MUST run first, before the Gate and before reading anything).**
-   Check whether **`flightdeck/cockpit.md` exists** (cockpit.md, not merely the directory — it is flightdeck's minimal contract).
+0. **Deck existence (graceful degrade — run first).** If **`flightdeck/cockpit.md` does not exist**, report one line — "No flightdeck deck here — run `/flightdeck:launch` to create one." — and **STOP**. (preflight reads a deck; it does not create one. Whether a deck is healthy/valid is `/flightdeck:walkaround`.)
 
-   - **Does NOT exist** → report one line: "No flightdeck deck here — run `/flightdeck:launch` to create one." then **STOP**. Read nothing else: no `rules.md`, no repo listing, no `git`, no migration probe. (Deckless = immediate stop — this guardrail keeps preflight from re-growing into an installer. Deck creation lives in `/flightdeck:launch`.)
-   - **Exists** → continue to the Gate, then step 1.
+1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides — when no-git, skip step 4's git note). Pre-3.0 keys, if present, are read but ignored.
 
-## Gate — model-invocation check (after Branch-0, before step 1)
-
-Resolve `preflight` self-invocability per [protocol § Rule resolution order](protocol.md#rule-resolution-order). **Default (3.0): self-invocable — continue.** Restricted only if House Rules say `preflight: don't self-invoke` (or a pre-3.0 deck omits `preflight` from `model_invocable`): then an explicit user `/flightdeck:preflight` → continue; model self-invocation or unknown call source → **STOP immediately** and report "`preflight` is manual-only (House Rule). Remove the `preflight: don't self-invoke` line to allow self-invoke."
-
-1. **Read `flightdeck/rules.md`** if present. Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order): infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides — when no-git, skip step 4's git note); honor `disabled_folders` (don't suggest them in fallback). Pre-3.0 keys, if present, are honored for compat.
-
-   **Version handling (two mutually exclusive branches — the only write preflight makes):** compare `rules.md` `version` against `MIGRATION.md` (`current` + `layout_need_update`); preflight and walkaround read the **same** list, so the verdict agrees.
-   - **Compatible-behind** (`version < current` **and** not `< any layout_need_update` entry) → **silently bump `version` to `current`. No message.** (Protocol's one allowed silent stamp.)
-   - **Structural-behind** (`version <` some `layout_need_update` entry, or no `version`/`rules.md`) → **do NOT bump.** Emit the passive note in step 4 (`ℹ deck version is structurally behind — run /flightdeck:walkaround for the migration`). The migration itself is walkaround's job (Audit 10); preflight never offers or performs it.
+   **Layout verdict (read-only — preflight never writes version).** Get the deck's layout verdict: **fast path** (script runtime reachable — `uv`/`python`) `flightdeck_index.py <deck> --verdict`; **fallback** read `MIGRATION.md` frontmatter (`current` + `layout_need_update` — the YAML, not the prose) and self-check the structural signals, yielding the same verdict. If the verdict is **not `current`** (`compatible-behind` / `structural-behind` / `malformed`), emit the passive note in step 4 pointing at walkaround. preflight **never bumps `version` and never migrates** — every version write (bump or migration) is walkaround's (it reads the same verdict).
 
 2. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), and the `## 下一步` action. These are the reconcile baseline; read each once and treat as cached. `preflight` **reads** `## 进行中` / `## 下一步` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
 
@@ -44,10 +34,10 @@ Resolve `preflight` self-invocability per [protocol § Rule resolution order](pr
    |---|---|---|
    | current branch token clearly mismatches `Active focus` | yes | `⚠ git state looks off (branch ≠ Active focus) — review before continuing` |
    | detached HEAD | yes | `⚠ git state looks off (detached HEAD) — review before continuing` |
-   | structural-behind version (from step 1) | yes | `ℹ deck version is structurally behind — run /flightdeck:walkaround for the migration` |
+   | layout verdict ≠ `current` (from step 1) | yes | `ℹ deck layout behind (<verdict>) — run /flightdeck:walkaround` |
    | uncommitted changes / ahead-behind / multiple stashes | no | (say nothing — day-to-day state, not preflight's concern) |
 
-   Git-state notes say **"review before continuing"**, not "run walkaround" — walkaround is a read-only file audit and does not read live git. Only the **version** note points at walkaround.
+   Git-state notes say **"review before continuing"**, not "run walkaround" — walkaround is a read-only file audit and does not read live git. Only the **layout-verdict** note points at walkaround.
 
 5. **Report item #1, then STOP.** Read-only recon doesn't fly the mission. State the `## 下一步` item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
 
@@ -92,7 +82,8 @@ Omit any table group with no entries. If both folder INDEX files are absent or e
 
 ## Don't do
 
-- Don't create a deck — deckless → point at `/flightdeck:launch` and STOP (Branch-0).
+- Don't create a deck — deckless → point at `/flightdeck:launch` and STOP (step 0).
+- Don't write `version` or migrate — preflight only reads the layout verdict and reports it; bump/migration are `/flightdeck:walkaround`'s.
 - Don't audit — status legality, INDEX↔folder consistency, cockpit drift, migration offers all belong to `/flightdeck:walkaround`.
 - Don't run the blocking "Resolve which?" git reconcile — git divergence is a passive one-liner now.
 - Don't auto-pick a fallback when `## 下一步` is empty — always ask.
