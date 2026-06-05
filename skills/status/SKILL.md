@@ -11,7 +11,7 @@ It edits one artifact's frontmatter `status:` (and, on every flip, that artifact
 
 ## Step 1 — read config
 
-**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off (on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat). The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `landed/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
+**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off (on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat). The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
 
 ## Step 2 — identify the target artifact (confidence rule)
 
@@ -34,7 +34,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 
 - Fire only at **new-artifact writes** and **clear status-semantic moments** — never on ordinary edits (typo/wording fixes).
 - A new spec/plan that is *already* being worked on (not merely captured) may go straight to `active` — see the direct-jump note in Step 4.
-- For the last trigger, status flips `done` and regenerates `## 进行中` (the artifact leaves the active set). **Archiving is not status's job** — `/flightdeck:landing` decides whether to move a `done` artifact into `landed/` by cross-reference-aware judgment.
+- For the last trigger, status flips `done` and regenerates `## 进行中` (the artifact leaves the active set). **Archiving is not status's job** — `/flightdeck:landing` decides whether to move a `done` artifact into `archive/` by cross-reference-aware judgment.
 
 ## Step 4 — forward-only state machine
 
@@ -43,7 +43,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 - **idea has no date prefix.** A `status: idea` spec is timeless (`<topic>.md`). The `idea → active` flip is the **one** transition that renames the file to add the `YYYY-MM-DD-` prefix — do the rename and the cockpit `## 进行中` regen (Step 5a) in the **same action** so no intermediate state is left behind.
 - `scrapped` is an **explicit human** action — never auto-set it (it records a settled-against direction; the AI must not unilaterally abandon work). `done` is auto-set on user approval/sign-off (the last trigger) — a flip only, no archive.
 - **Bump `last_updated` on every flip.** Whenever this skill changes `status:` (any transition above, including the create→`idea` write), set the same artifact's `last_updated:` to today. A status flip is by definition a substantive change. This is the auto-bump anchor for the case where the user (or model) edited the body and `status` performs the flip — `status` writes `last_updated` so no one has to remember a second field. Adding `last_updated` to a spec/plan that lacked it is fine (it's recommended). Do **not** bump `last_updated` on a no-op (when the flip is skipped per forward-only). **Idea exception:** do not *add* `last_updated` to a bare `status: idea` spec that lacks it — an idea usually carries only `status` + `summary`; if it already has the field, bump it as usual.
-- **`note:` field.** When the user gives a "why it hasn't moved" reason (a blocker / waiting-on note), write it to the artifact's optional `note:` frontmatter (the merged `active` state's diagnostic carrier — see [protocol § Status](../preflight/protocol.md#status-label--recommended-flow)); clear it when the reason resolves. `note:` never gates a flip — it is advisory text rendered as `[note: …]` in cockpit `## 进行中` + walkaround.
+- **`note:` field.** When the user gives a "why it hasn't moved" reason (a blocker / waiting-on note), write it to the artifact's optional `note:` frontmatter (the merged `active` state's diagnostic carrier — see [protocol § Status ⟂ location](../preflight/protocol.md#status--location-two-orthogonal-axes)); clear it when the reason resolves. `note:` never gates a flip — it is advisory text rendered as `[note: …]` in cockpit `## 进行中` + walkaround.
 
 ## Step 5 — sync the INDEX
 
@@ -68,16 +68,22 @@ A create→`idea` write does **not** change the active set → no `## 进行中`
 When the user approves / signs off:
 
 1. **Set `done` automatically** — "review passed" is an asserted fact; do not ask to confirm `done` itself. Regenerate the cockpit `## 进行中` region (the artifact leaves the active set — see Step 5a).
-2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unlanded). Whether to move it into `landed/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it keeps a `done` artifact in place when an `active` artifact still references it). Emit the land-readiness nudge (Step 7) so the user / model knows landing is available.
+2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unarchived). Whether to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it evaluates `--archivable` deterministically — see [exit-ritual § Land Routine](../preflight/exit-ritual.md#land-routine)). Emit the land-readiness nudge (Step 7) so the user / model knows landing is available.
 
 ## Step 7 — land-readiness (signal 1)
 
-If this invocation flipped an artifact to `done` / `scrapped`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so emit a one-line nudge ("looks like a landing point — run `/flightdeck:landing`?") or auto-run landing per [Rule resolution order](../preflight/protocol.md#rule-resolution-order). Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
+If this invocation flipped an artifact to `done` / `scrapped`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so:
+
+- **Default (end-of-turn debounce):** queue a single landing at end-of-turn (see [exit-ritual § Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) and [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)). If multiple `done` flips happen in the same turn, the debounce collapses them into one landing run — not one per flip.
+- **Degraded by House Rule `landing: nudge on done, don't auto-run`:** instead of auto-running landing, emit a one-line nudge only ("looks like a landing point — run `/flightdeck:landing`?").
+
+Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
 
 ## Don't do
 
 - Don't touch `cockpit.md` **beyond** the `## 进行中` AUTO region on an active-set-changing flip (Step 5a) — no `Last updated` bump, no `Active focus` / `## 下一步` / `Hanging tasks` edits. Those are landing's / the user's.
 - Don't commit, don't run length checks or AGENTS.md regeneration.
 - Don't downgrade a status; don't auto-set `scrapped` (or `done` outside user approval/sign-off).
-- Don't archive — moving a `done` artifact into `landed/` is `/flightdeck:landing`'s judgment, not status's.
+- Don't archive — moving a `done` artifact into `archive/` is `/flightdeck:landing`'s judgment, not status's.
+- Don't write `archived` or `landed` into any artifact's `status:` field — these are not valid status values; only the landing Land Routine can move files into `archive/`. Claiming an artifact is archived before landing has run is incorrect.
 - Don't act when the target artifact is ambiguous.
