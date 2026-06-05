@@ -89,22 +89,44 @@ class AuditStatusTest(unittest.TestCase):
             (deck / "specs" / "INDEX.md").write_text("no frontmatter\n", encoding="utf-8")
             self.assertEqual(audit_status(deck), [])
 
-    def test_landed_is_excluded(self):
+    def test_archive_is_excluded(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            (deck / "landed" / "specs").mkdir(parents=True)
-            (deck / "landed" / "specs" / "old.md").write_text(
+            (deck / "archive" / "specs").mkdir(parents=True)
+            (deck / "archive" / "specs" / "old.md").write_text(
                 "---\nsummary: archived no status\n---\n", encoding="utf-8"
             )
             self.assertEqual(audit_status(deck), [])
 
-    def test_charts_external_tree_not_audited(self):
+    def test_references_external_tree_not_audited(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            (deck / "charts" / "proj").mkdir(parents=True)
+            (deck / "references" / "proj").mkdir(parents=True)
             # nested file inside an imported tree — must not be flagged
-            (deck / "charts" / "proj" / "deep.md").write_text(
+            (deck / "references" / "proj" / "deep.md").write_text(
                 "no frontmatter\n", encoding="utf-8"
+            )
+            self.assertEqual(audit_status(deck), [])
+
+    def test_docs_knowledge_status_audited(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "guide.md").write_text(
+                "---\nstatus: done\nwhen_to_read: x\napplies_to: [a]\n---\n",
+                encoding="utf-8",
+            )
+            warn = _sev(audit_status(deck), "WARNING")
+            self.assertEqual(len(warn), 1)
+            self.assertIn("done", warn[0]["message"])
+
+    def test_docs_legal_status_no_finding(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "guide.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\n---\n",
+                encoding="utf-8",
             )
             self.assertEqual(audit_status(deck), [])
 
@@ -131,11 +153,11 @@ class AuditOrphanPlansTest(unittest.TestCase):
             )
             self.assertEqual(audit_orphan_plans(deck), [])
 
-    def test_landed_plans_excluded(self):
+    def test_archive_plans_excluded(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            (deck / "landed" / "plans").mkdir(parents=True)
-            (deck / "landed" / "plans" / "p.md").write_text(
+            (deck / "archive" / "plans").mkdir(parents=True)
+            (deck / "archive" / "plans" / "p.md").write_text(
                 "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
             )
             self.assertEqual(audit_orphan_plans(deck), [])
@@ -263,8 +285,18 @@ class AuditStrayTest(unittest.TestCase):
             deck = Path(d)
             for name in ("cockpit.md", "INDEX.md", "rules.md"):
                 (deck / name).write_text("# x\n", encoding="utf-8")
-            for folder in ("specs", "plans", "incidents", "checklists", "charts", "landed"):
+            for folder in ("specs", "plans", "incidents", "checklists", "docs", "references", "archive"):
                 (deck / folder).mkdir()
+            self.assertEqual(audit_stray(deck), [])
+
+    def test_nestable_area_subdir_not_stray(self):
+        """NESTABLE_KINDS folders may have <area>/ subdirs — those must not be flagged."""
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            for kind in ("incidents", "checklists", "docs", "references"):
+                area = deck / kind / "infra"
+                area.mkdir(parents=True)
+                (area / "note.md").write_text("# note\n", encoding="utf-8")
             self.assertEqual(audit_stray(deck), [])
 
     def test_root_md_linked_from_entry_is_reachable(self):

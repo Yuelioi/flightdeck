@@ -31,15 +31,23 @@ import sys
 from pathlib import Path
 
 import flightdeck_index
-from flightdeck_index import parse_frontmatter
+from flightdeck_index import (
+    KNOWLEDGE_KINDS,
+    IMPORTED_KINDS,
+    NESTABLE_KINDS,
+    parse_frontmatter,
+)
 
 # Legal status values per artifact kind (model-v4 §1; mirrors walkaround Audit 1).
 WORKFLOW_STATUSES = {"idea", "active", "done", "scrapped"}
 KNOWLEDGE_STATUSES = {"active", "obsolete", "superseded"}
 
 WORKFLOW_FOLDERS = ("specs", "plans")
-KNOWLEDGE_FOLDERS = ("incidents", "checklists", "charts")
-KNOWN_FOLDERS = {"specs", "plans", "incidents", "checklists", "charts", "landed"}
+# KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}  — from flightdeck_index
+# IMPORTED_KINDS  = {"references"}                       — from flightdeck_index
+# NESTABLE_KINDS  = {"incidents", "checklists", "docs", "references"} — from flightdeck_index
+KNOWLEDGE_FOLDERS = tuple(KNOWLEDGE_KINDS)
+KNOWN_FOLDERS = {"specs", "plans"} | KNOWLEDGE_KINDS | IMPORTED_KINDS | {"archive"}
 KNOWN_ROOT_FILES = {"cockpit.md", "INDEX.md", "rules.md"}
 
 # `[text](target)` — capture the target only; titles/spaces handled by the caller.
@@ -65,8 +73,10 @@ def _finding(audit, severity, path, message):
 def _artifact_files(folder):
     """Top-level *.md in a folder, excluding INDEX.md (no recursion).
 
-    Non-recursive on purpose: `charts/` may hold imported external project
+    Non-recursive on purpose: `references/` may hold imported external project
     trees whose nested files are not flightdeck artifacts (walkaround Audit 1).
+    NESTABLE_KINDS (incidents/checklists/docs/references) may have <area>/
+    sub-directories — only the top-level *.md are treated as artifacts.
     """
     return sorted(p for p in folder.glob("*.md") if p.name != "INDEX.md")
 
@@ -193,6 +203,9 @@ def audit_stray(deck):
     directory, and a root-level `.md` that is neither a known entry file nor
     linked from one. The fuzzier sub-checks (stray files inside known folders,
     non-.md assets) are left to the model — they need judgment.
+
+    NESTABLE_KINDS (incidents/checklists/docs/references) may contain <area>/
+    sub-directories as organisational partitions — those subdirs are not stray.
     """
     deck = Path(deck)
     linked = set()
@@ -211,6 +224,15 @@ def audit_stray(deck):
                 findings.append(
                     _finding("stray", "WARNING", child, f"unknown directory `{child.name}/` under deck root")
                 )
+            else:
+                # For nestable kinds, check their immediate subdirectories:
+                # <area>/ subdirs are legitimate organisational partitions, not stray.
+                if child.name in NESTABLE_KINDS:
+                    for sub in sorted(child.iterdir()):
+                        if sub.is_dir():
+                            # area partition — skip (not stray)
+                            pass
+                        # files inside nestable folders are handled by audit_status
         elif child.suffix == ".md" and child.name not in KNOWN_ROOT_FILES:
             if child.resolve() in linked:
                 continue
@@ -223,11 +245,11 @@ def audit_stray(deck):
 def _collect_md(deck, repo_root):
     """Markdown files for the dangling-ref scan: deck active tree + repo-root top level.
 
-    `landed/` is excluded (history is not held to current-state rules), matching
-    the general walkaround "don't audit landed/" principle.
+    `archive/` is excluded (history is not held to current-state rules), matching
+    the general walkaround "don't audit archive/" principle.
     """
     deck = Path(deck)
-    files = [p for p in deck.rglob("*.md") if "landed" not in p.relative_to(deck).parts]
+    files = [p for p in deck.rglob("*.md") if "archive" not in p.relative_to(deck).parts]
     if repo_root is not None:
         files += list(Path(repo_root).glob("*.md"))
     return files
