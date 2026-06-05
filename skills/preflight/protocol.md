@@ -6,9 +6,15 @@
 
 `flightdeck/` is a directory convention organized by **when you read what** — a persistent workbench for AI-assisted coding. What earns a place is governed by the [write gate](#write-gate).
 
+## Naming iron-rule (metaphor vs mainstream)
+
+The aviation metaphor is reserved for the **interaction surface** — slash commands, rituals, and the cockpit: `flightdeck` / `cockpit` / `preflight` / `walkaround` / `landing` / `launch` (including the every-session `cockpit.md` dashboard). The **data model — folders, statuses, fields — uses mainstream, ordinary names** a developer can guess cold. A newcomer who doesn't know the metaphor must still be able to guess what each folder / status / field is for.
+
+Consequence: the two metaphor folder names became mainstream — `charts/ → references/`, `landed/ → archive/`. Status values were already mainstream (`idea/active/done/scrapped`, `active/obsolete/superseded`) and don't change. `flightdeck/` (the product root) and `cockpit.md` (interaction surface) keep their names. This rule outranks thematic consistency — see [Design philosophy](#design-philosophy).
+
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` under no-git) and must carry a `version` field (the deck-conformance version that drives migration detection).
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`; plus `archive/HISTORY.md` under no-git) and must carry a `version` field (the deck-conformance version that drives migration detection).
 
 As of **3.0**, `rules.md` carries just `version` plus free-prose house rules:
 
@@ -23,7 +29,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
 2. **Environment inference** — `git`: does deck root contain `.git`?; `emit_agents_md`: does deck root already have `AGENTS.md`?
-3. **Built-in default** — `commit` = **local commit auto, push asks** (local commits are reversible — reset/amend; push is outward, so it stays gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment; `scripts` = **inferred** (use the bundled INDEX/verdict scripts when a `uv`/`python` runtime is reachable, else by hand). The one outward action (push) stays gated; everything reversible runs without asking.
+3. **Built-in default** — `commit` = **local commit auto, push asks** (local commits are reversible — reset/amend; push is outward, so it stays gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment; **`landing` auto-runs on `done`** — a `done` flip relays into a landing run, debounced to **once at end-of-turn** (reversible → automatic; the downgrade `landing: nudge on done, don't auto-run` reverts to nudge-only); `scripts` = **inferred** (use the bundled INDEX/verdict scripts when a `uv`/`python` runtime is reachable, else by hand). The one outward action (push) stays gated; everything reversible runs without asking.
 
 (Pre-3.0 structured keys, when still present on a not-yet-migrated deck, are read between steps 1 and 2 — honored for 3.x compatibility, removed at 4.0.)
 
@@ -40,7 +46,8 @@ Every skill resolves each behavior in this order — **first hit wins**:
 | commit confirm before the local commit (default is auto local) | `commit: ask` | `commit 先问我` |
 | commit manually (never) | `don't auto-commit; leave changes for me / CI` | `不要自动 commit，留给我或 CI` |
 | a status transition off (`start` — on by default) | `status: don't auto <transition>` | `status 不要自动 <transition>` |
-| no git | `this deck doesn't use git; history in landed/HISTORY.md` | `本 deck 不走 git，历史记 landed/HISTORY.md` |
+| landing auto-run on `done` off (downgrade to nudge-only; on by default) | `landing: nudge on done, don't auto-run` | `landing 完成时只提示不自动跑` |
+| no git | `this deck doesn't use git; history in archive/HISTORY.md` | `本 deck 不走 git，历史记 archive/HISTORY.md` |
 | has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
 
 There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `run scripts` toggle (script use is inferred from runtime availability), and no `disabled_folders` (empty/unused folders are simply not flagged). The legacy `commit without asking` phrase still matches the new default (auto local commit) for compat.
@@ -59,8 +66,10 @@ This replaces the pre-2.2 cockpit `**Layout**` string check. Purely additive rel
 ## Data model (folder = kind, frontmatter = status)
 
 flightdeck has exactly two axes:
-- **Folder = kind** (implicit; never written in frontmatter). Workflow kinds: `specs/` `plans/`. Knowledge kinds: `incidents/` `checklists/` `charts/`.
+- **Folder = kind** (implicit; never written in frontmatter). Workflow kinds: `specs/` `plans/`. Knowledge kinds: `incidents/` `checklists/` `docs/` `references/`.
 - **Frontmatter = status** (explicit, required) + knowledge routing fields (`when_to_read`/`applies_to`/`last_updated`) + a plan's optional `implements:`. The folder is the kind — files carry no type field.
+
+**Nesting by axis:** knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) **may nest by area** (`<folder>/<area>/` with its own `<folder>/<area>/INDEX.md`; a subdirectory is only an organizational partition within the *same* kind, never another kind). Workflow kinds (`specs/` `plans/`) are **strictly flat** — they drain into `archive/` after `done` so the active set never accumulates; group by feature via the INDEX hand area, not subdirectories.
 
 See [templates.md](templates.md) for per-folder frontmatter templates. The full field set is the canonical table below.
 
@@ -77,8 +86,8 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
 | `supersedes` | workflow | optional | grep (reverse derived) | author/status | dangling-edge INFO (optional) |
 | `related` | workflow | optional | grep | author | dangling-edge INFO (optional) |
-| `when_to_read` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
-| `applies_to` | incidents/checklists/charts | **required** | preflight routing | author | Audit 2 |
+| `when_to_read` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
+| `applies_to` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
 | `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
 | `recurrences` | incidents | optional (default 1) | INDEX-row render + promotion gate | landing/status (auto-bump on a clear recurrence) | int ≥ 1; ≈ 1 + `[Case N]` count |
 | `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
@@ -89,11 +98,25 @@ This table is the **single source of truth** for every frontmatter / config fiel
 
 ### Two deliberate asymmetries
 
-**Supersession — edge (workflow) vs status pointer (knowledge).** Knowledge files stay in place (never archived): a reader can land on a dead-but-in-place file, so a *forward* `superseded_by` (required when `status: superseded`) redirects to the replacement. Workflow artifacts archive into `landed/` when done — the old one is history a reader rarely hits cold, so the new artifact carries a *backward* `supersedes` edge and the reverse ("who superseded me") is grep-derived, never stored. Two mechanisms, one principle each — do not unify.
+**Supersession — edge (workflow) vs status pointer (knowledge).** Knowledge files stay in place (never archived): a reader can land on a dead-but-in-place file, so a *forward* `superseded_by` (required when `status: superseded`) redirects to the replacement. Workflow artifacts archive into `archive/` when done — the old one is history a reader rarely hits cold, so the new artifact carries a *backward* `supersedes` edge and the reverse ("who superseded me") is grep-derived, never stored. Two mechanisms, one principle each — do not unify.
 
 **`last_updated` — required (knowledge) vs recommended + auto-bump (workflow).** Knowledge is found by grep-routing where stale advice is dangerous → required. Workflow is found via INDEX/cockpit → staleness matters less; recommended, and auto-bumped by `status`/`landing` to prevent rot.
 
-## Status (label + recommended flow)
+## Status ⟂ location (two orthogonal axes)
+
+flightdeck separates **two independent axes** — the source of the historical "done = landed" confusion is collapsing them:
+
+- **status** ∈ `{idea, active, done, scrapped}` (workflow) — *which step the artifact reached*. Explicit frontmatter value.
+- **location** ∈ `{源文件夹, archive/}` — *whether it's still in the active area*. **Derived, NOT a frontmatter field** (computed from "is it under `archive/`?"), **but a first-class concept**: it drives **routing** (`archive/` is excluded from the routing graph entirely) and **archival judgment** (landing decides whether a `done` item lands). Don't dismiss it as unimportant just because it isn't written down.
+
+A `done` artifact has two legal locations: **done-but-unlanded** (still in `specs/`, because an `active` artifact still references it) or **done-and-archived** (moved into `archive/`).
+
+**Invariants (hard):**
+- `archived` / `landed` are **never status values** — no file ever writes `status: landed`.
+- **Only landing's Land Routine may move anything into `archive/`.** status never archives.
+- The AI **never** hand-writes an archival label, and **never** claims an item is archived without actually running landing.
+
+One sentence: **status says "which step", location says "in the active area or not", and landing is the only mover.**
 
 Fixed values, by kind:
 - workflow (spec/plan): `idea / active / done / scrapped`
@@ -109,8 +132,41 @@ knowledge: active → obsolete | superseded
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
 - `active` = being worked on; **auto-appears in cockpit `## 进行中`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
-- `done` = complete, archived to `landed/`.
-- `scrapped` = rejected / abandoned; stays in `specs/` (not archived), excluded from `specs/INDEX` — kept so the AI does not re-raise a settled-against direction.
+- `done` = 工作完成；留在源文件夹直到 landing ritual 把它归档进 `archive/`（**done ≠ archived**）.
+- `scrapped` = rejected / abandoned; stays in `specs/` (not archived), excluded from the to-start pool but **still visible** in `specs/INDEX` under a dedicated `### 已否决（scrapped）` group — kept so the AI does not re-raise a settled-against direction.
+
+### Status transition authority table (single source of truth)
+
+This is the **one authoritative table** for automatic status flips. Other files (`status` SKILL, `exit-ritual`) point here and do not restate the rules.
+
+Workflow chain: `idea → active → done`; `any → scrapped`.
+
+| Trigger | Flip | Who | Auto? |
+|---|---|---|---|
+| Write a new spec/plan (capture only, not yet started) | →`idea` | status | always |
+| Write a new spec/plan **and already working on it** | direct →`active` (legal skip past idea) | status | always |
+| Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## 进行中`) | status | default (House Rule `status: don't auto start` can disable) |
+| User approves / signs off | `active→done` (flips `done` only, **does not archive**) | status / landing seam | always |
+| A direction is rejected | `any→scrapped` | **user-explicit instruction only** | **never auto** |
+
+Iron rules:
+- **Forward-only, idempotent** — if target ≤ current, no-op.
+- `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
+- `scrapped` is triggered **only by an explicit user instruction**, stays in place, is **not archived**, and is listed in `specs/INDEX` under a dedicated `### 已否决（scrapped）` group (separated from the to-start pool so it doesn't pollute it, but **still visible** — excluding it from INDEX would hide settled-against directions from routing, defeating the "don't re-raise" purpose); deleted by hand.
+- `done`'s trigger source = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check.
+- Every flip bumps `last_updated` (bare `idea` excepted).
+
+Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / obsolete / superseded` with **no automatic flips** — set obsolete/superseded by hand (with `superseded_by`).
+
+### The status / landing seam
+
+`done` is the **single seam** between the lightweight `status` ritual and the heavy `landing` ritual:
+
+- `idea→active` is light work — `status` does it alone.
+- **`→done` = the "completion" moment = landing's trigger point.** Reaching `done` hands control to landing for wrap-up + archival decision. `status` itself still does not commit / archive — it recognizes completion and passes the baton.
+- **End-of-turn debounce:** a `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, not an unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. An explicit `/flightdeck:landing` is also a trigger. (See [landing auto-trigger](#rule-resolution-order) in Rule resolution order.)
+- **Archival criterion = a deterministic structural edge** (not AI prose reading): a `done` artifact archives into `archive/` **iff no `active` artifact points at it via a structural edge** (`implements:` active plan → done spec; `superseded_by` active knowledge → the knowledge it replaces). `flightdeck_index.py --archivable` computes the archivable-`done` set as a **reproducible fact** (same input → same conclusion); prose markdown links are for humans only and **don't enter the criterion**. Pointed-at by an active inbound edge → stays done-but-unlanded.
+- **Drain, don't accumulate:** every landing rescans **all** `done`-in-place artifacts (not just this session's), sweeping away any whose inbound edges have cleared — so done-but-unlanded **drains automatically** and never lingers. Still-pointed-at ones are listed by `walkaround` as INFO (naming the **blocking active artifact**, not a vague "reason").
 
 The optional `note:` field carries the "why it hasn't moved" diagnostic (blocker / pending reason) that the merged `active` state would otherwise lose; cockpit + walkaround render it as `[note: …]`.
 
@@ -120,7 +176,7 @@ Status is just a label — the user edits it freely; at landing the AI may *sugg
 
 ## INDEX.md (per-folder + root)
 
-Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`待启动（idea）` / `进行中·完成（active·done）`) and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`待启动（idea）` / `进行中·完成（active·done）` / `### 已否决（scrapped）`) — `scrapped` stays **visible** in its own group (separated from the to-start pool, not hidden) — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 
 The root `flightdeck/INDEX.md` is a sub-folder directory + global status summary (e.g. `specs/ — 3 (2 active, 1 done)`); it is a downgradeable component.
 
@@ -129,19 +185,22 @@ The root `flightdeck/INDEX.md` is a sub-folder directory + global status summary
 ## Folder map
 
 ```
-flightdeck/
-├── cockpit.md   rules.md   INDEX.md
-├── specs/       INDEX.md   (idea / active / done / scrapped)
-├── plans/       INDEX.md
-├── incidents/   INDEX.md
-├── checklists/  INDEX.md
-├── charts/      INDEX.md   (may hold an imported external project tree)
-└── landed/      (archive + HISTORY.md)
+flightdeck/                  [product name — kept]
+├── cockpit.md   rules.md   INDEX.md   [cockpit.md = interaction surface — metaphor kept]
+├── specs/       INDEX.md   (idea / active / done / scrapped)   workflow · self-authored · flat
+├── plans/       INDEX.md                                       workflow · self-authored · flat
+├── incidents/   INDEX.md   bug post-mortems                    knowledge · resident · nestable
+├── checklists/  INDEX.md   process / conventions (执行)         knowledge · resident · nestable
+├── docs/        INDEX.md   self-authored technical knowledge ★ knowledge · resident · nestable
+├── references/  INDEX.md   imported external material (旧 charts/) knowledge · imported · nestable
+└── archive/     (旧 landed/) + HISTORY.md                      location (not a kind)
 ```
 
-Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README — multi-file topics live as several files in one folder, grouped via the INDEX hand area; only `charts/` may contain an external project subtree.)
+`docs/` (★ new in 3.0) holds **self-authored, resident, explanatory** project technical knowledge — architecture, design rationale, subsystem overviews, lifecycle/philosophy. It is what you **read to understand**, vs `checklists/` (what you **execute**), `references/` (what comes from **outside**), and `specs/` (one-shot design intent that archives when built). `archive/` is a first-class structural container (mirrors source kinds, has `HISTORY.md`, handled specially by landing/index/migration) but is **not a kind** — it answers "in the active area or not", not "what artifact is this" (artifacts keep their own kind).
 
-**Which folder?** Classify by lifecycle: design / idea (started or not) → `specs/` (`status: idea` = unstarted); execution plan → `plans/`; evergreen operational reference → `checklists/`; imported external material → `charts/`; post-incident records → `incidents/`.
+Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README — multi-file topics live as several files in one folder, grouped via the INDEX hand area; only `references/` may contain an imported external project subtree.)
+
+**Which folder?** Classify by lifecycle: design / idea (started or not) → `specs/` (`status: idea` = unstarted); execution plan → `plans/`; evergreen operational reference (executed) → `checklists/`; self-authored technical knowledge (read to understand) → `docs/`; imported external material → `references/`; post-incident records → `incidents/`.
 
 **Routing is graph-based, not filesystem-based.** A file is "active" only if reachable from an entry (`cockpit.md`, `INDEX.md`, or `rules.md`). **A file nothing links to effectively does not exist** — no session reads it. Custom folders / root files are allowed but MUST be reachable from an entry, or they are orphans.
 
@@ -153,15 +212,16 @@ Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README 
 | Unsure about a design | `specs/` |
 | Running tests / preparing commit | `checklists/` |
 | Strange behavior / deja-vu bug | `incidents/` |
-| Need outside perspective | `charts/` |
+| Understand how the system works / why it's built this way | `docs/` |
+| Need outside perspective | `references/` |
 | Designing new feature | `specs/` (`status: idea`, flip to `active` when starting) |
 | Breaking work into steps | `specs/` → write a `plans/` file |
 
-**How to pick the right incident / checklist**: don't read every file. Both folders use frontmatter (`when_to_read` + `applies_to` + `last_updated`) — grep the metadata, only load full files whose triggers match the current task. Use `last_updated` to judge staleness. An optional `skip_when` field (negative routing — "when NOT to read this") lets a file pre-empt a false match (e.g. `skip_when: editing tests only` on a production-hardening checklist, so it stays silent during test-only work); absent is fine.
+**How to pick the right knowledge file**: don't read every file. All knowledge folders (`incidents/` `checklists/` `docs/` `references/`) use frontmatter (`when_to_read` + `applies_to` + `last_updated`) — grep the metadata, only load full files whose triggers match the current task. Use `last_updated` to judge staleness. An optional `skip_when` field (negative routing — "when NOT to read this") lets a file pre-empt a false match (e.g. `skip_when: editing tests only` on a production-hardening checklist, so it stays silent during test-only work); absent is fine.
 
 ### Frontmatter requirements (hard-fail)
 
-Incidents and checklists **MUST** carry frontmatter with `when_to_read`, `applies_to`, and `last_updated`. On a missing field: STOP, report the file path + missing fields to user, offer (a) add now or (b) delete the file. Silent skip = files invisible while their authors believe they're active. That is the worst failure mode for an advice system.
+Knowledge files (incidents / checklists / docs / references) **MUST** carry frontmatter with `when_to_read`, `applies_to`, and `last_updated`. On a missing field: STOP, report the file path + missing fields to user, offer (a) add now or (b) delete the file. Silent skip = files invisible while their authors believe they're active. That is the worst failure mode for an advice system.
 
 ### Proactive incident resurfacing
 
@@ -169,7 +229,7 @@ Before starting a task whose description / file paths overlap with an incident's
 
 ## Source-of-truth precedence (when sources disagree)
 
-Project agent rules > `rules.md` > `cockpit.md` > active folders (`specs/` `plans/` `incidents/` `checklists/` `charts/`) > `landed/`
+Project agent rules > `rules.md` > `cockpit.md` > active folders (`specs/` `plans/` `incidents/` `checklists/` `docs/` `references/`) > `archive/`
 
 `rules.md` sits just below the project's own agent rules: it governs how flightdeck skills behave. `cockpit.md` is the single operational entry below it.
 
@@ -189,13 +249,13 @@ Reject:
 ## Lifecycle
 
 ```
-idea →(flip one field)→ active → done   →(land = move to landed/)
+idea →(flip one field)→ active → done   →(land = move to archive/)
                                   scrapped (stays in specs/, not archived)
 ```
 
-A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `landed/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state.
+A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state.
 
-A scrapped spec stays in `specs/` (marked `status: scrapped`), never archived to `landed/` and excluded from `specs/INDEX`; delete by hand at will.
+A scrapped spec stays in `specs/` (marked `status: scrapped`), never archived to `archive/` and listed under `specs/INDEX`'s `### 已否决（scrapped）` group; delete by hand at will.
 
 **Knowledge lifecycle:** `active → obsolete | superseded` (set `superseded_by` when superseding). Landing knowledge is optional — files may stay in place indefinitely; no "to-land" reminder.
 
@@ -203,7 +263,7 @@ A scrapped spec stays in `specs/` (marked `status: scrapped`), never archived to
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + regen `## 进行中` from `status: active` + auto-write `## 下一步` + any `Hanging tasks` changes); append to `landed/HISTORY.md` when no-git; then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Last updated` + regen `## 进行中` from `status: active` + auto-write `## 下一步` + any `Hanging tasks` changes); append to `archive/HISTORY.md` when no-git; then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git). landing regenerates the INDEX of any folders changed this session.
 
 ## Ritual responsibilities — who owns what
 
@@ -255,7 +315,7 @@ A separate **project-rules upgrade gate** fires when a promoted incident continu
 | `incidents/` writes "forgot / careless" | Root cause must be a wrong assumption / wrong model / wrong process. |
 | External review feedback saved as its own file | Raw feedback is transient → project-root `tmp/`; its disposition (adopt / reject / defer) folds into the reviewed spec's `## 评审纪要`. |
 | Brainstorming where every knowledge item belongs | Heuristics catch 90%. Default-brainstorm is the failure mode. |
-| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` / `landed/HISTORY.md`, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
+| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` / `archive/HISTORY.md`, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
 | Bumping `Last updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |
 | Incident / checklist without required frontmatter | STOP, report file path + missing fields. Add or delete before proceeding. |
 | Incident / checklist with `last_updated` > 1 year in a fast-moving project | Likely stale advice. Bump after re-verifying or flip to `status: obsolete`. |
