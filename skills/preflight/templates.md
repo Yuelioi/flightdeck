@@ -17,7 +17,7 @@ version: 3.0             # REQUIRED — flightdeck release this deck conforms to
 
 ### Project conventions
 
-Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not use charts/").
+Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not use references/").
 General project conventions (code style, "branch before committing") belong in CLAUDE.md / AGENTS.md, NOT here.
 
 ### Autonomy overrides
@@ -26,16 +26,16 @@ Omit = defaults (local commit auto · push asks · all five rituals self-invoke 
 commit: ask                                   # confirm before each local commit (default: auto local)
 don't auto-commit; leave changes for me / CI  # never commit at all
 status: don't auto start                       # don't auto-flip idea→active when work begins
-this deck doesn't use git; history in landed/HISTORY.md
+this deck doesn't use git; history in archive/HISTORY.md
 has AGENTS.md but don't auto-regen
 ```
 
 ### Rules
 
-- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `landed/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `archive/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
 - **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; the layout verdict (`flightdeck_index.py --verdict`, fallback reads `MIGRATION.md` frontmatter) compares it against `current` + `layout_need_update` to detect migrations. `preflight` reads/reports the verdict; **`walkaround` is the only command that writes `version`**.
 - **No structured toggles remain (3.0).** `version` is the sole frontmatter field; everything else is inference / default / skill-judgment / House-Rule phrase:
-  - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in landed/HISTORY.md` overrides.
+  - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in archive/HISTORY.md` overrides.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
   - `commit` → defaults to **local commit auto, push asks** (local commits are reversible; push is outward). House Rules `commit: ask` (confirm before each local commit) / `don't auto-commit; leave changes for me / CI` (never). Under no-git there is no commit regardless.
   - ritual self-invocation → **all five rituals (`preflight`/`landing`/`walkaround`/`emit-agents-md`/`status`) always self-invoke**; there is no opt-out.
@@ -82,7 +82,7 @@ related: [<path>, ...]       # optional; weak cross-links
 
 ---
 
-## knowledge frontmatter — incident / checklist / chart
+## knowledge frontmatter — incident / checklist / reference
 
 ```markdown
 ---
@@ -98,6 +98,25 @@ last_updated: YYYY-MM-DD
 
 ---
 
+## docs frontmatter
+
+```markdown
+---
+status: active            # active / obsolete / superseded
+when_to_read: <one-line trigger>
+applies_to: [<tag>, ...]
+last_updated: YYYY-MM-DD
+summary: <one-line gist>  # optional but recommended; drives INDEX row
+# superseded only: superseded_by: <path>
+---
+```
+
+**Naming**: `<topic>.md` — no date prefix (docs are stable references, not log entries). Examples: `runtime.md`, `folder-semantics.md`, `glossary.md`.
+
+**Fields**: same lifecycle set as incident/checklist (`status` / `when_to_read` / `applies_to` / `last_updated`), plus an optional `summary` that drives the INDEX row — prefer it to `when_to_read` for the row when the doc is general-reference rather than situational.
+
+---
+
 ## INDEX.md — per folder
 
 ```markdown
@@ -110,7 +129,30 @@ last_updated: YYYY-MM-DD
 <!-- optional hand-maintained area (grouping notes for multi-file topics); AI does not touch -->
 ```
 
-For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `charts/` add `when_to_read` / `applies_to`. `implements`, `supersedes`, `related`, `note` do NOT go into the INDEX. (`specs/INDEX` groups its AUTO region by status and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).)
+For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `references/` add `when_to_read` / `applies_to`. `implements`, `supersedes`, `related`, `note` do NOT go into the INDEX. (`specs/INDEX` groups its AUTO region by status and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).)
+
+---
+
+## INDEX.md — area (nested folder inside a knowledge folder)
+
+Used for nested sub-folders within a knowledge folder, e.g. `docs/<area>/INDEX.md`.
+
+```markdown
+---
+purpose: <one-line description of what this area covers>
+last_updated: YYYY-MM-DD
+---
+
+# <folder>/<area> — INDEX
+
+<!-- AUTO:<area> -->
+- [<file>](<file>) — <status> — <one-line summary>
+<!-- /AUTO -->
+```
+
+**Frontmatter fields** (`purpose` + `last_updated`) are read by `flightdeck_index` to render the parent folder's INDEX area row — keep them accurate.
+
+**AUTO marker convention (critical — prevents first-regen drift)**: use the **area folder name** as the kind in `<!-- AUTO:<area> -->`. For example, `docs/runtime/INDEX.md` uses `<!-- AUTO:runtime -->`. This matches the marker that `flightdeck_index` emits when regenerating the area INDEX (it uses the area folder name as the kind). Using any other string will cause a spurious drift report on the first regeneration.
 
 ---
 
@@ -124,7 +166,7 @@ For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `s
 - plans/ — 2 (2 active)
 - incidents/ — 1 active
 - checklists/ — 1 active
-- charts/ — 2 projects imported
+- references/ — 2 projects imported
 <!-- /AUTO -->
 ```
 
@@ -132,7 +174,7 @@ For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `s
 
 ## status flow (recommended, not enforced)
 
-Status values (by kind) + the recommended transition arrows are canonical in [protocol § Status](protocol.md#status-label--recommended-flow) — not restated here.
+Status values (by kind) + location semantics are canonical in [protocol § Status ⟂ location](protocol.md#status--location-two-orthogonal-axes) — not restated here.
 
 ---
 
@@ -259,13 +301,13 @@ There is **no debrief template** — `debriefs/` was removed. External review fe
 - **Length cap: 80 lines hard ceiling.** Past 80, trim immediately. `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal (walkaround INFO, never blocks).
 - **`Active focus` is current state**, not history.
 - **Hanging tasks block landing** — resolve, or explicitly defer with a date.
-- **History does not live in cockpit.** Durable record = `landed/` archive + `git log` (+ `landed/HISTORY.md` when `git: false`). A landed artifact leaves `## 进行中` automatically; it is not logged in cockpit.
+- **History does not live in cockpit.** Durable record = `archive/` + `git log` (+ `archive/HISTORY.md` when `git: false`). A landed artifact leaves `## 进行中` automatically; it is not logged in cockpit.
 - **No metric tracking duplicated elsewhere** — link to the single source.
 - **No version stamp in cockpit.** The deck-conformance version lives in `rules.md` `version:`; migration detection compares it against `MIGRATION.md` (`current` + `layout_need_update`). cockpit is pure focus.
 
 ---
 
-## landed/HISTORY.md
+## archive/HISTORY.md
 
 ```markdown
 # History — <project>
@@ -273,7 +315,7 @@ There is **no debrief template** — `debriefs/` was removed. External review fe
 <!-- No-git history log. Present ONLY in git-less decks — init removes it when the project has .git (git log is the
      history there). Add-only: one line per landing, newest first; never edit, delete, or truncate past entries.
      This file IS the project's whole history, kept in full however long it grows.
-     Lives under landed/ — outside the routing graph; never read at session start (only its newest line). -->
+     Lives under archive/ — outside the routing graph; never read at session start (only its newest line). -->
 
 - YYYY-MM-DD — <what landed this session>; next: <pointer to the 下一步 action>
 ```
@@ -281,7 +323,7 @@ There is **no debrief template** — `debriefs/` was removed. External review fe
 ### Rules
 
 - **One line per landing**, newest first. Never edit, delete, or truncate past entries (add-only). No multi-line entries — link to the archived artifact for detail.
-- **Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history, kept **in full** and never trimmed however long it grows. Length is free: it never enters context (only its newest line is read, as the no-git staleness signal).
+- **Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history, kept **in full** and never trimmed however long it grows. Length is free: it never enters context (only its newest line is read, as the no-git staleness signal). Lives under `archive/` — outside the routing graph.
 - **Never read at session start** — reference for retrospectives / the no-git staleness check (newest line) only.
 
 ---
@@ -293,7 +335,7 @@ When one file references another, use a markdown link with a one-word hook:
 ```markdown
 Known trap: [v2-aelayer structure](incidents/v2-aelayer-structure.md)
 Procedure: [verify before commit](checklists/verify.md)
-Decision: [why we chose splice over rewrite](landed/specs/2025-12-01-write-strategy.md)
+Decision: [why we chose splice over rewrite](archive/specs/2025-12-01-write-strategy.md)
 ```
 
 Why this matters:
