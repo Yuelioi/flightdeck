@@ -51,6 +51,10 @@ a title: drop non-ascii, spaces → `-`, lowercase, keep `a-z0-9-`.
 
 **Default status:** workflow → `idea` (park; flip to `active` to start — that adds the date prefix). knowledge → `active` (knowledge is consumable the moment it exists; that's why its default differs from workflow's).
 
+**`incident` extra contract (error library):**
+- **Dedup before you create.** An incident is an error-library entry — before authoring one, **first check it isn't already recorded**: grep the error text into `incidents/` and/or run `flightdeck_index.py <deck> --match-signature "<symptom>" [--sig-error-type <TYPE>]`. A fingerprint hit → **append a `## [Case N]` to the existing file instead of creating a new one** (see [protocol § Hit path](../preflight/protocol.md#hit-path--check-the-error-library-before-writing-a-new-incident)). Only create when there is no match.
+- **Fill the `## Signature` block after creating.** The incident scaffold ships a `## Signature` block — fill its **four keys and only those four** (`symptom` / `error_type` / `where` / `trigger`); this is a **hard boundary** (no severity / owner / component / … — adding a key needs its own spec). `symptom` is the human-readable / grep anchor (the real error string, may be multi-line); `error_type: —` is a first-class case for non-exception problems (UI / perf / data). The fingerprint is computed from it — the author never hand-writes a fingerprint.
+
 **After writing:** run `uv run <flightdeck-pkg>/scripts/flightdeck_index.py <deck>` to
 regenerate INDEX + cockpit. An `active` workflow artifact projects into cockpit `## 进行中`;
 an `idea` does not.

@@ -168,6 +168,11 @@ Recurrence rule: same incident happens again → **append `## [Case N]`** to exi
 
 `last_updated` must be bumped on each Case append or status flip (per the canonical field table).
 
+**Lifecycle (active → obsolete → revived):** an incident carries a `## Signature` block (grep + dedup anchor) and a `resolved_by` field. Its life:
+- **active** = a live error worth resurfacing; routes normally and is matched by `--match-signature`.
+- **obsolete (retirement)** = the root cause is permanently fixed. At landing, fill `resolved_by` (a commit SHA or test id) **and** flip `status: obsolete` as one deliberate act (landing prompts, never auto-flips). Obsolete leaves the active routing/INDEX but **stays on disk + grep-able + still matched** — it is the historical record *and* the regression tripwire. `obsolete` here = "fixed and retired", not "outdated/worthless".
+- **revived (regression)** = a later signature hit lands on an obsolete entry. On confirmed regression, landing flips it back to `active`, clears `resolved_by`, and adds a Case noting the regression; `recurrences` keeps accumulating (lifetime count, never reset). Full sweep wiring: [landing § Recurrence sweep wiring](../landing/SKILL.md#recurrence-sweep-wiring); semantics: [protocol § Incident error-library lifecycle](protocol.md#incident-error-library-lifecycle).
+
 ### `checklists/` — procedures (you execute)
 
 Authored **process / conventions you execute**: reusable checklists, conventions, and operational standards you *run through* more than once. (Process-type knowledge — contrast `docs/`, which is explanatory knowledge you *read to understand*.)

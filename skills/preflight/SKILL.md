@@ -27,6 +27,7 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
    - Read `flightdeck/docs/INDEX.md` **(top-level only)**. `docs/` may nest into area sub-folders; preflight reads only the **top-level INDEX** (each row = one area or doc entry with a one-line purpose + `last_updated`). Do NOT drill into area sub-folders or individual doc bodies — load those on demand when the task calls for it.
    - **Do NOT** check status legality or INDEX↔folder consistency — that is `walkaround` (Audits 1/5). preflight only surfaces *what exists*.
    - `references/` is deliberately out of the catalog (imported external material is browsed on purpose, not surfaced every preflight).
+   - `obsolete` knowledge (e.g. a root-fixed, retired incident) is **already absent from the catalog** — the INDEX `<!-- AUTO -->` region excludes it, so preflight reads no obsolete rows (it stays on disk + grep-able for regression detection, just out of active routing). No special handling needed here.
    - Do NOT drill into individual checklist/incident/doc files until a trigger matches at execution time (read folder INDEX only).
 
 4. **Passive git/version note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
