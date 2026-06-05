@@ -174,6 +174,8 @@ def folder_summary(folder):
     ]
     if folder.name == "specs":
         statuses = [s for s in statuses if s != "scrapped"]
+    if folder.name in KNOWLEDGE_KINDS:
+        statuses = [s for s in statuses if s != "obsolete"]
     total = len(statuses)
     if total == 0:
         return "0"

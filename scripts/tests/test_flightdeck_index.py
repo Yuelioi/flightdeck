@@ -914,5 +914,18 @@ class MatchSignatureCliTest(unittest.TestCase):
             self.assertIn("2026-06-05-a.md", buf.getvalue())
 
 
+class ObsoleteCountExcludeTest(unittest.TestCase):
+    def test_obsolete_excluded_from_knowledge_count(self):
+        from flightdeck_index import folder_summary
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "incidents"
+            folder.mkdir()
+            for n, s in [("a.md", "active"), ("b.md", "active"), ("c.md", "obsolete")]:
+                (folder / n).write_text(
+                    f"---\nstatus: {s}\nwhen_to_read: w\napplies_to: [x]\nlast_updated: 2026-06-05\n---\n# t\n",
+                    encoding="utf-8")
+            self.assertEqual(folder_summary(folder), "2 active")   # obsolete 不计
+
+
 if __name__ == "__main__":
     unittest.main()
