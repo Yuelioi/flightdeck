@@ -24,9 +24,10 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 3. **Catalog warm-up (priming, NOT audit).** Read the folder INDEX files so the session knows what routed knowledge exists — do NOT glob individual files or read per-file frontmatter, and do NOT audit them:
    - Read `flightdeck/checklists/INDEX.md` and `flightdeck/incidents/INDEX.md`. List each entry as **File + when_to_read (two columns only)** — drop `applies_to` / `status` (those live in the INDEX file; read on demand when a trigger matches). Append the footnote `(状态/合法性审计见 /flightdeck:walkaround)`.
+   - Read `flightdeck/docs/INDEX.md` **(top-level only)**. `docs/` may nest into area sub-folders; preflight reads only the **top-level INDEX** (each row = one area or doc entry with a one-line purpose + `last_updated`). Do NOT drill into area sub-folders or individual doc bodies — load those on demand when the task calls for it.
    - **Do NOT** check status legality or INDEX↔folder consistency — that is `walkaround` (Audits 1/5). preflight only surfaces *what exists*.
-   - `charts/` is deliberately out of the catalog (imported external material is browsed on purpose, not surfaced every preflight).
-   - Do NOT drill into individual checklist/incident bodies — only when a trigger matches at execution time.
+   - `references/` is deliberately out of the catalog (imported external material is browsed on purpose, not surfaced every preflight).
+   - Do NOT drill into individual checklist/incident/doc files until a trigger matches at execution time (read folder INDEX only).
 
 4. **Passive git/version note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
 
@@ -71,6 +72,11 @@ Routing catalog (know-what-exists — read on demand; status audit → /flightde
 |---|---|
 | incidents/parser-recursion.md | before designing a recursive parser |
 
+[Docs]
+| Area / File | 用途 | last_updated |
+|---|---|---|
+| docs/api-design/ | REST API 设计规范与决策记录 | 2026-05-20 |
+
 (状态/合法性审计见 /flightdeck:walkaround)
 
 下一步 (item #1): <item description>
@@ -78,7 +84,7 @@ Routing catalog (know-what-exists — read on demand; status audit → /flightde
 Preflight complete (read-only). → Say "go" to execute item #1.
 ```
 
-Omit any table group with no entries. If both folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line, and the Land-readiness line last.
+Omit any table group with no entries. If all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line, and the Land-readiness line last.
 
 ## Don't do
 
@@ -89,7 +95,7 @@ Omit any table group with no entries. If both folder INDEX files are absent or e
 - Don't auto-pick a fallback when `## 下一步` is empty — always ask.
 - Don't bump `Last updated` — entry doesn't modify cockpit.
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
-- Don't drill into individual checklist/incident files until a trigger matches at execution time (read folder INDEX only).
+- Don't drill into individual checklist/incident/doc files or area sub-folders until a trigger matches at execution time (read folder INDEX only).
 
 ## Protocol knowledge (load on demand)
 
