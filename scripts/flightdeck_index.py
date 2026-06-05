@@ -252,6 +252,48 @@ def _workflow_fms(deck):
                     yield parse_frontmatter(p.read_text(encoding="utf-8"))
 
 
+def _active_inbound_targets(deck):
+    """deck 内任何 status:active 工件经结构化边（implements:/superseded_by）指向的目标路径集。"""
+    deck = Path(deck)
+    targets = set()
+    for kind in ("specs", "plans") + tuple(sorted(KNOWLEDGE_KINDS)):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        for p in folder.rglob("*.md"):       # rglob：覆盖嵌套 area
+            if p.name == "INDEX.md":
+                continue
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+            if fm.get("status") != "active":
+                continue
+            for field in ("implements", "superseded_by"):
+                v = fm.get(field)
+                if v:
+                    targets.add(v.strip())
+    return targets
+
+
+def archivable_done(deck):
+    """无 active 入边指向的 done workflow 工件（specs/plans）——可安全归档，确定性、可复现。"""
+    deck = Path(deck)
+    blocked = _active_inbound_targets(deck)
+    result = []
+    for kind in ("specs", "plans"):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        for p in sorted(folder.glob("*.md")):
+            if p.name == "INDEX.md":
+                continue
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+            if fm.get("status") != "done":
+                continue
+            rel = f"{kind}/{p.name}"
+            if rel not in blocked:
+                result.append(rel)
+    return sorted(result)
+
+
 def _structural_signal(deck):
     """True if the deck shows any pre-model-v4 structural signal (version-agnostic)."""
     deck = Path(deck)

@@ -636,5 +636,34 @@ class SpecsScrappedGroupTest(unittest.TestCase):
             self.assertIn("2026-05-01-dead.md", block)
 
 
+class ArchivableDoneTest(unittest.TestCase):
+    def _deck(self, root):
+        deck = Path(root)
+        (deck / "specs").mkdir()
+        (deck / "plans").mkdir()
+        return deck
+
+    def test_done_spec_with_active_plan_implements_is_blocked(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "specs" / "2026-06-01-a.md").write_text("---\nstatus: done\nsummary: a\n---\n", encoding="utf-8")
+            (deck / "plans" / "2026-06-02-p.md").write_text(
+                "---\nstatus: active\nsummary: p\nimplements: specs/2026-06-01-a.md\n---\n", encoding="utf-8"
+            )
+            self.assertEqual(flightdeck_index.archivable_done(deck), [])
+
+    def test_done_spec_with_no_active_inbound_is_archivable(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "specs" / "2026-06-01-a.md").write_text("---\nstatus: done\nsummary: a\n---\n", encoding="utf-8")
+            (deck / "plans" / "2026-06-02-p.md").write_text(
+                "---\nstatus: done\nsummary: p\nimplements: specs/2026-06-01-a.md\n---\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                flightdeck_index.archivable_done(deck),
+                ["plans/2026-06-02-p.md", "specs/2026-06-01-a.md"],
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
