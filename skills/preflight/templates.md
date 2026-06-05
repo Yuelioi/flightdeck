@@ -93,6 +93,7 @@ last_updated: YYYY-MM-DD
 # superseded only: superseded_by: <path>
 # optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
 # incidents only: recurrences: 1   # auto-bumped at landing on a clear recurrence; renders to INDEX as `recur: N` when > 1
+# incidents only: resolved_by:     # empty = not yet root-fixed; fill commit SHA / test id = retirement basis (then flip status: obsolete)
 ---
 ```
 
@@ -180,28 +181,39 @@ Status values (by kind) + location semantics are canonical in [protocol § Statu
 
 ## incident-report body
 
+`/flightdeck:new incident` scaffolds this shape; fill the `<...>` placeholders. The `## Signature` block is **body, not frontmatter** — it stays out of the per-session routing face (preflight loads only INDEX rows), yet is grep-able and is what `flightdeck_index.py --match-signature` parses for deterministic recurrence dedup.
+
 ```markdown
 # <one-line topic>
 
-**Symptom**: How the user / test / build actually observed it. Error text verbatim.
+## Signature
+- symptom: `<error text verbatim / observable symptom>`   # grep anchor; key:value line (the script parses it)
+- error_type: <exception class / error code, or —>
+- where: <function / file / subsystem>
+- trigger: <what action / scenario provokes it>
 
-**Root cause** (FORBIDDEN: "forgot", "careless", "didn't notice" — must be a wrong assumption / wrong model / wrong process):
+## 症状/复现
+<how the user / test / build actually observed it; steps to reproduce>
+
+## 根因
+(FORBIDDEN: "forgot", "careless", "didn't notice" — must be a wrong assumption / wrong model / wrong process)
 I assumed X, but in reality Y.
 
-**Lesson**: The specific next-time action. Not "be careful". Concrete behavior or check.
+## 修法
+The specific next-time action. Not "be careful". Concrete behavior or check.
 
----
-
-## [Case 2]   ← Appended on recurrence. DO NOT create a new file.
-
-**Symptom**: ...
-**Root cause**: ...
-**Lesson**: ...
+## Cases
+- YYYY-MM-DD 首次          ← first line written at create time
+- YYYY-MM-DD 复发，<一句>   ← appended on recurrence; keep only the most recent N
 ```
 
 ### Rules
 
-- **One file per topic.** A recurrence appends `## [Case N]` (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (ambiguous → asks first); `recurrences` renders into the INDEX row as `recur: N`, so the count + the `[Case N]` dates (the promotion-gate inputs) are visible without opening the file.
+- **`## Signature` is a hard 4-key schema — only `symptom` / `error_type` / `where` / `trigger`.** It exists *only* for hit-rate (grep + fingerprint); resist growing it into a second hidden frontmatter. Do not add keys for environment / version discrimination (e.g. Pydantic v1 vs v2 same-symptom-different-cause) — fold that into `trigger` or the body. Deliberate trade-off: same symptom across versions may share a fingerprint, disambiguated by `trigger` / the AI fuzzy layer.
+- **`symptom`** holds the actual string AI/grep will see (error text verbatim / exception class), not an abstract narrative title. May be multi-line (indent or `|` for a stack trace). It is the human-read / grep anchor; the fingerprint is **computed** from it — authors never hand-write a fingerprint.
+- **`error_type: —` is a first-class case, not a degenerate one.** UI misalignment / perf regression / deadlock / data corruption have no natural error_type; the incident reduces to `symptom + where`, as expected.
+- **Cases:** write the first line **at create time**. `recurrences` (frontmatter) is the **authoritative lifetime count**; the `## Cases` list keeps only the **most recent N lines** (order of single digits ~ a dozen) — so line count ≤ `recurrences`, and `recurrences` wins when they differ.
+- **One file per topic.** A recurrence appends a Case line (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (deterministic `--match-signature` first; ambiguous → asks); `recurrences` renders into the INDEX row as `recur: N`, so the count is visible without opening the file. On a regression (a `status: obsolete` incident recurring), landing revives it: flip back to `active`, clear `resolved_by`, mark the Case "回归，原根治失效", and keep accumulating `recurrences` (never reset).
 - **Forbidden root causes**: "forgot", "careless", "didn't notice", "rushed". These hide the real model error.
 - **Status field**:
   - `active` — still applies to the current codebase
