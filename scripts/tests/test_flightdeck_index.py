@@ -693,5 +693,40 @@ class ArchivableCliTest(unittest.TestCase):
             self.assertFalse((deck / "INDEX.md").exists())
 
 
+class NestedIndexTest(unittest.TestCase):
+    def test_top_index_lists_areas_with_purpose_and_date(self):
+        with tempfile.TemporaryDirectory() as d:
+            docs = Path(d) / "docs"
+            (docs / "runtime").mkdir(parents=True)
+            (docs / "runtime" / "INDEX.md").write_text(
+                "---\npurpose: 运行时子系统\nlast_updated: 2026-06-05\n---\n"
+                "# docs/runtime\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8"
+            )
+            (docs / "runtime" / "loop.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
+                encoding="utf-8",
+            )
+            (docs / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            top = flightdeck_index.regen_folder_index(docs)
+            self.assertIn("[runtime/](runtime/INDEX.md)", top)
+            self.assertIn("运行时子系统", top)
+            self.assertIn("2026-06-05", top)
+            area = flightdeck_index.regen_folder_index(docs / "runtime")
+            self.assertIn("loop.md", area)
+
+    def test_flat_docs_without_subdirs_behaves_flat(self):
+        with tempfile.TemporaryDirectory() as d:
+            docs = Path(d) / "docs"
+            docs.mkdir()
+            (docs / "arch.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
+                encoding="utf-8",
+            )
+            (docs / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            block = flightdeck_index.regen_folder_index(docs)
+            self.assertIn("arch.md", block)
+            self.assertNotIn("INDEX.md](", block)
+
+
 if __name__ == "__main__":
     unittest.main()

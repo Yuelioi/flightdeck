@@ -141,6 +141,15 @@ def regen_root_index(deck):
     return f"<!-- AUTO:root -->\n{body}\n{AUTO_END}"
 
 
+def _area_row(area_dir):
+    """顶层 INDEX 里一个 area 的行：链接 + 用途 + last_updated（取 area/INDEX.md frontmatter）。"""
+    idx = area_dir / "INDEX.md"
+    fm = parse_frontmatter(idx.read_text(encoding="utf-8")) if idx.is_file() else {}
+    purpose = fm.get("purpose", "⚠ purpose 缺失")
+    updated = fm.get("last_updated", "—")
+    return f"- [{area_dir.name}/]({area_dir.name}/INDEX.md) {DASH} {purpose} {DASH} last_updated: {updated}"
+
+
 def regen_folder_index(folder):
     """Regenerate the `<!-- AUTO:<kind> -->` block for one deck folder.
 
@@ -153,18 +162,28 @@ def regen_folder_index(folder):
     alphabetical) and `### 进行中·完成（active·done）` (active/done, by filename
     date descending). `scrapped` files stay on disk but never appear (they must
     not pollute the to-start pool, and the root count excludes them too).
+
+    Nestable knowledge folders (NESTABLE_KINDS) with subdirectories produce an
+    INDEX-of-INDEXes: one area row per subdirectory (purpose + last_updated from
+    the area's INDEX.md frontmatter), followed by any loose .md files at the top
+    level. Without subdirectories, falls back to the flat behavior.
     """
     folder = Path(folder)
     kind = folder.name
-    names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
     if kind == "specs":
+        names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
         return f"<!-- AUTO:{kind} -->\n{_specs_grouped_body(folder, names)}\n{AUTO_END}"
-    rows = [
-        format_row(kind, name, parse_frontmatter((folder / name).read_text(encoding="utf-8")))
-        for name in names
-    ]
-    body = "\n".join(rows)
-    return f"<!-- AUTO:{kind} -->\n{body}\n{AUTO_END}"
+    subdirs = sorted((d for d in folder.iterdir() if d.is_dir()), key=lambda p: p.name)
+    if kind in NESTABLE_KINDS and subdirs:
+        rows = [_area_row(d) for d in subdirs]
+        row_kind = kind if kind in KNOWLEDGE_KINDS else "checklists"
+        top_files = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+        rows += [format_row(row_kind, n, parse_frontmatter((folder / n).read_text(encoding="utf-8"))) for n in top_files]
+        return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
+    names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+    row_kind = kind if kind in (SUMMARY_KINDS | KNOWLEDGE_KINDS) else "checklists"
+    rows = [format_row(row_kind, name, parse_frontmatter((folder / name).read_text(encoding="utf-8"))) for name in names]
+    return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
 
 
 def _specs_grouped_body(folder, names):
@@ -368,6 +387,10 @@ def _index_targets(deck):
         folder = deck / name
         if folder.is_dir():
             yield name, folder / "INDEX.md", regen_folder_index(folder)
+            if name in NESTABLE_KINDS:
+                for area in sorted(d for d in folder.iterdir() if d.is_dir()):
+                    if (area / "INDEX.md").is_file() or any(area.glob("*.md")):
+                        yield f"{name}/{area.name}", area / "INDEX.md", regen_folder_index(area)
     yield "root", deck / "INDEX.md", regen_root_index(deck)
     cockpit = deck / "cockpit.md"
     if cockpit.is_file() and "<!-- AUTO:inprogress -->" in cockpit.read_text(encoding="utf-8"):
