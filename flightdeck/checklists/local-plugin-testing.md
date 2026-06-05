@@ -1,8 +1,8 @@
 ---
 status: active
-last_updated: 2026-06-03
+last_updated: 2026-06-05
 when_to_read: before locally testing an unpublished flightdeck build / syncing the working tree into the plugin cache
-applies_to: [local-test, dogfood, plugin-cache, robocopy, .in_use, CLAUDE_CONFIG_DIR]
+applies_to: [local-test, dogfood, plugin-cache, robocopy, .in_use, CLAUDE_CONFIG_DIR, build-stamp, .current]
 ---
 
 # Local plugin testing checklist
@@ -26,6 +26,10 @@ When dogfooding an **unpublished** flightdeck build (e.g. a `3.x` branch) before
 $src = "<flightdeck repo root>"   # the working tree you're testing
 $dst = "$env:CLAUDE_CONFIG_DIR\plugins\cache\flightdeck-marketplace\flightdeck\<published-version>"
 
+# Stamp the build FIRST, so /MIR carries the fresh .current into the cache. This is the
+# only place --write runs — see "Build-stamp anchor" below.
+uv run "$src\scripts\build_stamp.py" --write   # writes $src\.current = hash(build inputs)
+
 robocopy $src $dst /MIR /XD .git tmp .vscode /XF .in_use   # /MIR mirrors deletions too
 # robocopy exit code 0–7 = success; >=8 = failure.
 
@@ -44,8 +48,35 @@ $m.Attributes = $m.Attributes -bor [System.IO.FileAttributes]::Hidden
 - **Restart the session.** The running session already loaded the *old* skills into context; the synced build only takes effect in a **new** Claude Code session.
 - **Never run `/plugin update` or a marketplace sync while testing.** It re-pulls the published version from GitHub and clobbers the local build. To restore the clean published build, reinstall via `/plugin`.
 
+## Build-stamp anchor (`.current` — "is the cache the latest dev build?")
+
+Inside a dogfood session you can't see whether the loaded cache reflects your latest edits.
+`.current` (repo root, **git-ignored**) holds a short content hash over the **plugin build inputs**
+(`skills/ scripts/ scaffolds/ adapters/`, the `*-plugin/` manifests, `gemini-extension.json`,
+`AGENTS.md`/`GEMINI.md`/`CLAUDE.md`) — **not** the `flightdeck/` deck, `docs/`, or `tmp/`.
+
+> **Why git-ignored, never committed.** `.current` measures "*this* machine's working tree ==
+> the build *this* machine last synced into *its* cache." That's per-machine local state. A
+> committed copy lies on every other clone: a fresh checkout's working tree matches the
+> committed hash → `--check` says `current`, but that clone never synced — its loaded plugin is
+> the published marketplace build. Ignored instead: an un-synced clone has no `.current`, so
+> `--check` correctly returns `unknown — run --write during sync` (exit 2). The tooling
+> (`build_stamp.py`, this checklist) is committed; only the stamp value is local.
+
+- `--write` recomputes and writes `.current`. It runs **only** as the first sync step above
+  (before robocopy), so the mirror carries the fresh stamp into the cache. Never run `--write`
+  without then syncing, or `.current` will claim "current" while the cache is stale.
+- `--check` recomputes the live hash and compares: `current` (exit 0) / `stale` (exit 1) /
+  no `.current` (exit 2). Any edit to a build input after the last sync makes it report `stale`.
+
+Because `--write` only fires at sync, detection is automatic — no manual version bump. A
+`git checkout`/`pull` that renormalizes line endings can report a spurious `stale`; that errs
+toward re-syncing (never false-`current`), so it's safe.
+
 ## Verification
 
+- Cache matches working tree: `uv run scripts\build_stamp.py --check` → `current`. (After any
+  later build-input edit it flips to `stale` — that's the signal to re-sync.)
 - Changed files landed: `Get-FileHash $src\skills\preflight\SKILL.md` equals `Get-FileHash $dst\skills\preflight\SKILL.md`.
 - Deletions propagated: a file removed in the repo is absent under `$dst`.
 - `.in_use` exists and is a directory: `(Get-Item "$dst\.in_use" -Force).PSIsContainer` → `True`.

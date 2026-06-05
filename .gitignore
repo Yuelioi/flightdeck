@@ -15,3 +15,7 @@ flightdeck/references/
 
 # Session scratch (flightdeck 1.2: ephemeral working notes live here)
 tmp/
+
+# Build-stamp anchor: per-machine local sync state (scripts/build_stamp.py).
+# Records THIS machine's last cache sync — meaningless/misleading if shared. Never commit.
+.current
