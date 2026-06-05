@@ -261,7 +261,7 @@ I assumed X, but in reality Y.
 ### Rules
 
 - An idea-stage spec (`status: idea`) is a one-liner — no date prefix, no `implements:`. Starting it = flip `status: idea → active` (auto-adds the `YYYY-MM-DD-` prefix); a fuller design body grows in once active.
-- If an idea has been sitting > 6 months and no trigger has fired, consider `status: scrapped` (stays in `specs/`, excluded from INDEX). An idea that never finds its moment is not high-signal.
+- If an idea has been sitting > 6 months and no trigger has fired, consider `status: scrapped` (stays in `specs/`, listed under the `### 已否决（scrapped）` group of `specs/INDEX` — visible but off the to-start pool). An idea that never finds its moment is not high-signal.
 
 ---
 

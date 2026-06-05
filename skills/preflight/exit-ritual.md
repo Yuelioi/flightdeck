@@ -215,7 +215,7 @@ Walkaround is responsible for the **full-consistency check** — it regenerates 
 
 Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (a further token saving, complementing read-INDEX-first). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
 
-- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region by status (idea / active·done) and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region into three sections: `待启动（idea）` / `进行中·完成（active·done）` / `已否决（scrapped）` — scrapped is **visible** in its own group (not skipped), but excluded from the to-start pool and from root INDEX counts — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 - **Knowledge folders** (`incidents/` `checklists/` `docs/` `references/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`references/` rows show project/file count, not per-file status; `docs/` rows read `<status> — when_to_read: <…> — applies_to: <…>` like the other authored knowledge folders.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
@@ -276,6 +276,8 @@ Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifact
 5. When no-git (deck root has no `.git`, or a House Rule says so), append one line per landing to `archive/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
 
 **There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
+
+**Landing failure does not roll back `done`.** If landing fails mid-run, the artifact stays `done` at its current in-place location (done-but-unlanded); the next landing sweep picks it up. Never revert `status: done` on a landing failure — `done` asserts user approval, not a system-check result.
 
 ## Land-readiness check
 
