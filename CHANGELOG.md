@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`docs/` 文件夹** — 自撰常驻技术资料（区别于 `references/` 导入的外部材料）；knowledge 可按 area 嵌套形成 INDEX-of-INDEXes，撑大型项目。
 - **`scrapped` 在 `specs/INDEX` 单列 `### 已否决`** — 已否决 spec 不消失，可见留存供未来参考，避免重复讨论。
+- **incident 错误库生命周期** — 可 grep 的 `## Signature`（4 键放正文，preflight 不读 → 零路由 token）+ 确定性签名指纹去重（`--match-signature`，归一化剥易变 token、保语义键）+ obsolete 退役出路由（退出 INDEX/计数但留盘、仍进匹配）+ 回归复活（landing gated sweep 命中 obsolete 先确认再翻 active）。
 
 ### Changed
 - **主流命名铁律**：`charts/` → `references/`，`landed/` → `archive/`。航空隐喻只留指令/仪式/cockpit，数据文件夹改主流名，降低首次读者认知摩擦。
