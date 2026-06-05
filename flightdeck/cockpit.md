@@ -1,7 +1,7 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-06 by 月离 (本会话**清空 specs/ 积压**——4 spec 全做完整簇归档进 `archive/`：①**structural-edit-guard** `flightdeck_lint` 加 `audit_required_structure`（cockpit 必备块 `## 进行中`/AUTO 锚点/`## 下一步`/`## Hanging tasks` 缺→CRITICAL，抓多行 Edit 静默吞结构块）；②**scrapped 退役** 取消 `scrapped` status 值，否决=直接删文件（git 留史+commit body 记因），清 `STATUS_ORDER`/`WORKFLOW_STATUSES`/`folder_summary`/`_specs_grouped_body`/`layout_verdict` 特例 + ~35 处文档对齐 + 连带删过时 `docs/lifecycle.md` & 修 3 README，顺带消灭"计数≠可见行"+"文档↔代码漂移"俩 bug；③**status-spec-co-advance** landing 对账 `spec_advance_candidates`+CLI `--advance-candidates`（plan 全 done 而 spec 滞后→confirm-gated offer 推进）；④**incident-recurrence** 翻 done。另删 v1x backlog 池。**144 tests 绿**。改了 build input（脚本/skill）→ 下会话 reload 后 live 复验。)
-**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。本会话清空 specs/ 积压（4 spec 全做完归档）；specs/ 现空、无 active。
+**Last updated**: 2026-06-06 by 月离 (本会话：①探讨大型项目 docs 组织 → `folder-semantics.md` 加「知识规模化组织」节（四形态/golden-path/横切列/map 生成+核对/防漂移 + 3 条 anti-pattern，**build 输入**）；②探讨并**放弃** preset-library 预设库（收益低/维护要为通用性背书/用户心智负担大——见 memory）；③**锁定核心卖点=可恢复上下文**（随时可关对话、下次 preflight 干净接手、上下文不丢），落成 `execution-checkpoint` spec（idea，停机位）。改了 build input（folder-semantics）→ resync+reload 后 live 复验。)
+**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点锁定=随时可关对话、下次 preflight 干净接手、上下文不丢**；围绕它设计 `execution-checkpoint`（plan/task 边界看板同步）。specs/ 现 1 idea。
 
 ## 进行中
 
@@ -11,8 +11,8 @@
 
 ## 下一步
 
-- 下会话 **reload 后 live 复验**本会话脚本/skill 改动：structural-edit-guard（lint `required-structure` 抓 cockpit 缺块）、`--advance-candidates`（landing co-advance 对账）、scrapped 退役（遗留 `status: scrapped` 被 lint 标 illegal、`/flightdeck:new --status` 无 scrapped 选项）。
-- specs/ 已清空；新工作按需起 idea。
+- `execution-checkpoint`（idea，停机位）已成型——决定：flip→active 走 writing-plans，或先聊定 plan 开口（形态＝landing 子路径 vs 文档化 self-invoke 行为、checkpoint 提不提交）。
+- 本会话改了 `folder-semantics.md`（build 输入）→ resync + reload 后 live 复验那节文档指南。
 
 ## Hanging tasks
 

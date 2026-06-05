@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。本会话清空 specs/ 积压（4 spec 全做完归档）；specs/ 现空、无 active。
+flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点锁定=随时可关对话、下次 preflight 干净接手、上下文不丢**；围绕它设计 `execution-checkpoint`（plan/task 边界看板同步）。specs/ 现 1 idea。
 
 ## 进行中
 
@@ -13,8 +13,8 @@ None.
 
 ## 下一步
 
-- 下会话 **reload 后 live 复验**本会话脚本/skill 改动：structural-edit-guard（lint `required-structure` 抓 cockpit 缺块）、`--advance-candidates`（landing co-advance 对账）、scrapped 退役（遗留 `status: scrapped` 被 lint 标 illegal、`/flightdeck:new --status` 无 scrapped 选项）。
-- specs/ 已清空；新工作按需起 idea。
+- `execution-checkpoint`（idea，停机位）已成型——决定：flip→active 走 writing-plans，或先聊定 plan 开口（形态＝landing 子路径 vs 文档化 self-invoke 行为、checkpoint 提不提交）。
+- 本会话改了 `folder-semantics.md`（build 输入）→ resync + reload 后 live 复验那节文档指南。
 
 ## Hanging tasks
 
