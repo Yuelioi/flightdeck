@@ -46,8 +46,35 @@ def _frontmatter(kind, status, date, summary, implements, when_to_read, applies_
         lines.append(f"when_to_read: {when_to_read}")
         lines.append(f"applies_to: [{', '.join(applies_to)}]")
         lines.append(f"last_updated: {date}")
+        if kind == "incident":
+            lines.append("resolved_by:")     # 空=未根治；填 commit/test = 退役依据
     lines.append("---")
     return "\n".join(lines)
+
+
+_INCIDENT_BODY = """# {title}
+
+## Signature
+- symptom: `<报错原文 / 可观测症状>`
+- error_type: <异常类型/错误码 或 —>
+- where: <函数/文件/子系统>
+- trigger: <什么动作/场景引发>
+
+## 症状/复现
+
+## 根因
+
+## 修法
+
+## Cases
+- {date_placeholder} 首次
+"""
+
+
+def _body_scaffold(kind, title):
+    if kind == "incident":
+        return _INCIDENT_BODY.format(title=title, date_placeholder="YYYY-MM-DD")
+    return f"# {title}\n"
 
 
 def new(deck, kind, slug, title, status=None, summary="", implements=None,
@@ -79,7 +106,8 @@ def new(deck, kind, slug, title, status=None, summary="", implements=None,
         raise FileExistsError(f"artifact already exists: {path}")
 
     fm = _frontmatter(kind, status, date, summary, implements, when_to_read, applies_to)
-    path.write_text(f"{fm}\n\n# {title}\n", encoding="utf-8")
+    body = _body_scaffold(kind, title)
+    path.write_text(f"{fm}\n\n{body}", encoding="utf-8")
 
     if regen:
         flightdeck_index.main([str(deck)])

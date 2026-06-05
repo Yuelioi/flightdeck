@@ -176,5 +176,25 @@ class SkillContractConsistencyTest(unittest.TestCase):
         self.assertEqual(self._skill_table(), KIND_FOLDER)
 
 
+class IncidentSignatureScaffoldTest(unittest.TestCase):
+    def test_incident_body_has_signature_and_resolved_by(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            path = new(deck, "incident", slug="x", title="X",
+                       when_to_read="w", applies_to=["a"], regen=False)
+            text = path.read_text(encoding="utf-8")
+            self.assertIn("resolved_by:", text)        # frontmatter 字段（空）
+            self.assertIn("## Signature", text)         # 正文 scaffold
+            self.assertIn("- symptom:", text)
+            self.assertIn("## Cases", text)
+
+    def test_non_incident_unchanged(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            path = new(deck, "checklist", slug="y", title="Y",
+                       when_to_read="w", applies_to=["a"], regen=False)
+            self.assertNotIn("## Signature", path.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()
