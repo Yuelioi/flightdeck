@@ -40,9 +40,10 @@ flightdeck/
 ├── plans/              # 分步实施计划
 ├── incidents/          # 教训记录（根因，不许"忘了"）
 ├── checklists/         # 可复用流程
-├── charts/             # 导入的外部材料（RFC、竞品代码）
+├── references/         # 导入的外部材料（RFC、竞品代码）
 ├── debriefs/           # 外部 review 反馈（原文 + 处置）
-└── landed/             # 完成工作的归档
+├── docs/               # 自撰常驻技术资料
+└── archive/            # 完成工作的归档
 ```
 
 ### cockpit.md —— 唯一必读文件
@@ -140,7 +141,7 @@ version: <release>       # 唯一的结构化字段
 ## House rules
 
 ### Project conventions
-# deck 局部约定，如 "specs 用中文"、"不用 charts/"
+# deck 局部约定，如 "specs 用中文"、"不用 references/"
 
 ### Autonomy overrides
 # 行为覆盖；省略 = 默认（本地 commit 自动、push 才先问；仪式都可自调）
@@ -161,7 +162,7 @@ version: <release>       # 唯一的结构化字段
 
 ## 为什么需要它
 
-多数"AI memory"方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会影响未来决策的）、**文件夹=类型 + status 生命周期**（工作推进、再归档到 `landed/`）、**INDEX 优先读**（大项目省 token）、以及会话收尾时分类新知识的**landing 仪式**。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
+多数"AI memory"方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会影响未来决策的）、**文件夹=类型 + status 生命周期**（工作推进、再归档到 `archive/`）、**INDEX 优先读**（大项目省 token）、以及会话收尾时分类新知识的**landing 仪式**。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 

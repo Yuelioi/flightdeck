@@ -40,9 +40,10 @@ flightdeck/
 ├── plans/              # step-by-step implementation plans
 ├── incidents/          # lessons learned (root-cause, no "forgot")
 ├── checklists/         # repeatable procedures
-├── charts/             # imported external material (RFCs, competitor code)
+├── references/         # imported external material (RFCs, competitor code)
 ├── debriefs/           # external review feedback (raw + disposition)
-└── landed/             # archive of completed work
+├── docs/               # authored standing technical reference
+└── archive/            # archive of completed work
 ```
 
 ### cockpit.md — the one must-read file
@@ -140,7 +141,7 @@ version: <release>       # the only structured field
 ## House rules
 
 ### Project conventions
-# deck-local conventions, e.g. "specs in Chinese", "don't use charts/"
+# deck-local conventions, e.g. "specs in Chinese", "don't use references/"
 
 ### Autonomy overrides
 # behavioral overrides; omit = defaults (local commit auto, push asks; rituals self-invoke)
@@ -161,7 +162,7 @@ Override any of these with a one-line standard phrase under `### Autonomy overri
 
 ## Why it exists
 
-Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes future decisions), a **folder=kind + status lifecycle** (work advances, then archives to `landed/`), **INDEX-first reads** (token-cheap on large projects), and a **landing ritual** that classifies new knowledge at session end. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
+Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes future decisions), a **folder=kind + status lifecycle** (work advances, then archives to `archive/`), **INDEX-first reads** (token-cheap on large projects), and a **landing ritual** that classifies new knowledge at session end. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
 
 > ✨ Semantic clarity outranks thematic consistency — the aviation metaphor is used only where it sharpens intent, never as a theme.
 

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] — Unreleased
+
+自治面收敛 + 主流命名铁律 + 确定性归档判据。**Breaking**：存量 deck 需迁移，见 [MIGRATION.md](MIGRATION.md)。
+
+### Added
+- **`docs/` 文件夹** — 自撰常驻技术资料（区别于 `references/` 导入的外部材料）；knowledge 可按 area 嵌套形成 INDEX-of-INDEXes，撑大型项目。
+- **`scrapped` 在 `specs/INDEX` 单列 `### 已否决`** — 已否决 spec 不消失，可见留存供未来参考，避免重复讨论。
+
+### Changed
+- **主流命名铁律**：`charts/` → `references/`，`landed/` → `archive/`。航空隐喻只留指令/仪式/cockpit，数据文件夹改主流名，降低首次读者认知摩擦。
+- **status⟂location**：`done ≠ archived`。归档判据确定性：无 active 入边（`implements` / `superseded_by`），通过 `--archivable` 检查，才进 `archive/`；`done` 仅表示工作完成，不触发自动归档。
+- **done 翻转 end-of-turn 防抖接力 landing**：出厂默认 `status` 将 `done` 检测到后，在当轮结束时自动接力触发 landing（push 先问）；House Rule `landing: nudge on done, don't auto-run` 可将行为降级为仅提示。
+
+### Breaking
+- `charts/` → `references/`，`landed/` → `archive/`：存量 deck 需重命名文件夹及更新内部路径引用。迁移指引见 [MIGRATION.md](MIGRATION.md)。
+
 ## [2.3.0] — 2026-06-03
 
 Autonomy release: new decks ship full-auto, a `commit_mode` landing policy, and a more robust Land Routine. Additive and backward-compatible — existing decks keep their current behavior and `version` silently advances 2.2 → 2.3 on the next `preflight` (no migration).
