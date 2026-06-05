@@ -773,5 +773,22 @@ class MainMissingAreaIndexTest(unittest.TestCase):
             self.assertFalse((area / "INDEX.md").is_file())  # --check 不写
 
 
+class CockpitProjectionRobustnessTest(unittest.TestCase):
+    """regen_cockpit_inprogress must not KeyError on an active workflow file
+    missing `summary` — it renders the same sentinel format_row uses."""
+
+    def test_active_spec_missing_summary_renders_sentinel_not_keyerror(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "specs").mkdir()
+            (deck / "specs" / "2026-06-05-no-summary.md").write_text(
+                "---\nstatus: active\nlast_updated: 2026-06-05\n---\n# No summary\n",
+                encoding="utf-8",
+            )
+            block = regen_cockpit_inprogress(deck)   # 不应抛 KeyError
+            self.assertIn("2026-06-05-no-summary.md", block)
+            self.assertIn("summary 缺失", block)
+
+
 if __name__ == "__main__":
     unittest.main()

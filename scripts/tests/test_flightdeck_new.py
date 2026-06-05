@@ -5,7 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from flightdeck_new import new
+import re
+
+from flightdeck_new import new, KIND_FOLDER
 import flightdeck_index
 
 
@@ -155,6 +157,23 @@ class NewRegenTest(unittest.TestCase):
             new(deck, "spec", slug="demo", title="Demo",
                 status="active", summary="demo gist", date="2026-06-04", regen=True)
             self.assertEqual(flightdeck_index.index_drift(deck), [])
+
+
+class SkillContractConsistencyTest(unittest.TestCase):
+    """skills/new/SKILL.md is the authoring contract's prose face; its
+    `kind → folder` table must not drift from flightdeck_new.KIND_FOLDER.
+    (2026-06-05: it had — `chart` showed `charts/`, `doc` was missing.)"""
+
+    def _skill_table(self):
+        skill = (Path(__file__).resolve().parents[2] / "skills" / "new" / "SKILL.md")
+        text = skill.read_text(encoding="utf-8")
+        # rows shaped `| <kind> | `<folder>/` |` — backtick on the folder cell
+        # excludes the header (`| kind | folder |`) and separator (`|---|---|`).
+        pairs = re.findall(r"^\|\s*([a-z0-9-]+)\s*\|\s*`([a-z0-9/]+?)/?`\s*\|", text, re.M)
+        return {kind: folder for kind, folder in pairs}
+
+    def test_skill_kind_folder_table_matches_script(self):
+        self.assertEqual(self._skill_table(), KIND_FOLDER)
 
 
 if __name__ == "__main__":

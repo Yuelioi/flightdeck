@@ -222,7 +222,7 @@ def regen_cockpit_inprogress(deck):
             fm = parse_frontmatter((folder / name).read_text(encoding="utf-8"))
             if fm.get("status") != "active":
                 continue
-            row = f"- [{name}]({kind}/{name}) {DASH} {fm['summary']}"
+            row = f"- [{name}]({kind}/{name}) {DASH} {fm.get('summary', '⚠ summary 缺失')}"
             if fm.get("note"):
                 row += f" {DASH} [note: {fm['note']}]"
             rows.append(row)
