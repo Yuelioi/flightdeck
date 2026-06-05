@@ -263,7 +263,7 @@ idea →(flip one field)→ active → done   →(land = move to archive/)
                                   (rejected = delete the file)
 ```
 
-A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state.
+A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## 下一步` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
@@ -282,10 +282,12 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 | Ritual | Role | Writes? | Cockpit 80-line trim | INDEX | Deep per-file audit |
 | --- | --- | --- | --- | --- | --- |
 | `preflight` | read-only takeover at session start | no (reads layout verdict, reports only) — deckless redirects to /flightdeck:launch | reads only — passive note on git/layout drift | reads folder INDEX as catalog | no — audits belong to walkaround |
-| `landing` | write the session's outcome | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
+| `landing` | write the session's outcome (full mode); board-sync only (checkpoint mode at task boundaries) | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
 | `walkaround` | integrity audit on demand | version bump/migrate only (**sole version writer**); else proposes fixes, never auto-applies | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
 
 The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
+
+Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's Step-4 board-sync and writes nothing else (no INDEX, no archive, no commit). `preflight` stays read-only; checkpoint never runs at entry.
 
 ## Write gate
 
