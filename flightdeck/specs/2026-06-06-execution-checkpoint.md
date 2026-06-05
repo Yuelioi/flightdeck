@@ -1,6 +1,7 @@
 ---
-status: idea
+status: active
 summary: plan/task 边界自动看板同步（cockpit 下一步 + plan 进度落盘，commit 不强求），让用户随时可关对话、下次 preflight 干净接手、上下文不丢；轻量 checkpoint = 完整 landing 的子集
+last_updated: 2026-06-06
 ---
 
 # 执行检查点：task 边界看板同步（随时可关、干净接手）
@@ -64,10 +65,14 @@ flightdeck 现在**只有完整 landing 一种状态落盘点**，且它只在**
 - **倾向**：checkpoint 不是新的用户 skill（用户不主动调用它，它是自动行为）。落成**文档化的 self-invoke 行为**，或在现有 `landing` skill 里加一条 **checkpoint 轻量路径**（"task 边界 → 只同步看板、不走收尾重活"）。
 - **不做**：新的 `/flightdeck:checkpoint` 用户命令（除非真有手动触发需求）。
 
-## 待 plan 细化的开口
+## 已定方向（2026-06-06，写 plan 前拍板）
 
-- **形态**：文档化 self-invoke 行为 vs `landing` skill 的 checkpoint 子路径（倾向后者，复用其看板同步逻辑）。
-- **plan 的 task 进度表示法**：plan 文件用 checkbox 勾，还是一个"当前 task"指针？preflight / cockpit `## 下一步` 怎么引它。
-- **checkpoint 到底提不提交**：默认纯看板落盘不提交（用户"虽然没提交"的原话）；还是可逆→自动地顺手提交?需定默认，避免噪声 commit 与 durability 的取舍。
-- **self-invoke 触发措辞**：在哪个 skill 的哪一步写明"task 结束 → checkpoint"。
-- **与现有 landing 的代码/逻辑复用**：checkpoint 的看板同步应是 landing 看板同步那段的同一实现，避免两套漂移。
+- **形态** → **`landing` skill 的 checkpoint 子路径**：landing 加一条「task 边界 → 只同步看板、不走收尾重活」的轻量 mode，复用看板同步同一实现，避免两套漂移。（不做独立 `/flightdeck:checkpoint` 用户命令。）
+- **进度表示** → **plan 文件用「当前 task」指针**（plan 正文 `## Progress` 段 `current: <task>`，非 frontmatter）；cockpit `## 下一步` 直接引 `current`。不用 checkbox。
+- **提不提交** → **默认纯看板落盘、不提交**：checkpoint 只把 cockpit/plan 写到磁盘，preflight 读文件即干净接手；commit/durability 留给 deliberate 的 landing 或里程碑，避免噪声 commit。
+
+## 落地范围（落进 plan）
+
+- **canonical 定义** 写在 `skills/preflight/exit-ritual.md`（textbook 家），landing SKILL.md 引它。
+- **self-invoke 触发**：plan / plan-task 结束 → AI 自调 landing 的 checkpoint 子路径（不是 hook，契合 `why-no-hooks`）；琐碎小改不触发。
+- **`## 进行中` 不变**（仍 AUTO；plan 还 active），脚本层 `flightdeck_index.py` **零改动**——`current:` 指针只活在 plan 正文，cockpit 下一步是 AI 手写引用。
