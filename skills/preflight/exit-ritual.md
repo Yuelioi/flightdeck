@@ -249,15 +249,31 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 **`## 进行中` is AUTO-derived, not hand-written.** Regenerate its `<!-- AUTO:inprogress -->` region from every `status: active` spec/plan (same mechanism + row format as INDEX; a file's `note:` appends `[note: …]`). The `status` skill regenerates it on a status flip; landing regenerates it here. A hand edit is overwritten on the next regen. This is what makes cockpit a **status projection** of the active set — an artifact is in cockpit iff it is `active`, so orphans are structurally impossible.
 
-**`## 下一步` is auto-written by landing** (and on `idea→active` / a completed milestone). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
+**`## 下一步` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
 
 **`Active focus` vs `## 下一步` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## 下一步` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
 
 **`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests.
 
-**When to update mid-session:** after any commit that changes user-perceivable state, refresh `## 下一步` before starting the next task — don't wait for landing.
+**When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## 下一步` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 
 **Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` / `archive/HISTORY.md`, never cockpit.
+
+## Checkpoint — lightweight board-sync subpath
+
+A **checkpoint** is the cheapest possible status-write: it keeps the persisted board (`cockpit.md` + the active plan file) equal to *actual* progress, so a user can close the conversation at any plan-task boundary and the next `/flightdeck:preflight` resumes on a true picture — no lost context. It is **a strict subset of landing**: landing = checkpoint + the wrap-up heavy lifting (knowledge-classify, INDEX regen, archive, smoke-check, commit).
+
+**Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (stays inside [docs/why-no-hooks.md](../../docs/why-no-hooks.md)).
+
+**Action — exactly two board writes, then stop:**
+1. Refresh cockpit `## 下一步` to the next concrete single action (the next task).
+2. Advance the active plan's `## Progress` `current:` pointer to the next task.
+
+Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge · regen any INDEX · archive a `done` item · run the smoke-check · bump `Last updated` for a non-milestone task · **commit**.
+
+**Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
+
+**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's Step 4 uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs Step 4's board-sync and skips Steps 1–3 and 5–7 (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full-vs-checkpoint)).
 
 ## Land Routine
 
