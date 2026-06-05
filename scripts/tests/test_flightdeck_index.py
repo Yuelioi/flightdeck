@@ -828,5 +828,29 @@ class SignatureFingerprintTest(unittest.TestCase):
         self.assertNotIn("where", inspect.signature(signature_fingerprint).parameters)
 
 
+class ParseSignatureTest(unittest.TestCase):
+    SIG = (
+        "---\nstatus: active\n---\n# t\n\n"
+        "## Signature\n"
+        "- symptom: `KeyError: 'summary'`\n"
+        "- error_type: KeyError\n"
+        "- where: regen_cockpit_inprogress\n"
+        "- trigger: active 工件缺 summary\n\n"
+        "## 根因\n...\n"
+    )
+
+    def test_parses_four_keys(self):
+        from flightdeck_index import parse_signature
+        sig = parse_signature(self.SIG)
+        self.assertEqual(sig["symptom"], "KeyError: 'summary'")   # 反引号被剥
+        self.assertEqual(sig["error_type"], "KeyError")
+        self.assertEqual(sig["where"], "regen_cockpit_inprogress")
+        self.assertEqual(sig["trigger"], "active 工件缺 summary")
+
+    def test_no_block_returns_empty(self):
+        from flightdeck_index import parse_signature
+        self.assertEqual(parse_signature("---\nstatus: active\n---\n# t\n## 根因\nx\n"), {})
+
+
 if __name__ == "__main__":
     unittest.main()

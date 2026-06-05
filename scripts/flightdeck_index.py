@@ -47,6 +47,20 @@ def signature_fingerprint(symptom, error_type=""):
     key = f"{(error_type or '').strip()}\n{normalize_symptom(symptom)}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
 
+
+def parse_signature(text):
+    """抽 `## Signature` 块的 key:value 行为 dict（键 symptom/error_type/where/trigger）。
+    无块返回 {}。值两端反引号/空白剥掉。"""
+    m = re.search(r"^##\s+Signature\s*$(.*?)(?=^##\s|\Z)", text, re.M | re.S)
+    if not m:
+        return {}
+    sig = {}
+    for line in m.group(1).splitlines():
+        lm = re.match(r"\s*-\s*(symptom|error_type|where|trigger)\s*:\s*(.*)$", line)
+        if lm:
+            sig[lm.group(1)] = lm.group(2).strip().strip("`").strip()
+    return sig
+
 DASH = "—"  # em dash — the INDEX row delimiter
 
 SUMMARY_KINDS = {"specs", "plans"}                       # workflow，summary 行
