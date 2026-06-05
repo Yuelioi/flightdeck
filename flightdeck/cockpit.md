@@ -1,20 +1,19 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-05 by 月离 (本会话：3.0 dogfood item#1 主体过——② preflight 瘦身全过、③ /flightdeck:new fast path 全过、① model-v4 读新 cockpit + active→进行中 投影确认。dogfood 揪出并**修了两缺陷**：A) `skills/new/SKILL.md` kind 表滞后脚本（`chart→references/`、补 `doc→docs/` 行+dateless 规则）+ 加 **SKILL↔脚本 kind 一致性守卫测试**；B) `regen_cockpit_inprogress` 缺 summary 抛 KeyError → 改 `.get` 防御 + 回归测试。新建 incident 记 B。**116 tests 绿**、lint/`--check` 干净。改了 build input → cache 已 stale（戳 `85cf206204ba`），下会话需 reload 才能 live 复验 fallback 修复。随后把 5 组实现完成的 spec+plan（preflight-slim / new-artifact / model-v4 / command-simplify / model-coherence）翻 `done`，连同 scriptable-mechanical-layer 共 **12 文件整簇 land 进 `archive/`**（边图 archivable、改 frontmatter+prose 跨引用），active 区收到只剩 incident-recurrence。  上会话：build-stamp 锚点 + why-no-hooks doc)
-**Active focus**: flightdeck 3.0 收尾——所有核心工作（model-v4 / scriptable lint / preflight 瘦身+launch 拆分 / `/flightdeck:new`）已实施 + dogfood + land 归档完毕；**只剩发布**（version-bump + CHANGELOG + marketplace + tag + 合并 main），外加可选的 reload 后 live 复验。
+**Last updated**: 2026-06-05 by 月离 (本会话：从"怎么让 AI 快速定位错误库"讨论 → brainstorm → spec → plan → 实现 **incident 错误库生命周期**：可 grep 的 `## Signature`（4 键放正文、preflight 不读=零路由 token）+ 确定性签名指纹去重（`--match-signature`，归一化剥易变 token/保语义键）+ obsolete 退役出路由（留盘仍进匹配）+ gated 回归复活。subagent-driven 6 phase / 14 task（每 phase 实现+评审），spec 吸收 2 轮外部评审、回填 4 条现有 incident，**131 tests 绿**、`--check`/lint 干净，spec+plan 翻 done 整簇 land 进 `archive/`。改了 build input（脚本/skill）→ 下会话 reload 后 live 复验。  早先本会话：dogfood item#1 修两缺陷（SKILL kind 表 / KeyError）+ 5 组 spec+plan land。)
+**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。最新落成 incident 错误库生命周期；active 只剩 `incident-recurrence`（待 dogfood 行为验证）+ 若干 idea。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
 - [2026-06-03-incident-recurrence-autocount-design.md](specs/2026-06-03-incident-recurrence-autocount-design.md) — incident 复发计数升级——recurrences 提为 frontmatter 字段(从 body 头)、上 INDEX 行 recur:N、landing 自动维护；次数派生"待晋升/已晋级"，不加 status 值、不自动晋级、不 gate INDEX（避开 2.0 状态机红线）。已实现+27 tests 绿，待 dogfood 行为验证
-- [2026-06-05-incident-error-library-lifecycle.md](specs/2026-06-05-incident-error-library-lifecycle.md) — 错误库生命周期完善(方向C之Spec1)：生=正文加可grep的 ## Signature 块(symptom/error_type/where/trigger)+分节标准化；用=recurrence sweep 加确定性签名指纹精确匹配去重(脚本算,AI只管模糊层)；死=resolved_by + status:obsolete 从活跃路由退出(物理删/归档交 scrapped-disposition 统一定)。Signature 放正文+退役缩集→省token；B(两层manifest)留作超大deck未来升级备注
-- [2026-06-05-incident-error-library-lifecycle-rollout.md](plans/2026-06-05-incident-error-library-lifecycle-rollout.md) — 实施 incident 错误库生命周期 spec：P1 脚本签名归一化+指纹(纯函数,TDD)→P2 status-aware 匹配(--match-signature,obsolete 也命中)→P3 obsolete 出路由(INDEX/计数排除,镜像 specs scrapped)→P4 incident 模板(flightdeck_new 加 ## Signature+resolved_by+Cases 首行/templates.md)→P5 skill/protocol prose(landing 接脚本+gated 回归+幂等+退役提示/preflight/new/folder-semantics)→P6 迁移现有 incident+全验证(pytest/--check/lint/walkaround)+CHANGELOG
 <!-- /AUTO -->
 
 ## 下一步
 
-- **执行 incident 错误库生命周期 rollout**（见 [plans/2026-06-05-incident-error-library-lifecycle-rollout.md](plans/2026-06-05-incident-error-library-lifecycle-rollout.md)）：subagent-driven，6 phase / 14 task，从 P1 签名归一化开始。
-- 持续把 3.0 模型/功能**完善到位**（不急发布，避免迁移债）：`incident-recurrence`（唯一旧 active）补 dogfood 行为验证；待办 idea（status-spec-co-advance / structural-edit-guard / scrapped-disposition）按需推进；改 build input 后 reload 复验 fallback 修复。
+- 下会话 **reload 后 live 复验**本会话新功能：`/flightdeck:new` 建 incident 带 `## Signature`、`--match-signature` 建前查重、obsolete 退役出路由、landing gated 回归复活。
+- `incident-recurrence`（唯一 active）补 dogfood 行为验证。
+- 待办 idea 按需推进：status-spec-co-advance / structural-edit-guard / scrapped-artifact-disposition。
 
 ## Hanging tasks
 

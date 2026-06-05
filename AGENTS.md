@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0 收尾——所有核心工作（model-v4 / scriptable lint / preflight 瘦身+launch 拆分 / `/flightdeck:new`）已实施 + dogfood + land 归档完毕；**只剩发布**（version-bump + CHANGELOG + marketplace + tag + 合并 main），外加可选的 reload 后 live 复验。
+flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。最新落成 incident 错误库生命周期；active 只剩 `incident-recurrence`（待 dogfood 行为验证）+ 若干 idea。
 
 ## 进行中
 
@@ -13,8 +13,9 @@ flightdeck 3.0 收尾——所有核心工作（model-v4 / scriptable lint / pre
 
 ## 下一步
 
-- **发布 3.0**：version-bump + CHANGELOG（写 `/flightdeck:launch`、`/flightdeck:new` 两条 + preflight deckless 行为变更 + 本会话两 bugfix）+ marketplace + tag + 合并 → main（见 [checklists/version-bump.md](flightdeck/checklists/version-bump.md)）。
-- （可选，非阻塞）sync+reload 后 live 复验：用修后 build 跑 `/flightdeck:new` 各 kind（重点 `doc` 恒-dateless、`chart→references/`）验 fallback 修复；并验 `incident-recurrence`（唯一留 active）的 dogfood 行为 + model-v4 残项（idea→active 实地翻转带动 `## 进行中`、landing 写两区）。
+- 下会话 **reload 后 live 复验**本会话新功能：`/flightdeck:new` 建 incident 带 `## Signature`、`--match-signature` 建前查重、obsolete 退役出路由、landing gated 回归复活。
+- `incident-recurrence`（唯一 active）补 dogfood 行为验证。
+- 待办 idea 按需推进：status-spec-co-advance / structural-edit-guard / scrapped-artifact-disposition。
 
 ## Hanging tasks
 

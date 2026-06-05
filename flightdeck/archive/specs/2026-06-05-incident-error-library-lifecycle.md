@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 错误库生命周期完善(方向C之Spec1)：生=正文加可grep的 ## Signature 块(symptom/error_type/where/trigger)+分节标准化；用=recurrence sweep 加确定性签名指纹精确匹配去重(脚本算,AI只管模糊层)；死=resolved_by + status:obsolete 从活跃路由退出(物理删/归档交 scrapped-disposition 统一定)。Signature 放正文+退役缩集→省token；B(两层manifest)留作超大deck未来升级备注
 last_updated: 2026-06-05
 ---
@@ -82,9 +82,10 @@ last_updated: YYYY-MM-DD
 
 **确定性脚本匹配**作为兜底前置层：
 
-- 脚本读各 incident 的 `## Signature`，对 `symptom`（归一化）+ `error_type` + `where` 算**指纹**
-  （`trigger` **不进指纹**，仅人读——四字段里只有前三进匹配）。指纹由**单一规范函数**定义——
-  跨条目可复现靠"只有一个实现"，非靠 spec 列规则；`where` 进指纹但为**次要分量**（权重 plan 定）。
+- 脚本读各 incident 的 `## Signature`，对 `symptom`（归一化）+ `error_type` 算**主指纹**
+  （`where` / `trigger` **不进主指纹**——`where` 在多命中时作 tiebreak metadata 返回、`trigger` 仅人读；
+  四键里只有前两进匹配）。主指纹由**单一规范函数**定义——跨条目可复现靠"只有一个实现"，非靠
+  spec 列规则。（`where` 不进指纹 → 重构改 `where` 不会换指纹，见下方覆盖边界。）
 - 新错误：**指纹精确命中 → 确定性判"同一条"**，脚本直接指给 AI（零 AI 判断、零 token、
   **极低误判**——非"零"：如 `Connection refused` 在 `error_type: —`/`where: network` 时可能跨
   Redis/PG/HTTP 撞指纹）→ append Case + `recurrences +1`。
