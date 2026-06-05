@@ -11,9 +11,22 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 - Natural pause point (ship complete / brainstorm done) — closing checks before moving on.
 - Re-running mid-session to refresh cockpit (`## 进行中` + `## 下一步`) and clear hanging tasks.
 
+## Modes — full vs checkpoint
+
+`landing` runs in one of two modes; the AI picks by the trigger:
+
+| | **full** (default) | **checkpoint** (lightweight) |
+|---|---|---|
+| Trigger | session wrap · `/flightdeck:landing` · end-of-turn `done`-flip | **plan / plan-task boundary** (AI self-invoke) |
+| Runs | the whole checklist (Steps 0–7) | **only Step 4's board-sync** — refresh `## 下一步` + advance the active plan's `## Progress` `current:` pointer |
+| Skips | nothing | knowledge-classify (2) · INDEX regen (3) · archive (3a) · AGENTS.md (5) · smoke-check (6) · **commit (7)** |
+| Commit | local auto (push asks) | **none** (board on disk is enough; durability deferred to a full landing / milestone) |
+
+A checkpoint is a **strict subset of a full landing** — same Step-4 board-sync implementation, no fork. Canonical definition + rationale: [exit-ritual § Checkpoint](../preflight/exit-ritual.md#checkpoint--lightweight-board-sync-subpath). When in doubt (is this a task boundary or a session wrap?), a full landing is always safe — checkpoint is the cheaper option, never a required one.
+
 ## Run this checklist
 
-The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md). Skeleton:
+The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md). The checklist below is **full mode**; in **checkpoint mode** run **only Step 4** (board-sync) and stop — skip every other step. Skeleton:
 
 0. **Read `flightdeck/rules.md`** if present; resolve config per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Infer git from deck root `.git` (House Rule `this deck doesn't use git` overrides). When no-git: skip the commit step (step 7), and instead append one line to `archive/HISTORY.md` (`YYYY-MM-DD — <result>; next: <pointer>`, newest first). Commit behavior (default: **local commit auto, push asks**; overrides `commit: ask` = confirm before the local commit / `don't auto-commit; leave changes for me / CI` = never) drives step 7 under git. (Pre-3.0 `commit_mode` / `disabled_gates` are read but ignored — use the `commit:` House-Rule phrases instead.)
 0a. **Layout guard (before regenerating anything)** — get the deck's layout verdict: fast path `flightdeck_index.py <deck> --verdict` (script runtime reachable), else manual fallback (read `MIGRATION.md` frontmatter + self-check structural signals). If the verdict is **`structural-behind`** or **`malformed`** → **STOP**, report "deck layout is behind/broken (`<verdict>`) — run `/flightdeck:walkaround` to migrate first, then land." Do **not** regen a behind/broken deck (that is how landing used to crash mid-regen). **Compatibility-window consequence (known cost, not a bug):** on a not-yet-migrated (`structural-behind`, still carrying old `charts/` / `landed/`) deck, an end-of-turn `done` hand-off hits this same guard → it reports "migrate first" **instead of archiving**, so auto-archival is **effectively paused** on un-migrated decks until the author runs the migration — the deliberate guard against mixing old/new structure, not a malfunction. See [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check).
