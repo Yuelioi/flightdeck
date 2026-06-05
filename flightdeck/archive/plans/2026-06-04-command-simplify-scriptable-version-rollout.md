@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 实施 spec：脚本层(layout_verdict + format_row 健壮性, TDD) → 5 skill 改(删 Gate / 智能 landing / commit 默认 / verdict 接线) → protocol + scaffold 模板 → MIGRATION + dogfood rules → 验证(pytest / --check / walkaround / reload dogfood) + 发布提醒
 last_updated: 2026-06-04
-implements: specs/2026-06-04-command-simplify-scriptable-version-design.md
+implements: archive/specs/2026-06-04-command-simplify-scriptable-version-design.md
 ---
 
 # 命令简化 + 版本检查脚本化 — 实施

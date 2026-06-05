@@ -1,6 +1,6 @@
 ---
 status: done
-implements: specs/2026-06-03-scriptable-mechanical-layer-design.md
+implements: archive/specs/2026-06-03-scriptable-mechanical-layer-design.md
 summary: 机械层脚本化 rollout —— INDEX-regen 接进 landing/walkaround/status 双轨 + rules scripts 开关 + 版本 guard + walkaround lint 子命令；3 phase 全完成（lint=flightdeck_lint.py，Audit 1/4/5/7/8）
 last_updated: 2026-06-04
 ---

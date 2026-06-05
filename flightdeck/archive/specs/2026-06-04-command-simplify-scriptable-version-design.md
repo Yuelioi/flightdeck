@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 自治面收敛到底(真删 self-invoke/disabled_folders/run-scripts(转推断)/status:auto-land 开关，换好默认+推断+判断) + 智能 landing(智能归档替 auto-land) + commit 翻默认(本地自调/push 先问，override 保留) + 版本/布局判定脚本化(verdict 源自 MIGRATION frontmatter) + 版本职责单一归属(preflight 只读上报/landing 只读守卫/walkaround 唯一写) + preflight 删 Branch-0；并入 3.0
 last_updated: 2026-06-04
 ---

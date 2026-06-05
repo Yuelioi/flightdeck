@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 撰写新 deck 工件每次交"推导税"（按-kind frontmatter / 命名 dateless-vs-dated / 记得 regen——位置实践中已可靠落对 flightdeck/specs/，不是痛点）。选定方向 B：新增 /flightdeck:new skill 包 flightdeck_new.py，确定性盖按-kind frontmatter + 命名 + 落目录 + regen，覆盖全部工件种类，shell-first 交接；SKILL=权威撰写契约文档面（含方向 A）。发现靠常驻指针（protocol 节 + emit-agents-md 模板行 + skill description）——目的是让 agent 用入口而非手搓，不防 docs/。并入 3.0
 last_updated: 2026-06-04
 ---

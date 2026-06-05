@@ -20,7 +20,7 @@ reorder cockpit `## Next session` 列表时，一个多行 `Edit` 的 `old_strin
 
 ## 候选方案（下个对话定）
 
-1. **lint 里加"结构清单"校验**（推荐，归 [scriptable lint](2026-06-03-scriptable-mechanical-layer-design.md) Phase 3）：对已知文件类型断言必备结构块——`cockpit.md` 必有 `## Next session` / `## Hanging tasks`；skill `SKILL.md` 必有 frontmatter `name`/`description`；等。缺失 → 报错。轻量、确定性、脚本可做。
+1. **lint 里加"结构清单"校验**（推荐，归 [scriptable lint](../archive/specs/2026-06-03-scriptable-mechanical-layer-design.md) Phase 3）：对已知文件类型断言必备结构块——`cockpit.md` 必有 `## Next session` / `## Hanging tasks`；skill `SKILL.md` 必有 frontmatter `name`/`description`；等。缺失 → 报错。轻量、确定性、脚本可做。
 2. **anchor-checker PoC 升级**：现有 ~40 行 Python 顺带扫"标题集相对上次提交是否少了"（git diff 维度）——但需要 git 基线、较脆。
 3. **纯纪律**：协议里写"跨结构边界的 Edit 后必 re-read"——便宜但不可靠（正是这次失效的东西）。
 
@@ -28,5 +28,5 @@ reorder cockpit `## Next session` 列表时，一个多行 `Edit` 的 `old_strin
 
 ## Related
 
-- [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) —— lint 子命令是实现归属
+- [scriptable-mechanical-layer](../archive/specs/2026-06-03-scriptable-mechanical-layer-design.md) —— lint 子命令是实现归属
 - [token-reduction](../archive/specs/2026-06-03-token-reduction-design.md) —— anchor-checker PoC 来源（同批 QA 发现 dangling link）

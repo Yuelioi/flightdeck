@@ -2,7 +2,7 @@
 status: idea
 summary: preflight 静默 bump 版本时新的 autonomy/commit 默认对升级者不可见；提议在静默 bump 的那一回合打一行一次性提示，指向对应 MIGRATION 段。由 sketch 提升
 last_updated: 2026-06-03
-related: [landed/specs/2026-06-03-rules-simplification-design.md]
+related: [archive/specs/2026-06-03-rules-simplification-design.md]
 ---
 
 # preflight 静默 bump 既有 deck 时给一行升级提示

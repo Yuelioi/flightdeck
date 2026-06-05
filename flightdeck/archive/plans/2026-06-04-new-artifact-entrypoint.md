@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 实现 /flightdeck:new + flightdeck_new.py——TDD 建脚本（kind→folder 常量表、按-kind frontmatter、命名 dateless/dated、参数校验报错、调 flightdeck_index regen + status-aware stdout），再建 skills/new/SKILL.md（fast path + 权威撰写契约 fallback），接发现钩子（protocol 节 + emit 模板行 + description），验证 + dogfood，最后文档 + 发布提醒
 last_updated: 2026-06-04
-implements: specs/2026-06-04-new-artifact-authoring-convention-design.md
+implements: archive/specs/2026-06-04-new-artifact-authoring-convention-design.md
 ---
 
 # /flightdeck:new 撰写入口 — 实现计划

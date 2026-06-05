@@ -54,7 +54,7 @@ landing 时，对本会话产生的 bug/教训，**主动比对**现有 incident
 
 ### 6. walkaround 校验
 
-`recurrences` 为 int ≥1；与 `[Case N]` 块数大致一致（count 应 = 1 + Case 块数，因首次不带 Case 号）；不一致报 INFO。归 [scriptable lint](2026-06-03-scriptable-mechanical-layer-design.md) 的 lint 子命令时一并脚本化。
+`recurrences` 为 int ≥1；与 `[Case N]` 块数大致一致（count 应 = 1 + Case 块数，因首次不带 Case 号）；不一致报 INFO。归 [scriptable lint](../archive/specs/2026-06-03-scriptable-mechanical-layer-design.md) 的 lint 子命令时一并脚本化。
 
 ## 迁移
 
@@ -67,5 +67,5 @@ protocol（字段表 + 复发 auto-count 小节 + 晋级 gate 措辞 + 去"never
 ## Related
 
 - [[flightdeck-2.0-abandoned]] —— 不重蹈状态机覆辙
-- [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) —— recur 校验归其 lint
+- [scriptable-mechanical-layer](../archive/specs/2026-06-03-scriptable-mechanical-layer-design.md) —— recur 校验归其 lint
 - [preflight-tri-review-remediation](../archive/specs/2026-06-03-preflight-tri-review-remediation.md) —— 错题本计数升级的延续

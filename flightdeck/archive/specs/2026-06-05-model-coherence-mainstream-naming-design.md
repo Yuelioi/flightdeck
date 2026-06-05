@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 彻底理清 flightdeck 生命周期+文件夹模型并立主流命名铁律——status⟂location正交(landed非状态/done≠归档)、done翻转 end-of-turn 防抖接力landing(方案A出厂默认/push先问)、归档判据确定性结构边(脚本可算/不靠AI正文)、航空名只留指令与仪式、数据模型全主流(charts→references、landed→archive、新增docs/)、knowledge可嵌套撑大型项目、status自动翻转收成唯一权威表；并入3.0
 last_updated: 2026-06-05
 ---

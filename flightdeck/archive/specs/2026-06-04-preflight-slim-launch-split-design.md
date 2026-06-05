@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: preflight 太重（兼管初始化/检查/接管）——拆出 `/flightdeck:launch` 接管首次创建 deck，preflight 瘦成纯接管（读 cockpit/INDEX → 报下一步 + 精简 catalog 预热 + 被动一行 git 提示），删掉与 walkaround 重复的检查（结构性迁移探测/catalog 状态体检/cockpit 漂移/阻塞式 reconcile）。并入 3.0
 last_updated: 2026-06-04
-related: [specs/2026-06-03-model-v4-folder-state-cockpit-design.md, specs/2026-06-03-scriptable-mechanical-layer-design.md]
+related: [archive/specs/2026-06-03-model-v4-folder-state-cockpit-design.md, archive/specs/2026-06-03-scriptable-mechanical-layer-design.md]
 ---
 
 # preflight 瘦身 + 拆出 `/flightdeck:launch`（并入 3.0）

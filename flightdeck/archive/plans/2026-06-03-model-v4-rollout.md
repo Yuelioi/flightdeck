@@ -1,6 +1,6 @@
 ---
-status: active
-implements: specs/2026-06-03-model-v4-folder-state-cockpit-design.md
+status: done
+implements: archive/specs/2026-06-03-model-v4-folder-state-cockpit-design.md
 summary: model-v4 分 6 phase 实施——数据模型真相源 → flightdeck_index 扩展(+测试) → 4 skill 行为 → scaffolds/emit/MIGRATION → dogfood 迁移本仓库 → 验证收尾；并入 3.0
 last_updated: 2026-06-03
 ---

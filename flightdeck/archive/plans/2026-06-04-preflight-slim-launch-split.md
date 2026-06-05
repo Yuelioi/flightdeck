@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 实现 preflight 瘦身 + 拆出 /flightdeck:launch——新建 launch skill（搬 setup.md）、重写 preflight（重定向 Branch-0 / 删重复检查 / 2 列 catalog / 被动 git 表 / 版本 bump 优先级）、删 setup.md、改两条 description、交叉引用 doc-sweep；验证靠现有 pytest + index --check + dogfood + walkaround。清单自动发现无需注册，CHANGELOG 留发布时写
 last_updated: 2026-06-04
-implements: specs/2026-06-04-preflight-slim-launch-split-design.md
+implements: archive/specs/2026-06-04-preflight-slim-launch-split-design.md
 ---
 
 # preflight 瘦身 + 拆出 /flightdeck:launch — 实现计划

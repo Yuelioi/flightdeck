@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 实施模型理清 spec：脚本层(改名 charts→references/landed→archive、认 docs、knowledge 嵌套 INDEX-of-INDEXes、可归档 done 集、scrapped 分组、旧名结构信号, TDD) → lint/init/new → 模型文档(protocol/folder-semantics/templates/exit-ritual) → 4 skill 行为(status/landing/preflight/walkaround) → scaffold+MIGRATION+README → dogfood 迁移本仓库 + 全套验证 + 发布提醒
 last_updated: 2026-06-05
-implements: specs/2026-06-05-model-coherence-mainstream-naming-design.md
+implements: archive/specs/2026-06-05-model-coherence-mainstream-naming-design.md
 ---
 
 # 模型理清 + 主流命名铁律 — 实施
