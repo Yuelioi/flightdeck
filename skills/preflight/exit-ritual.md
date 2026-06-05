@@ -263,7 +263,7 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 A **checkpoint** is the cheapest possible status-write: it keeps the persisted board (`cockpit.md` + the active plan file) equal to *actual* progress, so a user can close the conversation at any plan-task boundary and the next `/flightdeck:preflight` resumes on a true picture — no lost context. It is **a strict subset of landing**: landing = checkpoint + the wrap-up heavy lifting (knowledge-classify, INDEX regen, archive, smoke-check, commit).
 
-**Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (stays inside [docs/why-no-hooks.md](../../docs/why-no-hooks.md)).
+**Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (consistent with flightdeck's deliberate no-startup-hooks design).
 
 **Action — exactly two board writes, then stop:**
 1. Refresh cockpit `## 下一步` to the next concrete single action (the next task).
