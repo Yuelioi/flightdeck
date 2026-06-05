@@ -13,8 +13,8 @@
 
 ## 下一步
 
-- **发布 3.0**：version-bump + CHANGELOG（写 `/flightdeck:launch`、`/flightdeck:new` 两条 + preflight deckless 行为变更 + 本会话两 bugfix）+ marketplace + tag + 合并 → main（见 [checklists/version-bump.md](checklists/version-bump.md)）。
-- （可选，非阻塞）sync+reload 后 live 复验：用修后 build 跑 `/flightdeck:new` 各 kind（重点 `doc` 恒-dateless、`chart→references/`）验 fallback 修复；并验 `incident-recurrence`（唯一留 active）的 dogfood 行为 + model-v4 残项（idea→active 实地翻转带动 `## 进行中`、landing 写两区）。
+- **执行 incident 错误库生命周期 rollout**（见 [plans/2026-06-05-incident-error-library-lifecycle-rollout.md](plans/2026-06-05-incident-error-library-lifecycle-rollout.md)）：subagent-driven，6 phase / 14 task，从 P1 签名归一化开始。
+- 持续把 3.0 模型/功能**完善到位**（不急发布，避免迁移债）：`incident-recurrence`（唯一旧 active）补 dogfood 行为验证；待办 idea（status-spec-co-advance / structural-edit-guard / scrapped-disposition）按需推进；改 build input 后 reload 复验 fallback 修复。
 
 ## Hanging tasks
 
