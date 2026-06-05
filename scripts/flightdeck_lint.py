@@ -39,7 +39,7 @@ from flightdeck_index import (
 )
 
 # Legal status values per artifact kind (model-v4 §1; mirrors walkaround Audit 1).
-WORKFLOW_STATUSES = {"idea", "active", "done", "scrapped"}
+WORKFLOW_STATUSES = {"idea", "active", "done"}
 KNOWLEDGE_STATUSES = {"active", "obsolete", "superseded"}
 
 WORKFLOW_FOLDERS = ("specs", "plans")
@@ -49,6 +49,23 @@ WORKFLOW_FOLDERS = ("specs", "plans")
 KNOWLEDGE_FOLDERS = tuple(KNOWLEDGE_KINDS)
 KNOWN_FOLDERS = {"specs", "plans"} | KNOWLEDGE_KINDS | IMPORTED_KINDS | {"archive"}
 KNOWN_ROOT_FILES = {"cockpit.md", "INDEX.md", "rules.md"}
+
+# structural-edit guard — required structural blocks per known file (label, regex).
+# A multi-line Edit whose old_string spans a heading can silently drop it; no
+# link/anchor check catches a *missing* heading. Scope is deliberately narrow
+# (cockpit.md only): its blocks anchor the landing/status AUTO regen, so dropping
+# one breaks regeneration — the highest-value, lowest-false-positive case. The
+# list mirrors the canonical cockpit.md template (preflight/templates.md), minus
+# any deck-specific section (e.g. dogfood's `## Note on dogfooding`).
+REQUIRED_SECTIONS = {
+    "cockpit.md": [
+        ("## 进行中", re.compile(r"(?m)^##\s+进行中\s*$")),
+        ("<!-- AUTO:inprogress -->", re.compile(r"<!--\s*AUTO:inprogress\s*-->")),
+        ("<!-- /AUTO -->", re.compile(r"<!--\s*/AUTO\s*-->")),
+        ("## 下一步", re.compile(r"(?m)^##\s+下一步\s*$")),
+        ("## Hanging tasks", re.compile(r"(?m)^##\s+Hanging tasks\s*$")),
+    ],
+}
 
 # `[text](target)` — capture the target only; titles/spaces handled by the caller.
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
@@ -242,6 +259,33 @@ def audit_stray(deck):
     return findings
 
 
+def audit_required_structure(deck):
+    """structural-edit guard — assert known files still carry their required
+    structural blocks (REQUIRED_SECTIONS). Catches the "silent structure loss"
+    a multi-line Edit causes when its old_string swallows a heading / AUTO
+    anchor and the new_string fails to restore it. A missing file is skipped
+    (deckless / not-yet-created is handled elsewhere).
+    """
+    deck = Path(deck)
+    findings = []
+    for filename, blocks in REQUIRED_SECTIONS.items():
+        f = deck / filename
+        if not f.is_file():
+            continue
+        text = f.read_text(encoding="utf-8")
+        for label, pattern in blocks:
+            if not pattern.search(text):
+                findings.append(
+                    _finding(
+                        "required-structure",
+                        "CRITICAL",
+                        f,
+                        f"{filename} missing required block `{label}` — a multi-line Edit may have dropped it",
+                    )
+                )
+    return findings
+
+
 def _collect_md(deck, repo_root):
     """Markdown files for the dangling-ref scan: deck active tree + repo-root top level.
 
@@ -260,6 +304,7 @@ def lint(deck, repo_root=None):
     deck = Path(deck)
     findings = []
     findings += audit_status(deck)
+    findings += audit_required_structure(deck)
     findings += audit_orphan_plans(deck)
     if (deck / "INDEX.md").is_file():
         findings += audit_index_consistency(deck)

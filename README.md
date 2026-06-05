@@ -195,7 +195,7 @@ Skill content under [`skills/`](skills/) is **tool-agnostic markdown**; manifest
 
 ## Documentation
 
-**Guides** — go deeper in [`docs/`](docs/): [Lifecycle & execution flow](docs/lifecycle.md) · [Architecture](docs/architecture.md) · [Design philosophy](docs/philosophy.md) · [How it compares](docs/comparison.md)
+**Guides** — go deeper in [`docs/`](docs/): [Architecture](docs/architecture.md) · [Design philosophy](docs/philosophy.md) · [How it compares](docs/comparison.md)
 
 **Protocol reference** (canonical, AI-facing): [protocol.md](skills/preflight/protocol.md) · [folder semantics](skills/preflight/folder-semantics.md) · [templates](skills/preflight/templates.md) · [the landing ritual](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 

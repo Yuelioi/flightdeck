@@ -1,6 +1,7 @@
 ---
-status: idea
-summary: scrapped 现状=留 specs/「已否决」分组当墓碑、root 计数却排除它(→计数≠可见行)、Land Routine 不归档；多处 docstring/SKILL 说「scrapped never appears」与代码 ### 已否决 分组矛盾。重定 scrapped 处置(倾向直接删、git 留史，符合果断删减) vs archive vs 留墓碑，并修计数≠可见行 + 文档↔代码漂移
+status: done
+summary: scrapped 状态退役——否决 workflow 工件＝直接删文件(git 留史+commit body 记原因)，取消 scrapped status 值与 ### 已否决 墓碑分组，一并消灭"计数≠可见行"+"文档↔代码漂移"两 bug。落地：STATUS_ORDER/WORKFLOW_STATUSES 去 scrapped、folder_summary/_specs_grouped_body/layout_verdict 去特例、6 skill+MIGRATION/CHANGELOG 对齐、lint 标遗留 scrapped 为 illegal、连带删过时 docs/lifecycle.md
+last_updated: 2026-06-06
 ---
 
 # scrapped 工件归宿重定 + 修计数/文档不一致
@@ -41,3 +42,14 @@ scrapped（已否决的 workflow 工件）现状处置自相矛盾、且像污�
 - 选方向后，scrapped 语义需在 protocol / folder-semantics / status SKILL / Land Routine / lint
   + `flightdeck_index.py`（`folder_summary` / `regen_folder_index` / `archivable_done`）一致落地。
 - 无论选哪个，先修「计数≠可见行」+ 文档漂移（独立的小 bug，不必等大方向）。
+
+## 决策与落地（2026-06-06）
+
+选 **方向 1（彻底删 + 取消 status 值）**——最果断、消灭俩 bug、无死结构（符合 [[prefers-decisive-deletion]] / [[history-logs-are-junk]]）。否决一个 workflow 工件＝**直接删文件**（仅用户显式指示；git log 留史 + commit body 记一行原因）。不再有 `scrapped` status 值、`### 已否决` 分组、墓碑。
+
+落地清单：
+- **代码**：`STATUS_ORDER` / lint `WORKFLOW_STATUSES` 去 `scrapped`；`folder_summary` 去 specs-scrapped 排除特例；`_specs_grouped_body` 去 `### 已否决` 分组；`layout_verdict` 去 scrapped-免-summary 特例；`flightdeck_new.py --status` choices 去 scrapped。
+- **测试**：删 4 个 scrapped 专测（分组/计数排除/missing-summary/own-group）、改 `STATUS_ORDER` 断言、新增「遗留 `status: scrapped` 被 lint 标 illegal WARNING」。137 tests 绿。
+- **两 bug 自动消灭**：移除 scrapped 渲染特例后，「计数≠可见行」与「文档↔代码漂移」矛盾不复存在。
+- **文档一致**：protocol / folder-semantics / templates / status SKILL / walkaround SKILL / landing SKILL / exit-ritual 共 ~30 处对齐；MIGRATION（status 6→3、遗留 scrapped 迁移即删）；CHANGELOG（撤未发布的「scrapped 单列」Added、改记「scrapped 退役」）。
+- **连带清理**：删过时的 `docs/lifecycle.md`（2.0 废弃模型 sketch/pending/awaiting-review/landed/debriefs，且与 model-architecture/protocol 重复），并移除 3 处 README 对它的引用。

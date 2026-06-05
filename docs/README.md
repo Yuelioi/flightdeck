@@ -6,7 +6,6 @@ The [README](../README.md) is the 2-minute quick start. These pages are for goin
 
 ## Guides
 
-- **[Lifecycle & execution flow](lifecycle.md)** — how a session runs (preflight → work → landing) and how work moves `sketch → spec → plan → landed`.
 - **[Architecture](architecture.md)** — how flightdeck, your AI, and `AGENTS.md` fit together.
 - **[Design philosophy](philosophy.md)** — why a write gate, why the lifecycle, why the 80-line ceiling, why aviation.
 - **[How it compares](comparison.md)** — vs AGENTS.md, Cline Memory Bank, OpenSpec, Cursor MDC, Letta Code.

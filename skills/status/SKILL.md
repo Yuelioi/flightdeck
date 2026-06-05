@@ -41,7 +41,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 - Chain: `idea → active → done`. **Direct jumps allowed**: a new spec/plan that is *already* being worked on may go straight to `active` (skipping the captured `idea` stage) — this is legal.
 - **Forward-only / idempotent**: if the target status equals the current one or is *earlier* in the chain → **no-op** (never downgrade, never error). E.g. user manually set a new file to `active`; the create→`idea` trigger is a no-op.
 - **idea has no date prefix.** A `status: idea` spec is timeless (`<topic>.md`). The `idea → active` flip is the **one** transition that renames the file to add the `YYYY-MM-DD-` prefix — do the rename and the cockpit `## 进行中` regen (Step 5a) in the **same action** so no intermediate state is left behind.
-- `scrapped` is an **explicit human** action — never auto-set it (it records a settled-against direction; the AI must not unilaterally abandon work). `done` is auto-set on user approval/sign-off (the last trigger) — a flip only, no archive.
+- **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (never auto; the AI must not unilaterally abandon work). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value. `done` is auto-set on user approval/sign-off (the last trigger) — a flip only, no archive.
 - **Bump `last_updated` on every flip.** Whenever this skill changes `status:` (any transition above, including the create→`idea` write), set the same artifact's `last_updated:` to today. A status flip is by definition a substantive change. This is the auto-bump anchor for the case where the user (or model) edited the body and `status` performs the flip — `status` writes `last_updated` so no one has to remember a second field. Adding `last_updated` to a spec/plan that lacked it is fine (it's recommended). Do **not** bump `last_updated` on a no-op (when the flip is skipped per forward-only). **Idea exception:** do not *add* `last_updated` to a bare `status: idea` spec that lacks it — an idea usually carries only `status` + `summary`; if it already has the field, bump it as usual.
 - **`note:` field.** When the user gives a "why it hasn't moved" reason (a blocker / waiting-on note), write it to the artifact's optional `note:` frontmatter (the merged `active` state's diagnostic carrier — see [protocol § Status ⟂ location](../preflight/protocol.md#status--location-two-orthogonal-axes)); clear it when the reason resolves. `note:` never gates a flip — it is advisory text rendered as `[note: …]` in cockpit `## 进行中` + walkaround.
 
@@ -49,14 +49,14 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 
 After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when a script runtime is available (inferred — `uv`/`python` reachable), `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
 
-1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) and skips `scrapped` — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs).
+1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs).
 2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.
 
 (The script fast path regenerates the folder INDEX, the root INDEX, **and** the cockpit `## 进行中` block in one run — `flightdeck_index.py <deck>` covers Step 5a too.)
 
 ## Step 5a — regen cockpit `## 进行中` (only on a flip that changes the active set)
 
-A `status: active` spec/plan is **visible in cockpit iff it is active** — cockpit `## 进行中` is the AUTO-derived projection of the active set ([protocol § cockpit](../preflight/protocol.md#data-model-folder--kind-frontmatter--status)). So whenever this skill's flip changes the active set — an `idea → active` start (an artifact **enters** `## 进行中`) or an `active → done`/`scrapped` flip (it **leaves**) — regenerate the cockpit `<!-- AUTO:inprogress -->` region from every current `status: active` spec/plan:
+A `status: active` spec/plan is **visible in cockpit iff it is active** — cockpit `## 进行中` is the AUTO-derived projection of the active set ([protocol § cockpit](../preflight/protocol.md#data-model-folder--kind-frontmatter--status)). So whenever this skill's flip changes the active set — an `idea → active` start (an artifact **enters** `## 进行中`) or an `active → done` flip (it **leaves**) — regenerate the cockpit `<!-- AUTO:inprogress -->` region from every current `status: active` spec/plan:
 
 - **Fast path**: `flightdeck_index.py <deck>` emits the `<!-- AUTO:inprogress -->` block (exact marker string) alongside the INDEXes — one run does Steps 5 + 5a.
 - **Fallback (always valid)**: rewrite the `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` block by hand — one row per `status: active` spec/plan, same Row format as INDEX, appending `[note: …]` when the file carries `note:`. Because the block is re-derived from current files, the `idea → active` rename is picked up automatically (do the rename **before** the regen so the new filename/link lands in the row).
@@ -72,7 +72,7 @@ When the user approves / signs off:
 
 ## Step 7 — land-readiness (signal 1)
 
-If this invocation flipped an artifact to `done` / `scrapped`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so:
+If this invocation flipped an artifact to `done`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so:
 
 - **Default (end-of-turn debounce):** queue a single landing at end-of-turn (see [exit-ritual § Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) and [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)). If multiple `done` flips happen in the same turn, the debounce collapses them into one landing run — not one per flip.
 - **Degraded by House Rule `landing: nudge on done, don't auto-run`:** instead of auto-running landing, emit a one-line nudge only ("looks like a landing point — run `/flightdeck:landing`?").
@@ -83,7 +83,7 @@ Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
 
 - Don't touch `cockpit.md` **beyond** the `## 进行中` AUTO region on an active-set-changing flip (Step 5a) — no `Last updated` bump, no `Active focus` / `## 下一步` / `Hanging tasks` edits. Those are landing's / the user's.
 - Don't commit, don't run length checks or AGENTS.md regeneration.
-- Don't downgrade a status; don't auto-set `scrapped` (or `done` outside user approval/sign-off).
+- Don't downgrade a status; don't auto-set `done` outside user approval/sign-off. **Never delete a workflow artifact without explicit user instruction.**
 - Don't archive — moving a `done` artifact into `archive/` is `/flightdeck:landing`'s judgment, not status's.
 - Don't write `archived` or `landed` into any artifact's `status:` field — these are not valid status values; only the landing Land Routine can move files into `archive/`. Claiming an artifact is archived before landing has run is incorrect.
 - Don't act when the target artifact is ambiguous.

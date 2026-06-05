@@ -10,7 +10,7 @@
 
 The aviation metaphor is reserved for the **interaction surface** — slash commands, rituals, and the cockpit: `flightdeck` / `cockpit` / `preflight` / `walkaround` / `landing` / `launch` (including the every-session `cockpit.md` dashboard). The **data model — folders, statuses, fields — uses mainstream, ordinary names** a developer can guess cold. A newcomer who doesn't know the metaphor must still be able to guess what each folder / status / field is for.
 
-Consequence: the two metaphor folder names became mainstream — `charts/ → references/`, `landed/ → archive/`. Status values were already mainstream (`idea/active/done/scrapped`, `active/obsolete/superseded`) and don't change. `flightdeck/` (the product root) and `cockpit.md` (interaction surface) keep their names. This rule outranks thematic consistency — see [Design philosophy](#design-philosophy).
+Consequence: the two metaphor folder names became mainstream — `charts/ → references/`, `landed/ → archive/`. Status values were already mainstream (`idea/active/done`, `active/obsolete/superseded`) and don't change. `flightdeck/` (the product root) and `cockpit.md` (interaction surface) keep their names. This rule outranks thematic consistency — see [Design philosophy](#design-philosophy).
 
 ## Project rules (`rules.md`)
 
@@ -106,7 +106,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 
 flightdeck separates **two independent axes** — the source of the historical "done = landed" confusion is collapsing them:
 
-- **status** ∈ `{idea, active, done, scrapped}` (workflow) — *which step the artifact reached*. Explicit frontmatter value.
+- **status** ∈ `{idea, active, done}` (workflow) — *which step the artifact reached*. Explicit frontmatter value.
 - **location** ∈ `{源文件夹, archive/}` — *whether it's still in the active area*. **Derived, NOT a frontmatter field** (computed from "is it under `archive/`?"), **but a first-class concept**: it drives **routing** (`archive/` is excluded from the routing graph entirely) and **archival judgment** (landing decides whether a `done` item lands). Don't dismiss it as unimportant just because it isn't written down.
 
 A `done` artifact has two legal locations: **done-but-unlanded** (still in `specs/`, because an `active` artifact still references it) or **done-and-archived** (moved into `archive/`).
@@ -119,27 +119,26 @@ A `done` artifact has two legal locations: **done-but-unlanded** (still in `spec
 One sentence: **status says "which step", location says "in the active area or not", and landing is the only mover.**
 
 Fixed values, by kind:
-- workflow (spec/plan): `idea / active / done / scrapped`
+- workflow (spec/plan): `idea / active / done`
 - knowledge: `active / obsolete / superseded`
 
 Recommended flow (documentation, NOT enforced):
 
 ```
-idea → active → done
-any state → scrapped
+idea → active → done   (rejected = delete the file)
 knowledge: active → obsolete | superseded
 ```
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
 - `active` = being worked on; **auto-appears in cockpit `## 进行中`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
 - `done` = 工作完成；留在源文件夹直到 landing ritual 把它归档进 `archive/`（**done ≠ archived**）.
-- `scrapped` = rejected / abandoned; stays in `specs/` (not archived), excluded from the to-start pool but **still visible** in `specs/INDEX` under a dedicated `### 已否决（scrapped）` group — kept so the AI does not re-raise a settled-against direction.
+- **Rejected / abandoned** = the artifact is **deleted outright** (only on explicit user instruction). git log is the history, with a one-line reason in the commit body. There is no `scrapped` status value and no tombstone group.
 
 ### Status transition authority table (single source of truth)
 
 This is the **one authoritative table** for automatic status flips. Other files (`status` SKILL, `exit-ritual`) point here and do not restate the rules.
 
-Workflow chain: `idea → active → done`; `any → scrapped`.
+Workflow chain: `idea → active → done`. Rejection **deletes** the file (no scrapped status).
 
 | Trigger | Flip | Who | Auto? |
 |---|---|---|---|
@@ -147,12 +146,12 @@ Workflow chain: `idea → active → done`; `any → scrapped`.
 | Write a new spec/plan **and already working on it** | direct →`active` (legal skip past idea) | status | always |
 | Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## 进行中`) | status | default (House Rule `status: don't auto start` can disable) |
 | User approves / signs off | `active→done` (flips `done` only, **does not archive**) | status / landing seam | always |
-| A direction is rejected | `any→scrapped` | **user-explicit instruction only** | **never auto** |
+| A direction is rejected | **delete the file** (git log + commit-body reason) | **user-explicit instruction only** | **never auto** |
 
 Iron rules:
 - **Forward-only, idempotent** — if target ≤ current, no-op.
 - `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
-- `scrapped` is triggered **only by an explicit user instruction**, stays in place, is **not archived**, and is listed in `specs/INDEX` under a dedicated `### 已否决（scrapped）` group (separated from the to-start pool so it doesn't pollute it, but **still visible** — excluding it from INDEX would hide settled-against directions from routing, defeating the "don't re-raise" purpose); deleted by hand.
+- **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (the AI never abandons work unilaterally). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value, no tombstone, no `### 已否决` group.
 - `done`'s trigger source = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check.
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
@@ -177,7 +176,7 @@ Status is just a label — the user edits it freely; at landing the AI may *sugg
 
 ## INDEX.md (per-folder + root)
 
-Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`待启动（idea）` / `进行中·完成（active·done）` / `### 已否决（scrapped）`) — `scrapped` stays **visible** in its own group (separated from the to-start pool, not hidden) — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 
 The root `flightdeck/INDEX.md` is a sub-folder directory + global status summary (e.g. `specs/ — 3 (2 active, 1 done)`); it is a downgradeable component.
 
@@ -188,7 +187,7 @@ The root `flightdeck/INDEX.md` is a sub-folder directory + global status summary
 ```
 flightdeck/                  [product name — kept]
 ├── cockpit.md   rules.md   INDEX.md   [cockpit.md = interaction surface — metaphor kept]
-├── specs/       INDEX.md   (idea / active / done / scrapped)   workflow · self-authored · flat
+├── specs/       INDEX.md   (idea / active / done)              workflow · self-authored · flat
 ├── plans/       INDEX.md                                       workflow · self-authored · flat
 ├── incidents/   INDEX.md   bug post-mortems                    knowledge · resident · nestable
 ├── checklists/  INDEX.md   process / conventions (执行)         knowledge · resident · nestable
@@ -261,12 +260,12 @@ Reject:
 
 ```
 idea →(flip one field)→ active → done   →(land = move to archive/)
-                                  scrapped (stays in specs/, not archived)
+                                  (rejected = delete the file)
 ```
 
 A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state.
 
-A scrapped spec stays in `specs/` (marked `status: scrapped`), never archived to `archive/` and listed under `specs/INDEX`'s `### 已否决（scrapped）` group; delete by hand at will.
+A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
 **Knowledge lifecycle:** `active → obsolete | superseded` (set `superseded_by` when superseding). Landing knowledge is optional — files may stay in place indefinitely; no "to-land" reminder.
 

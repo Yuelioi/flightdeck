@@ -35,7 +35,7 @@ Run all 14 in order. First read `flightdeck/rules.md` if present; resolve behavi
 For each `.md` file in these folders:
 
 - MUST carry `status`. Missing: **CRITICAL**.
-- Legal values (`specs/` and `plans/`): `idea` / `active` / `done` / `scrapped`.
+- Legal values (`specs/` and `plans/`): `idea` / `active` / `done`.
 - Present but illegal value: **WARNING**. The retired pre-3.0 values (`pending` / `awaiting-review` / `blocked`) are illegal here — flag the value, but route the fix through the deck-level model-v4 migration reported once in Audit 10 (`pending → idea`, `awaiting-review`/`blocked → active`); don't prescribe a per-file remap that pre-empts the migration.
 - The optional `note:` field is advisory diagnostic text — recognized and rendered (`[note: …]`), never validated as a status value.
 
@@ -80,7 +80,7 @@ For each artifact folder (`specs/`, `plans/`, `incidents/`, `checklists/`, `docs
 
 - If the folder has no `INDEX.md`: **WARNING** — missing per-folder INDEX.
 - Read the `<!-- AUTO -->` block in the folder's `INDEX.md`. Each row should list one file with its `status` (and other displayed metadata). Check:
-  - A real file exists with no corresponding row: **WARNING** — missing INDEX row. (`specs/INDEX` groups its AUTO region into `待启动（idea）` / `进行中·完成（active·done）` / `### 已否决（scrapped）` subheadings — match rows within the grouped block.) **`status: scrapped` specs now DO get a row** — in the `### 已否决（scrapped）` group of `specs/INDEX`; a scrapped spec **missing** from that group is a **WARNING** (missing INDEX row), while a scrapped row in the wrong group is an out-of-place WARNING. Scrapped specs are still kept off the to-start pool (they live only in the `### 已否决` group, never in `待启动`).
+  - A real file exists with no corresponding row: **WARNING** — missing INDEX row. (`specs/INDEX` groups its AUTO region into `待启动（idea）` / `进行中·完成（active·done）` subheadings — match rows within the grouped block.)
   - A row exists for a file not on disk: **WARNING** — stale INDEX row (ghost).
   - A row's displayed `status` does not match the file's actual frontmatter `status`: **WARNING** — out-of-sync status in INDEX. (Exception: `references/` rows show project/file count, not per-file status — do not flag `references/` for missing status values.) Audit 5 validates the `status` segment **only** — the `summary` segment is a derived value that the next `landing`/`status` regeneration self-heals, so it is not byte-compared here (avoids false drift from punctuation/wording).
 - **Nested knowledge areas:** for each nestable knowledge folder (`incidents/`, `checklists/`, `docs/`, `references/`) that contains `<area>/` subdirectories:
@@ -88,13 +88,13 @@ For each artifact folder (`specs/`, `plans/`, `incidents/`, `checklists/`, `docs
   - The top-level folder's `INDEX.md` should carry a row/line for each populated area (so the area is reachable from the parent index). A populated area with no parent-INDEX line: **WARNING**.
 - For the root `flightdeck/INDEX.md`:
   - If absent: **WARNING** — missing root INDEX.
-  - Each per-folder summary line's counts (e.g. `specs/ — 3 (2 active, 1 done)`) must match the actual file counts and status distribution in that folder. Mismatch: **WARNING**. The root `specs/` count **excludes `status: scrapped`** (scrapped is visible in `specs/INDEX`'s `### 已否决` group but stays out of the active/to-start counts) — do not flag the root `specs/` count for omitting scrapped. (Again, `references/` is exempt from status counting.)
+  - Each per-folder summary line's counts (e.g. `specs/ — 3 (2 active, 1 done)`) must match the actual file counts and status distribution in that folder. Mismatch: **WARNING**. (`references/` is exempt from status counting; knowledge folders exclude `obsolete` from the count, matching their INDEX.)
 
 ### 6. `archive/` has no non-terminal status (WARNING)
 
 For each `.md` file under `archive/` that carries a `status` field:
 
-- Workflow files (`archive/specs/`, `archive/plans/`): status must be `done` or `scrapped`. Any other value: **WARNING**. (A pre-3.0 deck may carry a historical `landed/sketches/` tree — left in place; audit its files by the same workflow rule.)
+- Workflow files (`archive/specs/`, `archive/plans/`): status must be `done`. Any other value: **WARNING**. (A pre-3.0 deck may carry a historical `landed/sketches/` tree — left in place; audit its files by the same workflow rule.)
 - Knowledge files (`archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/`): status must be `obsolete` or `superseded`. Any other value: **WARNING**. (A pre-3.0 `landed/` tree or `landed/debriefs/` is historical — left in place, not regenerated; do not flag its presence — Audit 10 routes the rename.)
 
 ### 7. Dangling internal references (CRITICAL)
@@ -113,7 +113,6 @@ Known folders: `specs/` `plans/` `incidents/` `checklists/` `docs/` `references/
 - A `.md` in a known folder that is neither a valid artifact file nor an `INDEX.md`: **WARNING** — stray file with no clear role.
 - **Nested knowledge areas are NOT stray.** Under a nestable knowledge folder (`incidents/`, `checklists/`, `docs/`, `references/`), an `<area>/` subdirectory is a valid same-kind organization partition — do not flag the subdir itself, nor the `.md` files inside it, as stray (they are audited as area files in Audits 1/2/5). Only `specs/` and `plans/` (workflow) forbid subdirectories — a subdir there **is** flagged.
 - **`status: idea` specs are NOT orphans.** An idea spec is the to-start pool — it is reachable via the `待启动（idea）` group of `specs/INDEX`, so the normal reachability rule already clears it. Never flag an idea spec as orphan/stray for "not in cockpit": ideas deliberately do not appear in cockpit `## 进行中` (only `active` does).
-- **`status: scrapped` specs are exempt from orphan/stray.** A scrapped spec stays in `specs/` in place and is now reachable via the `### 已否决（scrapped）` group of `specs/INDEX` (see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs)) — do NOT flag it as an orphan/stray here. (Its INDEX presence is the `### 已否决` row checked in Audit 5; it stays off the to-start pool.) The author deletes scrapped specs by hand at will.
 - A non-`.md` file under `flightdeck/` that no folder semantics cover: **WARNING**. Asset files (`.png` `.svg` `.json` `.yaml` etc.) under a folder that expects them (e.g. `references/`) are fine — do not flag those.
 - `references/` may hold an external project tree — files nested inside `references/<project>/` are not stray. Only top-level unrecognized files directly under `flightdeck/` or directly under a non-nestable folder are flagged.
 
@@ -167,7 +166,7 @@ Cockpit `## 进行中` is the AUTO-derived projection of the active set — an a
 
 - Read the `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` block in `cockpit.md`. Compute the expected set = every `status: active` spec/plan (NOT in `archive/`). Compare to the rows present:
   - An `active` spec/plan with **no** row in `## 进行中`: **WARNING** — missing from the active projection (run a regen). An `active` artifact invisible in cockpit is exactly the orphan the model-v4 design rules out — so this is the load-bearing check.
-  - A row for a file that is **not** `active` (it is `idea` / `done` / `scrapped`, or absent on disk): **WARNING** — stale projection row.
+  - A row for a file that is **not** `active` (it is `idea` / `done`, or absent on disk): **WARNING** — stale projection row.
   - A row whose `summary` / `[note: …]` differs from the file's current frontmatter: **INFO** — cosmetic drift, self-heals on the next `status`/`landing` regen (mirror of Audit 5's summary-segment leniency; don't byte-compare the summary as WARNING).
 - **Fast path**: the same `flightdeck_index.py --check <deck>` from Audit 5 also checks the `cockpit` target — a reported `cockpit` drift label covers this audit's WARNING cases deterministically.
 - If `cockpit.md` has no `<!-- AUTO:inprogress -->` region at all: this is a pre-model-v4 cockpit → handled by the migration offer (Audit 10 / preflight), not a separate finding here.

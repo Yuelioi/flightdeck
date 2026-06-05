@@ -53,7 +53,7 @@ has AGENTS.md but don't auto-regen
 
 ```markdown
 ---
-status: idea          # idea / active / done / scrapped (idea = unstarted, no date prefix; flip to active to start)
+status: idea          # idea / active / done (idea = unstarted, no date prefix; flip to active to start)
 summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines (use commas/dashes). Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a real change (not typos)
 note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pending reason). Rendered in cockpit 进行中 + walkaround as [note: …]
@@ -70,7 +70,7 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 
 ```markdown
 ---
-status: active               # idea / active / done / scrapped
+status: active               # idea / active / done
 summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing
 note: <one-line diagnostic>  # optional; "why it hasn't moved". Rendered in cockpit 进行中 + walkaround as [note: …]
@@ -130,7 +130,7 @@ summary: <one-line gist>  # optional but recommended; drives INDEX row
 <!-- optional hand-maintained area (grouping notes for multi-file topics); AI does not touch -->
 ```
 
-For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `references/` add `when_to_read` / `applies_to`. `implements`, `supersedes`, `related`, `note` do NOT go into the INDEX. (`specs/INDEX` groups its AUTO region by status and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).)
+For a workflow row (`specs/` `plans/`) the `<one-line summary>` is the file's `summary` frontmatter, copied verbatim (with `|` pipe-escaped) — the row is **derived from `summary`**, not hand-written; see [exit-ritual.md § INDEX regeneration](exit-ritual.md#index-regeneration--scope-rules) for the row-building rule. A file with no `summary` produces a row with the summary segment omitted. Rows in `incidents/` `checklists/` `references/` add `when_to_read` / `applies_to`. `implements`, `supersedes`, `related`, `note` do NOT go into the INDEX. (`specs/INDEX` groups its AUTO region by status — see [folder-semantics § specs/](folder-semantics.md#specs--designs).)
 
 ---
 
@@ -273,7 +273,7 @@ The specific next-time action. Not "be careful". Concrete behavior or check.
 ### Rules
 
 - An idea-stage spec (`status: idea`) is a one-liner — no date prefix, no `implements:`. Starting it = flip `status: idea → active` (auto-adds the `YYYY-MM-DD-` prefix); a fuller design body grows in once active.
-- If an idea has been sitting > 6 months and no trigger has fired, consider `status: scrapped` (stays in `specs/`, listed under the `### 已否决（scrapped）` group of `specs/INDEX` — visible but off the to-start pool). An idea that never finds its moment is not high-signal.
+- If an idea has been sitting > 6 months and no trigger has fired, **delete it** (git log keeps the history; note the reason in the commit body). An idea that never finds its moment is not high-signal.
 
 ---
 

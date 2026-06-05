@@ -19,7 +19,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-STATUS_ORDER = ["idea", "active", "done", "scrapped"]
+STATUS_ORDER = ["idea", "active", "done"]
 
 # 签名归一化：剥掉易变 token（路径/行号/时间戳/hex/uuid/长整数），但保留语义 token
 # （如引号包裹的 key）——`KeyError: 'summary'` 与 `'title'` 必须区分。完整规则在此，
@@ -162,9 +162,8 @@ def folder_summary(folder):
 
     Status is the shared `status:` across artifacts, or "mixed" if they differ.
 
-    In `specs/`, `scrapped` files are skipped (model-v4 §1.4): they stay on disk
-    but never show in the specs INDEX, so the root count must match the visible
-    rows and exclude them too.
+    Knowledge folders exclude `obsolete` (it stays on disk but off the routing
+    INDEX, so the root count must match the visible rows).
     """
     folder = Path(folder)
     names = [p for p in folder.glob("*.md") if p.name != "INDEX.md"]
@@ -172,8 +171,6 @@ def folder_summary(folder):
         parse_frontmatter(p.read_text(encoding="utf-8")).get("status", "")
         for p in names
     ]
-    if folder.name == "specs":
-        statuses = [s for s in statuses if s != "scrapped"]
     if folder.name in KNOWLEDGE_KINDS:
         statuses = [s for s in statuses if s != "obsolete"]
     total = len(statuses)
@@ -230,8 +227,8 @@ def regen_folder_index(folder):
     prefix) and would sort badly mixed with the dated active/done files, so the
     block is split into two in-AUTO subgroups — `### 待启动（idea）` (idea,
     alphabetical) and `### 进行中·完成（active·done）` (active/done, by filename
-    date descending). `scrapped` files stay on disk but never appear (they must
-    not pollute the to-start pool, and the root count excludes them too).
+    date descending). A rejected spec is deleted outright (3.0), not parked — so
+    there is no scrapped/tombstone group.
 
     Nestable knowledge folders (NESTABLE_KINDS) with subdirectories produce an
     INDEX-of-INDEXes: one area row per subdirectory (purpose + last_updated from
@@ -267,14 +264,11 @@ def _specs_grouped_body(folder, names):
     fms = {name: parse_frontmatter((folder / name).read_text(encoding="utf-8")) for name in names}
     ideas = sorted(n for n in names if fms[n].get("status") == "idea")
     active_done = sorted((n for n in names if fms[n].get("status") in ("active", "done")), reverse=True)
-    scrapped = sorted(n for n in names if fms[n].get("status") == "scrapped")
     groups = []
     if ideas:
         groups.append("### 待启动（idea）\n" + "\n".join(format_row("specs", n, fms[n]) for n in ideas))
     if active_done:
         groups.append("### 进行中·完成（active·done）\n" + "\n".join(format_row("specs", n, fms[n]) for n in active_done))
-    if scrapped:
-        groups.append("### 已否决（scrapped）\n" + "\n".join(format_row("specs", n, fms[n]) for n in scrapped))
     return "\n\n".join(groups)
 
 
@@ -389,6 +383,38 @@ def archivable_done(deck):
     return sorted(result)
 
 
+def spec_advance_candidates(deck):
+    """active spec whose implementing plans are ALL done (≥1 done, no active/idea
+    plan still pointing at it) — the plans finished but the spec lags behind.
+    landing confirm-gated offers to advance such a spec to `done` (it never flips
+    a second artifact itself). Deterministic, read-only; returns spec paths
+    relative to deck, sorted. Reuses the `implements:` edge, orthogonal to the
+    archivable (done-archival) and recurrence (incident-signature) sweeps."""
+    deck = Path(deck)
+    plans = deck / "plans"
+    if not plans.is_dir():
+        return []
+    by_spec = {}  # spec_rel -> set of implementing-plan statuses
+    for p in sorted(plans.glob("*.md")):
+        if p.name == "INDEX.md":
+            continue
+        fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+        target = fm.get("implements")
+        if target:
+            by_spec.setdefault(target.strip(), set()).add(fm.get("status", ""))
+    result = []
+    for spec_rel, statuses in by_spec.items():
+        spec_path = deck / spec_rel
+        if not spec_path.is_file():
+            continue
+        if parse_frontmatter(spec_path.read_text(encoding="utf-8")).get("status") != "active":
+            continue
+        # all implementing plans done (≥1 done, nothing still active/idea)
+        if "done" in statuses and statuses <= {"done"}:
+            result.append(spec_rel)
+    return sorted(result)
+
+
 def _structural_signal(deck):
     """True if the deck shows any pre-3.0-coherence structural signal."""
     deck = Path(deck)
@@ -434,8 +460,6 @@ def layout_verdict(deck):
         return vclass
     # 版本不落后 → 再查 malformed（缺必需 workflow 字段）
     for fm in _workflow_fms(deck):
-        if fm.get("status") == "scrapped":
-            continue
         if "status" not in fm or "summary" not in fm:
             return "malformed"
     return vclass
@@ -519,6 +543,11 @@ def main(argv=None):
         action="store_true",
         help="print the deck's archivable done set (one path per line) and exit; read-only",
     )
+    ap.add_argument(
+        "--advance-candidates",
+        action="store_true",
+        help="print active specs whose implementing plans are all done (one path per line) and exit; read-only",
+    )
     ap.add_argument("--match-signature", metavar="SYMPTOM", default=None,
                     help="print incidents whose signature fingerprint matches SYMPTOM (read-only); status<TAB>path")
     ap.add_argument("--sig-error-type", metavar="TYPE", default="",
@@ -531,6 +560,11 @@ def main(argv=None):
 
     if args.archivable:
         for rel in archivable_done(args.deck):
+            print(rel)
+        return 0
+
+    if args.advance_candidates:
+        for rel in spec_advance_candidates(args.deck):
             print(rel)
         return 0
 

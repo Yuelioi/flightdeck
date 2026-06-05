@@ -26,8 +26,8 @@ DASH = "—"  # em dash, the INDEX row delimiter
 
 
 class ModelConstantsTest(unittest.TestCase):
-    def test_status_order_is_four_states(self):
-        self.assertEqual(STATUS_ORDER, ["idea", "active", "done", "scrapped"])
+    def test_status_order(self):
+        self.assertEqual(STATUS_ORDER, ["idea", "active", "done"])
 
     def test_summary_kinds(self):
         self.assertEqual(SUMMARY_KINDS, {"specs", "plans"})
@@ -167,14 +167,10 @@ class SpecsGroupingTest(unittest.TestCase):
         (folder / "2026-06-03-new-done.md").write_text(
             "---\nstatus: done\nsummary: new done\n---\n", encoding="utf-8"
         )
-        # scrapped: physically present but must not appear
-        (folder / "2026-05-01-rejected.md").write_text(
-            "---\nstatus: scrapped\nsummary: rejected\n---\n", encoding="utf-8"
-        )
         (folder / "INDEX.md").write_text("stale\n", encoding="utf-8")
         return folder
 
-    def test_specs_index_groups_by_status_with_scrapped_in_own_section(self):
+    def test_specs_index_groups_by_status(self):
         with tempfile.TemporaryDirectory() as d:
             folder = self._specs(d)
             expected = (
@@ -186,9 +182,6 @@ class SpecsGroupingTest(unittest.TestCase):
                 "### 进行中·完成（active·done）\n"
                 f"- [2026-06-03-new-done.md](2026-06-03-new-done.md) {DASH} done {DASH} new done\n"
                 f"- [2026-06-01-old-active.md](2026-06-01-old-active.md) {DASH} active {DASH} old active\n"
-                "\n"
-                "### 已否决（scrapped）\n"
-                f"- [2026-05-01-rejected.md](2026-05-01-rejected.md) {DASH} scrapped {DASH} rejected\n"
                 "<!-- /AUTO -->"
             )
             self.assertEqual(regen_folder_index(folder), expected)
@@ -267,35 +260,6 @@ class FolderSummaryTest(unittest.TestCase):
             # active before done (lifecycle order), per folder-semantics example
             self.assertEqual(folder_summary(folder), "3 (1 active, 2 done)")
 
-    def test_specs_scrapped_excluded_from_root_count(self):
-        # scrapped specs stay on disk but are invisible in the specs INDEX, so
-        # they must not be counted in the root summary either — the root count
-        # must equal the number of visible INDEX rows.
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "specs"
-            folder.mkdir()
-            (folder / "2026-06-01-a.md").write_text(
-                "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
-            )
-            (folder / "2026-05-01-r.md").write_text(
-                "---\nstatus: scrapped\nsummary: r\n---\n", encoding="utf-8"
-            )
-            (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
-            # 1 visible (active); scrapped excluded
-            self.assertEqual(folder_summary(folder), "1 active")
-
-    def test_non_specs_folder_counts_all_statuses(self):
-        # the scrapped exclusion is specs-only; other folders count everything.
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "plans"
-            folder.mkdir()
-            (folder / "a.md").write_text(
-                "---\nstatus: active\nsummary: x\n---\n", encoding="utf-8"
-            )
-            (folder / "b.md").write_text(
-                "---\nstatus: scrapped\nsummary: y\n---\n", encoding="utf-8"
-            )
-            self.assertEqual(folder_summary(folder), "2 (1 active, 1 scrapped)")
 
     def test_empty_folder_is_zero(self):
         with tempfile.TemporaryDirectory() as d:
@@ -575,15 +539,6 @@ class LayoutVerdictTest(unittest.TestCase):
             )
             self.assertEqual(flightdeck_index.layout_verdict(deck), "malformed")
 
-    def test_scrapped_missing_summary_not_malformed(self):
-        with tempfile.TemporaryDirectory() as d:
-            deck = self._deck(d, version="3.0")
-            (deck / "specs" / "2026-05-01-r.md").write_text(
-                "---\nstatus: scrapped\n---\n", encoding="utf-8"
-            )
-            self.assertEqual(flightdeck_index.layout_verdict(deck), "current")
-
-
 class VerdictCliTest(unittest.TestCase):
     def test_verdict_flag_prints_and_writes_nothing(self):
         import io
@@ -631,21 +586,6 @@ class RootIndexDocsTest(unittest.TestCase):
             block = flightdeck_index.regen_root_index(deck)
             self.assertIn("docs/ — 1 active", block)
             self.assertIn("references/ — 1 project imported", block)
-
-
-class SpecsScrappedGroupTest(unittest.TestCase):
-    def test_scrapped_listed_in_own_group(self):
-        with tempfile.TemporaryDirectory() as d:
-            specs = Path(d) / "specs"
-            specs.mkdir()
-            (specs / "idea-x.md").write_text("---\nstatus: idea\nsummary: i\n---\n", encoding="utf-8")
-            (specs / "2026-06-01-a.md").write_text("---\nstatus: active\nsummary: a\n---\n", encoding="utf-8")
-            (specs / "2026-05-01-dead.md").write_text("---\nstatus: scrapped\nsummary: d\n---\n", encoding="utf-8")
-            block = flightdeck_index.regen_folder_index(specs)
-            self.assertIn("### 待启动（idea）", block)
-            self.assertIn("### 进行中·完成（active·done）", block)
-            self.assertIn("### 已否决（scrapped）", block)
-            self.assertIn("2026-05-01-dead.md", block)
 
 
 class ArchivableDoneTest(unittest.TestCase):
@@ -942,6 +882,75 @@ class ObsoleteRoutingExcludeTest(unittest.TestCase):
             block = regen_folder_index(folder)
             self.assertIn("live.md", block)
             self.assertNotIn("dead.md", block)   # obsolete 不进路由
+
+
+class SpecAdvanceCandidatesTest(unittest.TestCase):
+    def _deck(self, root):
+        deck = Path(root)
+        (deck / "specs").mkdir()
+        (deck / "plans").mkdir()
+        return deck
+
+    def _spec(self, deck, name, status):
+        (deck / "specs" / name).write_text(
+            f"---\nstatus: {status}\nsummary: s\n---\n", encoding="utf-8")
+
+    def _plan(self, deck, name, status, implements):
+        (deck / "plans" / name).write_text(
+            f"---\nstatus: {status}\nimplements: {implements}\nsummary: p\n---\n", encoding="utf-8")
+
+    def test_active_spec_with_all_plans_done_is_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "active")
+            self._plan(deck, "2026-06-02-p.md", "done", "specs/2026-06-01-x.md")
+            self.assertEqual(
+                flightdeck_index.spec_advance_candidates(deck),
+                ["specs/2026-06-01-x.md"])
+
+    def test_two_done_plans_one_spec_is_candidate_once(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "active")
+            self._plan(deck, "2026-06-02-a.md", "done", "specs/2026-06-01-x.md")
+            self._plan(deck, "2026-06-03-b.md", "done", "specs/2026-06-01-x.md")
+            self.assertEqual(
+                flightdeck_index.spec_advance_candidates(deck),
+                ["specs/2026-06-01-x.md"])
+
+    def test_active_spec_with_an_active_plan_not_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "active")
+            self._plan(deck, "2026-06-02-p1.md", "done", "specs/2026-06-01-x.md")
+            self._plan(deck, "2026-06-03-p2.md", "active", "specs/2026-06-01-x.md")
+            self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
+
+    def test_done_spec_not_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "done")
+            self._plan(deck, "2026-06-02-p.md", "done", "specs/2026-06-01-x.md")
+            self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
+
+    def test_active_spec_no_plan_not_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "active")
+            self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
+
+    def test_active_spec_with_only_idea_plan_not_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._spec(deck, "2026-06-01-x.md", "active")
+            self._plan(deck, "2026-06-02-p.md", "idea", "specs/2026-06-01-x.md")
+            self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
+
+    def test_plan_implementing_missing_spec_ignored(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._plan(deck, "2026-06-02-p.md", "done", "specs/ghost.md")
+            self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
 
 
 if __name__ == "__main__":

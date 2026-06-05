@@ -43,7 +43,7 @@ flightdeck/
 ├── rules.md            # Mandatory file (minimal contract); content optional — read first by every entry skill
 ├── INDEX.md            # Root index: subfolder directory + global status summary
 │
-├── specs/              # Designs & ideas (status: idea / active / done / scrapped)
+├── specs/              # Designs & ideas (status: idea / active / done)
 │   └── INDEX.md
 ├── plans/              # Implementation plans (carry optional implements:)
 │   └── INDEX.md
@@ -140,13 +140,13 @@ Design documents **and** unstarted ideas — one folder, status tells them apart
 
 **`status: idea`** = an unstarted thought / design (the to-start pool). No date prefix — ideas are timeless until acted on (`<topic>.md`). Starting it is a single field flip `idea → active`, which **adds the `YYYY-MM-DD-` prefix** (date helps order active/done by recency) and surfaces it in cockpit `## 进行中`. No folder move, no relation-edge rewrite — that is the whole point of merging sketches in.
 
-**`status: scrapped`** = the idea / design is abandoned. A scrapped spec **stays in `specs/` in place** — never archived to `archive/`, and **not** moved to a `graveyard/` subfolder (subfolders inside `specs/` are forbidden — see below). It stays **visible in `specs/INDEX`** but is listed under a dedicated `### 已否决（scrapped）` group — separated from the to-start pool so it does not pollute it, yet still reachable. (Don't exclude it from INDEX entirely: routing runs off the INDEX, so a fully-excluded scrapped spec would be invisible to the AI — losing the whole point of recording "considered, rejected" to avoid re-raising it.) Delete by hand at will — `walkaround` does not flag deletions of scrapped specs.
+**Rejecting a spec** = the idea / design is abandoned, so the file is **deleted** (only on explicit user instruction — the AI never abandons work unilaterally). git log keeps the history; record the reason in the commit body. There is no `scrapped` status value, no tombstone, no `graveyard/` subfolder — `specs/` holds only live designs (idea / active / done).
 
 The folder is the kind — files carry no type field. No `implements:` (that goes on the plan side).
 
 Lifecycle: when a spec is done and all its plans are complete, `land` it — move to `archive/specs/foo.md`. The spec leaves the active routing set but its history is preserved.
 
-**`specs/INDEX` status grouping**: idea files have no date prefix, so mixing them with the `YYYY-MM-DD-` active/done files would sort badly. The INDEX AUTO region **groups by status**: `待启动（idea）`, `进行中·完成（active·done）` — active/done by date descending, idea alphabetically — and a dedicated `### 已否决（scrapped）` group (visible but kept out of the to-start pool).
+**`specs/INDEX` status grouping**: idea files have no date prefix, so mixing them with the `YYYY-MM-DD-` active/done files would sort badly. The INDEX AUTO region **groups by status**: `待启动（idea）`, `进行中·完成（active·done）` — active/done by date descending, idea alphabetically.
 
 ### `plans/` — implementation plans
 
@@ -239,7 +239,7 @@ Nesting is decided **by axis**, not by per-folder exception:
 - **Knowledge folders MAY nest by area.** `NESTABLE` = the four knowledge kinds: `incidents/`, `checklists/`, `docs/`, `references/`. Place files under `<folder>/<area>/` with its own `<folder>/<area>/INDEX.md`. A subdirectory is **only an organizational partition within the same kind — never another kind** (that would reintroduce the "what kind is the subfolder" question). Depth is not capped: every level carries its own `INDEX.md`, and the top-level `<folder>/INDEX.md` becomes an **INDEX-of-INDEXes** listing each area (each row carries a one-line purpose + `last_updated`); preflight reads only the top INDEX to know-what-exists and drills down on demand.
 - **Workflow folders are strictly flat.** Do **NOT** create subfolders inside `specs/` or `plans/`. When one workflow topic needs several files (a large spec broken into chapters), keep them all in the same folder and group them in that folder's `INDEX.md` hand area (outside the `<!-- AUTO -->` region) with a label like `### Auth redesign (3 files)`.
 
-**Why the split — drain vs accumulate.** Workflow is one-shot: once `done` it drains into `archive/`, so the active set stays capacity-bounded — flat + INDEX date-ordering is enough (group by feature via the INDEX hand area, not subdirectories). Knowledge is resident and only grows (never archived on completion), so it needs by-area nesting to stay navigable at scale. (This also rules out a `specs/graveyard/` for scrapped specs — they stay in place, see [`specs/`](#specs--designs).)
+**Why the split — drain vs accumulate.** Workflow is one-shot: once `done` it drains into `archive/`, so the active set stays capacity-bounded — flat + INDEX date-ordering is enough (group by feature via the INDEX hand area, not subdirectories). Knowledge is resident and only grows (never archived on completion), so it needs by-area nesting to stay navigable at scale.
 
 ## README → INDEX
 

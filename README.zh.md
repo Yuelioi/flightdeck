@@ -195,7 +195,7 @@ version: <release>       # 唯一的结构化字段
 
 ## 文档
 
-**深入指南** —— 见 [`docs/`](docs/)：[生命周期与执行流程](docs/lifecycle.md) · [架构](docs/architecture.md) · [设计哲学](docs/philosophy.md) · [横向对比](docs/comparison.md)
+**深入指南** —— 见 [`docs/`](docs/)：[架构](docs/architecture.md) · [设计哲学](docs/philosophy.md) · [横向对比](docs/comparison.md)
 
 **协议参考**（canonical，AI 向）：[protocol.md](skills/preflight/protocol.md) · [文件夹语义](skills/preflight/folder-semantics.md) · [模板](skills/preflight/templates.md) · [landing 仪式](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 

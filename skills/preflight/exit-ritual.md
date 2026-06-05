@@ -56,7 +56,7 @@ Step 3a: Suggest status for affected artifacts
          anchor for the recommended-but-not-required workflow `last_updated`;
          knowledge artifacts already carry their own required `last_updated`.
 
-         For done or scrapped artifacts, offer to land them via the
+         For done artifacts, offer to land them via the
          single shared Land Routine (see "## Land Routine" below) —
          do not inline the move/INDEX/HISTORY steps here.
 
@@ -215,7 +215,7 @@ Walkaround is responsible for the **full-consistency check** — it regenerates 
 
 Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (a further token saving, complementing read-INDEX-first). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
 
-- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region into three sections: `待启动（idea）` / `进行中·完成（active·done）` / `已否决（scrapped）` — scrapped is **visible** in its own group (not skipped), but excluded from the to-start pool and from root INDEX counts — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region into two sections: `待启动（idea）` / `进行中·完成（active·done）` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 - **Knowledge folders** (`incidents/` `checklists/` `docs/` `references/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`references/` rows show project/file count, not per-file status; `docs/` rows read `<status> — when_to_read: <…> — applies_to: <…>` like the other authored knowledge folders.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
@@ -263,7 +263,7 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 The single source of truth for landing artifacts. Both `landing` (Step 3a above) and the `status` skill (`skills/status/SKILL.md`) MUST call this — do not reimplement it anywhere.
 
-Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
+Landing operates on a **land set**: the one-or-more `done` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
 0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` / `superseded_by:` inbound edge. Fast path: read the deterministic set from `flightdeck_index.py <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts). Fallback (no Python runtime): compute the same set by hand — scan every `active` artifact's `implements:` / `superseded_by:` values, collect their targets, and any `done`-in-place artifact **not** in that target set is archivable. Either way the judgment is the **edge graph**, never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` items land.)
 
@@ -283,7 +283,7 @@ Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifact
 
 Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2:
 
-- **signal 1** — this `status` invocation just flipped an artifact to `done` / `scrapped`.
+- **signal 1** — this `status` invocation just flipped an artifact to `done`.
 - **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
 
 Mechanics:

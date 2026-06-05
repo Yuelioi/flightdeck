@@ -123,7 +123,7 @@ def main(argv=None):
     ap.add_argument("--slug", required=True, help="filename slug: ^[a-z0-9-]+$")
     ap.add_argument("--title", required=True, help="human title (becomes the H1)")
     ap.add_argument("--status", default=None,
-                    choices=["idea", "active", "done", "scrapped", "obsolete", "superseded"])
+                    choices=["idea", "active", "done", "obsolete", "superseded"])
     ap.add_argument("--summary", default="", help="one-line gist (drives the INDEX row)")
     ap.add_argument("--implements", default=None, help="workflow only: specs/<x>.md")
     ap.add_argument("--when-to-read", dest="when_to_read", default=None)

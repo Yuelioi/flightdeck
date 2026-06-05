@@ -11,13 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **`docs/` 文件夹** — 自撰常驻技术资料（区别于 `references/` 导入的外部材料）；knowledge 可按 area 嵌套形成 INDEX-of-INDEXes，撑大型项目。
-- **`scrapped` 在 `specs/INDEX` 单列 `### 已否决`** — 已否决 spec 不消失，可见留存供未来参考，避免重复讨论。
 - **incident 错误库生命周期** — 可 grep 的 `## Signature`（4 键放正文，preflight 不读 → 零路由 token）+ 确定性签名指纹去重（`--match-signature`，归一化剥易变 token、保语义键）+ obsolete 退役出路由（退出 INDEX/计数但留盘、仍进匹配）+ 回归复活（landing gated sweep 命中 obsolete 先确认再翻 active）。
 
 ### Changed
 - **主流命名铁律**：`charts/` → `references/`，`landed/` → `archive/`。航空隐喻只留指令/仪式/cockpit，数据文件夹改主流名，降低首次读者认知摩擦。
 - **status⟂location**：`done ≠ archived`。归档判据确定性：无 active 入边（`implements` / `superseded_by`），通过 `--archivable` 检查，才进 `archive/`；`done` 仅表示工作完成，不触发自动归档。
 - **done 翻转 end-of-turn 防抖接力 landing**：出厂默认 `status` 将 `done` 检测到后，在当轮结束时自动接力触发 landing（push 先问）；House Rule `landing: nudge on done, don't auto-run` 可将行为降级为仅提示。
+- **workflow status 收敛 + `scrapped` 退役**：workflow status 三值 `idea`/`active`/`done`。否决一个工件＝直接删文件（git log 留史、commit body 记一行原因），不再有 `scrapped` 状态值或 `### 已否决` 墓碑分组——消除"留 specs/ 当墓碑"与"计数排除/文档声称不可见"的自相矛盾。
 
 ### Breaking
 - `charts/` → `references/`，`landed/` → `archive/`：存量 deck 需重命名文件夹及更新内部路径引用。迁移指引见 [MIGRATION.md](MIGRATION.md)。

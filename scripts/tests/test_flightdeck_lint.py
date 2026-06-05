@@ -13,9 +13,31 @@ from flightdeck_lint import (
     audit_index_consistency,
     audit_dangling_refs,
     audit_stray,
+    audit_required_structure,
     lint,
     main,
 )
+
+
+FULL_COCKPIT = """# Cockpit — test
+
+**Last updated**: 2026-06-06 by t
+**Active focus**: x
+
+## 进行中
+
+<!-- AUTO:inprogress -->
+- item
+<!-- /AUTO -->
+
+## 下一步
+
+- do the thing
+
+## Hanging tasks
+
+- (none)
+"""
 
 
 def _sev(findings, severity):
@@ -54,11 +76,24 @@ class AuditStatusTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
             (deck / "specs").mkdir()
-            for s in ("idea", "active", "done", "scrapped"):
+            for s in ("idea", "active", "done"):
                 (deck / "specs" / f"{s}.md").write_text(
                     f"---\nstatus: {s}\nsummary: x\n---\n", encoding="utf-8"
                 )
             self.assertEqual(audit_status(deck), [])
+
+    def test_scrapped_is_illegal_workflow_status(self):
+        # `scrapped` was retired (3.0): a rejected artifact is deleted, not
+        # parked. A lingering `status: scrapped` is now an illegal value.
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "specs").mkdir()
+            (deck / "specs" / "2026-05-01-dead.md").write_text(
+                "---\nstatus: scrapped\nsummary: r\n---\n", encoding="utf-8"
+            )
+            warn = _sev(audit_status(deck), "WARNING")
+            self.assertEqual(len(warn), 1)
+            self.assertIn("scrapped", warn[0]["message"])
 
     def test_knowledge_illegal_status_is_warning(self):
         with tempfile.TemporaryDirectory() as d:
@@ -309,6 +344,76 @@ class AuditStrayTest(unittest.TestCase):
             self.assertEqual(audit_stray(deck), [])
 
 
+class AuditRequiredStructureTest(unittest.TestCase):
+    def _write_cockpit(self, deck, text):
+        (deck / "cockpit.md").write_text(text, encoding="utf-8")
+
+    def test_full_cockpit_no_finding(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT)
+            self.assertEqual(audit_required_structure(deck), [])
+
+    def test_missing_inprogress_heading_is_critical(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## 进行中\n", ""))
+            crit = _sev(audit_required_structure(deck), "CRITICAL")
+            self.assertEqual(len(crit), 1)
+            self.assertIn("进行中", crit[0]["message"])
+            self.assertTrue(crit[0]["path"].endswith("cockpit.md"))
+
+    def test_missing_next_step_heading_is_critical(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## 下一步\n", ""))
+            crit = _sev(audit_required_structure(deck), "CRITICAL")
+            self.assertEqual(len(crit), 1)
+            self.assertIn("下一步", crit[0]["message"])
+
+    def test_missing_hanging_tasks_heading_is_critical(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging tasks\n", ""))
+            crit = _sev(audit_required_structure(deck), "CRITICAL")
+            self.assertEqual(len(crit), 1)
+            self.assertIn("Hanging tasks", crit[0]["message"])
+
+    def test_missing_auto_open_anchor_is_critical(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("<!-- AUTO:inprogress -->\n", ""))
+            crit = _sev(audit_required_structure(deck), "CRITICAL")
+            self.assertEqual(len(crit), 1)
+            self.assertIn("AUTO:inprogress", crit[0]["message"])
+
+    def test_missing_auto_close_anchor_is_critical(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("<!-- /AUTO -->\n", ""))
+            crit = _sev(audit_required_structure(deck), "CRITICAL")
+            self.assertEqual(len(crit), 1)
+            self.assertIn("/AUTO", crit[0]["message"])
+
+    def test_no_cockpit_file_no_finding(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self.assertEqual(audit_required_structure(deck), [])
+
+    def test_heading_with_trailing_whitespace_still_matches(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## 下一步\n", "## 下一步   \n"))
+            self.assertEqual(audit_required_structure(deck), [])
+
+    def test_lint_includes_required_structure(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging tasks\n", ""))
+            findings = lint(deck)
+            self.assertTrue(any(f["audit"] == "required-structure" for f in findings))
+
+
 class LintAndMainTest(unittest.TestCase):
     def test_lint_aggregates_audits(self):
         with tempfile.TemporaryDirectory() as d:
@@ -344,7 +449,7 @@ class LintAndMainTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            (deck / "cockpit.md").write_text("# c\n", encoding="utf-8")
+            (deck / "cockpit.md").write_text(FULL_COCKPIT, encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):
                 rc = main([str(deck)])
