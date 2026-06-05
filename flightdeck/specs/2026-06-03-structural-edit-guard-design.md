@@ -29,4 +29,4 @@ reorder cockpit `## Next session` 列表时，一个多行 `Edit` 的 `old_strin
 ## Related
 
 - [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) —— lint 子命令是实现归属
-- [token-reduction](../landed/specs/2026-06-03-token-reduction-design.md) —— anchor-checker PoC 来源（同批 QA 发现 dangling link）
+- [token-reduction](../archive/specs/2026-06-03-token-reduction-design.md) —— anchor-checker PoC 来源（同批 QA 发现 dangling link）

@@ -41,12 +41,12 @@ Autonomy release: new decks ship full-auto, a `commit_mode` landing policy, and 
 Metadata-model consolidation + workflow frontmatter enrichment, with the deck-conformance version relocated into a now-mandatory `rules.md`. **Existing decks need a one-time migration** — see [MIGRATION.md](MIGRATION.md) (2.1 → 2.2).
 
 ### Added
-- **Workflow frontmatter enrichment** — sketches/specs/plans gain recommended `summary` + `last_updated` and optional `supersedes` / `related` edges. `summary` drives the INDEX row (rows now derive purely from frontmatter); `last_updated` is auto-bumped by `status`/`landing`; relation edges are forward-only (reverse is grep-derived). ([spec](flightdeck/landed/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md))
-- **Canonical frontmatter field table** in `protocol.md` — single source of truth; `templates.md` / `folder-semantics.md` / `walkaround` defer to it instead of restating field semantics. ([spec](flightdeck/landed/specs/2026-06-02-metadata-model-consolidation-design.md))
+- **Workflow frontmatter enrichment** — sketches/specs/plans gain recommended `summary` + `last_updated` and optional `supersedes` / `related` edges. `summary` drives the INDEX row (rows now derive purely from frontmatter); `last_updated` is auto-bumped by `status`/`landing`; relation edges are forward-only (reverse is grep-derived). ([spec](flightdeck/archive/specs/2026-06-02-workflow-artifact-frontmatter-enrichment-design.md))
+- **Canonical frontmatter field table** in `protocol.md` — single source of truth; `templates.md` / `folder-semantics.md` / `walkaround` defer to it instead of restating field semantics. ([spec](flightdeck/archive/specs/2026-06-02-metadata-model-consolidation-design.md))
 - **walkaround Audits 11–12** — aggregated INFO for missing workflow `summary`/`last_updated`, plus dangling `supersedes`/`related` edge detection.
 
 ### Changed
-- **`rules.md` is now mandatory** and carries the deck-conformance `version:` — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. ([spec](flightdeck/landed/specs/2026-06-02-version-in-rules-migration-detection-design.md))
+- **`rules.md` is now mandatory** and carries the deck-conformance `version:` — part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). `preflight`/`walkaround` compare it against `MIGRATION.md` (`current` + `layout_need_update`) to detect migrations. ([spec](flightdeck/archive/specs/2026-06-02-version-in-rules-migration-detection-design.md))
 - **The `` `**Layout**` `` line is removed from `cockpit.md`** — the version now lives in `rules.md`; cockpit is pure focus.
 - **INDEX rows derive from `summary`**, and `landing` rewrites inbound `supersedes`/`related` edges to the `landed/` prefix on archive.
 
@@ -55,8 +55,8 @@ Metadata-model consolidation + workflow frontmatter enrichment, with the deck-co
 Soft-config gating + a new high-frequency status ritual. Additive and opt-in — `flightdeck/` Layout stays 1.2; default behavior is unchanged.
 
 ### Added
-- **`model_invocable` rules.md toggle** — per-project soft gate replacing the global `disable-model-invocation` hard switch on the four entry skills. Default `[]` = all manual (identical to before); opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`. ([spec](flightdeck/landed/specs/2026-06-02-soft-config-model-invocation-design.md))
-- **5th ritual `/flightdeck:status`** — high-frequency, model-invocable lifecycle auto-flip of a single artifact's `status:` + its INDEX row (forward-only; never touches cockpit/commit). ([spec](flightdeck/landed/specs/2026-06-02-status-lifecycle-skill-design.md))
+- **`model_invocable` rules.md toggle** — per-project soft gate replacing the global `disable-model-invocation` hard switch on the four entry skills. Default `[]` = all manual (identical to before); opt a ritual into model self-invocation with e.g. `model_invocable: [landing]`. ([spec](flightdeck/archive/specs/2026-06-02-soft-config-model-invocation-design.md))
+- **5th ritual `/flightdeck:status`** — high-frequency, model-invocable lifecycle auto-flip of a single artifact's `status:` + its INDEX row (forward-only; never touches cockpit/commit). ([spec](flightdeck/archive/specs/2026-06-02-status-lifecycle-skill-design.md))
 - **`status_auto` rules.md toggle** — opt-in list controlling which *optional* status transitions (`start`, `land`) the `status` skill auto-applies; core `create→pending` / `finish→awaiting-review` are always automatic.
 - **rules.md key admission policy** — a 4-point gate in `protocol.md` governing when a new toggle may be added (anti-sprawl).
 
@@ -124,12 +124,12 @@ Reliability + clarity hardening of the four entry skills, driven by multi-model 
 ## [1.1.0] — 2026-05-30
 
 ### Added
-- **Bundles** — a first-class concept for multi-file topics: a subfolder with a `README.md` contract (`bundle: true` + `reading_order` + routing frontmatter) plus detail leaves that inherit the README's routing and carry no routing fields of their own. One routing boundary per bundle (no nesting). See `skills/workflow/folder-semantics.md` and design `flightdeck/landed/specs/2026-05-30-bundles-and-routing-graph-design.md`.
+- **Bundles** — a first-class concept for multi-file topics: a subfolder with a `README.md` contract (`bundle: true` + `reading_order` + routing frontmatter) plus detail leaves that inherit the README's routing and carry no routing fields of their own. One routing boundary per bundle (no nesting). See `skills/workflow/folder-semantics.md` and design `flightdeck/archive/specs/2026-05-30-bundles-and-routing-graph-design.md`.
 - **Routing graph model** — folder-semantics now states flightdeck is graph-routed, not filesystem-routed: a file unreachable from any entry (cockpit / INDEX / manifest / bundle README) effectively does not exist. Custom folders/root files are allowed but must be reachable.
 - **Folder-choice decision table** — sketches (idea) vs specs (design to implement) vs checklists (evergreen operational reference) vs charts (imported external material). `checklists/` re-described as authored operational reference; no `references/` folder.
 - **Optional `skip_when` frontmatter** — negative routing ("when NOT to read this") for checklists / incident-reports / bundle READMEs.
 - **Walkaround** — extended Audit 1 for bundle contracts (README required, leaves must not carry routing fields, `reading_order` match), plus new Audit 9 (orphan / unreachable files + INDEX prompt) and Audit 10 (stray files); 10 audits total.
-- **preflight routing catalog** — `/flightdeck:preflight` now reads + parses the frontmatter of `checklists/` / `incident-reports/` flat files and bundle `README.md`s (recursively, excluding `landed/`) and prints a grouped catalog (`[Checklists]` / `[Incident reports]` / `[Bundles]` / `[Malformed bundles]`) with `when_to_read` + `applies_to` + `last_updated`, so routed triggers are in context at entry. Know-what-exists only (not read-all, not a `walkaround` substitute); leaves excluded; unparseable / missing-`when_to_read` / missing-`bundle:true` files surfaced with `⚠` markers rather than dropped. See `flightdeck/landed/specs/2026-05-30-preflight-routing-catalog-design.md`.
+- **preflight routing catalog** — `/flightdeck:preflight` now reads + parses the frontmatter of `checklists/` / `incident-reports/` flat files and bundle `README.md`s (recursively, excluding `landed/`) and prints a grouped catalog (`[Checklists]` / `[Incident reports]` / `[Bundles]` / `[Malformed bundles]`) with `when_to_read` + `applies_to` + `last_updated`, so routed triggers are in context at entry. Know-what-exists only (not read-all, not a `walkaround` substitute); leaves excluded; unparseable / missing-`when_to_read` / missing-`bundle:true` files surfaced with `⚠` markers rather than dropped. See `flightdeck/archive/specs/2026-05-30-preflight-routing-catalog-design.md`.
 
 ### Changed
 - **`reading_order` is now a reachability edge** — folder-semantics, `SKILL.md`, and walkaround Audit 9 all treat a bundle README's `reading_order` entries as routing edges to its leaves. A leaf listed in `reading_order` is reachable even without a prose body link, so well-formed bundles no longer false-positive as orphans; a leaf *missing* from `reading_order` is an orphan. Resolves a contradiction between the bundle contract (leaf list in frontmatter) and the orphan audit (links-only reachability).
@@ -139,7 +139,7 @@ Reliability + clarity hardening of the four entry skills, driven by multi-model 
 
 **Project renamed from `workshop` to `flightdeck`.** Aviation framing for operational discipline, continuity, and reliability. Single breaking-change window — post-v1.0 is additive-only.
 
-See [MIGRATION.md](MIGRATION.md) for upgrade steps. Design rationale: [flightdeck/landed/specs/2026-05-28-flightdeck-rebrand-design.md](flightdeck/landed/specs/2026-05-28-flightdeck-rebrand-design.md).
+See [MIGRATION.md](MIGRATION.md) for upgrade steps. Design rationale: [flightdeck/archive/specs/2026-05-28-flightdeck-rebrand-design.md](flightdeck/archive/specs/2026-05-28-flightdeck-rebrand-design.md).
 
 ### Renamed
 
