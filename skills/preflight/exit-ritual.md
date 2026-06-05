@@ -24,7 +24,8 @@ Step 2: Did this session produce new knowledge / discover a bug / agree on a dec
            (b) repeated procedure, 2nd occurrence → checklists/ (status: active)
            (c) design decision → specs/ (status: active, or idea if unstarted; brainstorm if substantial)
            (d) multi-step task → plans/ (status: active; optional implements: specs/<x>.md)
-           (e) imported external material → charts/ (status: active)
+           (e) imported external material → references/ (status: active)
+           (e2) authored standing technical reference (architecture / rationale / subsystem) → docs/ (status: active)
            (f) long-term idea / unstarted design → specs/ (status: idea, no date prefix; mark "Revisit when")
            (g) one-off / log / byproduct → DO NOT WRITE (gate)
            (h) ambiguous, no clear primary → brainstorm with user
@@ -39,7 +40,7 @@ Step 3: Regenerate INDEX for changed folders — full rules in "## INDEX regener
 
 Step 3a: Suggest status for affected artifacts
          For each artifact written or touched this session, the AI MAY suggest the next
-         typical status per the recommended flow ([protocol § Status](protocol.md#status-label--recommended-flow)).
+         typical status per the recommended flow ([protocol § Status ⟂ location](protocol.md#status--location-two-orthogonal-axes)).
 
          Status changes are applied ONLY after the user confirms. The user may
          change status to any legal value at any time — the AI does not block.
@@ -69,7 +70,7 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - default        → generate the message + `git commit` locally, no prompt
         - `commit: ask`  → ask "Commit now? (Y/n)" before the local commit
         - `don't auto-commit…` → do NOT commit; leave the changes for you / CI
-        - no-git overrides all → no commit (landing already logged landed/HISTORY.md)
+        - no-git overrides all → no commit (landing already logged archive/HISTORY.md)
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
@@ -126,11 +127,19 @@ Produce a structured plan in `plans/`. Optionally reference the governing design
 
 Set `status: active` in frontmatter.
 
-### (e) Imported external material → `charts/`
+### (e) Imported external material → `references/`
 
 **Trigger phrase**: "here's the RFC" / "import this competitor's API design"
 
-Raw external material — competitor code, RFCs, articles, research papers — goes to `charts/`. Authored operational procedures go to `checklists/` instead (keep the split clear).
+Raw external material — competitor code, RFCs, articles, research papers — goes to `references/`. Authored operational procedures go to `checklists/` instead (keep the split clear).
+
+Set `status: active` in frontmatter.
+
+### (e2) Authored standing technical reference → `docs/`
+
+**Trigger phrase**: "here's how the X subsystem works" / "the architecture / rationale here is, for future reference"
+
+Self-authored, durable explanatory material — architecture overviews, design rationale, subsystem references you wrote to *understand* the system — goes to `docs/`. Keep `docs/` (explanatory: things you read to comprehend) distinct from `checklists/` (procedural: steps you execute) and from `references/` (imported external raw material, not authored). If it teaches *how it works*, it's `docs/`; if it tells you *what steps to run*, it's `checklists/`.
 
 Set `status: active` in frontmatter.
 
@@ -207,7 +216,7 @@ Walkaround is responsible for the **full-consistency check** — it regenerates 
 Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (a further token saving, complementing read-INDEX-first). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
 
 - **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region by status (idea / active·done) and skips `scrapped` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
-- **Knowledge folders** (`incidents/` `checklists/` `charts/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`charts/` rows show project/file count, not per-file status.)
+- **Knowledge folders** (`incidents/` `checklists/` `docs/` `references/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`references/` rows show project/file count, not per-file status; `docs/` rows read `<status> — when_to_read: <…> — applies_to: <…>` like the other authored knowledge folders.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
 ### Script fast path (optional accelerator)
@@ -248,7 +257,7 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 **When to update mid-session:** after any commit that changes user-perceivable state, refresh `## 下一步` before starting the next task — don't wait for landing.
 
-**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` / `landed/HISTORY.md`, never cockpit.
+**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` / `archive/HISTORY.md`, never cockpit.
 
 ## Land Routine
 
@@ -256,11 +265,15 @@ The single source of truth for landing artifacts. Both `landing` (Step 3a above)
 
 Landing operates on a **land set**: the one-or-more `done` / `scrapped` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
-1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = landed/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → landed/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
-2. **Move.** For each entry in `M`, move `<folder>/<file>` → `landed/<folder>/<file>`, creating `landed/<folder>/` if absent.
+0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` / `superseded_by:` inbound edge. Fast path: read the deterministic set from `flightdeck_index.py <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts). Fallback (no Python runtime): compute the same set by hand — scan every `active` artifact's `implements:` / `superseded_by:` values, collect their targets, and any `done`-in-place artifact **not** in that target set is archivable. Either way the judgment is the **edge graph**, never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` items land.)
+
+   **Drain, don't accumulate.** Every landing rescans **all** `done`-in-place artifacts across the deck — **not just this session's freshly-produced ones**. Any whose inbound edge has since cleared (its blocking `active` artifact has itself landed or been re-pointed) is swept into the land set in this same pass; the rest stay **done-but-unlanded** until their blocker clears. So the active area drains automatically and `done`-but-unlanded never lingers as residue.
+
+1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = archive/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → archive/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
+2. **Move.** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent.
 3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
 4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region, then recompute the affected folders' count lines in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
-5. When no-git (deck root has no `.git`, or a House Rule says so), append one line per landing to `landed/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+5. When no-git (deck root has no `.git`, or a House Rule says so), append one line per landing to `archive/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
 
 **There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
 
@@ -273,9 +286,11 @@ Shared predicate, called by `status` (mid-session) and `preflight` (entry). **la
 
 Mechanics:
 - signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
+- **signal 1 auto-landing is end-of-turn debounced.** A `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, replacing the old unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. This is why landing rescans the whole `done`-in-place set (Land Routine step 0) rather than only the just-flipped artifact.
 - signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
-- **Deliberate gap (YAGNI):** a long single session that churns without ever flipping a status is not nudged mid-session (caught at next entry). No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `landed/HISTORY.md` mtime / line growth.
+- **Compatibility-window consequence (known cost, not a bug).** On a deck that is `structural-behind` — not yet migrated to the 3.0 names, so it still has `landed/` / `charts/` — end-of-turn landing **hits the layout guard** and STOPs with "migrate first" instead of archiving. So during the compatibility window, auto-archival is **effectively paused** on un-migrated decks: `done` items stay in place until the author runs the migration. This is the deliberate guard against mixing old/new structure, not a malfunction — don't read it as "auto-landing broke."
+- **Deliberate gap (YAGNI):** a long single session that churns without ever flipping a status is not nudged mid-session (caught at next entry). No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `archive/HISTORY.md` mtime / line growth.
 
 ## See also
 
