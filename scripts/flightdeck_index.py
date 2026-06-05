@@ -61,6 +61,32 @@ def parse_signature(text):
             sig[lm.group(1)] = lm.group(2).strip().strip("`").strip()
     return sig
 
+
+def match_signature(deck, symptom, error_type=""):
+    """返回主指纹相同的 incident（含 status:obsolete——回归检测依赖）。
+    扫 incidents/ 全部 .md（含嵌套 area，rglob）；缺 ## Signature 的跳过（走 AI 模糊层）。
+    每条 {path(相对 deck), status, where}。"""
+    fp = signature_fingerprint(symptom, error_type)
+    hits = []
+    inc = Path(deck) / "incidents"
+    if not inc.is_dir():
+        return hits
+    for p in sorted(inc.rglob("*.md")):
+        if p.name == "INDEX.md":
+            continue
+        text = p.read_text(encoding="utf-8")
+        sig = parse_signature(text)
+        if not sig.get("symptom"):
+            continue
+        if signature_fingerprint(sig["symptom"], sig.get("error_type", "")) == fp:
+            hits.append({
+                "path": str(p.relative_to(deck)).replace("\\", "/"),
+                "status": parse_frontmatter(text).get("status", ""),
+                "where": sig.get("where", ""),
+            })
+    return hits
+
+
 DASH = "—"  # em dash — the INDEX row delimiter
 
 SUMMARY_KINDS = {"specs", "plans"}                       # workflow，summary 行

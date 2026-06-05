@@ -852,5 +852,47 @@ class ParseSignatureTest(unittest.TestCase):
         self.assertEqual(parse_signature("---\nstatus: active\n---\n# t\n## 根因\nx\n"), {})
 
 
+class MatchSignatureTest(unittest.TestCase):
+    def _deck(self, d):
+        deck = Path(d)
+        (deck / "incidents").mkdir(parents=True)
+        return deck
+
+    def _inc(self, deck, name, status, symptom, etype="KeyError"):
+        (deck / "incidents" / name).write_text(
+            f"---\nstatus: {status}\nwhen_to_read: w\napplies_to: [a]\nlast_updated: 2026-06-05\n---\n"
+            f"# t\n\n## Signature\n- symptom: `{symptom}`\n- error_type: {etype}\n- where: foo\n- trigger: t\n",
+            encoding="utf-8",
+        )
+
+    def test_exact_match_returns_path_and_status(self):
+        from flightdeck_index import match_signature
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._inc(deck, "2026-06-05-a.md", "active", "KeyError: 'summary'")
+            hits = match_signature(deck, "KeyError: 'summary'", "KeyError")
+            self.assertEqual(len(hits), 1)
+            self.assertEqual(hits[0]["status"], "active")
+            self.assertTrue(hits[0]["path"].endswith("2026-06-05-a.md"))
+
+    def test_obsolete_still_matched(self):
+        # 回归检测依赖：obsolete 不被过滤
+        from flightdeck_index import match_signature
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            self._inc(deck, "2026-06-05-b.md", "obsolete", "KeyError: 'summary'")
+            hits = match_signature(deck, "KeyError: 'summary'", "KeyError")
+            self.assertEqual([h["status"] for h in hits], ["obsolete"])
+
+    def test_signatureless_skipped(self):
+        from flightdeck_index import match_signature
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "incidents" / "old.md").write_text(
+                "---\nstatus: active\nwhen_to_read: w\napplies_to: [a]\nlast_updated: 2026-06-05\n---\n# t\n## 根因\nx\n",
+                encoding="utf-8")
+            self.assertEqual(match_signature(deck, "KeyError: 'summary'", "KeyError"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
