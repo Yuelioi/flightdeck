@@ -56,6 +56,33 @@ Folded into 3.0 (still in `layout_need_update`, so the offer is non-silent). mod
 
 `current` stays `3.0`; `3.0` is already in `layout_need_update`, so a deck whose structure still matches a pre-model-v4 signal gets the non-silent offer even though the version string may already read `3.0`. After migrating, **reinstall/sync the plugin-cache copy** to load the model-v4 skills.
 
+### 3.0 — 主流命名 + docs/（BREAKING，结构）
+
+Folded into 3.0 (already in `layout_need_update`; offer is non-silent). Aviation metaphors are retained only on the interaction surface (commands / rituals / cockpit); data folders are renamed to mainstream English so non-aviation readers can orient immediately. Three changes: two renames and one new folder.
+
+| Before | After | Notes |
+|---|---|---|
+| `charts/` | `references/` | Semantics unchanged: externally-sourced reference material (`git mv`; INDEX title + `<!-- AUTO:charts -->` → `<!-- AUTO:references -->`) |
+| `landed/` | `archive/` | `git mv`; `landed/HISTORY.md → archive/HISTORY.md`; relationship-edge values with a `landed/` prefix (`implements`/`supersedes`/`related`/`superseded_by`) rewritten to `archive/` |
+| *(absent)* | `docs/` | New knowledge folder for self-authored standing technical material (may nest by area); its absence is not a migration failure — `walkaround` issues an INFO prompt to create it when needed |
+
+**Detection (structural signals, independent of the `version` string).** A deck is flagged `structural-behind` when **any** of the following exists:
+- a `charts/` folder still present;
+- a `landed/` folder still present.
+
+`flightdeck_index.py --verdict` / `_structural_signal` surfaces this verdict. `walkaround` offers the migration; `preflight` only reads and reports. File moves are never performed silently.
+
+**Migration (`walkaround` offers it; never silent; author-confirmed):**
+
+1. **Rename folders.** `git mv charts references` / `git mv landed archive`.
+2. **Update INDEX and markers.** In `references/INDEX.md`: update the title and change `<!-- AUTO:charts -->` to `<!-- AUTO:references -->`. In `archive/HISTORY.md`: update the title if it references `landed`.
+3. **Rewrite relationship edges.** In every workflow file, replace `landed/` prefix values in `implements`/`supersedes`/`related`/`superseded_by` with `archive/`.
+4. **Create `docs/INDEX.md`** (optional — add when you have standing technical material to keep).
+5. **Regenerate INDEX files.** Run `flightdeck_index.py <deck>` — it recognises the new folder names and rebuilds all `<!-- AUTO -->` regions.
+6. **Reinstall/sync the plugin-cache copy** to load the 3.0 skills that use `references/`/`archive/` paths.
+
+**Compatibility window:** 3.x reads old names and offers migration; old-name support removed at 4.0. On a deck that has not migrated, `landing` will hit the layout guard and **STOP** to require migration first — automated archiving is suspended until the rename is done (known cost, by design).
+
 ### 3.0 — autonomy convergence + scriptable layout verdict (BEHAVIORAL — no structural migration)
 
 Folded into 3.0. This batch removes nearly all autonomy toggles in favor of good defaults + environment inference + skill judgment, and scripts the version/layout check. It is **behavioral, not structural** — existing decks keep their files unchanged, so `3.0` is **not** re-added to `layout_need_update` for it and no file moves are required. Removed/changed keys are **read but ignored**.
