@@ -17,16 +17,17 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-# Workflow status lifecycle order — drives the mixed-status root summary breakdown.
 STATUS_ORDER = ["idea", "active", "done", "scrapped"]
 
 DASH = "—"  # em dash — the INDEX row delimiter
 
-SUMMARY_KINDS = {"specs", "plans"}
-KNOWLEDGE_KINDS = {"checklists", "incidents"}
+SUMMARY_KINDS = {"specs", "plans"}                       # workflow，summary 行
+KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}    # 自撰知识，auto-INDEX，knowledge 行
+IMPORTED_KINDS = {"references"}                          # 外部导入，手维护 INDEX，"imported" 汇总
+NESTABLE_KINDS = {"incidents", "checklists", "docs", "references"}  # 可按 area 嵌套（knowledge）
 
-# Canonical root-INDEX folder order (not alphabetical — a designed reading order).
-FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "charts"]
+# 主流命名后的 root-INDEX 顺序（设计读序，非字母序）。
+FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "docs", "references"]
 
 
 def format_row(kind, filename, fm):
@@ -117,8 +118,8 @@ def folder_summary(folder):
     return f"{total} ({parts})"
 
 
-def charts_summary(folder):
-    """charts/ is hand-maintained external imports; summarise by entry count."""
+def imported_summary(folder):
+    """references/（旧 charts/）是手维护的外部导入，按条目数汇总。"""
     idx = (Path(folder) / "INDEX.md").read_text(encoding="utf-8")
     start = idx.index("<!-- AUTO:")
     end = idx.index(AUTO_END)
@@ -134,7 +135,7 @@ def regen_root_index(deck):
         folder = deck / name
         if not folder.is_dir():
             continue
-        summ = charts_summary(folder) if name == "charts" else folder_summary(folder)
+        summ = imported_summary(folder) if name == "charts" else folder_summary(folder)
         rows.append(f"- {name}/ {DASH} {summ}")
     body = "\n".join(rows)
     return f"<!-- AUTO:root -->\n{body}\n{AUTO_END}"
@@ -211,8 +212,8 @@ def regen_cockpit_inprogress(deck):
     return f"<!-- AUTO:inprogress -->\n{body}\n{AUTO_END}"
 
 
-# charts/ folder INDEX is hand-maintained (external imports); only its root row is derived.
-REGEN_FOLDERS = [name for name in FOLDER_ORDER if name != "charts"]
+# references/ 的 INDEX 手维护（外部导入）；只它的 root 行派生。
+REGEN_FOLDERS = [name for name in FOLDER_ORDER if name not in IMPORTED_KINDS]
 
 
 def _fm_field(path, field):

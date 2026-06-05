@@ -12,31 +12,43 @@ from flightdeck_index import (
     regen_folder_index,
     folder_summary,
     replace_auto_block,
-    charts_summary,
+    imported_summary,
     regen_root_index,
     regen_cockpit_inprogress,
     main,
     STATUS_ORDER,
     SUMMARY_KINDS,
+    KNOWLEDGE_KINDS,
     FOLDER_ORDER,
 )
 
 DASH = "—"  # em dash, the INDEX row delimiter
 
 
-class ModelV4ConstantsTest(unittest.TestCase):
+class ModelConstantsTest(unittest.TestCase):
     def test_status_order_is_four_states(self):
         self.assertEqual(STATUS_ORDER, ["idea", "active", "done", "scrapped"])
 
-    def test_summary_kinds_drops_sketches(self):
+    def test_summary_kinds(self):
         self.assertEqual(SUMMARY_KINDS, {"specs", "plans"})
 
-    def test_folder_order_is_five_no_debriefs_no_sketches(self):
+    def test_knowledge_kinds_includes_docs(self):
+        self.assertEqual(flightdeck_index.KNOWLEDGE_KINDS, {"checklists", "incidents", "docs"})
+
+    def test_imported_kinds_is_references(self):
+        self.assertEqual(flightdeck_index.IMPORTED_KINDS, {"references"})
+
+    def test_folder_order_mainstream_names(self):
         self.assertEqual(
-            FOLDER_ORDER, ["specs", "plans", "incidents", "checklists", "charts"]
+            FOLDER_ORDER, ["specs", "plans", "incidents", "checklists", "docs", "references"]
         )
-        self.assertNotIn("debriefs", FOLDER_ORDER)
-        self.assertNotIn("sketches", FOLDER_ORDER)
+        self.assertNotIn("charts", FOLDER_ORDER)
+        self.assertNotIn("landed", FOLDER_ORDER)
+
+    def test_nestable_kinds_are_knowledge(self):
+        self.assertEqual(
+            flightdeck_index.NESTABLE_KINDS, {"incidents", "checklists", "docs", "references"}
+        )
 
 
 class ParseFrontmatterTest(unittest.TestCase):
@@ -289,17 +301,17 @@ class FolderSummaryTest(unittest.TestCase):
             (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
             self.assertEqual(folder_summary(folder), "0")
 
-    def test_charts_summary_counts_imported_entries(self):
+    def test_imported_summary_counts_imported_entries(self):
         with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "charts"
+            folder = Path(d) / "references"
             folder.mkdir()
             (folder / "INDEX.md").write_text(
-                "# charts\n<!-- AUTO:charts -->\n"
+                "# references\n<!-- AUTO:references -->\n"
                 f"- [a/](a/) {DASH} 1 project imported {DASH} desc\n"
                 "<!-- /AUTO -->\n",
                 encoding="utf-8",
             )
-            self.assertEqual(charts_summary(folder), "1 project imported")
+            self.assertEqual(imported_summary(folder), "1 project imported")
 
 
 class CockpitInprogressTest(unittest.TestCase):
