@@ -150,7 +150,7 @@ Lifecycle: when a spec is done and all its plans are complete, `land` it — mov
 
 ### `plans/` — implementation plans
 
-Task-level breakdowns of how to execute a spec (or a standalone piece of work). Plans carry the optional `implements:` back-reference to the spec they execute.
+Task-level breakdowns of how to execute a spec (or a standalone piece of work). Plans carry the optional `implements:` back-reference to the spec they execute. A plan body carries a `## Progress` block with a `current:` pointer to the next-to-execute task; checkpoints advance it at task boundaries and cockpit `## 下一步` quotes it (see [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath)). The pointer is body-only — it is **not** a frontmatter field and does not enter any INDEX.
 
 Naming: `YYYY-MM-DD-<topic>.md`.
 

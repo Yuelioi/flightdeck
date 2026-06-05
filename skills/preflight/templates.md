@@ -80,6 +80,18 @@ related: [<path>, ...]       # optional; weak cross-links
 ---
 ```
 
+**Plan body — progress pointer (`## Progress`).** A plan tracks execution progress with a single **pointer**, not per-task checkboxes:
+
+```markdown
+## Progress
+
+current: Task 3 — wire the checkpoint subpath into landing SKILL.md
+```
+
+- `current:` names the next-to-execute (or in-progress) task. A **checkpoint** advances it at each plan-task boundary (see [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath)); cockpit `## 下一步` quotes it.
+- It lives in the plan **body**, not frontmatter — so `flightdeck_index.py` does not parse it and `## 进行中` stays a pure `status: active` projection (no script change).
+- When every task is finished, `current:` reads `done — ready to land` and the plan flips `status: done`.
+
 ---
 
 ## knowledge frontmatter — incident / checklist / reference
