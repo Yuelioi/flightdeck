@@ -464,8 +464,16 @@ def main(argv=None):
 
     drift = []
     for label, path, new_block in _index_targets(args.deck):
-        current = path.read_text(encoding="utf-8")
-        cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
+        try:
+            current = path.read_text(encoding="utf-8")
+            cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
+        except (OSError, ValueError):
+            # 缺 INDEX.md 或无 AUTO 块：算 drift；非 --check 时新建一个最小 INDEX
+            drift.append(label)
+            if not args.check:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f"# {label} — INDEX\n\n{new_block}\n", encoding="utf-8")
+            continue
         if cur_block == new_block:
             continue
         drift.append(label)

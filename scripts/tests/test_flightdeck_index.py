@@ -728,5 +728,50 @@ class NestedIndexTest(unittest.TestCase):
             self.assertNotIn("INDEX.md](", block)
 
 
+class MainMissingAreaIndexTest(unittest.TestCase):
+    def test_area_with_md_but_no_index_does_not_crash_main(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
+            area = deck / "docs" / "runtime"
+            area.mkdir(parents=True)
+            # area 有 .md 但**没有** INDEX.md
+            (area / "loop.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
+                encoding="utf-8",
+            )
+            (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            (deck / "INDEX.md").write_text("# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = main([str(deck)])          # 默认 regen，不应崩
+            # 缺失的 area INDEX 被新建，且含 AUTO 块与该文件行
+            self.assertTrue((area / "INDEX.md").is_file())
+            self.assertIn("loop.md", (area / "INDEX.md").read_text(encoding="utf-8"))
+            self.assertEqual(rc, 0)
+
+    def test_area_missing_index_reported_as_drift_under_check(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
+            area = deck / "docs" / "runtime"
+            area.mkdir(parents=True)
+            (area / "loop.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
+                encoding="utf-8",
+            )
+            (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            (deck / "INDEX.md").write_text("# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = main([str(deck), "--check"])   # 只读，不应崩
+            self.assertEqual(rc, 1)                  # 有 drift
+            self.assertFalse((area / "INDEX.md").is_file())  # --check 不写
+
+
 if __name__ == "__main__":
     unittest.main()
