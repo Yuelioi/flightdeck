@@ -170,17 +170,16 @@ def regen_folder_index(folder):
 def _specs_grouped_body(folder, names):
     """Render the specs AUTO body as status-grouped subsections (see caller)."""
     fms = {name: parse_frontmatter((folder / name).read_text(encoding="utf-8")) for name in names}
-    ideas = [n for n in names if fms[n].get("status") == "idea"]
-    active_done = [n for n in names if fms[n].get("status") in ("active", "done")]
-    ideas.sort()  # idea: alphabetical (timeless, no date prefix)
-    active_done.sort(reverse=True)  # active/done: filename date descending
+    ideas = sorted(n for n in names if fms[n].get("status") == "idea")
+    active_done = sorted((n for n in names if fms[n].get("status") in ("active", "done")), reverse=True)
+    scrapped = sorted(n for n in names if fms[n].get("status") == "scrapped")
     groups = []
     if ideas:
-        rows = "\n".join(format_row("specs", n, fms[n]) for n in ideas)
-        groups.append(f"### 待启动（idea）\n{rows}")
+        groups.append("### 待启动（idea）\n" + "\n".join(format_row("specs", n, fms[n]) for n in ideas))
     if active_done:
-        rows = "\n".join(format_row("specs", n, fms[n]) for n in active_done)
-        groups.append(f"### 进行中·完成（active·done）\n{rows}")
+        groups.append("### 进行中·完成（active·done）\n" + "\n".join(format_row("specs", n, fms[n]) for n in active_done))
+    if scrapped:
+        groups.append("### 已否决（scrapped）\n" + "\n".join(format_row("specs", n, fms[n]) for n in scrapped))
     return "\n\n".join(groups)
 
 

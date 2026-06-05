@@ -174,7 +174,7 @@ class SpecsGroupingTest(unittest.TestCase):
         (folder / "INDEX.md").write_text("stale\n", encoding="utf-8")
         return folder
 
-    def test_specs_index_groups_by_status_and_drops_scrapped(self):
+    def test_specs_index_groups_by_status_with_scrapped_in_own_section(self):
         with tempfile.TemporaryDirectory() as d:
             folder = self._specs(d)
             expected = (
@@ -186,6 +186,9 @@ class SpecsGroupingTest(unittest.TestCase):
                 "### 进行中·完成（active·done）\n"
                 f"- [2026-06-03-new-done.md](2026-06-03-new-done.md) {DASH} done {DASH} new done\n"
                 f"- [2026-06-01-old-active.md](2026-06-01-old-active.md) {DASH} active {DASH} old active\n"
+                "\n"
+                "### 已否决（scrapped）\n"
+                f"- [2026-05-01-rejected.md](2026-05-01-rejected.md) {DASH} scrapped {DASH} rejected\n"
                 "<!-- /AUTO -->"
             )
             self.assertEqual(regen_folder_index(folder), expected)
@@ -616,6 +619,21 @@ class RootIndexDocsTest(unittest.TestCase):
             block = flightdeck_index.regen_root_index(deck)
             self.assertIn("docs/ — 1 active", block)
             self.assertIn("references/ — 1 project imported", block)
+
+
+class SpecsScrappedGroupTest(unittest.TestCase):
+    def test_scrapped_listed_in_own_group(self):
+        with tempfile.TemporaryDirectory() as d:
+            specs = Path(d) / "specs"
+            specs.mkdir()
+            (specs / "idea-x.md").write_text("---\nstatus: idea\nsummary: i\n---\n", encoding="utf-8")
+            (specs / "2026-06-01-a.md").write_text("---\nstatus: active\nsummary: a\n---\n", encoding="utf-8")
+            (specs / "2026-05-01-dead.md").write_text("---\nstatus: scrapped\nsummary: d\n---\n", encoding="utf-8")
+            block = flightdeck_index.regen_folder_index(specs)
+            self.assertIn("### 待启动（idea）", block)
+            self.assertIn("### 进行中·完成（active·done）", block)
+            self.assertIn("### 已否决（scrapped）", block)
+            self.assertIn("2026-05-01-dead.md", block)
 
 
 if __name__ == "__main__":
