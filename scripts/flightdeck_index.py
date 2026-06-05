@@ -40,6 +40,13 @@ def normalize_symptom(s):
         out = pat.sub(repl, out)
     return re.sub(r"\s+", " ", out).strip()
 
+
+def signature_fingerprint(symptom, error_type=""):
+    """主指纹 = error_type + 归一化 symptom。where **不**进指纹（spec：symptom+error_type
+    为主、where 为次/tiebreak，由调用方在多命中时区分）。"""
+    key = f"{(error_type or '').strip()}\n{normalize_symptom(symptom)}"
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+
 DASH = "—"  # em dash — the INDEX row delimiter
 
 SUMMARY_KINDS = {"specs", "plans"}                       # workflow，summary 行

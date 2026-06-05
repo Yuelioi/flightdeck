@@ -806,5 +806,27 @@ class SignatureNormalizeTest(unittest.TestCase):
         self.assertEqual(a, b)
 
 
+class SignatureFingerprintTest(unittest.TestCase):
+    def test_same_after_normalize_same_fp(self):
+        from flightdeck_index import signature_fingerprint
+        self.assertEqual(
+            signature_fingerprint("fail 0x7f3a", "KeyError"),
+            signature_fingerprint("fail 0x99aa", "KeyError"),
+        )
+
+    def test_distinct_key_distinct_fp(self):
+        from flightdeck_index import signature_fingerprint
+        self.assertNotEqual(
+            signature_fingerprint("KeyError: 'summary'", "KeyError"),
+            signature_fingerprint("KeyError: 'title'", "KeyError"),
+        )
+
+    def test_where_not_in_fingerprint(self):
+        # spec：where 不进主指纹（重构换 where 不应换指纹）
+        from flightdeck_index import signature_fingerprint
+        import inspect
+        self.assertNotIn("where", inspect.signature(signature_fingerprint).parameters)
+
+
 if __name__ == "__main__":
     unittest.main()
