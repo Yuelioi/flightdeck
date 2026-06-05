@@ -511,6 +511,10 @@ def main(argv=None):
         action="store_true",
         help="print the deck's archivable done set (one path per line) and exit; read-only",
     )
+    ap.add_argument("--match-signature", metavar="SYMPTOM", default=None,
+                    help="print incidents whose signature fingerprint matches SYMPTOM (read-only); status<TAB>path")
+    ap.add_argument("--sig-error-type", metavar="TYPE", default="",
+                    help="error_type to pair with --match-signature (optional)")
     args = ap.parse_args(argv)
 
     if args.verdict:
@@ -520,6 +524,11 @@ def main(argv=None):
     if args.archivable:
         for rel in archivable_done(args.deck):
             print(rel)
+        return 0
+
+    if args.match_signature is not None:
+        for h in match_signature(args.deck, args.match_signature, args.sig_error_type):
+            print(f"{h['status']}\t{h['path']}")
         return 0
 
     mismatch = version_mismatch(args.deck)

@@ -894,5 +894,25 @@ class MatchSignatureTest(unittest.TestCase):
             self.assertEqual(match_signature(deck, "KeyError: 'summary'", "KeyError"), [])
 
 
+class MatchSignatureCliTest(unittest.TestCase):
+    def test_cli_prints_status_tab_path(self):
+        import io
+        from contextlib import redirect_stdout
+        from flightdeck_index import main
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "incidents").mkdir()
+            (deck / "incidents" / "2026-06-05-a.md").write_text(
+                "---\nstatus: active\nwhen_to_read: w\napplies_to: [a]\nlast_updated: 2026-06-05\n---\n"
+                "# t\n\n## Signature\n- symptom: `KeyError: 'summary'`\n- error_type: KeyError\n- where: foo\n- trigger: t\n",
+                encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = main([str(deck), "--match-signature", "KeyError: 'summary'", "--sig-error-type", "KeyError"])
+            self.assertEqual(rc, 0)
+            self.assertIn("active", buf.getvalue())
+            self.assertIn("2026-06-05-a.md", buf.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()
