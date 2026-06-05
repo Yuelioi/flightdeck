@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 在 landing 加 checkpoint 轻量子路径（task 边界只同步看板·不提交）+ plan 正文 current 指针；纯 skill 散文改，脚本层零改动
 last_updated: 2026-06-06
-implements: specs/2026-06-06-execution-checkpoint.md
+implements: archive/specs/2026-06-06-execution-checkpoint.md
 ---
 
 # 执行检查点（checkpoint）Implementation Plan
@@ -14,6 +14,10 @@ implements: specs/2026-06-06-execution-checkpoint.md
 **Architecture:** checkpoint = **完整 landing 的子集**，落成 `landing` skill 的一条轻量 **mode**（不是新用户命令）。它只做 landing 第 4 步看板同步的两件事——刷新 cockpit `## 下一步` + 推进 active plan 正文的 `## Progress` `current:` 指针——并**落盘即止**（不分类知识、不 regen INDEX、不归档、不 smoke-check、不 commit）。canonical 定义写在 `skills/preflight/exit-ritual.md`（protocol textbook 的家），其余 skill 引它。`## 进行中` 仍是 AUTO、plan 仍 `active`，`current:` 指针只活在 plan **正文**而非 frontmatter，故脚本层 `flightdeck_index.py` **零改动**。
 
 **Tech Stack:** 纯 Markdown skill 散文（`skills/` 下的 SKILL.md / exit-ritual.md / protocol.md / templates.md / folder-semantics.md）。无代码、无 pytest 改动；验证靠**跨文件一致性 grep + 一次 dogfood 走查**。
+
+## Progress
+
+current: done — ready to land（5 task 全部完成；5 处 skill 一致、锚点全解析、脚本零改动经 index 复跑实证）
 
 **约束（来自 memory / House Rules）**：本仓库**只 commit、绝不 push**；中文 commit body；改 skill 后按 `checklists/local-plugin-testing.md` resync 到 plugin 缓存才能 live 复验。
 

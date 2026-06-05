@@ -1,19 +1,18 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-06 by 月离 (本会话：先聊定 `execution-checkpoint` 三个 plan 开口——①形态=landing 的 checkpoint 子路径；②进度=plan 正文 `current:` 指针；③默认纯看板落盘**不提交**。据此 flip spec→active 并落成 plan（5 task，纯 skill 散文改、脚本层零改动），待执行。)
-**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点锁定=随时可关对话、下次 preflight 干净接手、上下文不丢**；当前主线＝实现 `execution-checkpoint`（landing 加 checkpoint 轻量子路径 + plan `current:` 指针）。
+**Last updated**: 2026-06-06 by 月离 (本会话：**落成 checkpoint 特性并归档**——子代理驱动逐 task 实现 5 处 skill 改（exit-ritual canonical 定义 + landing Modes + plan `## Progress current:` 指针 + templates/folder-semantics/protocol 收口），双重评审通过、跨文件一致、`current:` 指针经 index 复跑实证为 body-only（脚本零改动）。spec+plan 已 done→archive。评审拦下一条 shipped-skill 死链 → 落 incident。)
+**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；其载体 checkpoint 特性已落成归档，待 resync 部署 + live 复验。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
-- [2026-06-06-execution-checkpoint.md](specs/2026-06-06-execution-checkpoint.md) — plan/task 边界自动看板同步（cockpit 下一步 + plan 进度落盘，commit 不强求），让用户随时可关对话、下次 preflight 干净接手、上下文不丢；轻量 checkpoint = 完整 landing 的子集
-- [2026-06-06-execution-checkpoint.md](plans/2026-06-06-execution-checkpoint.md) — 在 landing 加 checkpoint 轻量子路径（task 边界只同步看板·不提交）+ plan 正文 current 指针；纯 skill 散文改，脚本层零改动
+
 <!-- /AUTO -->
 
 ## 下一步
 
-- 执行 `plans/2026-06-06-execution-checkpoint.md` 的 **Task 1**：在 `skills/preflight/exit-ritual.md` 写下 checkpoint 的 canonical 定义（新 `## Checkpoint` 段 + 改 mid-session/下一步 触发句）。
-- 本会话改了 `folder-semantics.md`（build 输入）→ resync + reload 后 live 复验那节文档指南（仍未做）。
+- **resync + reload**：把本会话改的 5 处 skill（含 checkpoint + 早先 `folder-semantics.md`）同步进 plugin 缓存并重载，让 checkpoint 对下个会话 live 生效；之后 live 复验 checkpoint 子路径与「知识规模化组织」那节文档指南。
+- 选下一个 3.0 完善点（specs/ 现已清空，按需 `/flightdeck:new` 起新 idea）。
 
 ## Hanging tasks
 

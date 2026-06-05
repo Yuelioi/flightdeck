@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点锁定=随时可关对话、下次 preflight 干净接手、上下文不丢**；围绕它设计 `execution-checkpoint`（plan/task 边界看板同步）。specs/ 现 1 idea。
+flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；其载体 checkpoint 特性已落成归档，待 resync 部署 + live 复验。
 
 ## 进行中
 
@@ -13,8 +13,8 @@ None.
 
 ## 下一步
 
-- `execution-checkpoint`（idea，停机位）已成型——决定：flip→active 走 writing-plans，或先聊定 plan 开口（形态＝landing 子路径 vs 文档化 self-invoke 行为、checkpoint 提不提交）。
-- 本会话改了 `folder-semantics.md`（build 输入）→ resync + reload 后 live 复验那节文档指南。
+- **resync + reload**：把本会话改的 5 处 skill（含 checkpoint + 早先 `folder-semantics.md`）同步进 plugin 缓存并重载，让 checkpoint 对下个会话 live 生效；之后 live 复验 checkpoint 子路径与「知识规模化组织」那节文档指南。
+- 选下一个 3.0 完善点（specs/ 现已清空，按需 `/flightdeck:new` 起新 idea）。
 
 ## Hanging tasks
 
