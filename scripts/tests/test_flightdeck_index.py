@@ -531,6 +531,18 @@ class LayoutVerdictTest(unittest.TestCase):
             (deck / "rules.md").write_text("---\n---\n", encoding="utf-8")  # 无 version
             self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
 
+    def test_legacy_charts_dir_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "charts").mkdir()
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
+    def test_legacy_landed_dir_is_structural(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            (deck / "landed").mkdir()
+            self.assertEqual(flightdeck_index.layout_verdict(deck), "structural-behind")
+
     def test_current_version_clean_is_current(self):
         with tempfile.TemporaryDirectory() as d:
             deck = self._deck(d, version="3.0")

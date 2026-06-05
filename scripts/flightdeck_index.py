@@ -295,8 +295,10 @@ def archivable_done(deck):
 
 
 def _structural_signal(deck):
-    """True if the deck shows any pre-model-v4 structural signal (version-agnostic)."""
+    """True if the deck shows any pre-3.0-coherence structural signal."""
     deck = Path(deck)
+    if (deck / "charts").is_dir() or (deck / "landed").is_dir():
+        return True  # 旧主流前名 → 需改名迁移（charts→references / landed→archive）
     if (deck / "sketches").is_dir() or (deck / "debriefs").is_dir():
         return True
     if any(fm.get("status") in RETIRED_STATUSES for fm in _workflow_fms(deck)):
