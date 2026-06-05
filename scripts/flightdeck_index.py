@@ -413,10 +413,20 @@ def main(argv=None):
         action="store_true",
         help="print the deck's layout verdict (current/compatible-behind/structural-behind/malformed) and exit",
     )
+    ap.add_argument(
+        "--archivable",
+        action="store_true",
+        help="print the deck's archivable done set (one path per line) and exit; read-only",
+    )
     args = ap.parse_args(argv)
 
     if args.verdict:
         print(layout_verdict(args.deck))
+        return 0
+
+    if args.archivable:
+        for rel in archivable_done(args.deck):
+            print(rel)
         return 0
 
     mismatch = version_mismatch(args.deck)

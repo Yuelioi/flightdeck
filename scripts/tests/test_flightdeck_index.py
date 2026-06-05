@@ -665,5 +665,21 @@ class ArchivableDoneTest(unittest.TestCase):
             )
 
 
+class ArchivableCliTest(unittest.TestCase):
+    def test_archivable_flag_prints_paths_writes_nothing(self):
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "specs").mkdir()
+            (deck / "specs" / "2026-06-01-a.md").write_text("---\nstatus: done\nsummary: a\n---\n", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = main([str(deck), "--archivable"])
+            self.assertEqual(rc, 0)
+            self.assertIn("specs/2026-06-01-a.md", buf.getvalue())
+            self.assertFalse((deck / "INDEX.md").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
