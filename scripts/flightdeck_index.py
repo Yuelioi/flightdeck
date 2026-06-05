@@ -119,7 +119,7 @@ def folder_summary(folder):
 
 
 def imported_summary(folder):
-    """references/（旧 charts/）是手维护的外部导入，按条目数汇总。"""
+    """references/ 是手维护的外部导入，按条目数汇总。"""
     idx = (Path(folder) / "INDEX.md").read_text(encoding="utf-8")
     start = idx.index("<!-- AUTO:")
     end = idx.index(AUTO_END)
@@ -135,7 +135,7 @@ def regen_root_index(deck):
         folder = deck / name
         if not folder.is_dir():
             continue
-        summ = imported_summary(folder) if name == "charts" else folder_summary(folder)
+        summ = imported_summary(folder) if name in IMPORTED_KINDS else folder_summary(folder)
         rows.append(f"- {name}/ {DASH} {summ}")
     body = "\n".join(rows)
     return f"<!-- AUTO:root -->\n{body}\n{AUTO_END}"

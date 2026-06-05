@@ -593,5 +593,30 @@ class VerdictCliTest(unittest.TestCase):
             self.assertFalse((deck / "INDEX.md").exists())
 
 
+class RootIndexDocsTest(unittest.TestCase):
+    def _deck(self, root):
+        deck = Path(root)
+        for k in ("specs", "plans", "incidents", "checklists", "docs", "references"):
+            (deck / k).mkdir()
+        (deck / "docs" / "arch.md").write_text(
+            "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
+            encoding="utf-8",
+        )
+        (deck / "references" / "INDEX.md").write_text(
+            "# references\n<!-- AUTO:references -->\n- [rfc.md](rfc.md)\n<!-- /AUTO -->\n", encoding="utf-8"
+        )
+        (deck / "INDEX.md").write_text(
+            "# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8"
+        )
+        return deck
+
+    def test_root_has_docs_status_row_and_references_imported_row(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = self._deck(d)
+            block = flightdeck_index.regen_root_index(deck)
+            self.assertIn("docs/ — 1 active", block)
+            self.assertIn("references/ — 1 project imported", block)
+
+
 if __name__ == "__main__":
     unittest.main()
