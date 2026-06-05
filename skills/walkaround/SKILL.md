@@ -176,10 +176,10 @@ Cockpit `## 进行中` is the AUTO-derived projection of the active set — an a
 
 A `status: done` workflow artifact still sitting in its source folder (`specs/` or `plans/`, NOT in `archive/`) is *done-but-unlanded* — landing has not yet drained it. This is INFO only (landing drains automatically; the file is correctly `done`), but the two sub-cases differ:
 
-- **Blocked done** — the done artifact has a structural **inbound edge from an `active` artifact** (some active spec/plan points at it via `implements:` / `superseded_by:` / `supersedes:` / `related:`). It cannot land yet — the active work still depends on it. **INFO** — name the artifact **and the `active` artifact(s) blocking it** ("done-but-unlanded: `plans/x.md` held by active `specs/y.md`"). Don't push to land it.
+- **Blocked done** — the done artifact has a structural **inbound edge from an `active` artifact** (some active spec/plan points at it via `implements:` / `superseded_by:`). It cannot land yet — the active work still depends on it. **INFO** — name the artifact **and the `active` artifact(s) blocking it** ("done-but-unlanded: `plans/x.md` held by active `specs/y.md`"). Don't push to land it.
 - **Landable done** — the done artifact has **no** active inbound edge. It is safe to archive; landing just hasn't run. **INFO — "可 land"** (run `/flightdeck:landing` to drain it).
 
-**Fast path** (when a script runtime is reachable — `uv`/`python`, inferred): `flightdeck_index.py <deck> --archivable` prints the deterministic *landable* set (done workflow files with no active inbound edge), read-only. A `done` source file **in** that list → landable ("可 land"); a `done` source file **not** in the list → blocked (some active artifact's inbound edge holds it — report the blocker). See [protocol § done drain](../preflight/protocol.md). The manual edge-walk above is the always-valid fallback.
+**Fast path** (when a script runtime is reachable — `uv`/`python`, inferred): `flightdeck_index.py <deck> --archivable` prints the deterministic *landable* set (done workflow files with no active inbound edge), read-only. A `done` source file **in** that list → landable ("可 land"); a `done` source file **not** in the list → blocked (some active artifact's inbound edge holds it — report the blocker). See [protocol § status/landing seam](../preflight/protocol.md#the-status--landing-seam). The manual edge-walk above is the always-valid fallback.
 
 ## Output format
 
