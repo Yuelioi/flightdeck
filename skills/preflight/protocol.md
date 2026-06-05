@@ -319,7 +319,7 @@ A separate **project-rules upgrade gate** fires when a promoted incident continu
 
 ## Incident error-library lifecycle
 
-An incident is not just born and resurfaced — it can also be **retired** once its root cause is permanently fixed, and **revived** if the fix regresses. This is the "death" half of the error library; the "birth/use" half (Signature, fingerprint matching, hit path) lives under [routing](#how-to-pick-the-right-knowledge-file) + [Proactive incident resurfacing](#proactive-incident-resurfacing).
+An incident is not just born and resurfaced — it can also be **retired** once its root cause is permanently fixed, and **revived** if the fix regresses. This is the "death" half of the error library; the "birth/use" half (Signature, fingerprint matching, hit path) lives under [routing](#routing--scenario-triggers) + [Proactive incident resurfacing](#proactive-incident-resurfacing).
 
 ### Retirement semantics (`resolved_by` + `status: obsolete`)
 
