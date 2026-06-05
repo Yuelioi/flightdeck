@@ -790,5 +790,21 @@ class CockpitProjectionRobustnessTest(unittest.TestCase):
             self.assertIn("summary 缺失", block)
 
 
+class SignatureNormalizeTest(unittest.TestCase):
+    def test_quoted_keys_preserved_distinct(self):
+        from flightdeck_index import normalize_symptom
+        self.assertNotEqual(
+            normalize_symptom("KeyError: 'summary'"),
+            normalize_symptom("KeyError: 'title'"),
+        )
+
+    def test_volatile_tokens_collapsed(self):
+        from flightdeck_index import normalize_symptom
+        # hex / uuid / 路径 / 行号 / 时间戳 / 长整数 归一后应相等
+        a = normalize_symptom("boom at 0x7f3a2b1c /home/alice/p/foo.py line 42 id=123456")
+        b = normalize_symptom("boom at 0x99887766 /home/bob/q/foo.py line 99 id=999999")
+        self.assertEqual(a, b)
+
+
 if __name__ == "__main__":
     unittest.main()

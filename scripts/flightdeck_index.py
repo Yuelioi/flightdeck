@@ -13,11 +13,32 @@ Runnable as `uv run flightdeck_index.py <deck>` or `python flightdeck_index.py <
 # ///
 
 import argparse
+import hashlib
+import re
 import sys
 from collections import Counter
 from pathlib import Path
 
 STATUS_ORDER = ["idea", "active", "done", "scrapped"]
+
+# 签名归一化：剥掉易变 token（路径/行号/时间戳/hex/uuid/长整数），但保留语义 token
+# （如引号包裹的 key）——`KeyError: 'summary'` 与 `'title'` 必须区分。完整规则在此，
+# 测试套件（SignatureNormalizeTest）是契约；调整规则须先改测试。
+_VOLATILE = [
+    (re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b"), "_UUID_"),
+    (re.compile(r"0x[0-9a-fA-F]+"), "_HEX_"),
+    (re.compile(r"\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}:\d{2}\S*)?"), "_TIME_"),
+    (re.compile(r"[A-Za-z]:\\[^\s:]+|(?:/[\w.\-]+){2,}"), "_PATH_"),
+    (re.compile(r"\bline\s+\d+\b", re.I), "line _N_"),
+    (re.compile(r"\b\d{4,}\b"), "_N_"),
+]
+
+
+def normalize_symptom(s):
+    out = (s or "").strip()
+    for pat, repl in _VOLATILE:
+        out = pat.sub(repl, out)
+    return re.sub(r"\s+", " ", out).strip()
 
 DASH = "—"  # em dash — the INDEX row delimiter
 
