@@ -8,9 +8,12 @@ preflight just detects a runtime and calls this — no git check, interview, or 
 question. `--focus`/`--next` default to `(set me)` placeholders the user fills later.
 
 It also silently detects the deck's git mode: if `<target>/.git` exists, the copied
-`landed/HISTORY.md` is removed — `git log` is the history for git-backed decks, so the
+`archive/HISTORY.md` is removed — `git log` is the history for git-backed decks, so the
 file is kept only for no-git decks (where it is the git-log substitute). Avoids shipping
 a permanently-dead file into every git project.
+
+Post-copy, `docs/INDEX.md` is created if absent — the scaffold predates the docs/ folder
+(added in 3.0); this ensures all decks get it without waiting for scaffolds/full update.
 
 Refuses if the deck already exists. Pure stdlib; run with `uv run` or `python`.
 """
@@ -44,10 +47,23 @@ def init(target, name, user, date, focus, next_item):
     text = text.replace(_NEXT, next_item)
     cockpit.write_text(text, encoding="utf-8")
 
+    # docs/ is new in 3.0 and not yet in scaffolds/full (Task 5.1 will add it there).
+    # Create it here so every initialized deck gets the folder immediately.
+    docs_index = deck / "docs" / "INDEX.md"
+    if not docs_index.exists():
+        docs_index.parent.mkdir(parents=True, exist_ok=True)
+        docs_index.write_text(
+            "# docs INDEX\n\n_Reference documentation and write-ups._\n\n| File | Summary |\n|------|---------||\n",
+            encoding="utf-8",
+        )
+
     # HISTORY.md is the no-git history substrate (the git-log stand-in). A git-backed
     # deck uses `git log` instead, so drop the copied file — keeping it would be a
     # permanently-dead file. It survives only for no-git decks.
+    # NOTE: scaffold still uses `archive/` name; Task 5.1 renames scaffolds/full.
+    # Until then we handle both old (landed/) and new (archive/) locations.
     if (Path(target) / ".git").exists():
+        (deck / "archive" / "HISTORY.md").unlink(missing_ok=True)
         (deck / "landed" / "HISTORY.md").unlink(missing_ok=True)
 
     return deck
