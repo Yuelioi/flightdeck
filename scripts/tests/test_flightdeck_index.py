@@ -927,5 +927,22 @@ class ObsoleteCountExcludeTest(unittest.TestCase):
             self.assertEqual(folder_summary(folder), "2 active")   # obsolete 不计
 
 
+class ObsoleteRoutingExcludeTest(unittest.TestCase):
+    def test_obsolete_row_absent_from_knowledge_index(self):
+        from flightdeck_index import regen_folder_index
+        with tempfile.TemporaryDirectory() as d:
+            folder = Path(d) / "incidents"
+            folder.mkdir()
+            (folder / "live.md").write_text(
+                "---\nstatus: active\nwhen_to_read: w\napplies_to: [x]\nlast_updated: 2026-06-05\n---\n# t\n",
+                encoding="utf-8")
+            (folder / "dead.md").write_text(
+                "---\nstatus: obsolete\nwhen_to_read: w\napplies_to: [x]\nlast_updated: 2026-06-05\nresolved_by: test_x\n---\n# t\n",
+                encoding="utf-8")
+            block = regen_folder_index(folder)
+            self.assertIn("live.md", block)
+            self.assertNotIn("dead.md", block)   # obsolete 不进路由
+
+
 if __name__ == "__main__":
     unittest.main()

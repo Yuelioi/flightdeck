@@ -248,9 +248,15 @@ def regen_folder_index(folder):
         rows = [_area_row(d) for d in subdirs]
         row_kind = kind if kind in KNOWLEDGE_KINDS else "checklists"
         top_files = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+        if kind in KNOWLEDGE_KINDS:   # obsolete 留盘但退出路由（仍可 grep / 仍进 match_signature）
+            top_files = [n for n in top_files
+                         if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
         rows += [format_row(row_kind, n, parse_frontmatter((folder / n).read_text(encoding="utf-8"))) for n in top_files]
         return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
     names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
+    if kind in KNOWLEDGE_KINDS:   # obsolete 留盘但退出路由（仍可 grep / 仍进 match_signature）
+        names = [n for n in names
+                 if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
     row_kind = kind if kind in (SUMMARY_KINDS | KNOWLEDGE_KINDS) else "checklists"
     rows = [format_row(row_kind, name, parse_frontmatter((folder / name).read_text(encoding="utf-8"))) for name in names]
     return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
