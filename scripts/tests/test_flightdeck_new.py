@@ -12,7 +12,7 @@ import flightdeck_index
 def _deck(d):
     """Make a minimal deck skeleton (folders only) under temp dir d."""
     deck = Path(d) / "flightdeck"
-    for f in ["specs", "plans", "incidents", "checklists", "charts"]:
+    for f in ["specs", "plans", "incidents", "checklists", "references", "docs"]:
         (deck / f).mkdir(parents=True)
     return deck
 
@@ -60,6 +60,37 @@ class NewHappyPathTest(unittest.TestCase):
             self.assertIn("status: active", text)           # knowledge default
             self.assertIn("when_to_read: before X", text)
             self.assertIn("applies_to: [a, b]", text)
+
+    def test_chart_falls_in_references_folder(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            path = new(deck, "chart", slug="arch-overview", title="Arch Overview",
+                       when_to_read="when designing", applies_to=["arch"],
+                       date="2026-06-05", regen=False)
+            self.assertEqual(path, deck / "references" / "2026-06-05-arch-overview.md")
+            self.assertNotIn("charts", str(path))
+
+    def test_doc_kind_falls_in_docs_dateless(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            path = new(deck, "doc", slug="folder-semantics", title="Folder Semantics",
+                       when_to_read="before creating files", applies_to=["all"],
+                       summary="explains folder layout", date="2026-06-05", regen=False)
+            # dateless: no date prefix
+            self.assertEqual(path, deck / "docs" / "folder-semantics.md")
+            text = path.read_text(encoding="utf-8")
+            self.assertIn("status: active", text)
+            self.assertIn("summary: explains folder layout", text)
+            self.assertIn("when_to_read: before creating files", text)
+            self.assertIn("applies_to: [all]", text)
+            self.assertIn("last_updated: 2026-06-05", text)
+            self.assertIn("# Folder Semantics", text)
+
+    def test_doc_requires_routing_fields(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "doc", slug="bare", title="Bare", regen=False)
 
 
 class NewValidationTest(unittest.TestCase):

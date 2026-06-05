@@ -18,14 +18,16 @@ KIND_FOLDER = {
     "plan": "plans",
     "incident": "incidents",
     "checklist": "checklists",
-    "chart": "charts",
+    "chart": "references",
+    "doc": "docs",
 }
 WORKFLOW = {"spec", "plan"}
-KNOWLEDGE = {"incident", "checklist", "chart"}
+KNOWLEDGE = {"incident", "checklist", "chart", "doc"}
+DATELESS = {"doc"}   # always <slug>.md, never date-prefixed (standing reference)
 SLUG_RE = re.compile(r"^[a-z0-9-]+$")
 _DEFAULT_STATUS = {
     "spec": "idea", "plan": "idea",
-    "incident": "active", "checklist": "active", "chart": "active",
+    "incident": "active", "checklist": "active", "chart": "active", "doc": "active",
 }
 
 
@@ -39,6 +41,8 @@ def _frontmatter(kind, status, date, summary, implements, when_to_read, applies_
         if implements:
             lines.append(f"implements: {implements}")
     else:                               # knowledge — routing fields required
+        if summary:
+            lines.append(f"summary: {summary}")
         lines.append(f"when_to_read: {when_to_read}")
         lines.append(f"applies_to: [{', '.join(applies_to)}]")
         lines.append(f"last_updated: {date}")
@@ -69,7 +73,7 @@ def new(deck, kind, slug, title, status=None, summary="", implements=None,
     status = status or _DEFAULT_STATUS[kind]
 
     folder = Path(deck) / KIND_FOLDER[kind]
-    filename = f"{slug}.md" if status == "idea" else f"{date}-{slug}.md"
+    filename = f"{slug}.md" if (status == "idea" or kind in DATELESS) else f"{date}-{slug}.md"
     path = folder / filename
     if path.exists():
         raise FileExistsError(f"artifact already exists: {path}")
