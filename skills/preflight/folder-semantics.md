@@ -241,6 +241,34 @@ Nesting is decided **by axis**, not by per-folder exception:
 
 **Why the split — drain vs accumulate.** Workflow is one-shot: once `done` it drains into `archive/`, so the active set stays capacity-bounded — flat + INDEX date-ordering is enough (group by feature via the INDEX hand area, not subdirectories). Knowledge is resident and only grows (never archived on completion), so it needs by-area nesting to stay navigable at scale.
 
+## Organizing knowledge at scale (large projects)
+
+On a large codebase the question is not "which folder" but "how does an AI find the *right* knowledge for the task in front of it, without loading an encyclopedia." There are four **shapes** of knowledge — each with a different job, home, and anti-drift mechanism. Picking the shape (not just the folder) is what keeps a big deck navigable.
+
+| Shape | Form | Answers | Home | Stays fresh by |
+| --- | --- | --- | --- | --- |
+| **Golden path** | line (verb) | how to *do* a recurring task | `checklists/` | points to a canonical example + mechanism backstop |
+| **Cross-cutting concern** | column (aspect) | how to get *one* concern right | `checklists/` or `docs/` | authored once + pushed into lint/wrappers |
+| **Map** | plane (noun) | what *exists*, which to change | `docs/` | generated/checkable inventory |
+| **Rationale** | point (why) | why it is built this way | `docs/` | thin, written on demand |
+
+**Golden path = task-anchored spine.** Do **not** organize knowledge by topic ("everything about logging") — an AI arrives with a *task* ("add an endpoint"), not a topic. Author one entry per recurring task (`checklists/backend/add-endpoint.md`, `.../add-service.md`, `checklists/frontend/add-page.md`). Each entry owns only the *orchestration* — the order of steps — and **links out** at each step to the concern / map / example that step needs. One trigger match, one hop, everything pulled in. This is why routing (`when_to_read`) beats volume: the win is "this task fires exactly the 1–3 files it needs," not "the encyclopedia is complete."
+
+**Cross-cutting concerns are columns, not repeated rows.** i18n, logging, auth, validation thread through *every* golden path. The trap is re-teaching them inside each path → the same rule duplicated across N files → drift (the #1 source of both the "too heavy" and "goes stale" failures). Factor by axis instead:
+
+- Tasks are **rows** (golden paths) — they own order.
+- Concerns are **columns** — authored **once** (e.g. `docs/backend/i18n.md` for the model + a short executable rule); every row only **references** the column.
+- A **cell** (concern × task) is usually just the link. Add a line only for the *task-specific glue* that is genuine intersection knowledge (e.g. "service-layer i18n keys use prefix `services.<domain>.*`") — that line is not duplication, it belongs nowhere else.
+- **Push the column down into enforcement where you can.** A concern guaranteed by a wrapper (`withLogging()`) or a lint rule (`no-literal`) needs *no* per-path instruction — the path only notes the mechanism exists so the AI doesn't hand-roll around it. The more enforced a concern is, the thinner every golden path becomes. `enforce > document`.
+
+**Maps are nouns: generate the inventory, hand-write the judgment.** A subsystem map (`docs/backend/services.md`) answers "what exists / which one do I change," not "how." Split it the way `INDEX.md` itself splits (AUTO region + hand area):
+
+- The **inventory** (the list of services / modules) is mechanically enumerable → generate it from the filesystem and **check it back against the filesystem** (an entry in code but not the map — or vice versa — is a CI failure, not silent rot). This filesystem cross-check is the only reliable defense against map drift; never hand-maintain the list.
+- The **"which to touch when" judgment** (reverse-intuition routing: "send mail only via `NotifyService`," "rate-limiting lives in `middleware/`, not a service") is what code cannot express — the only part worth hand-writing.
+- Maps cross-link to golden paths: the map locates the noun, the golden path verbs it. Don't restate the "how" inside a map.
+
+**The throughline.** Making an AI fast on a large project is not writing a complete encyclopedia — it is building a *task → one-hop* routing net: the mechanical parts (inventories, uniform conventions) handed to generation and lint, and humans writing only what code can't — **order, choice, and why**. As with checklists and incidents, write a doc the **second** time an AI gets something wrong for lack of it: demand-driven, so the doc set stays bounded and every file earns its place.
+
 ## README → INDEX
 
 Within flightdeck conventions, always use `INDEX.md` — never `README.md`. `INDEX.md` precisely communicates "directory navigation" (as opposed to "project introduction").
@@ -260,3 +288,6 @@ The repository-root `README.md` (the GitHub project intro) is a standard project
 | Using `README.md` inside flightdeck conventions | Bundle README approach retired | Use `INDEX.md` (repo-root `README.md` is unaffected) |
 | Plan with no `implements:` and no explanation | Orphan plan is invisible to spec→plan tracing | Add `implements:` or note "standalone" in the plan body |
 | Knowledge file (incident / checklist / doc / reference) without `when_to_read` | Invisible to skill routing | Add `when_to_read` frontmatter |
+| Re-teaching a cross-cutting concern (i18n / logging / auth) inside every golden path | Same rule duplicated across N files → drift | Author the concern once (a column); each path links to it + adds only task-specific glue |
+| Organizing knowledge by topic for AI consumption ("all about X") | AI arrives with a task, not a topic — can't route to it | Anchor golden paths on tasks (verbs); anchor maps on nouns |
+| Hand-maintaining a subsystem inventory (service / module list) | Goes stale the moment one is added | Generate the inventory + check it against the filesystem; hand-write only the "which when" judgment |
