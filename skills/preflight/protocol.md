@@ -228,6 +228,16 @@ Knowledge files (incidents / checklists / docs / references) **MUST** carry fron
 
 Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Recording a recurrence happens at the **other** end of the session: at landing, a **clear** same-incident match auto-appends `[Case N]` + bumps `recurrences` (see [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up)); an **ambiguous** match asks the user. Auto-counting is safe because the consequential step — *promotion* — stays user-gated.
 
+### Hit path — check the error library *before* writing a new incident
+
+When you hit an error mid-session, **first check whether it is already known** before writing a fresh incident file — dedup's value is *prevention*, not after-the-fact cleanup:
+
+1. **grep the raw error text** into `incidents/` (the `symptom` line in each `## Signature` block is the grep anchor), and/or run the deterministic signature match: `flightdeck_index.py <deck> --match-signature "<symptom>" [--sig-error-type <TYPE>]` (read-only; prints `status<TAB>path` per fingerprint hit).
+2. **Matched an existing incident** → **append a `## [Case N]` rather than starting a new file**, and let landing's recurrence sweep do the bookkeeping. (Matched an `obsolete` entry → that's a candidate *regression* — see [Incident error-library lifecycle](#incident-error-library-lifecycle) below; do not silently re-append.)
+3. **No match** → it is genuinely new; author the incident via `/flightdeck:new incident`, which scaffolds the `## Signature` block.
+
+The fingerprint is computed from `symptom` (normalized) + `error_type` only — the author writes the human-readable `symptom`, never a hand-computed fingerprint. An incident with **no `## Signature`** block (legacy) is simply skipped by the deterministic layer and falls to the AI fuzzy layer at landing — both tracks coexist.
+
 ## Source-of-truth precedence (when sources disagree)
 
 Project agent rules > `rules.md` > `cockpit.md` > active folders (`specs/` `plans/` `incidents/` `checklists/` `docs/` `references/`) > `archive/`
@@ -306,6 +316,20 @@ The `recurrences` frontmatter counter (auto-bumped at landing) plus the `[Case N
 When the gate fires, `landing` prompts: "Promote `incidents/X.md` to `checklists/X.md`?". User confirms — promotion is **never automatic**.
 
 A separate **project-rules upgrade gate** fires when a promoted incident continues to recur after promotion. Then add a one-liner to project agent rules and mark the incident `Status: upgraded → project rules`. Do not delete the incident.
+
+## Incident error-library lifecycle
+
+An incident is not just born and resurfaced — it can also be **retired** once its root cause is permanently fixed, and **revived** if the fix regresses. This is the "death" half of the error library; the "birth/use" half (Signature, fingerprint matching, hit path) lives under [routing](#how-to-pick-the-right-knowledge-file) + [Proactive incident resurfacing](#proactive-incident-resurfacing).
+
+### Retirement semantics (`resolved_by` + `status: obsolete`)
+
+When an incident's root cause is permanently fixed (e.g. a guard test now prevents it), the incident is **retired**: fill `resolved_by` (a single reference — a commit SHA or a test id/path, e.g. `test_flightdeck_index.py::CockpitProjectionRobustnessTest`) **and** flip `status: obsolete`. These two are **one deliberate act**, performed at **landing** (the ritual that owns knowledge classification and retirement; `status` only touches workflow). Landing **never auto-flips** on a filled `resolved_by` — at most it *prompts* "resolved_by is filled but still active — retire?".
+
+`obsolete` here means **"root cause fixed, retired from active routing, kept as a historical record"** — it is **NOT "outdated / worthless"**. The name is reused for model consistency (knowledge status stays `active / obsolete / superseded`, no new value); the gap between the name and this meaning is a known, accepted point.
+
+### The obsolete dual path (kept routable for regression detection)
+
+`obsolete` only leaves the **active-recommendation routing** (it is excluded from the folder INDEX `<!-- AUTO -->` region and from the root knowledge count — so it costs zero session routing tokens). It is **not deleted and not hidden**: an obsolete incident is still **on disk, still grep-able, and still entered into `--match-signature` / the landing recurrence sweep**. This is load-bearing — regression detection *depends* on obsolete incidents staying matchable. **Implementations must NOT hard-filter `obsolete` out of the match set.** A signature hit on an obsolete entry is the signal that a "fixed" bug may have come back (regression handling lives in [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up) — gated revival, never a silent re-append).
 
 ## Common mistakes — STOP and reclassify
 
