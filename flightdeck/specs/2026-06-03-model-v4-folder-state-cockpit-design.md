@@ -2,7 +2,7 @@
 status: active
 summary: flightdeck 模型 v4——folder 7→5（sketches 并入 specs、删 debriefs）、workflow 状态 6→4（idea/active/done/scrapped）、cockpit 由 AI 全自动驱动（进行中区 AUTO 派生 + 下一步自动维护），并入 3.0
 last_updated: 2026-06-03
-related: [specs/2026-06-03-scriptable-mechanical-layer-design.md, landed/specs/2026-06-03-rules-simplification-design.md]
+related: [specs/2026-06-03-scriptable-mechanical-layer-design.md, archive/specs/2026-06-03-rules-simplification-design.md]
 ---
 
 # flightdeck 模型 v4 — folder / 状态 / cockpit 简化（并入 3.0）

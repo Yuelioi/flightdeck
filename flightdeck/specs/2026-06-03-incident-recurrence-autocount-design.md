@@ -68,4 +68,4 @@ protocol（字段表 + 复发 auto-count 小节 + 晋级 gate 措辞 + 去"never
 
 - [[flightdeck-2.0-abandoned]] —— 不重蹈状态机覆辙
 - [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md) —— recur 校验归其 lint
-- [preflight-tri-review-remediation](../landed/specs/2026-06-03-preflight-tri-review-remediation.md) —— 错题本计数升级的延续
+- [preflight-tri-review-remediation](../archive/specs/2026-06-03-preflight-tri-review-remediation.md) —— 错题本计数升级的延续

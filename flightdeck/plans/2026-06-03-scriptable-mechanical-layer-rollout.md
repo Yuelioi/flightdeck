@@ -24,7 +24,7 @@ last_updated: 2026-06-04
 
 ## Phase 3 — walkaround lint 子命令（待前置）
 
-- [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../landed/specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
+- [x] **前置已解**（2026-06-03）：A1 拆 migration / A4 拆 protocol 均评估后**关闭**（见 [token-reduction spec 结论](../archive/specs/2026-06-03-token-reduction-design.md)）——protocol 不会再大改，可安全脚本化。
 - [x] **lint 子命令**（2026-06-04）：交付为 `scripts/flightdeck_lint.py`（**分立脚本**，非 `flightdeck.py <cmd>`——遵 spec「职责分多脚本、统一待脚本变多 YAGNI」的已锁决策）。覆盖机械子集 Audit **1/4/5/7/8**（status 合法性 / orphan plan / INDEX↔folder drift〔复用 `flightdeck_index.index_drift`〕/ dangling ref / stray file 无歧义子集），吐 `{"findings":[…]}` JSON、有 CRITICAL/WARNING 时 exit≠0；判断项（知识分类 / migration / AGENTS 语义 drift / stray 完整可达性）留模型。dangling-ref 加**代码区剥离**（fenced/inline code 内的链接例不误报）。30 unittest（TDD）。已配线进 [exit-ritual § Script fast path](../../skills/preflight/exit-ritual.md) + walkaround intro。
 - [x] **lint 候选：untracked outstanding spec —— 由 model-v4 吸收，不再实现**（2026-06-04 决策）：model-v4 把 cockpit `## 进行中` 改为「从每个 `status: active` spec/plan **AUTO 派生**」，故「active spec 未被 cockpit 追踪」结构上不可能；walkaround Audit 13（进行中 AUTO 区一致性）已确定性兜底该不变量。原痛点（本会话 spec 没当场汇进 Next session）的根因——cockpit 手维护——已消失。结构块断言守卫仍是独立的 [structural-edit-guard](../specs/2026-06-03-structural-edit-guard-design.md)（idea），与本项无关。
 - [x] **Verify**（2026-06-04）：在本仓库 deck 实跑 `flightdeck_lint.py flightdeck`——当场抓出 3 处**真实** dangling ref（`CHANGELOG.md` 指向已归档进 `landed/specs/` 的 3 个 2026-06-02 spec，旧路径未改写），与人工 Audit 7 结论一致；已修 CHANGELOG 链接，deck 现 lint 干净（findings: []）。token 实测：脚本读文件在子进程、不进上下文，模型只见一行 JSON。
