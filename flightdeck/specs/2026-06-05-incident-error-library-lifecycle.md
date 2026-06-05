@@ -69,9 +69,12 @@ last_updated: YYYY-MM-DD
   问题没有天然 error_type，此时 incident 自然退化成 `symptom + where`，预期如此。
 - **Signature 是硬 schema，只有这 4 个键**（symptom / error_type / where / trigger），它**只为
   grep + 指纹**而存在，**不是通用元数据筐**。新增字段（severity/owner/component/introduced_by…）
-  需另开 spec——立此边界，防 Signature 长成"正文里的隐藏版 frontmatter"。
-- **Cases**：建 incident 时即写第一行（与 `recurrences: 1` 对应，故 Case 行数 == recurrences）；
-  高频条目正文会膨胀，故**只保留最近 N 行 + 总计数**（压缩，N 由 plan 定），AI 打开时不无限长。
+  需另开 spec——立此边界，防 Signature 长成"正文里的隐藏版 frontmatter"。环境/版本判别
+  （如 Pydantic v1/v2 同症状不同根因）写进 `trigger` 或正文，**不为它新增键**——接受"同症状
+  跨版本可能共指纹、靠 trigger/模糊层区分"的刻意取舍。
+- **Cases**：建 incident 时即写首行。**`recurrences` 是权威总计数**；Cases 只保留**最近 N 行
+  （量级个位~十几，plan 定）+ 总数标注**——压缩后 Case 行数 ≤ recurrences，**以 recurrences 为准**
+  （不再要求两者相等）。
 - 配套：protocol 增一条**命中路径**——"遇到报错，先把原文 grep 进 `incidents/` 看是否已知"。
 - 旧 incident 不强制回填，新建/复发触及时补 `## Signature`（渐进迁移）。
 
@@ -79,15 +82,24 @@ last_updated: YYYY-MM-DD
 
 **确定性脚本匹配**作为兜底前置层：
 
-- 脚本读各 incident 的 `## Signature`，对 `symptom`（归一化）+ `error_type` + `where` 算**指纹**。
+- 脚本读各 incident 的 `## Signature`，对 `symptom`（归一化）+ `error_type` + `where` 算**指纹**
+  （`trigger` **不进指纹**，仅人读——四字段里只有前三进匹配）。指纹由**单一规范函数**定义——
+  跨条目可复现靠"只有一个实现"，非靠 spec 列规则；`where` 进指纹但为**次要分量**（权重 plan 定）。
 - 新错误：**指纹精确命中 → 确定性判"同一条"**，脚本直接指给 AI（零 AI 判断、零 token、
-  零误判）→ append Case + `recurrences +1`。
+  **极低误判**——非"零"：如 `Connection refused` 在 `error_type: —`/`where: network` 时可能跨
+  Redis/PG/HTTP 撞指纹）→ append Case + `recurrences +1`。
 - **无精确命中 → 落回 AI 模糊层**（applies_to/语义）。模糊层三出口：确认同一条 / 确认新建 /
   **不确定 → 问用户**（保持当前 false-positive guard，不新增行为）。
 
 **触发时机（关键）**：主触发点是 **AI 准备建 incident 之前**——先 grep/`--match-signature`
 查，命中就 append Case 而非新建文件（dedup 的价值在**防**重复，不是事后补救）。**landing 的
 recurrence sweep 是兜底**，捞会话中漏查直接建出来的重复。
+
+**幂等**：建前匹配已 `+1` 的条目，landing 兜底 sweep **不得重复计**（Case 带轮次/会话标识，或
+按 case 身份去重）——防"建前 +1、landing 又 +1"双增。
+
+**obsolete 也进匹配/sweep**：`obsolete` 只退出"主动推荐路由"，**仍可 grep、仍参与建前匹配与
+recurrence sweep**（回归检测的依赖）——实现**不可**把 obsolete 直接硬过滤出匹配集。
 
 **确定性层的覆盖边界（诚实声明，别高估）**：
 - 只覆盖**同症状同错误**。`KeyError('summary')` vs `Missing field summary` vs `summary not
@@ -110,17 +122,23 @@ recurrence sweep 是兜底**，捞会话中漏查直接建出来的重复。
 - 根因被永久修复（如加了守卫测试）→ 填 `resolved_by` + 翻 `status: obsolete`。
   - **`resolved_by` 格式**：一个**引用**——commit SHA 或 测试 id/路径（如
     `test_flightdeck_index.py::CockpitProjectionRobustnessTest`）。单一约定，便于后续自动化。
-  - **退役是一次刻意动作（人/审批 gated，同 done/scrapped）**：填 `resolved_by` + 翻 `obsolete`
-    是**同一个有意动作**；landing **不**因 `resolved_by` 非空就自动翻 `obsolete`（避免误退役）。
+  - **退役是刻意动作（人/审批 gated，同 done/scrapped），落在 `landing`**（它本就管 knowledge
+    分类与 Land Routine；status skill 只管 workflow，不碰 knowledge 退役）：填 `resolved_by` + 翻
+    `obsolete` 是**同一个有意动作**；landing **不**因 `resolved_by` 非空就自动翻（避免误退役），
+    至多在 sweep 时**提示**"resolved_by 已填但仍 active，是否退役？"。
+  - **退役是治理决策、非脚本可推导的事实**：生(Signature)/用(指纹)已结构化，死保持人 gated——
+    脚本只提示候选，不自动退役（坦白承认三段自动化程度不同）。
 - **`obsolete` 从活跃路由退出**。**现状（已核实）**：`regen_folder_index` 对 knowledge 文件夹
   列出全部状态，scrapped 排除是 specs 专属——**obsolete 当前不被排除**。故"加排除"是本 spec
   的确定改动（preflight catalog + folder INDEX 活跃区均排除 obsolete），token 账那行据此成立。
 - **语义**：此处 `obsolete` = "根因已根治、退出活跃路由、保留作历史记录"，**不是"过时无价值"**。
   复用 obsolete 是为模型一致性（knowledge 状态固定 active/obsolete/superseded，**不新增状态**）；
   命名与含义的落差是已知点，是否改名交 [scrapped-artifact-disposition](scrapped-artifact-disposition.md) 一并定。
-- **回归处理（闭环）**：`obsolete` 的 incident 若签名再次精确命中（回滚/新变化致同症状重现）→
-  **复活**：翻回 `active`、清空 `resolved_by`、`recurrences` 继续累加、Cases 注明"回归，原根治失效"。
-  （不另设"验证期"缓冲——回归复活已提供安全网，YAGNI。）
+- **回归处理（闭环，gated）**：建前匹配 / landing sweep 命中一条 `obsolete` 时——脚本须
+  **status-aware**（返回命中条目的 status），命中 obsolete **不直接 append**，而是**先 AI/人确认
+  是否真回归**（防"新 bug 恰好同症状"误判，同模糊层 gated）→ 确认后**复活**：翻回 `active`、清空
+  `resolved_by`、Cases 注明"回归，原根治失效"。**`recurrences` 继续累加**（= 终生发生次数，不重置
+  ——重置丢历史；修复前/后两代由 Cases 的回归标注分隔）。不另设"验证期"缓冲（回归复活已是安全网，YAGNI）。
 - 物理删/归档：见非目标②，交 [scrapped-artifact-disposition](scrapped-artifact-disposition.md) 统一。
 
 ## token 账（验证"省token"）
@@ -170,3 +188,22 @@ deck 真的巨大、路由读取成为瓶颈时，可把路由拆两层：prefli
 **未采纳（项目现状）**：gpt 建议新增 `resolved/historical` 状态——flightdeck knowledge 状态固定
 active/obsolete/superseded（一致性，不新增状态）；保留 obsolete + 定义其义，改名问题交
 scrapped-disposition。gpt"验证期缓冲"——以回归复活替代，YAGNI。
+
+### 第 2 轮（ds 批准进 plan；claude/gpt 抓出新引入的问题）
+
+- **Cases"行数==recurrences" vs 压缩 自相矛盾**（gpt——真矛盾）→ 改口径：`recurrences` 权威总计数，
+  Cases 留最近 N，行数 ≤ recurrences。
+- **建前匹配 + landing sweep 双增计数**（gpt）→ 加幂等（Case 带轮次标识/按身份去重）。
+- **obsolete 出路由后还能否被发现**（gpt）→ 明确：obsolete 退主动推荐路由，仍 grep/仍进 sweep
+  （回归检测依赖），不可硬过滤。
+- **回归复活触发路径/谁执行悬空 + 仅签名命中自动复活误判风险**（claude①/gpt①）→ 改为 gated：
+  脚本 status-aware，命中 obsolete 不直接 append，先 AI/人确认真回归再复活。
+- **recurrences 回归后累加 vs 重置**（gpt②）→ 定：累加（终生计数），Cases 标注分隔两代。
+- **退役落哪个仪式**（claude③）→ 定：landing（status 只管 workflow）。
+- **trigger 进 Signature 但不进指纹**（gpt⑦）→ 明确仅人读，前三字段进指纹。
+- **where 进指纹 vs tiebreak 矛盾 / 确定性**（gpt⑤）→ where 为次要分量，确定性靠单一规范函数保证。
+- **"零误判"过满**（gpt⑥）→ 改"极低误判"+ Connection refused 例。
+- **version 判别无字段**（gpt④）→ 进 trigger/正文，刻意不新增键。
+- **退役标准主观/三段自动化程度不一**（gpt⑩）→ 坦白声明退役是治理决策、脚本只提示候选。
+- **Cases N 量级**（claude②/ds）→ 给量级提示（个位~十几）传给 plan。
+- 小：评审纪要"不了解项目现状"免责语属草稿元注释，进正式 3.0 时可删（作者判断）。
