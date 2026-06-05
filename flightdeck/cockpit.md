@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-05 by 月离 (本会话：① 答"跨工具 hook 无统一标准"+建 `docs/why-no-hooks.md` deck doc；② 加 **build-stamp 锚点** `scripts/build_stamp.py`+`.current`（内容 hash 判 cache 是否同步，git-ignored、接进 local-plugin-testing.md）；两 commit 已落、已同步 cache（戳 `7a18c9d119ac`），下会话 reload 后开始 3.0 交互 dogfood。dogfood 已发现 new/SKILL.md 滞后脚本——见下一步。  上会话：preflight 瘦身+拆 `/flightdeck:launch`、`/flightdeck:new` 撰写入口，79 tests 绿)
+**Last updated**: 2026-06-05 by 月离 (本会话：3.0 dogfood item#1 主体过——② preflight 瘦身全过、③ /flightdeck:new fast path 全过、① model-v4 读新 cockpit + active→进行中 投影确认。dogfood 揪出并**修了两缺陷**：A) `skills/new/SKILL.md` kind 表滞后脚本（`chart→references/`、补 `doc→docs/` 行+dateless 规则）+ 加 **SKILL↔脚本 kind 一致性守卫测试**；B) `regen_cockpit_inprogress` 缺 summary 抛 KeyError → 改 `.get` 防御 + 回归测试。新建 incident 记 B。**116 tests 绿**、lint/`--check` 干净。改了 build input → cache 已 stale（戳 `85cf206204ba`），下会话需 reload 才能 live 复验 fallback 修复。  上会话：build-stamp 锚点 + why-no-hooks doc)
 **Active focus**: flightdeck 3.0 收尾——model-v4 + scriptable lint + **preflight 瘦身/launch 拆分** + **`/flightdeck:new` 撰写入口** 均实施完成；剩发布前 reload 后交互 dogfood 验证 + AGENTS emit + 发布 → 合并 main。
 
 ## 进行中
@@ -21,11 +21,9 @@
 
 ## 下一步
 
-- 发布前交互 dogfood（reload 后）：① model-v4（preflight 读新 cockpit / status idea→active 带动 `## 进行中` / landing 写两区）；② preflight 瘦身（deckless → `/flightdeck:launch` 重定向、slim 接管 2 列 catalog + 被动 git 提示、无阻塞 reconcile）；③ `/flightdeck:new`（建各 kind 壳 + 发现钩子是否真让 brainstorming/agent 交接而非手搓）。
-- dogfood 通过后：preflight-slim / new-artifact 的 spec+plan 翻 `done`；重跑 `/flightdeck:emit-agents-md` 消 AGENTS.md drift。
-- 发布 3.0：version-bump + CHANGELOG（写 `/flightdeck:launch`、`/flightdeck:new` 两条 + preflight deckless 行为变更）+ marketplace + tag + 合并 → main（见 [checklists/version-bump.md](checklists/version-bump.md)）。
-- （可选）记一条 `flightdeck_index.format_row` 对缺-`summary` workflow 文件 KeyError 的健壮性缺口（reload 后可用 `/flightdeck:new` 自举 dogfood）。
-- **dogfood 发现（特性③，2026-06-05）**：`skills/new/SKILL.md` prose 滞后 `flightdeck_new.py`——description/fallback 契约表**无 `doc`**、仍 `chart→charts/` 旧名、缺 `reference`。fast path 跑脚本不受影响（已用它建 docs/why-no-hooks.md），但 fallback 手搓路径会落错。下次：修 SKILL.md 表对齐脚本 kind 常量，并考虑加 SKILL↔脚本 kind 表一致性守卫/测试（防再漂移）。
+- **sync+reload 后 live 复验**（cache 现 stale）：用修后 build 跑 `/flightdeck:new` 各 kind（重点 `doc` 恒-dateless、`chart→references/`）验 fallback 修复；顺带验 model-v4 残项——idea→active 实地翻转带动 `## 进行中`、landing 写两区。
+- 复验通过后：preflight-slim / new-artifact / model-v4 的 spec+plan 翻 `done`（本会话 dogfood 主体已过、缺陷已修+单测护住，仅差 live 复验）；重跑 `/flightdeck:emit-agents-md` 消 AGENTS.md drift。
+- 发布 3.0：version-bump + CHANGELOG（写 `/flightdeck:launch`、`/flightdeck:new` 两条 + preflight deckless 行为变更 + 本会话两 bugfix）+ marketplace + tag + 合并 → main（见 [checklists/version-bump.md](checklists/version-bump.md)）；发布时整簇 land `scriptable-mechanical-layer` spec+plan + 其余 done（见 INDEX 顶注）。
 
 ## Hanging tasks
 
