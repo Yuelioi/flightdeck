@@ -5,6 +5,12 @@
 *.sh           text eol=lf
 install.sh     text eol=lf
 
+# flightdeck hooks: extensionless bash scripts + polyglot .cmd MUST stay LF
+# (parsed by bash; the .cmd is a cmd/bash polyglot — CRLF breaks the bash half)
+hooks/session-start text eol=lf
+hooks/stop          text eol=lf
+*.cmd               text eol=lf
+
 # Force CRLF for PowerShell (Windows-native)
 *.ps1          text eol=crlf
 

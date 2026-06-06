@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Stop hook for flightdeck: silently regenerate the board AUTO regions
+# (cockpit ## 进行中 + each INDEX.md AUTO region) at end-of-turn. Passive
+# only — never decision:block, never archive, never touch judgment fields.
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# Gate: no deck → nothing to sync.
+[ -d "${PROJECT_DIR}/flightdeck" ] || exit 0
+
+# Locate a python runtime; degrade silently if none.
+PY=""
+for c in python3 python; do
+  if command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
+done
+[ -n "$PY" ] || exit 0
+
+index_py="${PLUGIN_ROOT}/scripts/flightdeck_index.py"
+[ -f "$index_py" ] || exit 0
+
+# Regenerate AUTO regions; swallow all output (passive, idempotent).
+"$PY" "$index_py" "${PROJECT_DIR}/flightdeck" >/dev/null 2>&1 || true
+exit 0

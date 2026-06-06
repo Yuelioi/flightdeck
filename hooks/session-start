@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# SessionStart hook for flightdeck: inject the bootstrap directive + a live
+# cockpit anchor so the agent enters in preflight-handoff mode from turn 0.
+# Never errors out — degrades to silence (manual preflight still works).
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Resolve the project dir the hook is running against.
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-$PWD}}"
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"; s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"; s="${s//$'\r'/\\r}"; s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+emit() {
+  # $1 = the context string (already the final injected text)
+  local ctx; ctx="$(escape_for_json "$1")"
+  if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+    printf '{\n  "additional_context": "%s"\n}\n' "$ctx"
+  elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+    printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ctx"
+  else
+    printf '{\n  "additionalContext": "%s"\n}\n' "$ctx"
+  fi
+}
+
+# Gate: no deck here → say nothing.
+if [ ! -d "${PROJECT_DIR}/flightdeck" ]; then
+  printf '{}\n'
+  exit 0
+fi
+
+# Static directive (single source of truth). Missing bootstrap is a packaging
+# bug, not a user state — degrade to silence rather than inject a broken anchor.
+bootstrap="$(cat "${PLUGIN_ROOT}/skills/_shared/bootstrap.md" 2>/dev/null || true)"
+if [ -z "$bootstrap" ]; then
+  printf '{}\n'
+  exit 0
+fi
+
+# Dynamic cockpit anchor (best-effort; skipped if cockpit missing/empty).
+cockpit="${PROJECT_DIR}/flightdeck/cockpit.md"
+anchor=""
+if [ -s "$cockpit" ]; then
+  focus="$(grep -m1 -E '^\*\*Active focus\*\*' "$cockpit" 2>/dev/null || true)"
+  # The "## 下一步" section: from its heading to the next "## " heading.
+  next="$(awk '/^## 下一步/{f=1;next} /^## /{f=0} f' "$cockpit" 2>/dev/null || true)"
+  if [ -n "$focus" ] || [ -n "$next" ]; then
+    anchor=$'\n\n<flightdeck-cockpit-anchor note="may lag last turn; reconcile via /flightdeck:preflight">\n'
+    anchor+="${focus}"$'\n## 下一步:\n'"${next}"
+    anchor+=$'\n</flightdeck-cockpit-anchor>'
+  fi
+fi
+
+emit "${bootstrap}${anchor}"
+exit 0
