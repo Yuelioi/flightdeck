@@ -10,7 +10,7 @@ This stub remains so links from `README.md` / `README.zh.md` / `CHANGELOG.md` st
 - **INDEX consistency**: each folder's `INDEX.md` (plus root `flightdeck/INDEX.md`) matches the files on disk; `landing` regenerates only the changed folders' INDEX.
 - **Migration**: a synthetic 1.1.x layout (`manifest.md` / `logbook.md` / `kneeboard/` / `flight-plans/` / `incident-reports/` / `safety-reviews/`) triggers the 1.1.x→1.2 detection in `preflight`/`walkaround`; an idempotent re-run skips already-migrated artifacts.
 - **walkaround**: the 10 audits surface illegal status, INDEX↔folder drift, missing `superseded_by`, orphan plan (INFO), and legacy 1.x paths.
-- **rules.md**: `git: false` makes `landing` skip the commit step and append `landed/HISTORY.md`; `disabled_folders` suppresses orphan flags; `disabled_gates` skips the `debrief-disposition` gate.
+- **rules.md**: a no-git deck (House Rule `this deck doesn't use git`, or a gitignored `flightdeck/`) makes `landing` skip the commit step and write **no** separate log — `archive/` files are the record. (Pre-3.0 `disabled_folders` / `disabled_gates` are read-but-ignored in 3.x.)
 - **emit-agents-md**: renders Current focus / Next session / Hanging tasks from `cockpit.md`.
 
 ## 2.0 test points
@@ -29,7 +29,7 @@ This stub remains so links from `README.md` / `README.zh.md` / `CHANGELOG.md` st
 
 ## 2.2 test points
 
-- **`rules.md` mandatory + version**: `rules.md` is part of the minimal 3-file contract (`rules.md` + `cockpit.md` + `landed/HISTORY.md`) and carries `version:`. The `**Layout**` cockpit line is gone — `preflight` / `walkaround` read the version from `rules.md` and compare against `MIGRATION.md` (`current` + `layout_need_update`) for migration detection.
+- **`rules.md` mandatory + version**: `rules.md` is part of the minimal 2-file contract (`rules.md` + `cockpit.md`) and carries `version:`. The `**Layout**` cockpit line is gone — `preflight` / `walkaround` read the version from `rules.md` and compare against `MIGRATION.md` (`current` + `layout_need_update`) for migration detection.
 - **2.1→2.2 migration**: a deck with no `rules.md` `version` (or `< 2.2`) triggers a non-silent migration offer; the migration is idempotent (each step skips if already done).
 - **Workflow frontmatter enrichment**: sketches/specs/plans gain recommended `summary` + `last_updated` and optional `supersedes` / `related`. INDEX rows derive purely from `summary`; `last_updated` auto-bumps on substantive change; reverse edges are grep-derived (no persisted `superseded_by`).
 - **Land Routine collect-then-migrate**: landing a set builds the full old→`landed/` remap *before* moving, then rewrites `implements` / `supersedes` / `related` across the active tree **and** the moved set — so intra-set mutual references survive archival (no dangling edges after a co-landed cluster).

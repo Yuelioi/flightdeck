@@ -26,16 +26,16 @@ Omit = defaults (local commit auto · push asks · all five rituals self-invoke 
 commit: ask                                   # confirm before each local commit (default: auto local)
 don't auto-commit; leave changes for me / CI  # never commit at all
 status: don't auto start                       # don't auto-flip idea→active when work begins
-this deck doesn't use git; history in archive/HISTORY.md
+this deck doesn't use git                       # deck is gitignored / outside any repo — no commit, plain mv
 has AGENTS.md but don't auto-regen
 ```
 
 ### Rules
 
-- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`; plus `archive/HISTORY.md` **only under no-git**, where it is the `git log` substitute). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
 - **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; the layout verdict (`flightdeck_index.py --verdict`, fallback reads `MIGRATION.md` frontmatter) compares it against `current` + `layout_need_update` to detect migrations. `preflight` reads/reports the verdict; **`walkaround` is the only command that writes `version`**.
 - **No structured toggles remain (3.0).** `version` is the sole frontmatter field; everything else is inference / default / skill-judgment / House-Rule phrase:
-  - `git` → inferred from deck root `.git` presence; House Rule `this deck doesn't use git; history in archive/HISTORY.md` overrides.
+  - `git` → inferred: deck is git-backed iff an ancestor `.git` exists **and** the deck is not gitignored (`git -C <deck> check-ignore .` empty); a gitignored `flightdeck/` is **no-git for deck ops** even inside a git repo. House Rule `this deck doesn't use git` overrides.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
   - `commit` → defaults to **local commit auto, push asks** (local commits are reversible; push is outward). House Rules `commit: ask` (confirm before each local commit) / `don't auto-commit; leave changes for me / CI` (never). Under no-git there is no commit regardless.
   - ritual self-invocation → **all five rituals (`preflight`/`landing`/`walkaround`/`emit-agents-md`/`status`) always self-invoke**; there is no opt-out.
@@ -325,30 +325,9 @@ There is **no debrief template** — `debriefs/` was removed. External review fe
 - **Length cap: 80 lines hard ceiling.** Past 80, trim immediately. `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal (walkaround INFO, never blocks).
 - **`Active focus` is current state**, not history.
 - **Hanging tasks block landing** — resolve, or explicitly defer with a date.
-- **History does not live in cockpit.** Durable record = `archive/` + `git log` (+ `archive/HISTORY.md` when `git: false`). A landed artifact leaves `## 进行中` automatically; it is not logged in cockpit.
+- **History does not live in cockpit.** Durable record = the `archive/` folder + `git log`. A landed artifact leaves `## 进行中` automatically; it is not logged in cockpit.
 - **No metric tracking duplicated elsewhere** — link to the single source.
 - **No version stamp in cockpit.** The deck-conformance version lives in `rules.md` `version:`; migration detection compares it against `MIGRATION.md` (`current` + `layout_need_update`). cockpit is pure focus.
-
----
-
-## archive/HISTORY.md
-
-```markdown
-# History — <project>
-
-<!-- No-git history log. Present ONLY in git-less decks — init removes it when the project has .git (git log is the
-     history there). Add-only: one line per landing, newest first; never edit, delete, or truncate past entries.
-     This file IS the project's whole history, kept in full however long it grows.
-     Lives under archive/ — outside the routing graph; never read at session start (only its newest line). -->
-
-- YYYY-MM-DD — <what landed this session>; next: <pointer to the 下一步 action>
-```
-
-### Rules
-
-- **One line per landing**, newest first. Never edit, delete, or truncate past entries (add-only). No multi-line entries — link to the archived artifact for detail.
-- **Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history, kept **in full** and never trimmed however long it grows. Length is free: it never enters context (only its newest line is read, as the no-git staleness signal). Lives under `archive/` — outside the routing graph.
-- **Never read at session start** — reference for retrospectives / the no-git staleness check (newest line) only.
 
 ---
 

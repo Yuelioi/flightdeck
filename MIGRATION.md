@@ -29,7 +29,7 @@ This document records breaking migrations for the maintainer's reference.
 | `commit_mode: manual` | `don't auto-commit; leave changes for me / CI` |
 | `model_invocable` omits a ritual | `<ritual>: don't self-invoke; I run it manually` |
 | `status_auto` omits `start`/`land` | `status: don't auto <transition>` |
-| `git: false` | `this deck doesn't use git; history in landed/HISTORY.md` |
+| `git: false` | `this deck doesn't use git` (3.0 removes the separate history log — `archive/` files are the record) |
 | `emit_agents_md: false` **and** deck has `AGENTS.md` | `has AGENTS.md but don't auto-regen` |
 | `emit_agents_md: false` **and** no `AGENTS.md` | (drop — inference already equivalent; **expected**, not a lost-config bug) |
 | `disabled_gates: [...]` | (drop — removed in 3.0; if genuinely used, convert per-gate to prose or keep a warning) |
@@ -63,7 +63,7 @@ Folded into 3.0 (already in `layout_need_update`; offer is non-silent). Aviation
 | Before | After | Notes |
 |---|---|---|
 | `charts/` | `references/` | Semantics unchanged: externally-sourced reference material (`git mv`; INDEX title + `<!-- AUTO:charts -->` → `<!-- AUTO:references -->`) |
-| `landed/` | `archive/` | `git mv`; `landed/HISTORY.md → archive/HISTORY.md`; relationship-edge values with a `landed/` prefix (`implements`/`supersedes`/`related`/`superseded_by`) rewritten to `archive/` |
+| `landed/` | `archive/` | `git mv`; **delete any `landed/HISTORY.md`** — 3.0 removes the separate landing log (`archive/` files + `git log` are the record); relationship-edge values with a `landed/` prefix (`implements`/`supersedes`/`related`/`superseded_by`) rewritten to `archive/` |
 | *(absent)* | `docs/` | New knowledge folder for self-authored standing technical material (may nest by area); its absence is not a migration failure — `walkaround` issues an INFO prompt to create it when needed |
 
 **Detection (structural signals, independent of the `version` string).** A deck is flagged `structural-behind` when **any** of the following exists:
@@ -75,7 +75,7 @@ Folded into 3.0 (already in `layout_need_update`; offer is non-silent). Aviation
 **Migration (`walkaround` offers it; never silent; author-confirmed):**
 
 1. **Rename folders.** `git mv charts references` / `git mv landed archive`.
-2. **Update INDEX and markers.** In `references/INDEX.md`: update the title and change `<!-- AUTO:charts -->` to `<!-- AUTO:references -->`. In `archive/HISTORY.md`: update the title if it references `landed`.
+2. **Update INDEX and markers.** In `references/INDEX.md`: update the title and change `<!-- AUTO:charts -->` to `<!-- AUTO:references -->`. **Delete any `landed/HISTORY.md` / `archive/HISTORY.md`** — the separate landing log is removed in 3.0.
 3. **Rewrite relationship edges.** In every workflow file, replace `landed/` prefix values in `implements`/`supersedes`/`related`/`superseded_by` with `archive/`.
 4. **Create `docs/INDEX.md`** (optional — add when you have standing technical material to keep).
 5. **Regenerate INDEX files.** Run `flightdeck_index.py <deck>` — it recognises the new folder names and rebuilds all `<!-- AUTO -->` regions.

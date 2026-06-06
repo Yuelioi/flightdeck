@@ -2,7 +2,7 @@
 status: active
 when_to_read: before editing scaffolds/full/ or the preflight copy-the-scaffold first-time-setup
 applies_to: [scaffolds, preflight, init, first-time-setup]
-last_updated: 2026-06-05
+last_updated: 2026-06-06
 resolved_by:
 ---
 
@@ -29,9 +29,10 @@ leftover files) becomes part of every freshly created deck.
 ## 修法
 
 Keep `scaffolds/full/` **pristine** — each folder holds only its `INDEX.md` (empty AUTO region),
-plus the 3 contract files (`rules.md` + `cockpit.md` + `landed/HISTORY.md`). Never use it as a
-scratch location. Pre-ship check: `find scaffolds/full -type f` should list *only* `rules.md`,
-`cockpit.md`, `landed/HISTORY.md`, and each folder's `INDEX.md` — nothing else.
+plus the 2 contract files (`rules.md` + `cockpit.md`). No `archive/` and no history-log file ship
+(3.0 removed the separate landing log; `archive/` is created on demand at first land). Never use it
+as a scratch location. Pre-ship check: `find scaffolds/full -type f` should list *only* `rules.md`,
+`cockpit.md`, and each folder's `INDEX.md` — nothing else.
 
 ## Cases
 - 2026-06-03 首次

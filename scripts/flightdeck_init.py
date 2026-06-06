@@ -7,10 +7,9 @@ incident) and substitute the cockpit placeholders. As of 3.0 first-run is zero-p
 preflight just detects a runtime and calls this — no git check, interview, or AGENTS.md
 question. `--focus`/`--next` default to `(set me)` placeholders the user fills later.
 
-It also silently detects the deck's git mode: if `<target>/.git` exists, the copied
-`archive/HISTORY.md` is removed — `git log` is the history for git-backed decks, so the
-file is kept only for no-git decks (where it is the git-log substitute). Avoids shipping
-a permanently-dead file into every git project.
+flightdeck keeps **no history-log file** under any git mode: the landing record is the
+moved files in `archive/` (+ `git log` on git-backed decks). `archive/` itself is created
+on demand at first land, so the scaffold ships no `archive/` and init writes no log.
 
 Refuses if the deck already exists. Pure stdlib; run with `uv run` or `python`.
 """
@@ -44,18 +43,12 @@ def init(target, name, user, date, focus, next_item):
     text = text.replace(_NEXT, next_item)
     cockpit.write_text(text, encoding="utf-8")
 
-    # HISTORY.md is the no-git history substrate (the git-log stand-in). A git-backed
-    # deck uses `git log` instead, so drop the copied file — keeping it would be a
-    # permanently-dead file. It survives only for no-git decks.
-    if (Path(target) / ".git").exists():
-        (deck / "archive" / "HISTORY.md").unlink(missing_ok=True)
-
     return deck
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Scaffold a flightdeck deck (full layout + 3-file contract)."
+        description="Scaffold a flightdeck deck (full layout + 2-file contract)."
     )
     ap.add_argument("target", nargs="?", default=".", help="project dir (deck created at <target>/flightdeck/)")
     ap.add_argument("--name", help="project name for the cockpit header (default: target dir name)")
@@ -72,7 +65,7 @@ def main(argv=None):
     except FileExistsError as e:
         print(f"refused: {e}")
         return 2
-    print(f"created deck at {deck} (full layout, 3-file contract)")
+    print(f"created deck at {deck} (full layout, 2-file contract)")
     return 0
 
 

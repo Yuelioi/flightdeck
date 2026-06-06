@@ -1,7 +1,7 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-06 by 月离 (本会话：**设计并实施 soft-landing 特性**——end-of-turn 有知识增量→自动跑 landing 知识+状态落盘子集 +「💾 上下文已保存」标记，**不 commit、不归档**，landing 幂等重跑只补差集。brainstorm→spec→plan→子代理逐 task 改 4 skill（exit-ritual signal3/三档表/标记/自评done安全阀 · landing Modes 三档 · protocol House Rule+Lifecycle · status 划界）+ dogfood session-flow；两轮外部 AI 评审 disposition 折进 spec `## 评审纪要`，final 全局 review 的 4 Important fix。另立 2 篇 docs（spec-lifecycle / session-flow）。spec+plan **留 active** 待 resync+live 复验后批准 done。)
-**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + **soft-landing** 已设计实施，待 resync 部署 + live 复验。
+**Last updated**: 2026-06-06 by 月离 (删 HISTORY 流水账 + 修 gitignored-deck 的 git-mode 接缝：land move 改普通 mv、git 判定加 check-ignore、cockpit `Last updated` 收紧；新 incident `gitignored-deck-git-mode-seam`。143 测试通过。)
+**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + 本轮 HISTORY 移除/gitignored-deck 接缝 已实施，待 resync 部署 + live 复验。
 
 ## 进行中
 
@@ -12,8 +12,8 @@
 
 ## 下一步
 
-- **resync + reload**：把本会话改的 skill（soft-landing 的 exit-ritual/landing/protocol/status + 早先 checkpoint/`folder-semantics.md`）同步进 plugin 缓存并重载，让 soft-landing + checkpoint 对下个会话 live 生效。
-- **live 复验 soft-landing**（end-of-turn 知识增量 → 自动落盘 +「已保存」标记、纯状态→checkpoint 静默、无增量沉默）+ checkpoint 子路径；复验通过 → 批准 `specs/2026-06-06-end-of-turn-soft-landing` + `plans/2026-06-06-soft-landing-rollout` done → 归档。
+- **resync + reload**：把两批 skill 改动同步进 plugin 缓存重载——① soft-landing（exit-ritual/landing/protocol/status + checkpoint/`folder-semantics`）② 本轮 HISTORY 移除 + gitignored-deck git-mode 接缝（protocol/exit-ritual/landing/launch/templates/folder-semantics/init/scaffold）——让二者对下个会话 live 生效。
+- **live 复验**：① soft-landing（end-of-turn 知识增量→自动落盘+标记、纯状态→checkpoint 静默、无增量沉默）+ checkpoint 子路径；② 在一个**真·gitignored deck** 上跑 landing，确认不写 HISTORY、用 `mv` 不报 `not under version control`、INDEX 一次到位。通过 → 批准 `specs/2026-06-06-end-of-turn-soft-landing` + `plans/2026-06-06-soft-landing-rollout` done → 归档。
 
 ## Hanging tasks
 

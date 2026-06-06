@@ -58,7 +58,7 @@ Step 3a: Suggest status for affected artifacts
 
          For done artifacts, offer to land them via the
          single shared Land Routine (see "## Land Routine" below) —
-         do not inline the move/INDEX/HISTORY steps here.
+         do not inline the move/INDEX steps here.
 
 Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
         below. Gist: bump Last updated only on the 4 sanctioned triggers;
@@ -70,7 +70,7 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - default        → generate the message + `git commit` locally, no prompt
         - `commit: ask`  → ask "Commit now? (Y/n)" before the local commit
         - `don't auto-commit…` → do NOT commit; leave the changes for you / CI
-        - no-git overrides all → no commit (landing already logged archive/HISTORY.md)
+        - no-git overrides all → no commit (the land move is on disk; `archive/` is the record — no separate log)
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
 ```
@@ -253,7 +253,6 @@ Active focus:     update if main thread shifted (otherwise leave) — coarse ses
 ## 进行中:        AUTO — regen from every status:active spec/plan (do NOT hand-write)
 ## 下一步:        auto-written — the next concrete single action (start an idea / advance an active)
 Hanging tasks:    hand-maintained list — add new blocking items, clear resolved ones
-HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — result; next: pointer)
 ```
 
 **`## 进行中` is AUTO-derived, not hand-written.** Regenerate its `<!-- AUTO:inprogress -->` region from every `status: active` spec/plan (same mechanism + row format as INDEX; a file's `note:` appends `[note: …]`). The `status` skill regenerates it on a status flip; landing regenerates it here. A hand edit is overwritten on the next regen. This is what makes cockpit a **status projection** of the active set — an artifact is in cockpit iff it is `active`, so orphans are structurally impossible.
@@ -262,11 +261,11 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 **`Active focus` vs `## 下一步` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## 下一步` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
 
-**`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests.
+**`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. **When it does bump, keep the parenthetical a terse one-line phrase** (what shifted + the next pointer) — **not a multi-sentence changelog of everything done this session.** A blow-by-blow narrative here is the same "session-log" smell in a different field: it bloats cockpit, costs tokens every landing, and duplicates what the spec/plan body and the commit message already hold. Aim ≤ ~200 chars; detail goes to the artifact, not the dashboard.
 
 **When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## 下一步` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 
-**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` / `archive/HISTORY.md`, never cockpit.
+**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` + the `archive/` folder, never cockpit.
 
 ### The 「已保存」(saved) marker — soft-landing's visible signal
 
@@ -320,10 +319,11 @@ Landing operates on a **land set**: the one-or-more `done` artifacts archived in
    **Drain, don't accumulate.** Every landing rescans **all** `done`-in-place artifacts across the deck — **not just this session's freshly-produced ones**. Any whose inbound edge has since cleared (its blocking `active` artifact has itself landed or been re-pointed) is swept into the land set in this same pass; the rest stay **done-but-unlanded** until their blocker clears. So the active area drains automatically and `done`-but-unlanded never lingers as residue.
 
 1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = archive/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → archive/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
-2. **Move.** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent.
+2. **Move (plain filesystem rename — never `git mv`).** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent. Use a plain `mv` / rename, **not `git mv`**: `git mv` assumes the deck is tracked and aborts with `fatal: not under version control` on a gitignored deck (the common case — projects routinely keep `flightdeck/` out of their code history), forcing fragile improvisation. A plain move works identically whether the deck is git-backed (the later commit step records the rename) or no-git.
 3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
 4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region, then recompute the affected folders' count lines in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
-5. When no-git (deck root has no `.git`, or a House Rule says so), append one line per landing to `archive/HISTORY.md` (`YYYY-MM-DD — <what landed>; next: <pointer>`, newest first).
+
+The land record is the moved files in `archive/` (+ `git log` on git-backed decks) — flightdeck keeps **no separate landing log** under any git mode. `archive/<folder>/<file>` *is* the durable history; `preflight` reads files, not a journal.
 
 **There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
 
@@ -345,7 +345,7 @@ Mechanics:
 - **Compatibility-window consequence (known cost, not a bug).** On a deck that is `structural-behind` — not yet migrated to the 3.0 names, so it still has `landed/` / `charts/` — end-of-turn landing **hits the layout guard** and STOPs with "migrate first" instead of archiving. So during the compatibility window, auto-archival is **effectively paused** on un-migrated decks: `done` items stay in place until the author runs the migration. This is the deliberate guard against mixing old/new structure, not a malfunction — don't read it as "auto-landing broke."
 - **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion gate**. It is landing's no-`done` natural form + a visible marker. Timing is pinned: persist → print the 「已保存」marker → end the turn (never "reply then persist"). The 「已保存」marker format is in [§ Cockpit update](#cockpit-update--what-changes); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
-- **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `archive/HISTORY.md` mtime / line growth.
+- **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state.
 
 ## See also
 

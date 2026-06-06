@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **status⟂location**：`done ≠ archived`。归档判据确定性：无 active 入边（`implements` / `superseded_by`），通过 `--archivable` 检查，才进 `archive/`；`done` 仅表示工作完成，不触发自动归档。
 - **done 翻转 end-of-turn 防抖接力 landing**：出厂默认 `status` 将 `done` 检测到后，在当轮结束时自动接力触发 landing（push 先问）；House Rule `landing: nudge on done, don't auto-run` 可将行为降级为仅提示。
 - **workflow status 收敛 + `scrapped` 退役**：workflow status 三值 `idea`/`active`/`done`。否决一个工件＝直接删文件（git log 留史、commit body 记一行原因），不再有 `scrapped` 状态值或 `### 已否决` 墓碑分组——消除"留 specs/ 当墓碑"与"计数排除/文档声称不可见"的自相矛盾。
+- **git 判定识别"deck 被 gitignore"**：deck 是否走 git 改为"祖先有 `.git` **且** deck 未被 gitignore（`git check-ignore` 为空）"。把 `flightdeck/` 单独 gitignore（常见做法——deck 不进代码库历史）正确判为 deck-级 no-git，即便外层代码仓有 git；不再让 landing 在 git/no-git 间反复横跳。
+- **land 搬迁永远用普通 `mv`，绝不 `git mv`**：`git mv` 在被 ignore 的 deck 上会 `fatal: not under version control` 失败、逼出脆弱的即兴补救；普通 `mv` 对被跟踪和 no-git 两种 deck 都成立（被跟踪时随后 commit 自识别 rename）。
+- **`Last updated` 收紧为一行短句**：cockpit 的 `Last updated` 括注是"变了什么 + 下一步指针"的一行短语，不再是整段会话流水账（违反它自己"不是会话流水账"的规定、且每次 landing 都涨 token）。
+
+### Removed
+- **`archive/HISTORY.md` 落地流水账整条移除**（所有 git 模式）。落地记录＝`archive/` 里被搬进去的文件本身 + `git log`；no-git deck（如被 gitignore 的 `flightdeck/`）也一样靠 `archive/` 文件，不另写日志。最小契约从 3 文件回到 2 文件（`rules.md` + `cockpit.md`）；scaffold 不再预置 `archive/`（首次 land 时按需创建）；`init` 不再有 HISTORY 增删逻辑。
 
 ### Breaking
 - `charts/` → `references/`，`landed/` → `archive/`：存量 deck 需重命名文件夹及更新内部路径引用。迁移指引见 [MIGRATION.md](MIGRATION.md)。

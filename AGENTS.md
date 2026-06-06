@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + **soft-landing** 已设计实施，待 resync 部署 + live 复验。
+flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + 本轮 HISTORY 移除/gitignored-deck 接缝 已实施，待 resync 部署 + live 复验。
 
 ## 进行中
 
@@ -14,8 +14,8 @@ flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、�
 
 ## 下一步
 
-- **resync + reload**：把本会话改的 skill（soft-landing 的 exit-ritual/landing/protocol/status + 早先 checkpoint/`folder-semantics.md`）同步进 plugin 缓存并重载，live 生效。
-- **live 复验 soft-landing** + checkpoint 子路径；复验通过 → 批准 soft-landing spec+plan done → 归档。
+- **resync + reload**：两批 skill 改动同步进 plugin 缓存重载——① soft-landing + checkpoint ② 本轮 HISTORY 移除 + gitignored-deck git-mode 接缝——live 生效。
+- **live 复验**：① soft-landing + checkpoint 子路径；② 真·gitignored deck 上跑 landing（不写 HISTORY、`mv` 不报错、INDEX 一次到位）。通过 → 批准 soft-landing spec+plan done → 归档。
 
 ## Hanging tasks
 

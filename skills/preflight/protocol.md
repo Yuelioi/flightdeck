@@ -14,7 +14,7 @@ Consequence: the two metaphor folder names became mainstream — `charts/ → re
 
 ## Project rules (`rules.md`)
 
-`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`; plus `archive/HISTORY.md` under no-git) and must carry a `version` field (the deck-conformance version that drives migration detection).
+`flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`) and must carry a `version` field (the deck-conformance version that drives migration detection).
 
 As of **3.0**, `rules.md` carries just `version` plus free-prose house rules:
 
@@ -28,7 +28,7 @@ Everything that used to be a toggle is now **inferred from the environment** (`g
 Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
-2. **Environment inference** — `git`: does deck root contain `.git`?; `emit_agents_md`: does deck root already have `AGENTS.md`?
+2. **Environment inference** — `git`: is the **deck** under version control? — `deck root` has (or is under) a `.git` **and** the deck is **not gitignored** (`git -C <deck> check-ignore .` returns empty). A gitignored `flightdeck/` — common when a project deliberately keeps its deck out of code history — is **no-git for deck operations** even though the surrounding repo has git: landing skips the commit step and never invokes git on deck files (plain `mv` for the land move; the repo's own tracked code is committed by its normal flow, which flightdeck doesn't touch). `emit_agents_md`: does deck root already have `AGENTS.md`?
 3. **Built-in default** — `commit` = **local commit auto, push asks** (local commits are reversible — reset/amend; push is outward, so it stays gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment; **`landing` auto-runs on `done`** — a `done` flip relays into a landing run, debounced to **once at end-of-turn** (reversible → automatic; the downgrade `landing: nudge on done, don't auto-run` reverts to nudge-only); `scripts` = **inferred** (use the bundled INDEX/verdict scripts when a `uv`/`python` runtime is reachable, else by hand). The one outward action (push) stays gated; everything reversible runs without asking.
 
 (Pre-3.0 structured keys, when still present on a not-yet-migrated deck, are read between steps 1 and 2 — honored for 3.x compatibility, removed at 4.0.)
@@ -47,7 +47,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 | commit manually (never) | `don't auto-commit; leave changes for me / CI` | `不要自动 commit，留给我或 CI` |
 | a status transition off (`start` — on by default) | `status: don't auto <transition>` | `status 不要自动 <transition>` |
 | landing auto-run on `done` off (downgrade to nudge-only; on by default) | `landing: nudge on done, don't auto-run` | `landing 完成时只提示不自动跑` |
-| no git | `this deck doesn't use git; history in archive/HISTORY.md` | `本 deck 不走 git，历史记 archive/HISTORY.md` |
+| no git | `this deck doesn't use git` | `本 deck 不走 git` |
 | has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
 | soft-landing at end-of-turn off (signal 3; on by default) | `landing: don't soft-land at end-of-turn` | `landing 结尾不自动落盘` |
 
@@ -194,10 +194,10 @@ flightdeck/                  [product name — kept]
 ├── checklists/  INDEX.md   process / conventions (执行)         knowledge · resident · nestable
 ├── docs/        INDEX.md   self-authored technical knowledge ★ knowledge · resident · nestable
 ├── references/  INDEX.md   imported external material (旧 charts/) knowledge · imported · nestable
-└── archive/     (旧 landed/) + HISTORY.md                      location (not a kind)
+└── archive/     (旧 landed/)                                   location (not a kind)
 ```
 
-`docs/` (★ new in 3.0) holds **self-authored, resident, explanatory** project technical knowledge — architecture, design rationale, subsystem overviews, lifecycle/philosophy. It is what you **read to understand**, vs `checklists/` (what you **execute**), `references/` (what comes from **outside**), and `specs/` (one-shot design intent that archives when built). `archive/` is a first-class structural container (mirrors source kinds, has `HISTORY.md`, handled specially by landing/index/migration) but is **not a kind** — it answers "in the active area or not", not "what artifact is this" (artifacts keep their own kind).
+`docs/` (★ new in 3.0) holds **self-authored, resident, explanatory** project technical knowledge — architecture, design rationale, subsystem overviews, lifecycle/philosophy. It is what you **read to understand**, vs `checklists/` (what you **execute**), `references/` (what comes from **outside**), and `specs/` (one-shot design intent that archives when built). `archive/` is a first-class structural container (mirrors source kinds, handled specially by landing/index/migration) but is **not a kind** — it answers "in the active area or not", not "what artifact is this" (artifacts keep their own kind). The archived files themselves **are** the landing record — flightdeck keeps no separate history log.
 
 Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README — multi-file topics live as several files in one folder, grouped via the INDEX hand area; only `references/` may contain an imported external project subtree.)
 
@@ -276,7 +276,7 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + regen `## 进行中` from `status: active` + auto-write `## 下一步` + any `Hanging tasks` changes); append to `archive/HISTORY.md` when no-git; then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Last updated` + regen `## 进行中` from `status: active` + auto-write `## 下一步` + any `Hanging tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
 
 ## Ritual responsibilities — who owns what
 
@@ -298,7 +298,7 @@ Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses 
 
 ## Templates
 
-See [templates.md](templates.md) for `spec` / `plan` / `incident` / `checklist` / `cockpit.md` / `rules.md` / `HISTORY.md` / `INDEX.md` templates.
+See [templates.md](templates.md) for `spec` / `plan` / `incident` / `checklist` / `cockpit.md` / `rules.md` / `INDEX.md` templates.
 
 ## Relation to project agent rules
 
@@ -344,7 +344,7 @@ When an incident's root cause is permanently fixed (e.g. a guard test now preven
 | `incidents/` writes "forgot / careless" | Root cause must be a wrong assumption / wrong model / wrong process. |
 | External review feedback saved as its own file | Raw feedback is transient → project-root `tmp/`; its disposition (adopt / reject / defer) folds into the reviewed spec's `## 评审纪要`. |
 | Brainstorming where every knowledge item belongs | Heuristics catch 90%. Default-brainstorm is the failure mode. |
-| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` / `archive/HISTORY.md`, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
+| Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` + the `archive/` folder, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
 | Bumping `Last updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |
 | Incident / checklist without required frontmatter | STOP, report file path + missing fields. Add or delete before proceeding. |
 | Incident / checklist with `last_updated` > 1 year in a fast-moving project | Likely stale advice. Bump after re-verifying or flip to `status: obsolete`. |

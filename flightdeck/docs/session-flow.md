@@ -38,7 +38,7 @@ summary: 一次会话的走向——preflight 只读接管→执行→（任务�
 
 3. **接缝 —— done。** `active → done` 的触发源是**你断言的批准/签收**——AI 不自评完成、不靠 smoke-check 判定。到 `done` 即把棒交给 landing。**done 只翻 status，不归档**。
 
-4. **收尾 —— landing（full mode）。** 在**回合结束前** debounce 跑一次（把本回合所有 `done` 聚到同一次 landing）：① 分类本会话新知识（incident/checklist/spec/plan/doc/references，或不写）② 建议 status、bump `last_updated` ③ 重生成**有改动**文件夹的 INDEX + root ④ 回写 cockpit（`Last updated`/`## 进行中`/`## 下一步`）⑤ recurrence sweep + 晋升闸 ⑥ 本地 commit（**push 问**）⑦ 归档 `done`（Land Routine：算 land set → 搬进 `archive/` → 改关系边 → 删 INDEX 行 → no-git 记 HISTORY）。
+4. **收尾 —— landing（full mode）。** 在**回合结束前** debounce 跑一次（把本回合所有 `done` 聚到同一次 landing）：① 分类本会话新知识（incident/checklist/spec/plan/doc/references，或不写）② 建议 status、bump `last_updated` ③ 重生成**有改动**文件夹的 INDEX + root ④ 回写 cockpit（`Last updated`/`## 进行中`/`## 下一步`）⑤ recurrence sweep + 晋升闸 ⑥ 本地 commit（**push 问**）⑦ 归档 `done`（Land Routine：算 land set → 普通 `mv` 搬进 `archive/`（绝不 `git mv`）→ 改关系边 → 删 INDEX 行）。落地记录就是 `archive/` 里的文件本身 + `git log`，**不另记流水账**。
 
 5. **闭环 —— 下次 preflight 干净接手。** 看板已在盘上，下个会话进 preflight 就接着 `## 下一步` 走。
 

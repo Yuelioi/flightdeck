@@ -26,7 +26,7 @@ class InitTest(unittest.TestCase):
             self.assertIn("decide what to build", cockpit)
             self.assertNotIn("<ACTIVE_FOCUS", cockpit)
             self.assertNotIn("<FIRST_NEXT_ITEM", cockpit)
-            # full layout + 3-file contract present
+            # full layout + 2-file contract present
             for f in FOLDERS:
                 self.assertTrue((deck / f / "INDEX.md").exists(), f"missing {f}/INDEX.md")
             self.assertTrue((deck / "INDEX.md").exists())
@@ -34,10 +34,10 @@ class InitTest(unittest.TestCase):
             # references/ exists, charts/ is gone
             self.assertTrue((deck / "references").exists(), "references/ should exist")
             self.assertFalse((deck / "charts").exists(), "charts/ should not exist")
-            # no-git deck keeps HISTORY.md in archive/
-            self.assertTrue(
+            # no history-log file ships under any git mode (archive/ is created on demand)
+            self.assertFalse(
                 (deck / "archive" / "HISTORY.md").exists(),
-                "HISTORY.md should exist in archive/ for no-git deck",
+                "HISTORY.md must never ship — archive/ files are the landing record",
             )
             # landed/ is gone (renamed to archive/ in scaffold)
             self.assertFalse((deck / "landed").exists(), "landed/ should not exist")
@@ -61,25 +61,20 @@ class InitTest(unittest.TestCase):
             deck = Path(d) / "flightdeck"
             self.assertTrue((deck / "docs" / "INDEX.md").exists(), "missing docs/INDEX.md")
 
-    def test_no_git_keeps_history(self):
-        # target without .git → no-git deck → HISTORY.md is the history substrate, kept
-        with tempfile.TemporaryDirectory() as d:
-            init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
-            deck = Path(d) / "flightdeck"
-            self.assertTrue(
-                (deck / "archive" / "HISTORY.md").exists(),
-                "HISTORY.md should exist in archive/ for no-git deck",
-            )
-
-    def test_git_deck_drops_history(self):
-        # target with .git → git log is the history → the copied HISTORY.md is removed
-        with tempfile.TemporaryDirectory() as d:
-            (Path(d) / ".git").mkdir()
-            init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
-            deck = Path(d) / "flightdeck"
-            self.assertFalse((deck / "archive" / "HISTORY.md").exists())
-            # the rest of the deck is unaffected
-            self.assertTrue((deck / "cockpit.md").exists())
+    def test_no_history_log_under_any_git_mode(self):
+        # flightdeck keeps no separate landing log — archive/ files are the record.
+        # Neither a no-git target nor a git target ships HISTORY.md.
+        for make_git in (False, True):
+            with tempfile.TemporaryDirectory() as d:
+                if make_git:
+                    (Path(d) / ".git").mkdir()
+                init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
+                deck = Path(d) / "flightdeck"
+                self.assertFalse(
+                    (deck / "archive" / "HISTORY.md").exists(),
+                    f"HISTORY.md must not ship (make_git={make_git})",
+                )
+                self.assertTrue((deck / "cockpit.md").exists())
 
     def test_refuses_if_deck_already_exists(self):
         with tempfile.TemporaryDirectory() as d:

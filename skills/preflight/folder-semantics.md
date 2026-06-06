@@ -8,8 +8,8 @@ As of 3.x, both `/flightdeck:launch` (first-time deck creation) and `install --s
 
 | Concept | What it means |
 | --- | --- |
-| **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ docs/ references/ archive/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md` (+ `archive/HISTORY.md` for no-git decks — init removes it when the deck has `.git`) |
-| **Minimal contract** (validation floor) | `rules.md` (+ `version`) + `cockpit.md` must exist (walkaround CRITICAL if `rules.md`/`version` missing); `archive/HISTORY.md` additionally under no-git — the *floor*, not a scaffold variant |
+| **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ docs/ references/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md`. `archive/` is created on demand at first land — not pre-shipped |
+| **Minimal contract** (validation floor) | `rules.md` (+ `version`) + `cockpit.md` must exist (walkaround CRITICAL if `rules.md`/`version` missing) — the *floor*, not a scaffold variant |
 
 **Empty is the normal initial state.** A freshly scaffolded deck has empty folders + empty `INDEX.md` files — expected, not an anti-pattern. Under the full layout a **missing** known folder is the anomaly (walkaround flags it); an **empty-but-present** folder / `INDEX.md` is fine and never flagged. (This reverses the pre-3.x "add folders on demand" guidance.)
 
@@ -56,8 +56,7 @@ flightdeck/
 ├── references/         # Imported external material (may hold an external project tree)
 │   └── INDEX.md
 │
-└── archive/            # Archive umbrella — mirrors source structure on demand
-    └── HISTORY.md      # Landing log, newest first — no-git decks only (init removes it when the deck has .git)
+└── archive/            # Archive umbrella — created on demand at first land; mirrors source structure
 ```
 
 ## Entry files
@@ -102,11 +101,9 @@ Note: `references/` rows show a file/project count and "imported" rather than a 
 
 The root INDEX is a **downgradeable component** — if the project finds per-folder INDEXes sufficient and the root INDEX underused, it may be removed without affecting the model.
 
-### `archive/HISTORY.md` — landing log
+### No separate landing log
 
-Lives under `archive/`, so it is **outside the routing graph** (never read at session start). An **add-only** log (never edit, delete, or truncate past entries), one line per landing, **newest first**.
-
-**Exists only under `git: false`** — `init` removes it when the deck has `.git` (there `git log` is the authoritative history). On a no-git deck it is the project's whole history in place of `git log`, kept **in full** (length is free: it never enters context; only its newest line is read, as the no-git staleness signal).
+flightdeck keeps **no history-log file** under any git mode. The durable landing record is the moved files in `archive/` (+ `git log` on git-backed decks) — `preflight` reads files, not a journal. A no-git deck (e.g. a gitignored `flightdeck/`) loses nothing: the archived artifacts themselves are the history.
 
 ## INDEX.md (per-folder)
 
@@ -221,12 +218,11 @@ There is **no `debriefs/` folder**. External review feedback (other AIs, colleag
 
 Top-level archive for completed or retired work. `archive/` **mirrors any source folder on demand** — create the matching subdirectory the first time you archive something of that kind.
 
-`archive/` is a **first-class structural container** (it mirrors the source kinds, holds `HISTORY.md`, and landing / index / migration treat it specially) — **but it is not itself a kind.** It does not answer "what kind of artifact is this" (the artifact keeps its own kind); it only answers "is it still in the active area?" — i.e. it is the `location` axis made concrete, orthogonal to `status`.
+`archive/` is a **first-class structural container** (it mirrors the source kinds, and landing / index / migration treat it specially) — **but it is not itself a kind.** It does not answer "what kind of artifact is this" (the artifact keeps its own kind); it only answers "is it still in the active area?" — i.e. it is the `location` axis made concrete, orthogonal to `status`. The archived files themselves **are** the landing record — there is no separate log file.
 
 - `archive/specs/` — specs archived after the work is done.
 - `archive/plans/` — plans archived after execution.
 - `archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/` — obsolete-but-historical reference moved out of the active set. (A pre-3.0 deck may still carry a historical `landed/` tree or `landed/debriefs/` — left in place, not regenerated.)
-- `archive/HISTORY.md` — append-only landing log (no-git decks only; absent when the deck has `.git`).
 
 Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `archive/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `archive/`.
 
