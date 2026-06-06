@@ -190,6 +190,15 @@ Which do you want? Or skip the write?
 
 This forces a structured decision in seconds. The "skip the write" option is critical — defaulting to write is the failure mode.
 
+## Self-asserting `done` — safety valve (pure-do tasks only)
+
+soft-landing may flip `done` itself **only** for a pure-do, no-verify task. The boundary is **rule-first, examples-second** (avoid the "list = exhaustive" trap):
+
+- **Rule:** anything that will be **mechanically executed by AI or scripts, where a misjudgment is not easily noticed**, is **needs-verify** (AI must NOT self-assert `done`).
+- **Examples (non-exhaustive):** any external-system change (open PR, deploy, write DB, send email…); governance / data-model edits (`protocol.md`, `rules.md`, `AGENTS.md`, frontmatter fields, script contracts).
+- When self-asserting `done`, the AI **must print a verdict line**: `[判定: <reason>; 无需验证; 自动 done]` — making the call observable and auditable.
+- Self-asserting `done` is a **state write only** — soft-landing still does **not** archive (archival stays full landing's). Misjudgment is cheap: `done` is one frontmatter field the user can flip back, and no commit/move was produced.
+
 ## Hanging tasks — block session exit
 
 A session **cannot be closed cleanly** while an open `## Hanging tasks` item remains. Either resolve it now, or record it explicitly in `cockpit.md` "Hanging tasks" (`- [ ] <blocking item>`) so the next preflight sees it on entry and resolves.
@@ -259,9 +268,34 @@ HISTORY.md:       when no-git, append one line per landing (YYYY-MM-DD — resul
 
 **Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` / `archive/HISTORY.md`, never cockpit.
 
+### The 「已保存」(saved) marker — soft-landing's visible signal
+
+When a **soft-landing** runs (signal 3), end the turn with this marker so the user knows it is safe to close the conversation:
+
+```
+──────────── 💾 上下文已保存 ────────────
+知识 + 状态已落盘 · 现在关闭对话不会丢失
+已落:<最多 3 个文件名;更多写「等 N 个文件」> · cockpit 已更新
+下次 /flightdeck:preflight 干净接手
+```
+
+- Wording is deliberately **「已保存 / 已落盘」, never "LANDED / 已归档 / 已完成"** — soft-landing does not archive and may not be `done`; the marker must not collide with `done ≠ archived`.
+- Line 3 is a one-line check summary: **at most 3 filenames**, overflow → 「等 N 个文件」; **no commit hash** (soft-landing does not commit).
+- **Silence rule:** with no knowledge increment (pure Q&A / exploration, or state-only → checkpoint) → **print nothing**. Known trade-off: the user cannot distinguish "nothing to persist" from "AI missed it"; accepted to avoid noise.
+
 ## Checkpoint — lightweight board-sync subpath
 
 A **checkpoint** is the cheapest possible status-write: it keeps the persisted board (`cockpit.md` + the active plan file) equal to *actual* progress, so a user can close the conversation at any plan-task boundary and the next `/flightdeck:preflight` resumes on a true picture — no lost context. It is **a strict subset of landing**: landing = checkpoint + the wrap-up heavy lifting (knowledge-classify, INDEX regen, archive, smoke-check, commit).
+
+**Three tiers, one landing.** `checkpoint` ⊂ `soft-landing` ⊂ `full landing` — same machinery, different trigger + range (not three rituals):
+
+| Tier | Essence | Trigger | Range | commit / archive |
+|---|---|---|---|---|
+| **checkpoint** | save **state** | plan-task boundary / end-of-turn state-only increment | board only (`## 下一步` + plan `current:`), disk-only | none |
+| **soft-landing** | save **state + knowledge** | end-of-turn with a **knowledge increment** (signal 3) | checkpoint + classify knowledge + regen changed INDEX | **neither** |
+| **full landing** | + **advance lifecycle** | `done` / explicit `/flightdeck:landing` | soft-landing + archive done + promotion gate | + local commit + archive |
+
+`soft-landing` carries **no commit and no archive** — both are "traceable tails" deferred to a full landing (durability rides on files being on disk; `preflight` reads files, not git). See [§ Land-readiness signal 3](#land-readiness-check).
 
 **Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (consistent with flightdeck's deliberate no-startup-hooks design).
 
@@ -297,10 +331,11 @@ Landing operates on a **land set**: the one-or-more `done` artifacts archived in
 
 ## Land-readiness check
 
-Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2:
+Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2 (each queues a full landing at end-of-turn). **signal 3** is separate — it triggers a *soft-landing* (knowledge + state persist only, no commit/archive), not a full landing:
 
 - **signal 1** — this `status` invocation just flipped an artifact to `done`.
 - **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
+- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## 进行中` / `## 下一步` / `Active focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
 
 Mechanics:
 - signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
@@ -308,7 +343,9 @@ Mechanics:
 - signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
 - **Compatibility-window consequence (known cost, not a bug).** On a deck that is `structural-behind` — not yet migrated to the 3.0 names, so it still has `landed/` / `charts/` — end-of-turn landing **hits the layout guard** and STOPs with "migrate first" instead of archiving. So during the compatibility window, auto-archival is **effectively paused** on un-migrated decks: `done` items stay in place until the author runs the migration. This is the deliberate guard against mixing old/new structure, not a malfunction — don't read it as "auto-landing broke."
-- **Deliberate gap (YAGNI):** a long single session that churns without ever flipping a status is not nudged mid-session (caught at next entry). No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `archive/HISTORY.md` mtime / line growth.
+- **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion gate**. It is landing's no-`done` natural form + a visible marker. Timing is pinned: persist → print the 「已保存」marker → end the turn (never "reply then persist"). The 「已保存」marker format is in [§ Cockpit update](#cockpit-update--what-changes); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
+- **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
+- **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state. Future signpost: under no-git, signal 2 could use `archive/HISTORY.md` mtime / line growth.
 
 ## See also
 

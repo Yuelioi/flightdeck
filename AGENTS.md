@@ -5,16 +5,17 @@
 
 ## Current focus
 
-flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；其载体 checkpoint 特性已落成归档，待 resync 部署 + live 复验。
+flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + **soft-landing** 已设计实施，待 resync 部署 + live 复验。
 
 ## 进行中
 
-None.
+- `specs/2026-06-06-end-of-turn-soft-landing.md` — soft-landing（end-of-turn 知识增量→自动落盘+「已保存」标记，不 commit、不归档，landing 幂等）
+- `plans/2026-06-06-soft-landing-rollout.md` — 把 soft-landing 铺进 exit-ritual/landing/protocol/status + dogfood session-flow 的逐文件实施
 
 ## 下一步
 
-- **resync + reload**：把本会话改的 5 处 skill（含 checkpoint + 早先 `folder-semantics.md`）同步进 plugin 缓存并重载，让 checkpoint 对下个会话 live 生效；之后 live 复验 checkpoint 子路径与「知识规模化组织」那节文档指南。
-- 选下一个 3.0 完善点（specs/ 现已清空，按需 `/flightdeck:new` 起新 idea）。
+- **resync + reload**：把本会话改的 skill（soft-landing 的 exit-ritual/landing/protocol/status + 早先 checkpoint/`folder-semantics.md`）同步进 plugin 缓存并重载，live 生效。
+- **live 复验 soft-landing** + checkpoint 子路径；复验通过 → 批准 soft-landing spec+plan done → 归档。
 
 ## Hanging tasks
 

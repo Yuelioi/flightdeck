@@ -11,18 +11,18 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 - Natural pause point (ship complete / brainstorm done) — closing checks before moving on.
 - Re-running mid-session to refresh cockpit (`## 进行中` + `## 下一步`) and clear hanging tasks.
 
-## Modes — full vs checkpoint
+## Modes — full · soft-landing · checkpoint
 
-`landing` runs in one of two modes; the AI picks by the trigger:
+`landing` runs in one of three modes; the AI picks by the trigger (`checkpoint ⊂ soft-landing ⊂ full`):
 
-| | **full** (default) | **checkpoint** (lightweight) |
-|---|---|---|
-| Trigger | session wrap · `/flightdeck:landing` · end-of-turn `done`-flip | **plan / plan-task boundary** (AI self-invoke) |
-| Runs | the whole checklist (Steps 0–7) | **only Step 4's board-sync** — refresh `## 下一步` + advance the active plan's `## Progress` `current:` pointer |
-| Skips | nothing | knowledge-classify (2) · INDEX regen (3) · archive (3a) · AGENTS.md (5) · smoke-check (6) · **commit (7)** |
-| Commit | local auto (push asks) | **none** (board on disk is enough; durability deferred to a full landing / milestone) |
+| | **full** (default) | **soft-landing** | **checkpoint** |
+|---|---|---|---|
+| Trigger | session wrap · `/flightdeck:landing` · end-of-turn `done`-flip | **end-of-turn with a knowledge increment** (signal 3) | plan / plan-task boundary · end-of-turn state-only |
+| Runs | the whole checklist (Steps 0–7) | Steps 2–4 (classify knowledge · regen changed INDEX · cockpit board) + 「已保存」marker | only Step 4's board-sync |
+| Skips | nothing | archive (3a) · promotion gate (3z) · smoke-check (6) · **commit (7)** | everything except Step 4 |
+| Commit / archive | local commit (push asks) + archive | **neither** (durability deferred to full landing) | none |
 
-A checkpoint is a **strict subset of a full landing** — same Step-4 board-sync implementation, no fork. Canonical definition + rationale: [exit-ritual § Checkpoint](../preflight/exit-ritual.md#checkpoint--lightweight-board-sync-subpath). When in doubt (is this a task boundary or a session wrap?), a full landing is always safe — checkpoint is the cheaper option, never a required one.
+soft-landing is landing's **no-`done` natural form** — Steps 2–4 with no commit/archive, plus the 「已保存」marker; canonical definition + signal 3 trigger + stateless dedup: [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check) and [§ Checkpoint 三档 table](../preflight/exit-ritual.md#checkpoint--lightweight-board-sync-subpath). **landing 幂等:** re-running a full landing after a soft-landing only fills the diff (commit + archive + promotion gate); the already-persisted Steps 2–4 self-detect `already clean`. A checkpoint and a soft-landing are each a **strict subset of a full landing** — same machinery, no fork. When in doubt about the mode, a full landing is always safe — the lighter modes are cheaper options, not required ones.
 
 ## Run this checklist
 

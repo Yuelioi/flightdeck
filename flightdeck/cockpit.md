@@ -1,18 +1,19 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-06 by 月离 (本会话：**落成 checkpoint 特性并归档**——子代理驱动逐 task 实现 5 处 skill 改（exit-ritual canonical 定义 + landing Modes + plan `## Progress current:` 指针 + templates/folder-semantics/protocol 收口），双重评审通过、跨文件一致、`current:` 指针经 index 复跑实证为 body-only（脚本零改动）。spec+plan 已 done→archive。评审拦下一条 shipped-skill 死链 → 落 incident。)
-**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；其载体 checkpoint 特性已落成归档，待 resync 部署 + live 复验。
+**Last updated**: 2026-06-06 by 月离 (本会话：**设计并实施 soft-landing 特性**——end-of-turn 有知识增量→自动跑 landing 知识+状态落盘子集 +「💾 上下文已保存」标记，**不 commit、不归档**，landing 幂等重跑只补差集。brainstorm→spec→plan→子代理逐 task 改 4 skill（exit-ritual signal3/三档表/标记/自评done安全阀 · landing Modes 三档 · protocol House Rule+Lifecycle · status 划界）+ dogfood session-flow；两轮外部 AI 评审 disposition 折进 spec `## 评审纪要`，final 全局 review 的 4 Important fix。另立 2 篇 docs（spec-lifecycle / session-flow）。spec+plan **留 active** 待 resync+live 复验后批准 done。)
+**Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + **soft-landing** 已设计实施，待 resync 部署 + live 复验。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
-
+- [2026-06-06-end-of-turn-soft-landing.md](specs/2026-06-06-end-of-turn-soft-landing.md) — end-of-turn 若有知识增量,自动跑 landing 的知识+状态落盘子集并输出「已保存」标记,让用户随时可安全关闭对话、上下文不丢;soft-landing 不 commit、不归档(commit/归档/晋升闸都是 full landing 的尾巴),landing 幂等重跑只补差集
+- [2026-06-06-soft-landing-rollout.md](plans/2026-06-06-soft-landing-rollout.md) — 把 end-of-turn soft-landing(知识落盘+「已保存」标记、不commit不归档、landing 幂等)铺进 exit-ritual/landing/protocol/status 4 个 skill + session-flow dogfood doc 的逐文件实施步骤
 <!-- /AUTO -->
 
 ## 下一步
 
-- **resync + reload**：把本会话改的 5 处 skill（含 checkpoint + 早先 `folder-semantics.md`）同步进 plugin 缓存并重载，让 checkpoint 对下个会话 live 生效；之后 live 复验 checkpoint 子路径与「知识规模化组织」那节文档指南。
-- 选下一个 3.0 完善点（specs/ 现已清空，按需 `/flightdeck:new` 起新 idea）。
+- **resync + reload**：把本会话改的 skill（soft-landing 的 exit-ritual/landing/protocol/status + 早先 checkpoint/`folder-semantics.md`）同步进 plugin 缓存并重载，让 soft-landing + checkpoint 对下个会话 live 生效。
+- **live 复验 soft-landing**（end-of-turn 知识增量 → 自动落盘 +「已保存」标记、纯状态→checkpoint 静默、无增量沉默）+ checkpoint 子路径；复验通过 → 批准 `specs/2026-06-06-end-of-turn-soft-landing` + `plans/2026-06-06-soft-landing-rollout` done → 归档。
 
 ## Hanging tasks
 

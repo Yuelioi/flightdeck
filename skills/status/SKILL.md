@@ -79,6 +79,8 @@ If this invocation flipped an artifact to `done`, run the shared [Land-readiness
 
 Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
 
+**signal 3 (end-of-turn soft-landing) does NOT go through `status`.** It is the AI's own end-of-turn self-invoke when a knowledge increment exists (see [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check)); `status` only emits **signal 1** (this flip → `done`). When soft-landing needs to judge a state-only "actual change", it **reuses this skill's `## 进行中` diff logic** (Step 5a — re-derive from the current `status: active` set), not a new diff.
+
 ## Don't do
 
 - Don't touch `cockpit.md` **beyond** the `## 进行中` AUTO region on an active-set-changing flip (Step 5a) — no `Last updated` bump, no `Active focus` / `## 下一步` / `Hanging tasks` edits. Those are landing's / the user's.
