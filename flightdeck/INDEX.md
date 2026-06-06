@@ -2,7 +2,7 @@
 
 <!-- AUTO:root -->
 - specs/ — 2 active
-- plans/ — 1 active
+- plans/ — 2 active
 - incidents/ — 6 active
 - checklists/ — 3 active
 - docs/ — 5 active

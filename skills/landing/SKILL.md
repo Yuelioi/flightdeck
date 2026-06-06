@@ -24,6 +24,8 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 
 soft-landing is landing's **no-`done` natural form** — Steps 2–4 with no commit/archive, plus the 「已保存」marker; canonical definition + signal 3 trigger + stateless dedup: [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check) and [§ Checkpoint 三档 table](../preflight/exit-ritual.md#checkpoint--lightweight-board-sync-subpath). **landing 幂等:** re-running a full landing after a soft-landing only fills the diff (commit + archive + promotion gate); the already-persisted Steps 2–4 self-detect `already clean`. A checkpoint and a soft-landing are each a **strict subset of a full landing** — same machinery, no fork. When in doubt about the mode, a full landing is always safe — the lighter modes are cheaper options, not required ones.
 
+> The `## 进行中` + `INDEX.md` AUTO regions a landing regenerates are the *same* regions the Claude-only `Stop` hook welds at end-of-turn (one implementation: `flightdeck_index.py <deck>`). The hook keeps them fresh between landings; landing still owns archive, promotion gate, and commit. No divergence — the hook is a passive subset, never a separate code path.
+
 ## Run this checklist
 
 The full rules + rationale live in [exit-ritual.md](../preflight/exit-ritual.md). The checklist below is **full mode**; in **checkpoint mode** run **only Step 4** (board-sync) and stop — skip every other step. Skeleton:
