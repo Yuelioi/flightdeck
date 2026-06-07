@@ -62,6 +62,38 @@ an `idea` does not.
 **If the target file already exists:** the script refuses; by hand, pick a different slug
 or remove/rename the existing file first.
 
+**Graduate question (spec only — ask proactively):** immediately after creating a `spec`,
+judge whether it meets **either** of these criteria (lenient; the user's yes/no is the gate,
+not a mechanical check):
+
+- **约束后续开发** — defines a rule / contract / interface that future code must obey
+  (error-code table, i18n-key convention, plugin protocol, design tokens, …).
+- **大概率被反复参考** — will be opened for repeated look-up rather than read once and forgotten.
+
+Negative examples — these look like design specs but **do NOT qualify** unless they also
+set a durable rule the codebase must obey:
+- One-off bugfix design / post-mortem spec
+- A migration-sequencing spec (ordering steps for a one-time migration)
+- A throwaway experiment / probe design
+- A specific feature's implementation plan (no lasting contract)
+
+If the spec plausibly hits either criterion, **ask the user: "这份 spec 要标记为 graduate？"**
+(English: "Mark this spec `graduate: true`?"). On yes, write `graduate: true` into the
+spec's frontmatter.
+
+**Flag window:** `graduate: true` can be set at creation time (here) **or at any point
+during the spec's active life** — mid-plan-execution is fine. The gate is the user's
+yes/no; flightdeck does not re-detect at completion time. A missed flag is the user's
+responsibility; there is no completion-time auto-detection fallback.
+
+**`when_to_update` for knowledge artifacts (docs / references):** when authoring a `doc`
+or `reference` that will be referenced repeatedly, consider adding a `when_to_update` field
+to the frontmatter — a one-phrase "what kind of change would make this doc wrong". This
+opts the artifact into stale detection (the rituals auto-flip `status: stale` when a
+matching change is detected). See `skills/preflight/templates.md` for the format and
+good/bad examples. Graduate-out docs **must** carry `when_to_update` (omitting it opts
+the doc out of stale detection immediately, defeating the point).
+
 ## Relationship to landing
 
 `landing` already knows the knowledge-artifact convention and creates incidents/checklists
