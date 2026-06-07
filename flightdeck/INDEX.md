@@ -1,8 +1,8 @@
 # flightdeck — INDEX
 
 <!-- AUTO:root -->
-- specs/ — 3 active
-- plans/ — 3 active
+- specs/ — 2 active
+- plans/ — 1 active
 - incidents/ — 8 active
 - checklists/ — 3 active
 - docs/ — 6 active
