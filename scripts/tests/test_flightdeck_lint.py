@@ -165,6 +165,27 @@ class AuditStatusTest(unittest.TestCase):
             )
             self.assertEqual(audit_status(deck), [])
 
+    def test_knowledge_superseded_is_illegal(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "a.md").write_text(
+                "---\nstatus: superseded\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n# t\n",
+                encoding="utf-8",
+            )
+            warns = _by_audit(audit_status(deck), "status")
+            self.assertTrue(any("illegal status `superseded`" in f["message"] for f in warns))
+
+    def test_knowledge_stale_is_legal(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "a.md").write_text(
+                "---\nstatus: stale\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n# t\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(_by_audit(audit_status(deck), "status"), [])
+
 
 class AuditOrphanPlansTest(unittest.TestCase):
     def test_plan_without_implements_is_info(self):

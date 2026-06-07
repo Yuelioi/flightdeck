@@ -40,7 +40,7 @@ from flightdeck_index import (
 
 # Legal status values per artifact kind (model-v4 §1; mirrors walkaround Audit 1).
 WORKFLOW_STATUSES = {"idea", "active", "done"}
-KNOWLEDGE_STATUSES = {"active", "obsolete", "superseded"}
+KNOWLEDGE_STATUSES = {"active", "stale", "obsolete"}
 
 WORKFLOW_FOLDERS = ("specs", "plans")
 # KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}  — from flightdeck_index
