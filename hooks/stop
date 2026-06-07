@@ -9,6 +9,8 @@ dbg() { [ -n "${FLIGHTDECK_HOOK_DEBUG:-}" ] && printf 'flightdeck-hook[%s]: %s\n
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+. "${SCRIPT_DIR}/_context.sh"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
 dbg "project-dir = ${PROJECT_DIR}"
 
@@ -16,6 +18,17 @@ dbg "project-dir = ${PROJECT_DIR}"
 if [ ! -d "${PROJECT_DIR}/flightdeck" ]; then
   dbg "gate: no deck at ${PROJECT_DIR}/flightdeck — exit"
   exit 0
+fi
+
+# Cursor's stable-loading primary path: refresh the always-applied rule file at
+# turn end so the next turn loads a current cockpit anchor. Independent of the
+# python board-sync below (no interpreter needed to read cockpit + bootstrap).
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ] || [ -n "${CURSOR_PROJECT_ROOT:-}" ]; then
+  cursor_ctx="$(build_context "$PROJECT_DIR" "$PLUGIN_ROOT")" || cursor_ctx=""
+  if [ -n "$cursor_ctx" ]; then
+    dbg "cursor: refresh .cursor/rules/flightdeck-context.mdc"
+    write_cursor_rules "$PROJECT_DIR" "$cursor_ctx"
+  fi
 fi
 
 # Locate a *working* python runtime; degrade silently if none. The viability

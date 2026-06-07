@@ -199,3 +199,39 @@ def test_hook_debug_silent_by_default(tmp_path):
     r2 = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(tmp_path)})
     assert r1.returncode == 0 and r1.stderr == ""
     assert r2.returncode == 0 and r2.stderr == ""
+
+
+def _cursor_rule(proj):
+    return proj / ".cursor" / "rules" / "flightdeck-context.mdc"
+
+
+def test_cursor_session_start_writes_rule_file(tmp_path):
+    proj = _mk_deck(tmp_path, "**Active focus**: cur\n\n## 下一步\n- cur1\n")
+    r = _run_host("session-start",
+                  {"CURSOR_PLUGIN_ROOT": "x", "CURSOR_PROJECT_ROOT": str(proj)})
+    assert r.returncode == 0
+    assert "additional_context" in json.loads(r.stdout)  # belt-and-suspenders still emits
+    rule = _cursor_rule(proj)
+    assert rule.exists()
+    txt = rule.read_text(encoding="utf-8")
+    assert "alwaysApply: true" in txt
+    assert "EXTREMELY_IMPORTANT" in txt       # bootstrap body
+    assert "cur1" in txt                       # cockpit anchor (下一步)
+    assert "flightdeck-cockpit-anchor" in txt
+
+
+def test_cursor_stop_refreshes_rule_file(tmp_path):
+    proj = _mk_regenerable_deck(tmp_path)
+    r = _run_host("stop", {"CURSOR_PLUGIN_ROOT": "x", "CURSOR_PROJECT_ROOT": str(proj)})
+    assert r.returncode == 0
+    rule = _cursor_rule(proj)
+    assert rule.exists()
+    assert "alwaysApply: true" in rule.read_text(encoding="utf-8")
+
+
+def test_non_cursor_writes_no_rule_file(tmp_path):
+    # A Gemini/Claude session must NOT spray a .cursor/ dir into the project.
+    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## 下一步\n- g1\n")
+    r = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(proj)})
+    assert r.returncode == 0
+    assert not _cursor_rule(proj).exists()

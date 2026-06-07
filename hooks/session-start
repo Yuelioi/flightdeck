@@ -9,19 +9,14 @@ dbg() { [ -n "${FLIGHTDECK_HOOK_DEBUG:-}" ] && printf 'flightdeck-hook[%s]: %s\n
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+. "${SCRIPT_DIR}/_context.sh"
 
 # Resolve the project dir the hook is running against. Single host signal each,
 # then $PWD fallback; the deck gate below never walks up to a parent directory.
 # (Codex has no dedicated env var here — it rides $PWD; verified live in Phase 4.)
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
 dbg "project-dir = ${PROJECT_DIR}"
-
-escape_for_json() {
-  local s="$1"
-  s="${s//\\/\\\\}"; s="${s//\"/\\\"}"
-  s="${s//$'\n'/\\n}"; s="${s//$'\r'/\\r}"; s="${s//$'\t'/\\t}"
-  printf '%s' "$s"
-}
 
 emit() {
   # $1 = the context string (already the final injected text)
@@ -43,27 +38,20 @@ if [ ! -d "${PROJECT_DIR}/flightdeck" ]; then
   exit 0
 fi
 
-# Static directive (single source of truth). Missing bootstrap is a packaging
-# bug, not a user state — degrade to silence rather than inject a broken anchor.
-bootstrap="$(cat "${PLUGIN_ROOT}/skills/_shared/bootstrap.md" 2>/dev/null || true)"
-if [ -z "$bootstrap" ]; then
+# Assemble bootstrap directive + live cockpit anchor (shared with stop).
+content="$(build_context "$PROJECT_DIR" "$PLUGIN_ROOT")" || content=""
+if [ -z "$content" ]; then
+  dbg "no bootstrap content — emit {}"
   printf '{}\n'
   exit 0
 fi
 
-# Dynamic cockpit anchor (best-effort; skipped if cockpit missing/empty).
-cockpit="${PROJECT_DIR}/flightdeck/cockpit.md"
-anchor=""
-if [ -s "$cockpit" ]; then
-  focus="$(grep -m1 -E '^\*\*Active focus\*\*' "$cockpit" 2>/dev/null || true)"
-  # The "## 下一步" section: from its heading to the next "## " heading.
-  next="$(awk '/^## 下一步/{f=1;next} /^## /{f=0} f' "$cockpit" 2>/dev/null || true)"
-  if [ -n "$focus" ] || [ -n "$next" ]; then
-    anchor=$'\n\n<flightdeck-cockpit-anchor note="may lag last turn; reconcile via /flightdeck:preflight">\n'
-    anchor+="${focus}"$'\n## 下一步:\n'"${next}"
-    anchor+=$'\n</flightdeck-cockpit-anchor>'
-  fi
+# Cursor's stable-loading primary path: write the always-applied rule file.
+# (Still emit additional_context below as belt-and-suspenders, not the main dep.)
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ] || [ -n "${CURSOR_PROJECT_ROOT:-}" ]; then
+  dbg "cursor: write .cursor/rules/flightdeck-context.mdc"
+  write_cursor_rules "$PROJECT_DIR" "$content"
 fi
 
-emit "${bootstrap}${anchor}"
+emit "$content"
 exit 0
