@@ -59,6 +59,9 @@ last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a r
 note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pending reason). Rendered in cockpit 进行中 + walkaround as [note: …]
 supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
 related: [<path>, ...]       # optional; weak links — shared premise / blast-radius, NOT supersedes or implements
+# optional: graduate: true
+#   — 结构性设计稿完工后本体变身常驻 docs；命中"约束后续开发/大概率反复参考"判据时
+#     由 /flightdeck:new 或 plan 执行中提示打标；landing 负责将 done 的 graduate 本体改写搬入 docs/
 ---
 ```
 
@@ -98,11 +101,15 @@ current: Task 3 — wire the checkpoint subpath into landing SKILL.md
 
 ```markdown
 ---
-status: active            # active / obsolete / superseded
+status: active            # active / stale / obsolete
+                          # stale=疑似过期·待复核；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
 applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
-# superseded only: superseded_by: <path>
+# optional: when_to_update: <什么样的改动会让我失效>
+#   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
+#   GOOD: 改了 plugin 加载协议 / 动了 hooks/stop.sh
+#   BAD:  有任何改动时
 # optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
 # incidents only: recurrences: 1   # auto-bumped at landing on a clear recurrence; renders to INDEX as `recur: N` when > 1
 # incidents only: resolved_by:     # empty = not yet root-fixed; fill commit SHA / test id = retirement basis (then flip status: obsolete)
@@ -115,12 +122,16 @@ last_updated: YYYY-MM-DD
 
 ```markdown
 ---
-status: active            # active / obsolete / superseded
+status: active            # active / stale / obsolete
+                          # stale=疑似过期·待复核；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
 applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
 summary: <one-line gist>  # optional but recommended; drives INDEX row
-# superseded only: superseded_by: <path>
+# optional: when_to_update: <什么样的改动会让我失效>
+#   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
+#   GOOD: 改了 plugin 加载协议 / 动了 hooks/stop.sh
+#   BAD:  有任何改动时
 ---
 ```
 
@@ -227,10 +238,10 @@ The specific next-time action. Not "be careful". Concrete behavior or check.
 - **Cases:** write the first line **at create time**. `recurrences` (frontmatter) is the **authoritative lifetime count**; the `## Cases` list keeps only the **most recent N lines** (order of single digits ~ a dozen) — so line count ≤ `recurrences`, and `recurrences` wins when they differ.
 - **One file per topic.** A recurrence appends a Case line (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (deterministic `--match-signature` first; ambiguous → asks); `recurrences` renders into the INDEX row as `recur: N`, so the count is visible without opening the file. On a regression (a `status: obsolete` incident recurring), landing revives it: flip back to `active`, clear `resolved_by`, mark the Case "回归，原根治失效", and keep accumulating `recurrences` (never reset).
 - **Forbidden root causes**: "forgot", "careless", "didn't notice", "rushed". These hide the real model error.
-- **Status field**:
+- **Status field** (`active` / `stale` / `obsolete` — stale=疑似过期·待复核；obsolete=已死·待归档排水态):
   - `active` — still applies to the current codebase
-  - `obsolete` — the underlying constraint no longer exists (framework upgraded, code removed). Keep the file as history but mark.
-  - `superseded` — folded into your project agent rules. Note the upgrade: `status: superseded → project-rules §<section>`. Do not delete.
+  - `stale` — auto-flipped by the ritual when a `when_to_update` condition is matched; needs author review before flipping back to `active`
+  - `obsolete` — the underlying constraint no longer exists (framework upgraded, code removed); landing drains it to `archive/` (knowledge analog of workflow `done`)
 - **Promotion path**: incident reports promote in two stages — first to `checklists/` (after a 3-criterion gate at `landing`), then to project agent rules (only if the checklist is also ignored and the incident continues to recur). Full gate criteria in [protocol.md § Incident promotion gates](protocol.md#incident-promotion-gates).
 - **Frontmatter `when_to_read` + `applies_to` are REQUIRED** (not optional). An incident report without them fails the routing check and is reported as a hanging task. They let AI grep for relevance without loading the full file — same pattern as skill SKILL.md `description`. Examples:
   - `when_to_read: "before designing a recursive parser"` / `applies_to: [parser, recursion, stack-depth]`

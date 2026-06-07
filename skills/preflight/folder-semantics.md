@@ -178,7 +178,7 @@ Naming: `<topic>.md` (no date prefix — checklists are stable resources).
 
 Promotion rule: a process becomes a checklist the **second** time you run it. First time = ad-hoc. Second time = pattern.
 
-`status: obsolete` = the external constraint no longer exists; `status: superseded` = a newer checklist replaces this one (set `superseded_by`). Both may stay in place indefinitely — no automatic "to-land" reminder.
+`status: obsolete` = the external constraint no longer exists; a `supersedes:` edge on the newer checklist records the replacement for traceability. Obsolete checklists are drained to `archive/` by the ritual — no indefinite stay in the active area.
 
 ### `docs/` — technical knowledge (you read)
 
@@ -196,9 +196,11 @@ Four boundaries that keep it distinct:
 
 **docs/ vs an archived spec** (avoid two sources of truth): per the existing [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree), the **active `docs/`** outranks an archived spec in `archive/`. After a feature ships, its spec lands in `archive/` (the frozen history) while the durable knowledge of *how it ultimately works* graduates into `docs/` (the current truth). This divergence is "history ≠ present", not drift — no `source_spec` / `graduated_from` field tracks the graduation (it's a human edit; trace origin via git history if needed).
 
+**Graduate path**: structural design specs (`graduate: true`) land here after `done` — landing rewrites the spec body into a "current truth" doc and moves it into `docs/`; this is the primary route by which `docs/` grows. New entries from graduate should always carry `when_to_update` (the condition that invalidates this doc) so the ritual can auto-flip them `stale` when the relevant code changes.
+
 Naming: `<topic>.md` (no date prefix — resident reference, same as checklists/incidents).
 
-Frontmatter: the **knowledge** set (`status: active/obsolete/superseded` + `when_to_read` + `applies_to` + `last_updated` + `summary`), so preflight can warm it in the routing catalog.
+Frontmatter: the **knowledge** set (`status: active/stale/obsolete` + `when_to_read` + `applies_to` + `last_updated` + `summary` + optional `when_to_update`), so preflight can warm it in the routing catalog. `stale` = 疑似过期·待复核；`obsolete` = 已死·待归档排水态（knowledge 版的 workflow `done`），被仪式排入 `archive/`。
 
 ### `references/` — external material
 
@@ -224,7 +226,7 @@ Top-level archive for completed or retired work. `archive/` **mirrors any source
 - `archive/plans/` — plans archived after execution.
 - `archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/` — obsolete-but-historical reference moved out of the active set. (A pre-3.0 deck may still carry a historical `landed/` tree or `landed/debriefs/` — left in place, not regenerated.)
 
-Archiving vs `status: obsolete/superseded`: flip `status` to keep a dead file in place (still reachable, marked dead); **move to `archive/`** to remove it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `archive/`.
+Archiving vs `status: obsolete`: flip `status: obsolete` to signal "dead, awaiting archive" (still reachable, marked dead — knowledge analog of workflow `done`); the ritual then drains it to `archive/`. **Moving to `archive/`** removes it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `archive/`.
 
 Archived files are **exempt from status and INDEX audits** — `walkaround` does not check `archive/`.
 
