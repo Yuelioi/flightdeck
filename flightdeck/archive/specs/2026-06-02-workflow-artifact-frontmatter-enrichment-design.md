@@ -11,7 +11,7 @@ related: [landed/specs/2026-06-02-metadata-model-consolidation-design.md, landed
 **来源**：dogfood 中作者提出 —— (1) spec/plan 归档后摘要丢失，想看历史只剩文件名；(2) 缺更新时间，长命 spec 判断不出新旧；(3) 一个大 spec 常对多个 plan / 取代旧 spec，关系散落在正文，归档时不好快速查齐。
 **状态**：pending（设计定稿 + 三方 review 处置已并入，待开 plan 实现）
 **关联**：[2026-06-02-version-in-rules-migration-detection-design.md](2026-06-02-version-in-rules-migration-detection-design.md)（动机不同，但改的是同一批文件 —— `templates.md` frontmatter、INDEX 生成、walkaround；实现时同一 pass 落地，省得两遍动 `templates.md`）
-**评审**：已并入三方 AI review（claude / ds / gpt）处置 —— 见 [debriefs/2026-06-02-frontmatter-enrichment-tri-review.md](../debriefs/2026-06-02-frontmatter-enrichment-tri-review.md)
+**评审**：已并入三方 AI review（claude / ds / gpt）处置（原 tri-review debrief 已清理）。
 
 ---
 

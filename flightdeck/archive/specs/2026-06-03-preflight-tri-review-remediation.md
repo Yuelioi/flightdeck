@@ -8,7 +8,7 @@ last_updated: 2026-06-03
 
 > 由 `sketches/preflight-tri-review-triage.md` **提升**而来（2026-06-03）。提升原因：清单已进入执行（B/C 多项已改、减重项已并入 token-reduction spec），留在 sketches/ 不再反映现状。本 spec 是这轮审核 **19 项发现的单一去向账本**——减重 A 项的实现归 [token-reduction spec](2026-06-03-token-reduction-design.md)，本 spec 不重述其设计，只记处置。
 
-来源：`debriefs/2026-06-03-rules-simplification-tri-review.md` 等（同一轮 preflight skill 的三模型审核）。每条标 `[C]`=claude `[D]`=ds `[G]`=gpt 出处；多标=被交叉印证。
+来源：同一轮 preflight skill 的三模型审核（rules-simplification tri-review，原始 debrief 已清理）。每条标 `[C]`=claude `[D]`=ds `[G]`=gpt 出处；多标=被交叉印证。
 
 **前置结论**：脚本可作为机械层加速器 + markdown fallback（官方双轨）引入，不破坏工具无关性（见 [scriptable-mechanical-layer](2026-06-03-scriptable-mechanical-layer-design.md)）。减重与重构正交：内容架构重构在本 spec / token-reduction spec，机械层脚本化单独走那份 spec/plan。
 

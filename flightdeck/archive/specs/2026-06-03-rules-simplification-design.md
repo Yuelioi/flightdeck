@@ -171,7 +171,7 @@ disabled_folders: []
 
 ## 8. 风险 / 开放问题
 
-**已随三方评审解决（见 [debriefs/2026-06-03-rules-simplification-tri-review.md](../debriefs/2026-06-03-rules-simplification-tri-review.md)）：**
+**已随三方评审解决（原 tri-review debrief 已清理）：**
 - ~~prose 覆盖可靠性~~ → §4 穿针版（标准句式 + 宽松匹配，非 toggle）。
 - ~~失去确定性 STOP 的兜底~~ → §3 内层门审计升为 P2 硬前置。
 - ~~版本号 minor vs major~~ → **3.0**。
