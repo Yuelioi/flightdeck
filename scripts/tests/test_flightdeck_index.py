@@ -878,6 +878,19 @@ class MatchSignatureTest(unittest.TestCase):
                 encoding="utf-8")
             self.assertEqual(match_signature(deck, "KeyError: 'summary'", "KeyError"), [])
 
+    def test_match_signature_reaches_archived_incidents(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "archive" / "incidents").mkdir(parents=True)
+            (deck / "archive" / "incidents" / "old.md").write_text(
+                "---\nstatus: obsolete\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n"
+                "# old\n## Signature\n- symptom: boom on parse\n- error_type: ValueError\n- where: p.py\n- trigger: bad input\n",
+                encoding="utf-8",
+            )
+            from flightdeck_index import match_signature
+            hits = match_signature(deck, "boom on parse", "ValueError")
+            self.assertTrue(any("old.md" in h["path"] for h in hits))
+
 
 class MatchSignatureCliTest(unittest.TestCase):
     def test_cli_prints_status_tab_path(self):
