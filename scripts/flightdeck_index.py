@@ -342,7 +342,7 @@ def _workflow_fms(deck):
 
 
 def _active_inbound_targets(deck):
-    """deck 内任何 status:active 工件经结构化边（implements:/superseded_by）指向的目标路径集。"""
+    """deck 内任何 status:active 工件经结构化边（implements:）指向的目标路径集。"""
     deck = Path(deck)
     targets = set()
     for kind in ("specs", "plans") + tuple(sorted(KNOWLEDGE_KINDS)):
@@ -355,7 +355,7 @@ def _active_inbound_targets(deck):
             fm = parse_frontmatter(p.read_text(encoding="utf-8"))
             if fm.get("status") != "active":
                 continue
-            for field in ("implements", "superseded_by"):
+            for field in ("implements",):
                 v = fm.get(field)
                 if v:
                     targets.add(v.strip())

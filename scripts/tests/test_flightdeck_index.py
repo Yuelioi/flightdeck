@@ -616,6 +616,28 @@ class ArchivableDoneTest(unittest.TestCase):
                 ["plans/2026-06-02-p.md", "specs/2026-06-01-a.md"],
             )
 
+    def test_supersedes_edge_does_not_pin_target(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "new.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\nsupersedes: docs/old.md\n---\n# new\n",
+                encoding="utf-8",
+            )
+            from flightdeck_index import _active_inbound_targets
+            self.assertNotIn("docs/old.md", _active_inbound_targets(deck))
+
+    def test_superseded_by_no_longer_pins(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            (deck / "docs" / "x.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\nsuperseded_by: docs/old.md\n---\n# x\n",
+                encoding="utf-8",
+            )
+            from flightdeck_index import _active_inbound_targets
+            self.assertNotIn("docs/old.md", _active_inbound_targets(deck))
+
 
 class ArchivableCliTest(unittest.TestCase):
     def test_archivable_flag_prints_paths_writes_nothing(self):
