@@ -103,6 +103,8 @@ Always goes to `incidents/`. Check existing topics first — if related, append 
 
 Set `status: active` in frontmatter.
 
+**Also fires on an abandoned path / wall, not just a shipped fix.** If this turn **tried an approach and dropped it** — or hit a wall that cost real time — record the **failure path + why it failed** (including why a plausible-looking option doesn't work), not only the final working fix. Negative knowledge ("X looks viable but fails because Y, so we chose Z") is exactly what stops the next session from re-walking the dead end. ✅ "Cursor `sessionStart` `additional_context` proved unreliable → switched to a `.cursor/rules/*.mdc` rule file"  ❌ silently keeping only "used a rule file" with the rejected option lost. The write gate still applies (a momentary typo you fixed in the same breath is not a wall).
+
 ### (b) Repeated procedure → `checklists/`
 
 **Trigger phrase**: "every time we do X, the steps are" / "the way to do X correctly is"
