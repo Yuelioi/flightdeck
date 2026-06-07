@@ -167,6 +167,18 @@ There is **no `debriefs/` folder**. The raw feedback is a transient input — ke
 
 If genuinely ambiguous, brainstorm with the user. Use the AI-asks-user template below.
 
+### 写工件 body 的质量 — how to write what you keep
+
+Once the gate says *keep it*, write the body so it is reusable (this is **not** part of the (a)–(h) match chain above — it is how you write whatever (a)–(f) routed):
+
+- **Record the substantive result / change, not process meta-narration.** State the new fact or constraint about the system / your understanding directly — "`emit()` gained a Codex branch", "X failed because Y" — the statement stands on its own, **no** `implemented` / `discovered` verb prefix required. Do **not** write process meta-narration ("analyzed…", "investigated…", "currently looking at…"). The opposite of a good body is *process narration*, not "state vs change".
+  > A verb table (implemented / fixed / decided / migrated) only **illustrates the shape of a good entry — it is not mandatory**; `discovered` / `decided` slip back into action-sentences, so prefer stating the result directly, and many valid statements ("`emit()` gained a Codex branch") need no leading verb at all.
+- **Each fact stands alone** — no pronouns ("it" / "this"); readable out of context.
+- **Carry the load-bearing literals** — filenames, function / symbol names, key values, error strings. Not "changed that function" but "`emit()` gained a Codex branch".
+- **Examples + one cross-kind line:**
+  - ✅ "`emit()` now branches injection fields per host (Claude / Codex / Gemini = `additionalContext`)"  ❌ "researched how each host differs in injection fields"
+  - Decisions / incidents likewise: record "chose Z over the alternatives because of constraint Y" / "X failed because Y" — **not** "discussed several options".
+
 ## AI-asks-user template (ambiguous classification)
 
 When triggering (h), open the conversation with a structured ask:

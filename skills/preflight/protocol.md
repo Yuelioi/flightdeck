@@ -298,6 +298,15 @@ Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses 
 
 `flightdeck/` records only content that **changes future behavior, influences decisions, or gets referenced repeatedly**. Session byproducts, debug logs, and chat play-by-plays do not qualify. Gate strictly.
 
+**Skip — gate these out (do NOT write):** empty status checks (`status` / `ls` that surfaced nothing); **a dependency install / build command that merely succeeded with no derived conclusion** (`npm/pip/uv install`, a green build by itself); **an exploration that concluded nothing** (searched, neither found nor ruled anything out); **a repeat that added no new information** (same op rerun without widening coverage / reaching a new conclusion / eliminating a new possibility); one-off logs and trial-and-error play-by-plays ("today's log is…" / "I tried 5 ways").
+
+**Two boundaries — NOT skips, do write:** ① an exploration that yields an **exclusionary conclusion** ("X is not the root cause") is negative knowledge — **write it**; ② a repeat that **brings new coverage / a new conclusion** — **write it**.
+
+- ✅ write: "Cursor injection is fixed to `.cursor/rules/*.mdc` as the primary path (sessionStart proved unreliable)" — **influences future decisions, will be referenced repeatedly**.
+- ❌ don't: "today's `--check` run printed clean" — a one-off status that changes no future behavior.
+
+(This Skip list is the write gate's canonical negative list — passed before authoring *any* artifact. It runs parallel to `landing`'s `exit-ritual` heuristic **(g) One-off → DO NOT WRITE**, which is the first-match item at *classification* time; same direction, each self-contained.)
+
 ## Templates
 
 See [templates.md](templates.md) for `spec` / `plan` / `incident` / `checklist` / `cockpit.md` / `rules.md` / `INDEX.md` templates.
