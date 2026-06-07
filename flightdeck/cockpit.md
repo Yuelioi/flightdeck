@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-07 by 月离 (hook rollout 相位1 机制接线完成：Codex/Gemini config、Cursor stop、emit 四家分支、project-dir 泛化、HOOK_DEBUG、Cursor 规则文件主路径——163 测试绿、逐任务本地 commit。撞到并修 Windows python3 桩致 board-sync 静默失效（incident 已记）。下一步=相位2 文案。历史详 git log。)
+**Last updated**: 2026-06-07 by 月离 (hook rollout 相位1（机制，163 测试绿）+ 相位2（文案：删 why-no-hooks、bootstrap/exit-ritual/protocol/landing/session-flow 降 hook-primary、关键上下文槽、失败捕获）均完成、逐任务本地 commit。相位3 收编撞模型坑：workflow 无 superseded 状态（incident 记），待用户定收编映射。历史详 git log。)
 **Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + auto-land 执行层（注入入场 + Stop board-sync）+ HISTORY 移除/gitignored-deck 接缝 均已实施，待 resync 部署 + live 复验。
 
 ## 进行中
@@ -17,16 +17,17 @@
 ## 下一步
 
 - **#1 ✅ write-gate-examples 完成**：spec+plan 已实施、done、归档（protocol § Write gate 加 skip-list+✅/❌、exit-ritual 加独立 body 质量小节、refactor spec 加边界注记锚点）。写门/分类启发/body 段已定稿，hook refactor Phase2 按锚点跳过。
-- **#2 执行 hook rollout（当前·先行）**：执行 `plans/2026-06-07-hook-primary-refactor-rollout`。**相位1 机制接线 ✅ done**（Task 1.1–1.7 全 commit、163 测试绿；plain `current:` 在 plan 里）。**当前在相位2 文案**（删 why-no-hooks + 引用清理、bootstrap 三链路、exit-ritual board-AUTO 移出 agent、preflight/protocol/landing/status/session-flow hook-primary 重写、#2 关键上下文槽、#4 失败捕获）→ 相位3 收编 → **相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）**。注：相位2 用 verify-then-strip，非-Claude 降级叙事的删除等相位4 实证后。
+- **#2 执行 hook rollout（当前·先行）**：执行 `plans/2026-06-07-hook-primary-refactor-rollout`。**相位1 机制 ✅ + 相位2 文案 ✅**（Task 1.1–1.7、2.1–2.8 全 commit，2.6 无可压跳过；163 测试绿）。**相位3 收编待决策**：plan 原写"标 status superseded"，但 workflow 无此状态（见 incident `workflow-has-no-superseded-status`）→ 正确映射=旧工件翻 `done`+归档+新工件 carry `supersedes` 反向边，待用户确认。然后 **相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）**。注：相位2 verify-then-strip——非-Claude hook 叙事现标"待 Phase 0 实证"，删除等实证后。
 - **并入说明**：原「resync / live 复验」+ auto-land 两个 rollout + soft-landing 的落地，均已**并入本 rollout**（相位4 = 各家 live 实证）；auto-land spec + 两 rollout 将在相位3 标 superseded，soft-landing spec 的 what 保留。
 - **本轮新并入（外部记忆系统借鉴，用户拍板）**：① Cursor 注入改 `.cursor/rules/*.mdc` 规则文件为**主路径**（稳定加载>优雅加载，Task 1.7）；② cockpit `## 关键上下文` 槽（#2，Task 2.7）；③ 失败/弯路捕获入 incidents（#4，Task 2.8）。**单独 backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试）。
 
 ## 关键上下文
 
-- 执行中：`plans/2026-06-07-hook-primary-refactor-rollout` Phase 2 文案（`## Progress` `current:` 指针在 plan body）；Phase 1 机制全 commit、`scripts/tests/` 163+ passed（`uv run pytest scripts/tests/`）。
-- hook 文件：`hooks/{session-start,stop,_context.sh}` + `hooks/hooks-{codex,gemini,cursor}.json`；Cursor 主路径=写 `.cursor/rules/flightdeck-context.mdc`。
-- 未跟踪待你单独提交：`specs/2026-06-07-hook-primary-refactor` + 其 rollout plan、`.gitignore`（cursor 忽略行 + `.claude`）、删的 debrief。
-- Phase 4 live 实证（resync 后新会话）未做——非-Claude hook 文案现标"待 Phase 0 实证"。
+- 执行中：`plans/2026-06-07-hook-primary-refactor-rollout`——相位1+2 ✅，**相位3 待用户定收编映射**（done+archive+supersedes，非 status superseded；见 incident `workflow-has-no-superseded-status`）。
+- 相位3 收编目标三工件：`specs/2026-06-06-auto-land-executor`、`plans/2026-06-06-auto-land-executor-rollout`、`plans/2026-06-06-soft-landing-rollout`（有效产出已 ship：commit febdeea / 14c5a92）。
+- hook 文件：`hooks/{session-start,stop,_context.sh}` + `hooks/hooks-{codex,gemini,cursor}.json`；测试 `scripts/tests/test_hooks.py`（`uv run pytest scripts/tests/`）。
+- 未跟踪待你单独提交：`specs/2026-06-07-hook-primary-refactor` + 其 rollout plan、`.gitignore`（cursor 行 + `.claude`）、删的 debrief。
+- Phase 4 live 实证（resync 后新会话）未做——非-Claude hook 文案标"待 Phase 0 实证"。
 
 ## Hanging tasks
 
