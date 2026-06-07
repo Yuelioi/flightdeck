@@ -435,6 +435,33 @@ class AuditRequiredStructureTest(unittest.TestCase):
             self.assertTrue(any(f["audit"] == "required-structure" for f in findings))
 
 
+class AuditWhenToUpdateTest(unittest.TestCase):
+    def _doc(self, deck, body_fm):
+        (deck / "docs").mkdir(exist_ok=True)
+        (deck / "docs" / "a.md").write_text(
+            f"---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n{body_fm}---\n# t\n",
+            encoding="utf-8",
+        )
+    def test_vague_when_to_update_flagged(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._doc(deck, "when_to_update: 有任何改动时\n")
+            from flightdeck_lint import audit_when_to_update
+            self.assertTrue(audit_when_to_update(deck))
+    def test_concrete_when_to_update_ok(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._doc(deck, "when_to_update: 改了 plugin 加载协议 / 动了 hooks/stop.sh\n")
+            from flightdeck_lint import audit_when_to_update
+            self.assertEqual(audit_when_to_update(deck), [])
+    def test_missing_when_to_update_not_flagged(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            self._doc(deck, "")
+            from flightdeck_lint import audit_when_to_update
+            self.assertEqual(audit_when_to_update(deck), [])
+
+
 class LintAndMainTest(unittest.TestCase):
     def test_lint_aggregates_audits(self):
         with tempfile.TemporaryDirectory() as d:
