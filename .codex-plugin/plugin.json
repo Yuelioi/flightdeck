@@ -21,6 +21,7 @@
     "preflight"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
   "interface": {
     "displayName": "Flightdeck",
     "shortDescription": "Operational protocol for AI-assisted engineering sessions",

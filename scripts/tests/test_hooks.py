@@ -81,3 +81,20 @@ def test_stop_regens_board_and_exits_zero(tmp_path):
 def test_stop_silent_without_deck(tmp_path):
     r = _run("stop", tmp_path)
     assert r.returncode == 0
+
+
+# --- Phase 1: cross-host hook wiring ---
+
+def test_codex_hooks_config_shape():
+    cfg = json.loads((REPO / "hooks" / "hooks-codex.json").read_text(encoding="utf-8"))
+    assert "SessionStart" in cfg["hooks"]
+    assert "Stop" in cfg["hooks"]
+    cmds = [h["command"] for grp in cfg["hooks"]["SessionStart"] for h in grp["hooks"]]
+    assert any("run-hook.cmd" in c and "session-start" in c for c in cmds)
+    stop_cmds = [h["command"] for grp in cfg["hooks"]["Stop"] for h in grp["hooks"]]
+    assert any("run-hook.cmd" in c and "stop" in c for c in stop_cmds)
+
+
+def test_codex_plugin_manifest_declares_hooks():
+    mf = json.loads((REPO / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert mf.get("hooks") == "./hooks/hooks-codex.json"
