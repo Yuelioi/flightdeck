@@ -268,7 +268,7 @@ A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just 
 
 Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus 「已保存」marker, no commit/archive); default-on, downgradable via House Rule `landing: don't soft-land at end-of-turn`. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
 
-On Claude Code, a passive `Stop` hook additionally regenerates the mechanical board AUTO regions (`## 进行中` + each `INDEX.md`) at every end-of-turn — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## 下一步` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it — other hosts regen those regions on the next `landing` / `status` / `checkpoint`.
+A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## 进行中` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## 下一步` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it. (Live-verified on Claude Code; Codex/Gemini/Cursor pending Phase 0 verification — those hosts meanwhile regen on the next `landing` / `status` / `checkpoint`.)
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
