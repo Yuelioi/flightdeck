@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/hooks/run-hook.cmd session-start",
+            "name": "flightdeck-handoff"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/hooks/run-hook.cmd stop",
+            "name": "flightdeck-board-sync"
+          }
+        ]
+      }
+    ]
+  }
+}

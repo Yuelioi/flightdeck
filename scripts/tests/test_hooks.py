@@ -104,3 +104,13 @@ def test_cursor_has_stop_hook():
     cfg = json.loads((REPO / "hooks" / "hooks-cursor.json").read_text(encoding="utf-8"))
     assert "stop" in cfg["hooks"]
     assert any("stop" in h["command"] for h in cfg["hooks"]["stop"])
+
+
+def test_gemini_hooks_config_shape():
+    cfg = json.loads((REPO / "hooks" / "hooks-gemini.json").read_text(encoding="utf-8"))
+    assert "SessionStart" in cfg["hooks"]
+    assert "AfterAgent" in cfg["hooks"]
+    cmds = [h["command"] for grp in cfg["hooks"]["SessionStart"] for h in grp["hooks"]]
+    assert any("run-hook.cmd" in c and "session-start" in c for c in cmds)
+    after = [h["command"] for grp in cfg["hooks"]["AfterAgent"] for h in grp["hooks"]]
+    assert any("run-hook.cmd" in c and "stop" in c for c in after)
