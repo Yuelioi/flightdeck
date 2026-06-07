@@ -98,3 +98,9 @@ def test_codex_hooks_config_shape():
 def test_codex_plugin_manifest_declares_hooks():
     mf = json.loads((REPO / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert mf.get("hooks") == "./hooks/hooks-codex.json"
+
+
+def test_cursor_has_stop_hook():
+    cfg = json.loads((REPO / "hooks" / "hooks-cursor.json").read_text(encoding="utf-8"))
+    assert "stop" in cfg["hooks"]
+    assert any("stop" in h["command"] for h in cfg["hooks"]["stop"])
