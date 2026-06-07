@@ -383,6 +383,25 @@ def archivable_done(deck):
     return sorted(result)
 
 
+def archivable_obsolete(deck):
+    """status:obsolete 的 knowledge 工件（incidents/checklists/docs）——已死·待归档，
+    与 archivable_done 对称：obsolete 是 knowledge 版 done 排水态，无钉扣概念
+    （superseded_by 已退役），扫到即可排进 archive/。确定性、可复现。"""
+    deck = Path(deck)
+    result = []
+    for kind in sorted(KNOWLEDGE_KINDS):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        for p in sorted(folder.rglob("*.md")):
+            if p.name == "INDEX.md":
+                continue
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+            if fm.get("status") == "obsolete":
+                result.append(str(p.relative_to(deck)).replace("\\", "/"))
+    return sorted(result)
+
+
 def spec_advance_candidates(deck):
     """active spec whose implementing plans are ALL done (≥1 done, no active/idea
     plan still pointing at it) — the plans finished but the spec lags behind.
@@ -559,7 +578,7 @@ def main(argv=None):
         return 0
 
     if args.archivable:
-        for rel in archivable_done(args.deck):
+        for rel in sorted(set(archivable_done(args.deck)) | set(archivable_obsolete(args.deck))):
             print(rel)
         return 0
 

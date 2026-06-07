@@ -638,6 +638,18 @@ class ArchivableDoneTest(unittest.TestCase):
             from flightdeck_index import _active_inbound_targets
             self.assertNotIn("docs/old.md", _active_inbound_targets(deck))
 
+    def test_archivable_includes_obsolete_knowledge(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "incidents").mkdir()
+            for name, st in (("dead.md", "obsolete"), ("live.md", "active"), ("amber.md", "stale")):
+                (deck / "incidents" / name).write_text(
+                    f"---\nstatus: {st}\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n# {name}\n",
+                    encoding="utf-8",
+                )
+            from flightdeck_index import archivable_obsolete
+            self.assertEqual(archivable_obsolete(deck), ["incidents/dead.md"])
+
 
 class ArchivableCliTest(unittest.TestCase):
     def test_archivable_flag_prints_paths_writes_nothing(self):
@@ -653,6 +665,17 @@ class ArchivableCliTest(unittest.TestCase):
             self.assertEqual(rc, 0)
             self.assertIn("specs/2026-06-01-a.md", buf.getvalue())
             self.assertFalse((deck / "INDEX.md").exists())
+
+    def test_archivable_cli_union_done_and_obsolete(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "specs").mkdir(); (deck / "docs").mkdir()
+            (deck / "specs" / "s.md").write_text("---\nstatus: done\nsummary: s\nlast_updated: 2026-06-07\n---\n# s\n", encoding="utf-8")
+            (deck / "docs" / "d.md").write_text("---\nstatus: obsolete\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n# d\n", encoding="utf-8")
+            from flightdeck_index import archivable_done, archivable_obsolete
+            union = sorted(set(archivable_done(deck)) | set(archivable_obsolete(deck)))
+            self.assertIn("specs/s.md", union)
+            self.assertIn("docs/d.md", union)
 
 
 class NestedIndexTest(unittest.TestCase):
