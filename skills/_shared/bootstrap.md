@@ -17,6 +17,15 @@ increment (board moved, no new knowledge) → run a silent **checkpoint** instea
 
 This directive is the single source of truth shared across every host (Claude Code, Cursor,
 Gemini, Codex). The mechanical part of board-sync (`## 进行中` + each `INDEX.md` AUTO region) is
-additionally welded by a Stop hook on Claude Code — but the *judgment* parts above (entry handoff,
-knowledge classification, `## 下一步` / `Active focus`) are always yours.
+welded by the **turn-end hook on every host that fires it** (Claude/Codex `Stop`, Cursor `stop`,
+Gemini `AfterAgent`) — but the *judgment* parts above (entry handoff, knowledge classification,
+`## 下一步` / `Active focus`) are always yours.
+
+**How this directive reaches you (primary → floor):** primary is the entry hook — Claude/Codex/Gemini
+inject it as `SessionStart` `additionalContext`; Cursor writes `.cursor/rules/flightdeck-context.mdc`
+(`alwaysApply`, the stable-loading path). The floor is a `GEMINI.md` / `AGENTS.md` `@`-include, load-bearing
+only when the hook is unavailable — config/script missing, no bash/python present, or live delivery not yet
+confirmed on that host. (Non-Claude hook delivery is **pending Phase 0 live verification**; the `@`-include
+floor and a manual `/flightdeck:preflight` always work meanwhile. The manifest never re-includes this body —
+one host, one injection.)
 </EXTREMELY_IMPORTANT>
