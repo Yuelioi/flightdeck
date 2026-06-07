@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 结构性设计 spec 完工后本体变身常驻 docs；配 when_to_update→stale 失效信号防悄悄过期；knowledge status 砍成 {active, stale, obsolete}（删 superseded 状态值），obsolete=knowledge 版 done 排水态，检测落进出场双仪式
 last_updated: 2026-06-07
 ---

@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 逐文件落地 graduate + when_to_update/stale + status{active,stale,obsolete}：相位1 脚本/lint 机械核心(TDD)→相位2 skill 散文→相位3 docs/incident 对齐→相位4 dogfood 迁移+全验证
 last_updated: 2026-06-07
 implements: specs/2026-06-07-graduate-and-knowledge-freshness.md
