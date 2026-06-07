@@ -1,11 +1,13 @@
 ---
-status: active
+status: done
 summary: 给 auto-land 补执行层——把唯一能在回合结尾安全自动化的 board-sync(cockpit ## 进行中 + INDEX 的 AUTO 区)从"靠 agent 自觉"转成脚本真执行(Stop hook 每回合结尾静默重生);判断性看板(## 下一步/Active focus/plan 指针)+知识分类+done 归档仍归 agent,靠 session-start 注入常驻强制令拉到很高的 best-effort,诚实不膨胀;why-no-hooks 核心前提对 gating hook 仍成立、对 session-start 注入失效,据此改写为采纳可移植注入+被动同步 hook、拒绝 gating hook
-last_updated: 2026-06-06
+last_updated: 2026-06-07
 related: specs/2026-06-06-end-of-turn-soft-landing.md
 ---
 
 # auto-land 执行层：脚本静默焊死 board-sync + session-start 注入强提醒
+
+> **Superseded by `specs/2026-06-07-hook-primary-refactor`**（done+archive）。本 spec 的有效产出（session-start 注入 + Stop board-sync）已 ship（commit `febdeea`/`08dac7c`）；hook-primary 把它泛化到四家并承继。保留作历史。
 
 ## 背景 / 要解决的问题
 

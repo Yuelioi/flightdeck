@@ -1,11 +1,13 @@
 ---
-status: active
+status: done
 summary: 把 auto-land 执行层 spec 落地的逐文件实施——新增 hooks/（run-hook.cmd + session-start 注入 + stop 被动 board-sync + hooks.json/hooks-cursor.json）+ skills/_shared/bootstrap.md，接 Cursor/Gemini manifest，加 hook 测试；再做 Layer 3 文档改写（exit-ritual board-AUTO 移出 agent 顾虑、protocol/landing 同步、why-no-hooks 前提部分失效改写 + 新决策原则、session-flow 纳入注入入场 + Stop board-sync）
-last_updated: 2026-06-06
-implements: specs/2026-06-06-auto-land-executor.md
+last_updated: 2026-06-07
+implements: archive/specs/2026-06-06-auto-land-executor.md
 ---
 
 # auto-land 执行层落地实施 Implementation Plan
+
+> **Superseded by `plans/2026-06-07-hook-primary-refactor-rollout`**（done+archive）。有效产出已 ship；hook-primary rollout 承继并泛化到四家。保留作历史。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

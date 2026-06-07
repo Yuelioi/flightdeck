@@ -1,11 +1,13 @@
 ---
-status: active
+status: done
 summary: 把 end-of-turn soft-landing(知识落盘+「已保存」标记、不commit不归档、landing 幂等)铺进 exit-ritual/landing/protocol/status 4 个 skill + session-flow dogfood doc 的逐文件实施步骤
-last_updated: 2026-06-06
+last_updated: 2026-06-07
 implements: specs/2026-06-06-end-of-turn-soft-landing.md
 ---
 
 # soft-landing 落地实施 Implementation Plan
+
+> **Done（completed, archived）**——soft-landing 已 ship（commit `14c5a92`）。其 spec `specs/2026-06-06-end-of-turn-soft-landing` 的 *what* 仍有效、保持 active；本 rollout 仅作完成归档（非被取代）。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
