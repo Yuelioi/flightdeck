@@ -6,15 +6,19 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
 
 # Gate: no deck → nothing to sync.
 [ -d "${PROJECT_DIR}/flightdeck" ] || exit 0
 
-# Locate a python runtime; degrade silently if none.
+# Locate a *working* python runtime; degrade silently if none. The viability
+# probe (`-c ''`) is load-bearing on Windows: `command -v python3` resolves to
+# the Microsoft Store stub (exits 49, never runs Python), so a plain presence
+# check would pick it and board-sync would silently no-op. Skip any interpreter
+# that can't execute, falling through to the real one (e.g. the `py` launcher).
 PY=""
-for c in python3 python; do
-  if command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
+for c in python3 python py; do
+  if command -v "$c" >/dev/null 2>&1 && "$c" -c '' >/dev/null 2>&1; then PY="$c"; break; fi
 done
 [ -n "$PY" ] || exit 0
 

@@ -152,3 +152,28 @@ def test_gemini_emit_and_projectdir_via_gemini_var(tmp_path):
     assert "hookSpecificOutput" in out
     assert "additionalContext" in out["hookSpecificOutput"]
     assert "g1" in out["hookSpecificOutput"]["additionalContext"]
+
+
+def _mk_regenerable_deck(tmp_path):
+    proj = _mk_deck(
+        tmp_path,
+        "# Cockpit\n**Active focus**: t\n\n## 进行中\n\n"
+        "<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n\n## 下一步\n- x\n",
+    )
+    return proj
+
+
+def test_stop_projectdir_via_gemini_var(tmp_path):
+    # GEMINI_PROJECT_DIR is the only project signal; $PWD points at REPO. The side
+    # effect (INDEX.md created in the TEMP deck, not REPO) proves resolution used it.
+    proj = _mk_regenerable_deck(tmp_path)
+    r = _run_host("stop", {"GEMINI_PROJECT_DIR": str(proj)})
+    assert r.returncode == 0
+    assert (proj / "flightdeck" / "INDEX.md").exists()
+
+
+def test_stop_projectdir_via_cursor_var(tmp_path):
+    proj = _mk_regenerable_deck(tmp_path)
+    r = _run_host("stop", {"CURSOR_PROJECT_ROOT": str(proj)})
+    assert r.returncode == 0
+    assert (proj / "flightdeck" / "INDEX.md").exists()
