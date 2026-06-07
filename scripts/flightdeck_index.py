@@ -132,6 +132,8 @@ def format_row(kind, filename, fm):
                 n = 1
             if n > 1:
                 row += f" {DASH} recur: {n}"
+        if status == "stale":
+            row = "⚠ " + row
         return row
     raise ValueError(f"unknown folder kind: {kind}")
 
@@ -253,13 +255,13 @@ def regen_folder_index(folder):
         rows = [_area_row(d) for d in subdirs]
         row_kind = kind if kind in KNOWLEDGE_KINDS else "checklists"
         top_files = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
-        if kind in KNOWLEDGE_KINDS:   # obsolete 留盘但退出路由（仍可 grep / 仍进 match_signature）
+        if kind in KNOWLEDGE_KINDS:   # obsolete 待排进 archive（archivable_obsolete），不进路由行；stale 进行但带 ⚠
             top_files = [n for n in top_files
                          if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
         rows += [format_row(row_kind, n, parse_frontmatter((folder / n).read_text(encoding="utf-8"))) for n in top_files]
         return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
     names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
-    if kind in KNOWLEDGE_KINDS:   # obsolete 留盘但退出路由（仍可 grep / 仍进 match_signature）
+    if kind in KNOWLEDGE_KINDS:   # obsolete 待排进 archive（archivable_obsolete），不进路由行；stale 进行但带 ⚠
         names = [n for n in names
                  if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
     row_kind = kind if kind in (SUMMARY_KINDS | KNOWLEDGE_KINDS) else "checklists"

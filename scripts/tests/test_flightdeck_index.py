@@ -942,6 +942,23 @@ class ObsoleteRoutingExcludeTest(unittest.TestCase):
             self.assertNotIn("dead.md", block)   # obsolete 不进路由
 
 
+class StaleIndexRenderTest(unittest.TestCase):
+    def test_index_marks_stale_and_excludes_obsolete(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "docs").mkdir()
+            for name, st in (("amber.md", "stale"), ("dead.md", "obsolete"), ("live.md", "active")):
+                (deck / "docs" / name).write_text(
+                    f"---\nstatus: {st}\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-07\n---\n# {name}\n",
+                    encoding="utf-8",
+                )
+            from flightdeck_index import regen_folder_index
+            body = regen_folder_index(deck / "docs")
+            self.assertIn("amber.md", body)      # stale shown
+            self.assertIn("⚠", body)             # stale marked
+            self.assertNotIn("dead.md", body)    # obsolete excluded
+
+
 class SpecAdvanceCandidatesTest(unittest.TestCase):
     def _deck(self, root):
         deck = Path(root)
