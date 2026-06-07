@@ -1,8 +1,9 @@
 ---
 status: active
 when_to_read: 想理解一个 spec 从 idea 到归档+知识沉淀的完整生命周期/流向时
+when_to_update: 改了 graduate 触发 / archive 搬运规则 / status 轴时
 applies_to: [specs, plans, lifecycle, archive, status, graduation]
-last_updated: 2026-06-06
+last_updated: 2026-06-07
 summary: 一个 spec 沿 status 轴（idea→active→done）走、沿 location 轴被 landing 搬进 archive/；完工后历史冻进 archive/、活知识 graduate 进 docs/
 ---
 
@@ -20,6 +21,8 @@ summary: 一个 spec 沿 status 轴（idea→active→done）走、沿 location 
 | **location** | 源文件夹 / `archive/` | 还在不在活动区。**派生**（看是否在 `archive/` 下），**不是 frontmatter 字段**，但是一等概念：它驱动**路由**（`archive/` 整个被排除出路由图）与**归档判断**。 |
 
 铁律：`archived` / `landed` **从来不是 status 值**，没有文件写 `status: landed`；**只有 landing 的 Land Routine 能把东西搬进 `archive/`**，status 永不归档。
+
+knowledge 工件（graduate 后沉进 `docs/` 的那份）走自己的 status 轴：`{active, stale, obsolete}`——`stale`（疑似过期·待复核）是黄灯，`obsolete`（已确认死亡）是排水触发态，与 workflow 的 `done` 对称（见 `model-architecture.md` § 两条正交轴）。`superseded` 已从 knowledge status 枚举中删除；取代关系用 `supersedes` 溯源边标注，不是状态值。
 
 ## 完整流向（一张图）
 
@@ -51,7 +54,14 @@ summary: 一个 spec 沿 status 轴（idea→active→done）走、沿 location 
 
 5. **land —— 唯一的搬运者。** 一个 `done` 有两种合法位置：**done-but-unlanded**（还在 `specs/`，因为仍有 `active` 文件指向它）或 **done-and-archived**（已进 `archive/`）。landing 在**回合结束前**跑一次（debounce：把本回合所有 done 聚到同一次 landing），每次都**重扫所有** done-in-place 文件，凡入边已清空的就扫进 `archive/`——所以 done-but-unlanded **自动排干**，不会滞留。
 
-6. **graduate —— 知识沉淀进 docs/。** 特性上线后，它的 spec 落进 `archive/`（**冻结的历史**），而"最终它到底怎么运作"的**耐久知识 graduate 进 `docs/`**（**当前的真相**，常驻、完工不归档）。两者分叉是"历史 ≠ 现在"，不是漂移：**active 的 `docs/` 在真相优先级上压过 `archive/` 里的旧 spec**。没有 `source_spec` 字段追踪这次毕业（人手编辑，需要溯源就查 git log）。
+6. **graduate —— 知识沉淀进 docs/。** 结构性/约束性的设计稿——定义了后续代码必须遵守的规范、或大概率被反复参考的那种——完工后它的耐久知识沉淀进 `docs/`（**当前的真相**，常驻、完工不归档）。**active 的 `docs/` 在真相优先级上压过 `archive/` 里的旧 spec。**
+
+   **两条路，用哪条取决于该结构性知识是否已有 docs 条目在管：**
+
+   - **graduate（新建）**：全新结构域——在 frontmatter 打 `graduate: true` 标记（可在整个 active 生命周期内任意时刻补标）；landing 时把 spec **本体改写成解释性 docs**（"当前真相"视角）并**搬进 `docs/`**，源 `specs/` 下的文件随改写一并移走，**不留 archive 双胞胎**。改写后的 doc 补齐 `when_to_read` / `applies_to` / `when_to_update`（spec 本无这些字段，不补则脱离保鲜网）。无 `graduate: true` hint → 普通归档，不二次识别。
+   - **更新既有 doc**：该知识已有 `docs/` 条目在管其主题 → 实现时直接改那份既有 doc，不 graduate 成新文件，spec 走普通归档路。（本 spec 自身走的就是这条路——它的耐久知识沉进 `model-architecture.md`/`spec-lifecycle.md`，frontmatter 不打 `graduate: true`，不是遗漏，是用对了路。）
+
+   幂等键：`graduate: true` 的 done spec **仍在 `specs/`** 才触发改写——一旦 landing 改写移走，触发键消失，preflight 扫不到、不重复改写；landing 中途失败源文件还在，preflight 接着做。
 
 ## 关键不变量（最容易踩的）
 
