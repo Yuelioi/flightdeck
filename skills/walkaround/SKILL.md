@@ -44,8 +44,8 @@ For each `.md` file in these folders:
 For each `.md` file in these folders (excluding `INDEX.md`; the nestable knowledge folders may hold `<area>/` subdirectories — audit the `.md` files in those areas the same way; `references/` may contain external project trees — audit only flightdeck-authored top-level `.md` files directly under `references/`, not the imported external tree):
 
 - MUST carry `status`. Missing: **CRITICAL**.
-- Legal values: `active` / `obsolete` / `superseded`.
-- Present but illegal value: **WARNING**.
+- Legal values: `active` / `stale` / `obsolete`.
+- Present but illegal value: **WARNING**. `stale` is a legal status (auto-set by ritual when a doc's `when_to_update` condition is met; cleared by user when the doc is brought current again). The retired pre-3.0 value `superseded` is **not** legal here — a live knowledge file carrying `status: superseded` (outside `archive/`) is a **WARNING** (retired-3.0 leftover): the correct 3.0 representation is the dead artifact going `obsolete` (drained to `archive/` by the ritual) while the replacing artifact carries a `supersedes:` traceability edge. Route the fix as: "flip to `obsolete` if dead (and let the ritual drain it to `archive/`), or flip to `active`/`stale` if still valid; the replacing artifact should carry `supersedes: <this-file>` for traceability."
 
 ### 2. Knowledge routing fields (WARNING)
 
@@ -57,12 +57,16 @@ For each knowledge artifact NOT in `archive/`:
 
 Workflow artifacts (`specs/`, `plans/`) are **out of scope here** — they carry no required routing fields. Their recommended `summary` / `last_updated` are checked at INFO in Audit 11.
 
-### 3. `superseded` needs `superseded_by` (WARNING)
+### 3. Retired-3.0 supersession leftovers (WARNING)
 
-For each knowledge artifact with `status: superseded` (NOT in `archive/`):
+The `superseded_by` field and `status: superseded` value were retired in flightdeck 3.0 (see [protocol.md § Supersession model](../preflight/protocol.md#supersession-model)). The old redirect mechanism (`superseded_by` required when `status: superseded`) was predicated on knowledge files staying in place indefinitely. Since `obsolete` is now a drain state (rituals move knowledge to `archive/` the same way they drain `done` workflow), the dead file is no longer on disk long enough to need a redirect. Supersession is now expressed entirely by the new artifact's `supersedes:` traceability edge plus the old artifact going `obsolete` and being drained to `archive/`.
 
-- MUST carry `superseded_by` pointing to the replacing file. Missing or empty: **WARNING** — superseded artifact has no forward pointer; readers cannot find the replacement.
-- If `superseded_by` is present but the pointed-to file does not exist on disk: **WARNING** — broken `superseded_by` reference.
+For each knowledge artifact NOT in `archive/`:
+
+- A live `superseded_by` field on the artifact: **WARNING** — retired-3.0 leftover. `superseded_by` no longer pins or redirects anything; remove the field. Ensure the replacing artifact carries `supersedes: <this-file>` for traceability, and that this artifact is `obsolete` (dead) or `active`/`stale` (still valid), whichever is correct.
+- `status: superseded` on the artifact: **WARNING** — retired-3.0 leftover (handled in Audit 1, cross-reference here for completeness). Migrate as described in Audit 1.
+
+An artifact in `archive/` that carries a legacy `status: superseded` (written before 3.0) is tolerated as frozen history — Audit 6 covers it. Do NOT flag archive files here.
 
 ### 4. Orphan plan (INFO)
 
@@ -95,7 +99,7 @@ For each artifact folder (`specs/`, `plans/`, `incidents/`, `checklists/`, `docs
 For each `.md` file under `archive/` that carries a `status` field:
 
 - Workflow files (`archive/specs/`, `archive/plans/`): status must be `done`. Any other value: **WARNING**. (A pre-3.0 deck may carry a historical `landed/sketches/` tree — left in place; audit its files by the same workflow rule.)
-- Knowledge files (`archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/`): status must be `obsolete` or `superseded`. Any other value: **WARNING**. (A pre-3.0 `landed/` tree or `landed/debriefs/` is historical — left in place, not regenerated; do not flag its presence — Audit 10 routes the rename.)
+- Knowledge files (`archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/`): status must be `obsolete`. Any other value: **WARNING**. (Pre-3.0 archived knowledge files may carry a legacy `status: superseded` — these are tolerated as frozen history written before 3.0 retired that value; no new `superseded` files should reach `archive/`. A pre-3.0 `landed/` tree or `landed/debriefs/` is historical — left in place, not regenerated; do not flag its presence — Audit 10 routes the rename.)
 
 ### 7. Dangling internal references (CRITICAL)
 
@@ -158,7 +162,7 @@ These are **recommended, not required** — never escalate to WARNING/CRITICAL. 
 For each workflow artifact NOT in `archive/` carrying `supersedes:` or `related:`:
 
 - Resolve each path value relative to the flightdeck root. If the target exists **neither in the active tree nor under `archive/`**: **INFO** — dangling relation edge (target deleted or never existed). An edge that points into `archive/` is normal (the Land Routine rewrites edges to the `archive/` prefix on archive) — do NOT flag it.
-- This checks frontmatter edge **values** only; prose `[text](path)` links are Audit 7's job (`supersedes`/`related` are not markdown links). `superseded_by` is knowledge-only and stays in Audit 3 — Audit 12 does not touch it.
+- This checks frontmatter edge **values** only; prose `[text](path)` links are Audit 7's job (`supersedes`/`related` are not markdown links). `superseded_by` is a retired-3.0 field — its presence is flagged by Audit 3, not here; Audit 12 does not touch it.
 
 ### 13. Cockpit `## 进行中` AUTO-region consistency (WARNING / INFO)
 
@@ -175,7 +179,7 @@ Cockpit `## 进行中` is the AUTO-derived projection of the active set — an a
 
 A `status: done` workflow artifact still sitting in its source folder (`specs/` or `plans/`, NOT in `archive/`) is *done-but-unlanded* — landing has not yet drained it. This is INFO only (landing drains automatically; the file is correctly `done`), but the two sub-cases differ:
 
-- **Blocked done** — the done artifact has a structural **inbound edge from an `active` artifact** (some active spec/plan points at it via `implements:` / `superseded_by:`). It cannot land yet — the active work still depends on it. **INFO** — name the artifact **and the `active` artifact(s) blocking it** ("done-but-unlanded: `plans/x.md` held by active `specs/y.md`"). Don't push to land it.
+- **Blocked done** — the done artifact has a structural **inbound edge from an `active` artifact** (some active spec/plan points at it via `implements:`). It cannot land yet — the active work still depends on it. **INFO** — name the artifact **and the `active` artifact(s) blocking it** ("done-but-unlanded: `plans/x.md` held by active `specs/y.md`"). Don't push to land it.
 - **Landable done** — the done artifact has **no** active inbound edge. It is safe to archive; landing just hasn't run. **INFO — "可 land"** (run `/flightdeck:landing` to drain it).
 
 **Fast path** (when a script runtime is reachable — `uv`/`python`, inferred): `flightdeck_index.py <deck> --archivable` prints the deterministic *landable* set (done workflow files with no active inbound edge), read-only. A `done` source file **in** that list → landable ("可 land"); a `done` source file **not** in the list → blocked (some active artifact's inbound edge holds it — report the blocker). See [protocol § status/landing seam](../preflight/protocol.md#the-status--landing-seam). The manual edge-walk above is the always-valid fallback.
