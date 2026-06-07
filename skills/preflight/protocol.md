@@ -10,7 +10,7 @@
 
 The aviation metaphor is reserved for the **interaction surface** — slash commands, rituals, and the cockpit: `flightdeck` / `cockpit` / `preflight` / `walkaround` / `landing` / `launch` (including the every-session `cockpit.md` dashboard). The **data model — folders, statuses, fields — uses mainstream, ordinary names** a developer can guess cold. A newcomer who doesn't know the metaphor must still be able to guess what each folder / status / field is for.
 
-Consequence: the two metaphor folder names became mainstream — `charts/ → references/`, `landed/ → archive/`. Status values were already mainstream (`idea/active/done`, `active/obsolete/superseded`) and don't change. `flightdeck/` (the product root) and `cockpit.md` (interaction surface) keep their names. This rule outranks thematic consistency — see [Design philosophy](#design-philosophy).
+Consequence: the two metaphor folder names became mainstream — `charts/ → references/`, `landed/ → archive/`. Status values are mainstream (`idea/active/done`, `active/stale/obsolete`). `flightdeck/` (the product root) and `cockpit.md` (interaction surface) keep their names. This rule outranks thematic consistency — see [Design philosophy](#design-philosophy).
 
 ## Project rules (`rules.md`)
 
@@ -85,21 +85,25 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `note` | workflow | optional | cockpit `## 进行中` row + walkaround render | author/status | rendered as `[note: …]`, not validated |
 | `last_updated` | knowledge + workflow | knowledge **required**; workflow recommended | preflight (staleness) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
 | `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
-| `supersedes` | workflow | optional | grep (reverse derived) | author/status | dangling-edge INFO (optional) |
+| `supersedes` | workflow + knowledge | optional | grep (traceability only — NOT an archival-pinning edge) | author/status | dangling-edge INFO (optional) |
 | `related` | workflow | optional | grep | author | dangling-edge INFO (optional) |
 | `when_to_read` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
 | `applies_to` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
+| `when_to_update` | docs/references (knowledge) | recommended for graduate-out docs; optional otherwise | exit-ritual + preflight stale detection | author (set at graduate time) | flag if absent on a graduate-tagged doc |
 | `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
 | `recurrences` | incidents | optional (default 1) | INDEX-row render + promotion gate | landing/status (auto-bump on a clear recurrence) | int ≥ 1; ≈ 1 + `[Case N]` count |
-| `superseded_by` | knowledge (when `status: superseded`) | **conditional** | redirect from dead-but-in-place file | author | Audit 3 |
+| `graduate` | specs | optional | landing (graduate seam trigger) | author / AI (front-loads at creation or during active life) | — |
+| `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | preflight (verdict report) / landing (guard) / walkaround | launch (init) / **walkaround only** (bump + migrate) | Audit 10 |
 | `git` · `emit_agents_md` · `disabled_gates` · `disabled_folders` · `model_invocable` · `status_auto` · `commit_mode` | `rules.md` (pre-3.0) | **removed in 3.0** — inferred / House-Rules / skill-judgment / default (see [Rule resolution order](#rule-resolution-order)); read but ignored for 3.x compat | all entry skills | — | — |
 
 `cockpit.md` board fields (`Last updated` / `Active focus` / `## 进行中` / `## 下一步` / `## Hanging tasks`) are not YAML frontmatter. `## 进行中` is an AUTO region derived from `status: active` spec/plan; `## 下一步` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 
-### Two deliberate asymmetries
+### Supersession model
 
-**Supersession — edge (workflow) vs status pointer (knowledge).** Knowledge files stay in place (never archived): a reader can land on a dead-but-in-place file, so a *forward* `superseded_by` (required when `status: superseded`) redirects to the replacement. Workflow artifacts archive into `archive/` when done — the old one is history a reader rarely hits cold, so the new artifact carries a *backward* `supersedes` edge and the reverse ("who superseded me") is grep-derived, never stored. Two mechanisms, one principle each — do not unify.
+**`supersedes` edge (traceability-only, NOT archival-pinning).** The new artifact may carry `supersedes: <old-artifact>` pointing at the one it replaces — this is a traceability annotation for humans and grep, nothing more. It is **not** an archival-pinning edge: `flightdeck_index.py --archivable` does **not** include it in the blocking-inbound-edge set (only `implements:` pins). The old artifact's death is driven **independently** — by the user flipping it to `obsolete`, which the rituals then drain to `archive/`. Once archived, a `supersedes` pointer into `archive/` is a legal cold history pointer; no maintenance required.
+
+**`superseded_by` is retired (3.0).** The old forward-redirect field (`superseded_by` required when `status: superseded`) was predicated on knowledge files staying in place indefinitely. Since `obsolete` is now a drain state (rituals move it to `archive/` — see [Status ⟂ location](#status--location-two-orthogonal-axes)), the dead file is no longer on disk long enough to need a redirect. `superseded_by` must not be written on new files; `walkaround` flags any live instance.
 
 **`last_updated` — required (knowledge) vs recommended + auto-bump (workflow).** Knowledge is found by grep-routing where stale advice is dangerous → required. Workflow is found via INDEX/cockpit → staleness matters less; recommended, and auto-bumped by `status`/`landing` to prevent rot.
 
@@ -121,13 +125,16 @@ One sentence: **status says "which step", location says "in the active area or n
 
 Fixed values, by kind:
 - workflow (spec/plan): `idea / active / done`
-- knowledge: `active / obsolete / superseded`
+- knowledge: `active / stale / obsolete`
+
+(`superseded` is **deleted** as a knowledge status value — the old `superseded` + `superseded_by` redirect mechanism is retired; see [Supersession model](#supersession-model). Live `superseded` knowledge files should be re-evaluated: flip to `obsolete` and drain, or flip to `active` if still valid.)
 
 Recommended flow (documentation, NOT enforced):
 
 ```
 idea → active → done   (rejected = delete the file)
-knowledge: active → obsolete | superseded
+knowledge: active → stale (auto, ritual) → active (user-reviewed) | obsolete (user-confirmed dead)
+          active → obsolete (user-confirmed dead, no stale step required)
 ```
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
@@ -141,6 +148,8 @@ This is the **one authoritative table** for automatic status flips. Other files 
 
 Workflow chain: `idea → active → done`. Rejection **deletes** the file (no scrapped status).
 
+**Workflow:**
+
 | Trigger | Flip | Who | Auto? |
 |---|---|---|---|
 | Write a new spec/plan (capture only, not yet started) | →`idea` | status | always |
@@ -149,6 +158,15 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 | User approves / signs off | `active→done` (flips `done` only, **does not archive**) | status / landing seam | always |
 | A direction is rejected | **delete the file** (git log + commit-body reason) | **user-explicit instruction only** | **never auto** |
 
+**Knowledge:**
+
+| Trigger | Flip | Who | Auto? |
+|---|---|---|---|
+| Recent change matches doc's `when_to_update` | `active→stale` (or no-op if already `stale`) | exit-ritual (landing/soft-landing) **and** preflight | **auto** (both rituals; idempotent) |
+| User confirms doc is now current | `stale→active` | user-asserted only | **never auto** |
+| User confirms doc is dead / obsolete | `→obsolete` | user-asserted only | **never auto** |
+| Ritual detects `obsolete` knowledge artifact | drain to `archive/` (location change, not a new status) | landing / preflight | **auto** (same drain logic as `done`) |
+
 Iron rules:
 - **Forward-only, idempotent** — if target ≤ current, no-op.
 - `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
@@ -156,7 +174,7 @@ Iron rules:
 - `done`'s trigger source = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check.
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
-Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / obsolete / superseded` with **no automatic flips** — set obsolete/superseded by hand (with `superseded_by`).
+Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: exit-ritual (landing/soft-landing) and preflight each compare recent changes against `when_to_update` fields and auto-flip `status: stale` when a match is detected (idempotent — already-stale is a no-op). The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the `→done` rule for workflow. Set `obsolete` by hand; rituals drain it to `archive/`.
 
 ### The status / landing seam
 
@@ -165,7 +183,7 @@ Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active /
 - `idea→active` is light work — `status` does it alone.
 - **`→done` = the "completion" moment = landing's trigger point.** Reaching `done` hands control to landing for wrap-up + archival decision. `status` itself still does not commit / archive — it recognizes completion and passes the baton.
 - **End-of-turn debounce:** a `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, not an unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. An explicit `/flightdeck:landing` is also a trigger. (See [landing auto-trigger](#rule-resolution-order) in Rule resolution order.)
-- **Archival criterion = a deterministic structural edge** (not AI prose reading): a `done` artifact archives into `archive/` **iff no `active` artifact points at it via a structural edge** (`implements:` active plan → done spec; `superseded_by` active knowledge → the knowledge it replaces). `flightdeck_index.py --archivable` computes the archivable-`done` set as a **reproducible fact** (same input → same conclusion); prose markdown links are for humans only and **don't enter the criterion**. Pointed-at by an active inbound edge → stays done-but-unlanded.
+- **Archival criterion = a deterministic structural edge** (not AI prose reading): a `done` artifact archives into `archive/` **iff no `active` artifact points at it via a structural edge** (`implements:` active plan → done spec). `supersedes` is traceability-only and is **NOT** a pinning edge — `flightdeck_index.py --archivable` does not include it in the blocking set. `flightdeck_index.py --archivable` computes the archivable-`done` set as a **reproducible fact** (same input → same conclusion); prose markdown links are for humans only and **don't enter the criterion**. Pointed-at by an active inbound edge → stays done-but-unlanded.
 - **Drain, don't accumulate:** every landing rescans **all** `done`-in-place artifacts (not just this session's), sweeping away any whose inbound edges have cleared — so done-but-unlanded **drains automatically** and never lingers. Still-pointed-at ones are listed by `walkaround` as INFO (naming the **blocking active artifact**, not a vague "reason").
 - **Landing failure does not roll back `done`.** `done` asserts **user approval**, not "landing's smoke-check passed" — the two are orthogonal. If landing fails mid-run (smoke-check error, script crash, interrupted session), the artifact stays `done` at its current location (done-but-unlanded); the next landing sweep picks it up. Never revert `status: done` on a landing failure.
 
@@ -224,6 +242,20 @@ Reachability entries: `cockpit.md` / `INDEX.md` / `rules.md`. (No bundle README 
 
 Knowledge files (incidents / checklists / docs / references) **MUST** carry frontmatter with `when_to_read`, `applies_to`, and `last_updated`. On a missing field: STOP, report the file path + missing fields to user, offer (a) add now or (b) delete the file. Silent skip = files invisible while their authors believe they're active. That is the worst failure mode for an advice system.
 
+### Stale detection (`when_to_update`, dual-ritual)
+
+Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong"). When a change hits a doc's trigger, the ritual auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode).
+
+**Detection runs at both rituals (landing=primary, preflight=compensating):**
+- **Exit-ritual (landing/soft-landing)** — primary: at turn end, compare this turn's changes against each doc's `when_to_update`; auto-flip stale on a match.
+- **preflight (entry, retroactive safety net)** — compensating: diff `anchor..HEAD` plus worktree uncommitted changes against `when_to_update` fields; catches any windows where landing didn't run (hard-closed session, skipped landing).
+
+**Anchor:** the git ref recorded by the most recent exit-ritual (stored as a `Flightdeck-Sync:` trailer in the landing commit, or a small pointer file — exact storage is implementation-specific but must be a concrete recorded ref, never a guess). preflight diffs from this anchor forward. After preflight's stale sweep, the anchor advances to HEAD.
+
+**Idempotency:** `stale` detection is idempotent — already-`stale` docs are a no-op. If landing already flipped it, preflight's re-check just confirms the same result without extra side-effects.
+
+**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the `→done` rule. The AI does not self-certify either direction.
+
 ### Proactive incident resurfacing
 
 Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Recording a recurrence happens at the **other** end of the session: at landing, a **clear** same-incident match auto-appends `[Case N]` + bumps `recurrences` (see [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up)); an **ambiguous** match asks the user. Auto-counting is safe because the consequential step — *promotion* — stays user-gated.
@@ -245,6 +277,12 @@ Project agent rules > `rules.md` > `cockpit.md` > active folders (`specs/` `plan
 `rules.md` sits just below the project's own agent rules: it governs how flightdeck skills behave. `cockpit.md` is the single operational entry below it.
 
 > **"Project agent rules"** = your project's top-level AI instructions file — whatever your AI tool reads on every session.
+
+## Preconditions and boundaries
+
+**Single active session.** This protocol assumes only one AI session runs preflight/exit-ritual against the same deck at a time. Concurrent-session conflict coordination (two sessions simultaneously editing frontmatter) is out of scope. Single-user, sequential use; if concurrent sessions are ever needed, a separate spec is required.
+
+**`archive/` is cold storage, not a live routing input.** Artifacts drained to `archive/` are grep-able cold records — recurrence sweeps scan `archive/incidents/` for regression detection, and `supersedes` edges may point into `archive/` as valid cold history pointers. None of this makes `archive/` a live routing DB: it stays excluded from the routing graph. Only an explicit revival (un-archive + status flip) promotes a file back into the active area.
 
 ## Design philosophy
 
@@ -272,7 +310,9 @@ A passive **turn-end hook** additionally regenerates the mechanical board AUTO r
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
-**Knowledge lifecycle:** `active → obsolete | superseded` (set `superseded_by` when superseding). Landing knowledge is optional — files may stay in place indefinitely; no "to-land" reminder.
+**Knowledge lifecycle:** `active ⇄ stale → obsolete` (stale auto-flipped by ritual on `when_to_update` match; obsolete drained to `archive/` by ritual — same drain logic as workflow `done`). `obsolete` is the **knowledge analog of workflow `done`**: a terminal state meaning "dead, pending drain", not an in-place tombstone. **`obsolete`-not-yet-drained ≡ `done`-but-unlanded** — both drain automatically on next landing/preflight, never linger permanently.
+
+**Graduate seam** (spec → docs, at landing): a spec with `graduate: true` that reaches `done` is, at landing, **rewritten body-and-all into a permanent `docs/` entry** (current-truth view) and the source `specs/` file is moved there — no archive twin. Two paths for knowledge reaching `docs/`: (a) **graduate** — a `graduate: true` done spec that covers a new structural domain → new `docs/` entry; (b) **direct update** — an existing `docs/` entry already owns the topic → update it in place (no graduate). Discriminator: if a `docs/` entry already covers the topic, update it; else graduate a new one. The `graduate: true` flag window = the whole active life of the spec (can be added at any point before landing; missed flag = user's responsibility, no completion-time re-detection fallback). Idempotency key = "`graduate: true` done spec **still in `specs/`**" — once moved, the trigger key is gone and re-runs are safe no-ops. Graduate is landing's primary path; preflight is the compensating path (catches landing-not-run windows). Graduate-out docs must carry `when_to_read` / `applies_to` / `when_to_update`; omitting `when_to_update` opts the doc out of stale detection immediately.
 
 ## Exit ritual
 
@@ -340,11 +380,11 @@ An incident is not just born and resurfaced — it can also be **retired** once 
 
 When an incident's root cause is permanently fixed (e.g. a guard test now prevents it), the incident is **retired**: fill `resolved_by` (a single reference — a commit SHA or a test id/path, e.g. `test_flightdeck_index.py::CockpitProjectionRobustnessTest`) **and** flip `status: obsolete`. These two are **one deliberate act**, performed at **landing** (the ritual that owns knowledge classification and retirement; `status` only touches workflow). Landing **never auto-flips** on a filled `resolved_by` — at most it *prompts* "resolved_by is filled but still active — retire?".
 
-`obsolete` here means **"root cause fixed, retired from active routing, kept as a historical record"** — it is **NOT "outdated / worthless"**. The name is reused for model consistency (knowledge status stays `active / obsolete / superseded`, no new value); the gap between the name and this meaning is a known, accepted point.
+`obsolete` here means **"root cause fixed, retired from active routing, pending drain to archive/"** — it is **NOT "outdated / worthless"**. Knowledge status uses `active / stale / obsolete`; `obsolete` is the knowledge analog of workflow `done` (drain state — the ritual moves it to `archive/`).
 
-### The obsolete dual path (kept routable for regression detection)
+### The obsolete dual path (drained to archive/, still grep-able cold)
 
-`obsolete` only leaves the **active-recommendation routing** (it is excluded from the folder INDEX `<!-- AUTO -->` region and from the root knowledge count — so it costs zero session routing tokens). It is **not deleted and not hidden**: an obsolete incident is still **on disk, still grep-able, and still entered into `--match-signature` / the landing recurrence sweep**. This is load-bearing — regression detection *depends* on obsolete incidents staying matchable. **Implementations must NOT hard-filter `obsolete` out of the match set.** A signature hit on an obsolete entry is the signal that a "fixed" bug may have come back (regression handling lives in [landing § Recurrence sweep wiring](../landing/SKILL.md#recurrence-sweep-wiring) — gated revival, never a silent re-append).
+`obsolete` only leaves the **active-recommendation routing** (excluded from the folder INDEX `<!-- AUTO -->` region and from the root knowledge count — zero session routing tokens). The ritual then **drains it to `archive/`** — same drain logic as workflow `done`. It is **not deleted**: an archived incident is still **on disk, still grep-able** in `archive/incidents/`, **and still entered into `--match-signature` / the landing recurrence sweep** (the sweep must scan `archive/incidents/` too — regression detection *depends* on retired incidents staying matchable). **Implementations must NOT hard-filter `obsolete` or `archive/` out of the match set.** A signature hit on an archived entry is the signal that a "fixed" bug may have come back — **revival = un-archive + flip back to `active`** (regression handling lives in [landing § Recurrence sweep wiring](../landing/SKILL.md#recurrence-sweep-wiring) — gated revival, never a silent re-append).
 
 ## Common mistakes — STOP and reclassify
 
