@@ -102,6 +102,15 @@ class NewValidationTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 new(deck, "widget", slug="x", title="X", regen=False)
 
+    def test_status_choices_reject_retired_superseded(self):
+        # superseded is retired in 3.0 — the real CLI parser must reject it.
+        from flightdeck_new import main
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(SystemExit):
+                main([str(deck), "spec", "--slug", "x", "--title", "X",
+                      "--status", "superseded"])
+
     def test_illegal_slug_raises(self):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)

@@ -43,7 +43,7 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 4a. **Retroactive safety net (preflight's ONE allowed write — compensating for landing-not-run).**
 
-   Preflight is read-mostly. The single write it is **allowed** to perform is: (a) flipping affected knowledge artifacts to `stale`, and (b) advancing the anchor. No graduate, no drain — those are landing's moves. Preflight surfaces them but does NOT execute them automatically; the heavy moves stay landing's.
+   Preflight is read-mostly. The single write it is **allowed** to perform is flipping affected knowledge artifacts to `stale` (an uncommitted frontmatter edit that the next landing commits). It does **not** write the anchor: the anchor is simply the most recent `Flightdeck-Sync:` trailer commit, and it advances **automatically at the next landing** (preflight makes no commit, so there is nothing for it to advance). No graduate, no drain — those are landing's moves. Preflight surfaces them but does NOT execute them automatically; the heavy moves stay landing's.
 
    Run the following three checks. Each is idempotent; already-correct state = no-op.
 
@@ -51,9 +51,8 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
    Run: `flightdeck_index.py <deck> --changed-since-anchor`
    (diffs from the last `Flightdeck-Sync:` anchor to HEAD plus worktree; catches sessions where landing didn't run).
    For each `docs/` + knowledge artifact whose `when_to_update` is semantically matched by any of those paths:
-   - Auto-flip `status: stale` in its frontmatter (same auto-flip rule as exit-ritual — no pre-ask; idempotent).
-   - Advance the anchor to HEAD after the sweep (write the new ref to the pointer file / cockpit field that `--changed-since-anchor` reads — this is the anchor-advance write).
-   Fallback (no anchor or no Python runtime): diff this session's changed files visible in `git status` against `when_to_update` fields by hand; advance anchor at end.
+   - Auto-flip `status: stale` in its frontmatter (same auto-flip rule as exit-ritual — no pre-ask; idempotent). Re-running preflight is safe: already-`stale` = no-op, and the anchor only moves at the next landing's trailer commit.
+   Fallback (no anchor or no Python runtime): diff this session's changed files visible in `git status` against `when_to_update` fields by hand.
 
    **(ii) Graduate compensation.**
    Scan `specs/` for any `graduate: true` spec whose `status` is `done` and that **still sits in `specs/`** (landing didn't finish the graduate move).
@@ -124,7 +123,7 @@ Omit any table group with no entries. If all three folder INDEX files are absent
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
 - Don't drill into individual checklist/incident/doc files or area sub-folders until a trigger matches at execution time (read folder INDEX only).
 - **Don't graduate specs or drain `obsolete` artifacts** — those are landing's moves. Preflight surfaces them (step 4a) and stops; execution happens at the next landing.
-- **Don't write anything beyond the one allowed write** (step 4a: flip `stale` + advance anchor). All other preflight actions are read-only.
+- **Don't write anything beyond the one allowed write** (step 4a: flip `stale`). Preflight does not write/advance the anchor (that happens at the next landing's `Flightdeck-Sync:` trailer). All other preflight actions are read-only.
 
 ## Protocol knowledge (load on demand)
 
