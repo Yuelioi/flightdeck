@@ -114,3 +114,41 @@ def test_gemini_hooks_config_shape():
     assert any("run-hook.cmd" in c and "session-start" in c for c in cmds)
     after = [h["command"] for grp in cfg["hooks"]["AfterAgent"] for h in grp["hooks"]]
     assert any("run-hook.cmd" in c and "stop" in c for c in after)
+
+
+def _run_host(script, host_env, *, project_env=None, stdin=""):
+    """Run a hook with all host vars cleared, then apply only host_env.
+    project_env keys (e.g. CLAUDE_PROJECT_DIR / GEMINI_PROJECT_DIR) locate the deck."""
+    env = dict(os.environ)
+    for k in ("CLAUDE_PLUGIN_ROOT", "CURSOR_PLUGIN_ROOT", "CURSOR_PROJECT_ROOT",
+              "GEMINI_PROJECT_DIR", "CODEX_PLUGIN_ROOT", "COPILOT_CLI",
+              "CLAUDE_PROJECT_DIR"):
+        env.pop(k, None)
+    if project_env:
+        env.update({k: str(v) for k, v in project_env.items()})
+    env.update({k: str(v) for k, v in host_env.items()})
+    return subprocess.run(
+        [BASH, str(REPO / "hooks" / script)],
+        input=stdin, capture_output=True, text=True, encoding="utf-8", env=env,
+    )
+
+
+def test_codex_emit_uses_hookSpecificOutput(tmp_path):
+    proj = _mk_deck(tmp_path, "**Active focus**: c\n\n## 下一步\n- c1\n")
+    r = _run_host("session-start", {"CODEX_PLUGIN_ROOT": "x"},
+                  project_env={"CLAUDE_PROJECT_DIR": proj})
+    assert r.returncode == 0
+    out = json.loads(r.stdout)
+    assert "hookSpecificOutput" in out
+    assert "additionalContext" in out["hookSpecificOutput"]
+
+
+def test_gemini_emit_and_projectdir_via_gemini_var(tmp_path):
+    # GEMINI_PROJECT_DIR is the ONLY project signal → also tests project-dir resolution.
+    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## 下一步\n- g1\n")
+    r = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(proj)})
+    assert r.returncode == 0
+    out = json.loads(r.stdout)
+    assert "hookSpecificOutput" in out
+    assert "additionalContext" in out["hookSpecificOutput"]
+    assert "g1" in out["hookSpecificOutput"]["additionalContext"]

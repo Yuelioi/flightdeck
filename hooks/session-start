@@ -7,8 +7,10 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Resolve the project dir the hook is running against.
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-$PWD}}"
+# Resolve the project dir the hook is running against. Single host signal each,
+# then $PWD fallback; the deck gate below never walks up to a parent directory.
+# (Codex has no dedicated env var here — it rides $PWD; verified live in Phase 4.)
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
 
 escape_for_json() {
   local s="$1"
@@ -22,7 +24,8 @@ emit() {
   local ctx; ctx="$(escape_for_json "$1")"
   if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
     printf '{\n  "additional_context": "%s"\n}\n' "$ctx"
-  elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  elif [ -n "${CODEX_PLUGIN_ROOT:-}" ] || [ -n "${GEMINI_PROJECT_DIR:-}" ] \
+       || { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; }; then
     printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ctx"
   else
     printf '{\n  "additionalContext": "%s"\n}\n' "$ctx"
