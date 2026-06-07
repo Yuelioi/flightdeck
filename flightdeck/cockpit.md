@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-07 by 月离 (hook rollout 相位1（机制，163 测试绿）+ 相位2（文案）+ 相位3（收编：auto-land spec+rollout 翻 done+archive+supersedes 边、soft-landing-rollout 完成归档、soft-landing spec 保 active）均完成、逐任务本地 commit。仅剩相位4 live 实证（resync 后新会话，做不了停地板）。历史详 git log。)
+**Last updated**: 2026-06-07 by 月离 (相位3 收编 commit 补全（ff7868e 漏的归档件内容半边补在 7b4fcc2）；`.gitignore` + 删 2 份 tri-review debrief + 清死链已提交（53505b6/9edb9d8），工作区干净。相位1–3 全 done，仅剩相位4 live 实证（resync 后新会话，做不了停地板）。历史详 git log。)
 **Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + auto-land 执行层（注入入场 + Stop board-sync）+ HISTORY 移除/gitignored-deck 接缝 均已实施，待 resync 部署 + live 复验。
 
 ## 进行中
@@ -23,7 +23,7 @@
 - **相位1–3 全 done**，仅剩**相位4 live 实证**（resync→新会话手动跑各家最小矩阵；见 plan Phase 4）。
 - hook 文件：`hooks/{session-start,stop,_context.sh}` + `hooks/hooks-{codex,gemini,cursor}.json`；测试 `scripts/tests/test_hooks.py`（`uv run pytest scripts/tests/`，163 passed）；调试 `FLIGHTDECK_HOOK_DEBUG=1`。
 - 全 skill 非-Claude hook 叙事标"待 Phase 0 实证"——相位4 过了才由各家收尾步翻最终态。
-- `.gitignore`（cursor 忽略行 + `.claude`）+ 删的 debrief 仍未提交（你的范围决定，留你单独处理）。
+- `.gitignore`（cursor `.mdc` 投影忽略 + `.claude`）+ 删 2 份 tri-review debrief（含清死链）已提交（`53505b6`/`9edb9d8`）。工作区现干净。
 
 ## Hanging tasks
 
