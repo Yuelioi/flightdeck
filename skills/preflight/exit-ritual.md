@@ -60,6 +60,36 @@ Step 3a: Suggest status for affected artifacts
          single shared Land Routine (see "## Land Routine" below) —
          do not inline the move/INDEX steps here.
 
+Step 3b: Graduate finish (landing = primary path).
+         For each `graduate: true` spec that is `done` AND still in `specs/`:
+         - Rewrite its body into a current-truth perspective as a new `docs/` entry.
+           The new doc MUST carry `when_to_read`, `applies_to`, and `when_to_update`
+           (spec files carry none of these; omitting `when_to_update` opts the doc out
+           of stale detection immediately, defeating the point).
+         - A `## 设计权衡` section MAY be preserved in the new doc when the rationale
+           has lasting value; other spec-internal history is not ported.
+         - Move the rewritten file to `docs/<slug>.md` (or a nested area if appropriate).
+           NO archive twin — one artifact, the docs/ copy. Do NOT also archive the
+           source spec.
+         - Remove the source `specs/` file; update both `specs/INDEX` and `docs/INDEX`.
+         Idempotency key = source file still in `specs/`. Once moved, the key is gone;
+         re-runs are safe no-ops. Preflight is the compensating path if landing didn't run.
+
+Step 3c: Stale detection (landing/soft-landing = primary detector).
+         Run: `flightdeck_index.py <deck> --changed-since-anchor`
+         (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
+         worktree uncommitted changes).
+         For each `docs/` + knowledge artifact whose `when_to_update` is semantically
+         matched by any of those changed paths:
+         - Auto-flip `status: stale` in its frontmatter (no pre-ask — stale is
+           reversible, local, purely a warning; "docs quietly lying" is the worst outcome).
+         - Idempotent: already-`stale` = no-op.
+         - Surface a one-line "待复核: <file>" note in cockpit (append under ## 下一步
+           or a dedicated "## 待复核" subsection if one exists — do not bury it).
+         Fallback (no Python runtime or no anchor yet): compare this session's changed
+         paths against each doc's `when_to_update` by hand (same semantic match,
+         anchored to this session's changes only).
+
 Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
         below. Gist: bump Last updated only on the 4 sanctioned triggers;
         regen the ## 进行中 AUTO region from status:active; auto-write ## 下一步;
@@ -73,6 +103,13 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - no-git overrides all → no commit (the land move is on disk; `archive/` is the record — no separate log)
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
+        - **`Flightdeck-Sync:` trailer (REQUIRED on every landing/soft-land commit):**
+          append `Flightdeck-Sync: <git-ref>` as a commit trailer (the ref is `HEAD`
+          *after* the commit — i.e. the new SHA, or the current branch tip). This is
+          the anchor that `--changed-since-anchor` and `preflight`'s retroactive stale
+          sweep key on for the next session. Without it, the anchor is absent and
+          preflight must fall back to a full worktree diff.
+          Under no-git: skip (no commit → no anchor trailer; preflight falls back).
 ```
 
 ### Step 5a — Recurrence sweep + promotion gate (wrap-up)
@@ -333,9 +370,11 @@ The single source of truth for landing artifacts. Both `landing` (Step 3a above)
 
 Landing operates on a **land set**: the one-or-more `done` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
-0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` / `superseded_by:` inbound edge. Fast path: read the deterministic set from `flightdeck_index.py <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts). Fallback (no Python runtime): compute the same set by hand — scan every `active` artifact's `implements:` / `superseded_by:` values, collect their targets, and any `done`-in-place artifact **not** in that target set is archivable. Either way the judgment is the **edge graph**, never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` items land.)
+0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` / `superseded_by:` inbound edge. Fast path: read the deterministic set from `flightdeck_index.py <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts — **and** any `obsolete` knowledge artifacts still in the active area). Fallback (no Python runtime): compute the same set by hand — scan every `active` artifact's `implements:` / `superseded_by:` values, collect their targets, and any `done`-in-place artifact **not** in that target set is archivable; **additionally include every `obsolete`-in-place knowledge artifact** (they have no pinning edges — `obsolete` is knowledge's drain state, the analog of workflow `done`). Either way the judgment is the **edge graph** (for workflow) or **status** (for knowledge), never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` workflow items and `obsolete` knowledge items land.)
 
-   **Drain, don't accumulate.** Every landing rescans **all** `done`-in-place artifacts across the deck — **not just this session's freshly-produced ones**. Any whose inbound edge has since cleared (its blocking `active` artifact has itself landed or been re-pointed) is swept into the land set in this same pass; the rest stay **done-but-unlanded** until their blocker clears. So the active area drains automatically and `done`-but-unlanded never lingers as residue.
+   **Drain, don't accumulate.** Every landing rescans **all** `done`-in-place artifacts **and `obsolete` knowledge artifacts** across the deck — **not just this session's freshly-produced ones**. `done` workflow items whose inbound edge has since cleared are swept in; `obsolete` knowledge items are swept in unconditionally (no blocking edges apply). The active area drains automatically; neither `done`-but-unlanded nor `obsolete`-not-yet-drained lingers as residue.
+
+   **Drain destination for `obsolete` knowledge:** mirror the source structure — `incidents/foo.md → archive/incidents/foo.md`, `docs/foo.md → archive/docs/foo.md`, etc. Specifically, `archive/incidents/` is the required destination for retired incidents so `--match-signature` can scan them for regression detection (it now also scans `archive/incidents/`). Freeze the file's status as `obsolete` — the archive entry is the cold record.
 
 1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = archive/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → archive/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
 2. **Move (plain filesystem rename — never `git mv`).** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent. Use a plain `mv` / rename, **not `git mv`**: `git mv` assumes the deck is tracked and aborts with `fatal: not under version control` on a gitignored deck (the common case — projects routinely keep `flightdeck/` out of their code history), forcing fragile improvisation. A plain move works identically whether the deck is git-backed (the later commit step records the rename) or no-git.

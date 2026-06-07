@@ -41,6 +41,31 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
    Git-state notes say **"review before continuing"**, not "run walkaround" — walkaround is a read-only file audit and does not read live git. Only the **layout-verdict** note points at walkaround.
 
+4a. **Retroactive safety net (preflight's ONE allowed write — compensating for landing-not-run).**
+
+   Preflight is read-mostly. The single write it is **allowed** to perform is: (a) flipping affected knowledge artifacts to `stale`, and (b) advancing the anchor. No graduate, no drain — those are landing's moves. Preflight surfaces them but does NOT execute them automatically; the heavy moves stay landing's.
+
+   Run the following three checks. Each is idempotent; already-correct state = no-op.
+
+   **(i) Compensating stale check.**
+   Run: `flightdeck_index.py <deck> --changed-since-anchor`
+   (diffs from the last `Flightdeck-Sync:` anchor to HEAD plus worktree; catches sessions where landing didn't run).
+   For each `docs/` + knowledge artifact whose `when_to_update` is semantically matched by any of those paths:
+   - Auto-flip `status: stale` in its frontmatter (same auto-flip rule as exit-ritual — no pre-ask; idempotent).
+   - Advance the anchor to HEAD after the sweep (write the new ref to the pointer file / cockpit field that `--changed-since-anchor` reads — this is the anchor-advance write).
+   Fallback (no anchor or no Python runtime): diff this session's changed files visible in `git status` against `when_to_update` fields by hand; advance anchor at end.
+
+   **(ii) Graduate compensation.**
+   Scan `specs/` for any `graduate: true` spec whose `status` is `done` and that **still sits in `specs/`** (landing didn't finish the graduate move).
+   - If found: surface it — "graduate 待完成: `specs/<file>` — landing 未完成此步骤，需执行 graduate 改写搬运。" Do NOT auto-graduate here; the rewrite is a judgment-heavy operation that belongs to landing.
+
+   **(iii) Obsolete reminder.**
+   Run: `flightdeck_index.py <deck> --archivable`
+   If the output includes any `obsolete` knowledge artifact still in the active area:
+   - Surface it — "待排空 (obsolete knowledge): `<file>` — 下次 landing 会自动归档。" Do not drain here; draining is landing's job.
+
+   Include any findings from (i)–(iii) in the preflight output before the routing catalog. If all three checks are clean, omit the section silently.
+
 5. **Report item #1, then STOP.** Read-only recon doesn't fly the mission. State the `## 下一步` item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
 
    **Land-readiness as the FINAL output line** (skip under no-git): if `git status` shows **≥ 5** changed files under `flightdeck/`, append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
@@ -86,7 +111,7 @@ Routing catalog (know-what-exists — read on demand; status audit → /flightde
 Preflight complete (read-only). → Say "go" to execute item #1.
 ```
 
-Omit any table group with no entries. If all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line, and the Land-readiness line last.
+Omit any table group with no entries. If all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line. Place any step 4a findings (stale flips, graduate reminders, obsolete reminders) **before** the routing catalog. The Land-readiness line is always last.
 
 ## Don't do
 
@@ -98,6 +123,8 @@ Omit any table group with no entries. If all three folder INDEX files are absent
 - Don't bump `Last updated` — entry doesn't modify cockpit.
 - Don't grep the codebase for "things to do" — cockpit.md is authoritative.
 - Don't drill into individual checklist/incident/doc files or area sub-folders until a trigger matches at execution time (read folder INDEX only).
+- **Don't graduate specs or drain `obsolete` artifacts** — those are landing's moves. Preflight surfaces them (step 4a) and stops; execution happens at the next landing.
+- **Don't write anything beyond the one allowed write** (step 4a: flip `stale` + advance anchor). All other preflight actions are read-only.
 
 ## Protocol knowledge (load on demand)
 
