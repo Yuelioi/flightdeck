@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-07 by 月离 (write-gate-examples 实施完成并归档：protocol § Write gate 加 skip-list+✅/❌、exit-ritual 加独立 body 质量小节、refactor spec 加边界注记；spec+plan 已 done+landed。下一步转执行 hook-primary rollout。历史详 git log。)
+**Last updated**: 2026-06-07 by 月离 (hook rollout 相位1 机制接线完成：Codex/Gemini config、Cursor stop、emit 四家分支、project-dir 泛化、HOOK_DEBUG、Cursor 规则文件主路径——163 测试绿、逐任务本地 commit。撞到并修 Windows python3 桩致 board-sync 静默失效（incident 已记）。下一步=相位2 文案。历史详 git log。)
 **Active focus**: flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + auto-land 执行层（注入入场 + Stop board-sync）+ HISTORY 移除/gitignored-deck 接缝 均已实施，待 resync 部署 + live 复验。
 
 ## 进行中
@@ -17,7 +17,7 @@
 ## 下一步
 
 - **#1 ✅ write-gate-examples 完成**：spec+plan 已实施、done、归档（protocol § Write gate 加 skip-list+✅/❌、exit-ritual 加独立 body 质量小节、refactor spec 加边界注记锚点）。写门/分类启发/body 段已定稿，hook refactor Phase2 按锚点跳过。
-- **#2 执行 hook rollout（当前·先行）**：spec + plan `2026-06-07-hook-primary-refactor[-rollout]` 已落、已过 3 轮评审硬化。= 执行 `plans/2026-06-07-hook-primary-refactor-rollout`——**相位1 机制接线（本会话可 TDD）** → 相位2 文案 → 相位3 收编 → **相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）**。执行方式待用户选（subagent-driven / inline）。
+- **#2 执行 hook rollout（当前·先行）**：执行 `plans/2026-06-07-hook-primary-refactor-rollout`。**相位1 机制接线 ✅ done**（Task 1.1–1.7 全 commit、163 测试绿；plain `current:` 在 plan 里）。**当前在相位2 文案**（删 why-no-hooks + 引用清理、bootstrap 三链路、exit-ritual board-AUTO 移出 agent、preflight/protocol/landing/status/session-flow hook-primary 重写、#2 关键上下文槽、#4 失败捕获）→ 相位3 收编 → **相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）**。注：相位2 用 verify-then-strip，非-Claude 降级叙事的删除等相位4 实证后。
 - **并入说明**：原「resync / live 复验」+ auto-land 两个 rollout + soft-landing 的落地，均已**并入本 rollout**（相位4 = 各家 live 实证）；auto-land spec + 两 rollout 将在相位3 标 superseded，soft-landing spec 的 what 保留。
 - **本轮新并入（外部记忆系统借鉴，用户拍板）**：① Cursor 注入改 `.cursor/rules/*.mdc` 规则文件为**主路径**（稳定加载>优雅加载，Task 1.7）；② cockpit `## 关键上下文` 槽（#2，Task 2.7）；③ 失败/弯路捕获入 incidents（#4，Task 2.8）。**单独 backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试）。
 
