@@ -25,7 +25,12 @@ supersedes: archive/plans/2026-06-06-auto-land-executor-rollout.md
 
 ## Progress
 
-current: Phase 2 — 文案精简（待启动）。**Phase 1 机制接线 ✅ done**（Task 1.1–1.7 全部本地 commit、`scripts/tests/` 163 passed）。期间发现并修 Windows python3 桩致 board-sync 静默失效 → `incidents/2026-06-07-windows-python-stub-board-sync-noop.md`。Phase 4 live 实证未做（需 resync 后新会话）。
+current: **Phase 4 — 每家 Phase 0 live 实证（待 resync 后新会话；本会话做不了，停地板）。** Phase 1–3 全 done、逐任务本地 commit、`scripts/tests/` 163 passed：
+- **Phase 1 机制接线 ✅**（Task 1.1–1.7）。期间发现并修 Windows python3 桩致 board-sync 静默失效 → `incidents/2026-06-07-windows-python-stub-board-sync-noop.md`。
+- **Phase 2 文案 ✅**（Task 2.1–2.8；2.6 无可压跳过）。
+- **Phase 3 收编 ✅**（Task 3.1：auto-land spec+rollout done+archive+supersedes 反向边、soft-landing spec+rollout 均 done+archive）。模型坑：workflow 无 superseded 状态 → `incidents/2026-06-07-workflow-has-no-superseded-status`，正确走 done+archive+supersedes。
+
+> **复选框说明**：Phase 1–3 在 commit 流里逐任务完成，但本文档 `- [ ]` 未回勾（账漏同步，已知）。其中少数子步把宿主接法延到 Phase 4 live 核（Task 1.3 Gemini extension 声明法、Task 1.1 Codex `${CODEX_PLUGIN_ROOT}` 变量名）——这些待 Phase 4 实证后才定。Phase 4 见 Task 4.1。
 
 ---
 
