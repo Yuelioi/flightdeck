@@ -1,3 +1,5 @@
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -1026,6 +1028,28 @@ class SpecAdvanceCandidatesTest(unittest.TestCase):
             deck = self._deck(d)
             self._plan(deck, "2026-06-02-p.md", "done", "specs/ghost.md")
             self.assertEqual(flightdeck_index.spec_advance_candidates(deck), [])
+
+
+def _git(deck, *args):
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t", HOME=str(deck))
+    subprocess.run(["git", *args], cwd=deck, check=True, capture_output=True, env=env)
+
+
+class AnchorTest(unittest.TestCase):
+    def test_anchor_and_changed_since(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            _git(deck, "init", "-q")
+            (deck / "a").write_text("1", encoding="utf-8")
+            _git(deck, "add", "-A"); _git(deck, "commit", "-qm", "land\n\nFlightdeck-Sync: 1")
+            (deck / "b").write_text("2", encoding="utf-8")
+            _git(deck, "add", "-A"); _git(deck, "commit", "-qm", "ordinary work")
+            from flightdeck_index import last_anchor_ref, changed_since_anchor
+            self.assertIsNotNone(last_anchor_ref(deck))
+            changed = changed_since_anchor(deck)
+            self.assertIn("b", changed)
+            self.assertNotIn("a", changed)
 
 
 if __name__ == "__main__":

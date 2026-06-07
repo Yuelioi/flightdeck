@@ -15,6 +15,7 @@ Runnable as `uv run flightdeck_index.py <deck>` or `python flightdeck_index.py <
 import argparse
 import hashlib
 import re
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -509,6 +510,39 @@ def version_mismatch(deck):
     return None
 
 
+def last_anchor_ref(deck):
+    """最近一个带 Flightdeck-Sync trailer 的 commit SHA（上次退出仪式锚点），无则 None。"""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(deck), "log", "-1", "--grep=Flightdeck-Sync", "--format=%H"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        return out or None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def changed_since_anchor(deck):
+    """自锚点以来变动的路径（committed + 工作树未提交），相对 repo 根。
+    无锚点 → 退化成工作树改动（首跑/无历史仍给信号）。"""
+    anchor = last_anchor_ref(deck)
+    paths = set()
+    try:
+        cmds = [["status", "--porcelain"]]
+        if anchor:
+            cmds.append(["diff", "--name-only", f"{anchor}..HEAD"])
+        for cmd in cmds:
+            out = subprocess.run(["git", "-C", str(deck), *cmd],
+                                 capture_output=True, text=True, check=True).stdout
+            for line in out.splitlines():
+                p = line[3:].strip() if cmd[0] == "status" else line.strip()
+                if p:
+                    paths.add(p)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+    return sorted(paths)
+
+
 def _index_targets(deck):
     """Yield (label, index_path, new_block) for every regenerable INDEX."""
     deck = Path(deck)
@@ -581,6 +615,11 @@ def main(argv=None):
                     help="print incidents whose signature fingerprint matches SYMPTOM (read-only); status<TAB>path")
     ap.add_argument("--sig-error-type", metavar="TYPE", default="",
                     help="error_type to pair with --match-signature (optional)")
+    ap.add_argument(
+        "--changed-since-anchor",
+        action="store_true",
+        help="print paths changed since the last Flightdeck-Sync anchor commit (one per line); read-only",
+    )
     args = ap.parse_args(argv)
 
     if args.verdict:
@@ -600,6 +639,11 @@ def main(argv=None):
     if args.match_signature is not None:
         for h in match_signature(args.deck, args.match_signature, args.sig_error_type):
             print(f"{h['status']}\t{h['path']}")
+        return 0
+
+    if args.changed_since_anchor:
+        for p in changed_since_anchor(args.deck):
+            print(p)
         return 0
 
     mismatch = version_mismatch(args.deck)
