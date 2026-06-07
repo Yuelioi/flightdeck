@@ -4,12 +4,19 @@
 # only — never decision:block, never archive, never touch judgment fields.
 set -uo pipefail
 
+# Opt-in diagnostics (FLIGHTDECK_HOOK_DEBUG=1) — default silent.
+dbg() { [ -n "${FLIGHTDECK_HOOK_DEBUG:-}" ] && printf 'flightdeck-hook[%s]: %s\n' "$(basename "$0")" "$1" >&2 || true; }
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
+dbg "project-dir = ${PROJECT_DIR}"
 
 # Gate: no deck → nothing to sync.
-[ -d "${PROJECT_DIR}/flightdeck" ] || exit 0
+if [ ! -d "${PROJECT_DIR}/flightdeck" ]; then
+  dbg "gate: no deck at ${PROJECT_DIR}/flightdeck — exit"
+  exit 0
+fi
 
 # Locate a *working* python runtime; degrade silently if none. The viability
 # probe (`-c ''`) is load-bearing on Windows: `command -v python3` resolves to
@@ -20,11 +27,13 @@ PY=""
 for c in python3 python py; do
   if command -v "$c" >/dev/null 2>&1 && "$c" -c '' >/dev/null 2>&1; then PY="$c"; break; fi
 done
-[ -n "$PY" ] || exit 0
+if [ -z "$PY" ]; then dbg "no working python — exit"; exit 0; fi
+dbg "python = ${PY}"
 
 index_py="${PLUGIN_ROOT}/scripts/flightdeck_index.py"
-[ -f "$index_py" ] || exit 0
+if [ ! -f "$index_py" ]; then dbg "missing ${index_py} — exit"; exit 0; fi
 
 # Regenerate AUTO regions; swallow all output (passive, idempotent).
+dbg "regen board: ${PROJECT_DIR}/flightdeck"
 "$PY" "$index_py" "${PROJECT_DIR}/flightdeck" >/dev/null 2>&1 || true
 exit 0

@@ -177,3 +177,25 @@ def test_stop_projectdir_via_cursor_var(tmp_path):
     r = _run_host("stop", {"CURSOR_PROJECT_ROOT": str(proj)})
     assert r.returncode == 0
     assert (proj / "flightdeck" / "INDEX.md").exists()
+
+
+def test_hook_debug_stop_emits_diagnostics(tmp_path):
+    # tmp_path has no flightdeck/ -> stop exits at the gate; debug must narrate it.
+    r = _run_host("stop", {"FLIGHTDECK_HOOK_DEBUG": "1", "GEMINI_PROJECT_DIR": str(tmp_path)})
+    assert r.returncode == 0
+    assert "flightdeck-hook" in r.stderr
+    assert "project-dir" in r.stderr or "gate" in r.stderr
+
+
+def test_hook_debug_session_start_emits_diagnostics(tmp_path):
+    r = _run_host("session-start",
+                  {"FLIGHTDECK_HOOK_DEBUG": "1", "GEMINI_PROJECT_DIR": str(tmp_path)})
+    assert r.returncode == 0
+    assert "flightdeck-hook" in r.stderr
+
+
+def test_hook_debug_silent_by_default(tmp_path):
+    r1 = _run_host("stop", {"GEMINI_PROJECT_DIR": str(tmp_path)})
+    r2 = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(tmp_path)})
+    assert r1.returncode == 0 and r1.stderr == ""
+    assert r2.returncode == 0 and r2.stderr == ""

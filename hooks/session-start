@@ -4,6 +4,9 @@
 # Never errors out — degrades to silence (manual preflight still works).
 set -uo pipefail
 
+# Opt-in diagnostics (FLIGHTDECK_HOOK_DEBUG=1) — default silent.
+dbg() { [ -n "${FLIGHTDECK_HOOK_DEBUG:-}" ] && printf 'flightdeck-hook[%s]: %s\n' "$(basename "$0")" "$1" >&2 || true; }
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
@@ -11,6 +14,7 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # then $PWD fallback; the deck gate below never walks up to a parent directory.
 # (Codex has no dedicated env var here — it rides $PWD; verified live in Phase 4.)
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_ROOT:-${GEMINI_PROJECT_DIR:-$PWD}}}"
+dbg "project-dir = ${PROJECT_DIR}"
 
 escape_for_json() {
   local s="$1"
@@ -34,6 +38,7 @@ emit() {
 
 # Gate: no deck here → say nothing.
 if [ ! -d "${PROJECT_DIR}/flightdeck" ]; then
+  dbg "gate: no deck at ${PROJECT_DIR}/flightdeck — emit {}"
   printf '{}\n'
   exit 0
 fi
