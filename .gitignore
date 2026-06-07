@@ -19,3 +19,7 @@ tmp/
 # Build-stamp anchor: per-machine local sync state (scripts/build_stamp.py).
 # Records THIS machine's last cache sync — meaningless/misleading if shared. Never commit.
 .current
+.claude
+
+# Cursor injection projection: hook-generated, never hand-edited (flightdeck 3.0).
+**/.cursor/rules/flightdeck-context.mdc
