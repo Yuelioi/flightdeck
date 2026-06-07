@@ -20,7 +20,7 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
    **Layout verdict (read-only — preflight never writes version).** Get the deck's layout verdict: **fast path** (script runtime reachable — `uv`/`python`) `flightdeck_index.py <deck> --verdict`; **fallback** read `MIGRATION.md` frontmatter (`current` + `layout_need_update` — the YAML, not the prose) and self-check the structural signals, yielding the same verdict. If the verdict is **not `current`** (`compatible-behind` / `structural-behind` / `malformed`), emit the passive note in step 4 pointing at walkaround. preflight **never bumps `version` and never migrates** — every version write (bump or migration) is walkaround's (it reads the same verdict).
 
-2. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), and the `## 下一步` action. These are the reconcile baseline; read each once and treat as cached. `preflight` **reads** `## 进行中` / `## 下一步` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
+2. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), the `## 下一步` action, and the `## 关键上下文` recovery slot (the load-bearing literals from last session, if any). These are the reconcile baseline; read each once and treat as cached. `preflight` **reads** `## 进行中` / `## 下一步` / `## 关键上下文` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
 
 3. **Catalog warm-up (priming, NOT audit).** Read the folder INDEX files so the session knows what routed knowledge exists — do NOT glob individual files or read per-file frontmatter, and do NOT audit them:
    - Read `flightdeck/checklists/INDEX.md` and `flightdeck/incidents/INDEX.md`. List each entry as **File + when_to_read (two columns only)** — drop `applies_to` / `status` (those live in the INDEX file; read on demand when a trigger matches). Append the footnote `(状态/合法性审计见 /flightdeck:walkaround)`.
@@ -81,6 +81,7 @@ Routing catalog (know-what-exists — read on demand; status audit → /flightde
 (状态/合法性审计见 /flightdeck:walkaround)
 
 下一步 (item #1): <item description>
+关键上下文: <load-bearing literals from last session, if any — omit the line when - (none)>
 
 Preflight complete (read-only). → Say "go" to execute item #1.
 ```

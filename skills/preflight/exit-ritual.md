@@ -264,6 +264,7 @@ Last updated:     ONLY in these cases (otherwise leave alone):
 Active focus:     update if main thread shifted (otherwise leave) — coarse session main thread
 ## 进行中:        AUTO — regen from every status:active spec/plan (do NOT hand-write)
 ## 下一步:        auto-written — the next concrete single action (start an idea / advance an active)
+## 关键上下文:    agent-judged — load-bearing literals a next session needs to resume (or - (none))
 Hanging tasks:    hand-maintained list — add new blocking items, clear resolved ones
 ```
 
@@ -272,6 +273,8 @@ Hanging tasks:    hand-maintained list — add new blocking items, clear resolve
 **`## 下一步` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
 
 **`Active focus` vs `## 下一步` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## 下一步` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
+
+**`## 关键上下文` is the recovery slot.** At a checkpoint / soft-land / landing, refresh it with the **load-bearing literals a next session needs to resume**: the file under edit, a failing test name, an error string, a key value. Literals, not prose; nothing to carry → `- (none)`. Same agent-maintained model as `## 下一步` (not AUTO). It is cockpit's *transient resume hint* — distinct from a durable knowledge artifact's body (see § 写工件 body 的质量 above): both stress load-bearing literals, but one is the dashboard, the other is the record.
 
 **`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. **When it does bump, keep the parenthetical a terse one-line phrase** (what shifted + the next pointer) — **not a multi-sentence changelog of everything done this session.** A blow-by-blow narrative here is the same "session-log" smell in a different field: it bloats cockpit, costs tokens every landing, and duplicates what the spec/plan body and the commit message already hold. Aim ≤ ~200 chars; detail goes to the artifact, not the dashboard.
 

@@ -21,6 +21,13 @@
 - **并入说明**：原「resync / live 复验」+ auto-land 两个 rollout + soft-landing 的落地，均已**并入本 rollout**（相位4 = 各家 live 实证）；auto-land spec + 两 rollout 将在相位3 标 superseded，soft-landing spec 的 what 保留。
 - **本轮新并入（外部记忆系统借鉴，用户拍板）**：① Cursor 注入改 `.cursor/rules/*.mdc` 规则文件为**主路径**（稳定加载>优雅加载，Task 1.7）；② cockpit `## 关键上下文` 槽（#2，Task 2.7）；③ 失败/弯路捕获入 incidents（#4，Task 2.8）。**单独 backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试）。
 
+## 关键上下文
+
+- 执行中：`plans/2026-06-07-hook-primary-refactor-rollout` Phase 2 文案（`## Progress` `current:` 指针在 plan body）；Phase 1 机制全 commit、`scripts/tests/` 163+ passed（`uv run pytest scripts/tests/`）。
+- hook 文件：`hooks/{session-start,stop,_context.sh}` + `hooks/hooks-{codex,gemini,cursor}.json`；Cursor 主路径=写 `.cursor/rules/flightdeck-context.mdc`。
+- 未跟踪待你单独提交：`specs/2026-06-07-hook-primary-refactor` + 其 rollout plan、`.gitignore`（cursor 忽略行 + `.claude`）、删的 debrief。
+- Phase 4 live 实证（resync 后新会话）未做——非-Claude hook 文案现标"待 Phase 0 实证"。
+
 ## Hanging tasks
 
 - (none)
