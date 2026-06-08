@@ -83,6 +83,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `status` | all workflow + knowledge | **required** | preflight/landing/status/walkaround | status/landing/user | Audit 1 |
 | `summary` | workflow (specs/plans) | recommended | INDEX generation | status/landing/author | INFO if missing |
 | `note` | workflow | optional | cockpit `## 进行中` row + walkaround render | author/status | rendered as `[note: …]`, not validated |
+| `verify` | workflow (`done`) + knowledge (`stale`) | optional | preflight/landing/walkaround verify-debt scan + `flightdeck_index.py --verify-pending` | author/status/landing | present = owes verification, value = one-line how-to (see [verify field](#verify--the-verification-marker)) |
 | `last_updated` | knowledge + workflow | knowledge **required**; workflow recommended | preflight (staleness) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
 | `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
 | `supersedes` | workflow + knowledge | optional | grep (traceability only — NOT an archival-pinning edge) | author/status | dangling-edge INFO (optional) |
@@ -106,6 +107,16 @@ This table is the **single source of truth** for every frontmatter / config fiel
 **`superseded_by` is retired (3.0).** The old forward-redirect field (`superseded_by` required when `status: superseded`) was predicated on knowledge files staying in place indefinitely. Since `obsolete` is now a drain state (rituals move it to `archive/` — see [Status ⟂ location](#status--location-two-orthogonal-axes)), the dead file is no longer on disk long enough to need a redirect. `superseded_by` must not be written on new files; `walkaround` flags any live instance.
 
 **`last_updated` — required (knowledge) vs recommended + auto-bump (workflow).** Knowledge is found by grep-routing where stale advice is dangerous → required. Workflow is found via INDEX/cockpit → staleness matters less; recommended, and auto-bumped by `status`/`landing` to prevent rot.
+
+### `verify` — the verification marker
+
+**`verify` is a status附加标记, NOT a status and NOT a state machine.** It is read **together with** `status` (sibling to `note:` / `resolved_by:` / `when_to_update:`), never on its own. Presence/value/absence carry the whole contract:
+
+- **present** = the artifact **owes verification** (substantively written/done, but not yet confirmed against reality);
+- **value** = a one-line **how-to-verify** note (e.g. `verify: 相位4 各家 live 实证`) — so the debt's *content* survives any cockpit edit/regen and the deterministic scan can re-surface it;
+- **absent** = verified, or no verification needed.
+
+Binary present/absent only — there is **no `verify: failed` value** (a failed verification revives the artifact and **keeps** `verify`; see [验证非阻塞](#验证非阻塞-non-blocking-verification)). Optional; applies to a knowledge `stale` artifact (written-but-unverified) and a workflow `done` artifact (substantively-done-but-unverified). **It is not a 4th workflow status** — the status value sets are unchanged (workflow `idea/active/done`, knowledge `active/stale/obsolete`); `verify` only modifies how a given status reads. Every preflight/landing/walkaround re-surfaces the debt via a deterministic scan of the `verify` field across the active tree + `archive/` (`flightdeck_index.py --verify-pending`).
 
 ## Status ⟂ location (two orthogonal axes)
 
@@ -136,6 +147,8 @@ idea → active → done   (rejected = delete the file)
 knowledge: active → stale (auto, ritual) → active (user-reviewed) | obsolete (user-confirmed dead)
           active → obsolete (user-confirmed dead, no stale step required)
 ```
+
+`stale` = **待复核：疑似过期 _或_ 新产出未验证** — two sources distinguished by the [`verify` field](#verify--the-verification-marker): **has `verify`** = written-but-unverified; **no `verify`** = `when_to_update`-matched suspected-outdated. The status token is unchanged; only the meaning broadens.
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
 - `active` = being worked on; **auto-appears in cockpit `## 进行中`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
@@ -171,7 +184,8 @@ Iron rules:
 - **Forward-only, idempotent** — if target ≤ current, no-op.
 - `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
 - **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (the AI never abandons work unilaterally). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value, no tombstone, no `### 已否决` group.
-- `done`'s trigger source = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check.
+- `done`'s trigger source (no-verify task) = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check. **Unchanged.**
+- **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [验证非阻塞](#验证非阻塞-non-blocking-verification).
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
 Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: exit-ritual (landing/soft-landing) and preflight each compare recent changes against `when_to_update` fields and auto-flip `status: stale` when a match is detected (idempotent — already-stale is a no-op). The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the `→done` rule for workflow. Set `obsolete` by hand; rituals drain it to `archive/`.
@@ -190,6 +204,19 @@ Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active /
 The optional `note:` field carries the "why it hasn't moved" diagnostic (blocker / pending reason) that the merged `active` state would otherwise lose; cockpit + walkaround render it as `[note: …]`.
 
 Status is just a label — the user edits it freely; at landing the AI may *suggest* the next typical status (per the recommended flow), applied only after the user confirms. walkaround flags odd values as INFO/warning, never blocks.
+
+### 验证非阻塞 (non-blocking verification)
+
+Verification is a **non-blocking marker, not a blocking gate**. The old "needs-verify → AI may NOT self-assert `done`" gate is **removed**: the AI **may** self-assert `done` (workflow) or write `stale` (knowledge) carrying a [`verify`](#verify--the-verification-marker) note. Safety comes from **visibility** — every preflight re-surfaces the verify debt via a deterministic scan — **plus reversibility**, NOT from blocking. Premise: preflight is the standard, 必经 entry — flightdeck's existing "single explicit entry point" design.
+
+**Per-kind pass/fail** — the SKILL must first 识别 the artifact's kind (knowledge vs workflow), then act:
+
+| | verification **passes** | verification **fails** |
+| --- | --- | --- |
+| **knowledge** (`stale`) | drop `verify`; flip `stale → active` | revive to `active` (`mv` back from `archive/` if archived); **keep `verify`** |
+| **workflow** (`done`) | drop `verify`; stays `done` → becomes `--archivable` | revive to `active` (`mv` back from `archive/` if archived); **keep `verify`** |
+
+Fail keeps `verify` (re-do + re-verify) — binary present/absent only, no `verify: failed` value. Multiple verify-debt items are handled **one at a time, independently**.
 
 > **Legacy (pre-3.0, read for compat through 3.x):** the old 6-value workflow set (`pending / awaiting-review / blocked`, plus sketch `active`) remaps `pending → idea`, `awaiting-review → active`, `blocked → active` (+ a `note:` / cockpit line). `preflight` offers this migration; never silent.
 
@@ -245,6 +272,8 @@ Knowledge files (incidents / checklists / docs / references) **MUST** carry fron
 ### Stale detection (`when_to_update`, dual-ritual)
 
 Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong"). When a change hits a doc's trigger, the ritual auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode).
+
+`stale` covers **two待复核 sources** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠待复核` vs `⚠未验证`).
 
 **Detection runs at both rituals (landing=primary, preflight=compensating):**
 - **Exit-ritual (landing/soft-landing)** — primary: at turn end, compare this turn's changes against each doc's `when_to_update`; auto-flip stale on a match.
