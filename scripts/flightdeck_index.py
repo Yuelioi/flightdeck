@@ -545,7 +545,7 @@ def changed_since_anchor(deck):
 
 def verify_pending(deck):
     """(path, verify-note) for every artifact carrying a `verify` field,
-    across the active tree AND archive/ — the待验证 source of truth.
+    across the active tree AND archive/ — the 待验证 source of truth.
     Path is deck-relative, POSIX-slashed; sorted by path."""
     deck = Path(deck)
     out = []
@@ -558,7 +558,7 @@ def verify_pending(deck):
             continue
         if v:
             out.append((str(p.relative_to(deck)).replace("\\", "/"), v))
-    return sorted(set(out))
+    return sorted(out)
 
 
 def _index_targets(deck):

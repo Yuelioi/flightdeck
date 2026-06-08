@@ -1070,6 +1070,12 @@ class VerifyPendingTest(unittest.TestCase):
                 "---\nstatus: active\nwhen_to_read: y\napplies_to: [b]\nlast_updated: 2026-06-08\n---\n# clean\n",
                 encoding="utf-8",
             )
+            # Defence-in-depth: an INDEX.md carrying a verify: field must be
+            # excluded by the `if p.name == "INDEX.md": continue` guard.
+            (deck / "checklists" / "INDEX.md").write_text(
+                "---\nverify: 这是 INDEX 不应出现在结果里\n---\n# checklists INDEX\n",
+                encoding="utf-8",
+            )
             rows = flightdeck_index.verify_pending(str(deck))
             self.assertEqual(
                 rows,
@@ -1078,6 +1084,9 @@ class VerifyPendingTest(unittest.TestCase):
                     ("checklists/foo.md", "跑一遍 foo 流程"),
                 ],
             )
+            # The INDEX.md must not appear in the result at all.
+            paths = [r[0] for r in rows]
+            self.assertNotIn("checklists/INDEX.md", paths)
 
 
 if __name__ == "__main__":
