@@ -22,13 +22,14 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
 2. **Read `flightdeck/INDEX.md`** (root INDEX) once, in full — the global status summary (counts per folder). Then **read `flightdeck/cockpit.md`** once, in full — focus on `Last updated`, `Active focus`, the `## 进行中` AUTO region (the active set), the `## 下一步` action, and the `## 关键上下文` recovery slot (the load-bearing literals from last session, if any). These are the reconcile baseline; read each once and treat as cached. `preflight` **reads** `## 进行中` / `## 下一步` / `## 关键上下文` but never rewrites them — a stale `## 下一步` is corrected at the next landing / status write point, not here.
 
-3. **Catalog warm-up (priming, NOT audit).** Read the folder INDEX files so the session knows what routed knowledge exists — do NOT glob individual files or read per-file frontmatter, and do NOT audit them:
-   - Read `flightdeck/checklists/INDEX.md` and `flightdeck/incidents/INDEX.md`. List each entry as **File + when_to_read (two columns only)** — drop `applies_to` / `status` (those live in the INDEX file; read on demand when a trigger matches). Append the footnote `(状态/合法性审计见 /flightdeck:walkaround)`.
-   - Read `flightdeck/docs/INDEX.md` **(top-level only)**. `docs/` may nest into area sub-folders; preflight reads only the **top-level INDEX** (each row = one area or doc entry with a one-line purpose + `last_updated`). Do NOT drill into area sub-folders or individual doc bodies — load those on demand when the task calls for it.
+3. **Catalog warm-up (priming, NOT audit). READ ≠ DISPLAY.** Read the folder INDEX files so the session knows what routed knowledge exists — do NOT glob individual files or read per-file frontmatter, and do NOT audit them. **The READ is unchanged (priming is preserved — the AI must still know what exists, with each entry's `when_to_read` already in context for routing); only the user-visible OUTPUT is slimmed to COUNTS.** `when_to_read` is loaded on demand when a task triggers — but it is already in context for routing, so trimming the echo loses no discoverability.
+   - Read `flightdeck/checklists/INDEX.md` and `flightdeck/incidents/INDEX.md` **fully into context** (entries with `when_to_read` — routing intact). **Display only counts** (see Output format); do NOT echo per-entry `when_to_read` / `applies_to` / `status` tables.
+   - Read `flightdeck/docs/INDEX.md` **(top-level only) into context**. `docs/` may nest into area sub-folders; preflight reads only the **top-level INDEX** (each row = one area or doc entry with a one-line purpose + `last_updated`) — loaded for routing, displayed as a count. Do NOT drill into area sub-folders or individual doc bodies — load those on demand when the task calls for it.
    - **Do NOT** check status legality or INDEX↔folder consistency — that is `walkaround` (Audits 1/5). preflight only surfaces *what exists*.
    - `references/` is deliberately out of the catalog (imported external material is browsed on purpose, not surfaced every preflight).
    - `obsolete` knowledge (e.g. a root-fixed, retired incident) is **already absent from the catalog** — the INDEX `<!-- AUTO -->` region excludes it, so preflight reads no obsolete rows (it stays on disk + grep-able for regression detection, just out of active routing). No special handling needed here.
    - Do NOT drill into individual checklist/incident/doc files until a trigger matches at execution time (read folder INDEX only).
+   - **待验证 report (derived from a deterministic scan, source = files not cockpit).** Run `flightdeck_index.py <deck> --verify-pending` (prints `path<TAB>note` for every artifact carrying `verify`, across the active tree + `archive/`). Render each scan row as `⚠未验证: <file> — <怎么验>` (the `<note>` is the row's how-to-verify value). Because the list is re-derived fresh from the `verify` fields on disk each preflight, a hand-edited or trimmed cockpit **cannot lose the debt**. This is the non-blocking verification marker — canonical contract: [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification) + [exit-ritual § Step 3c](exit-ritual.md#decision-tree) (待验证 surfacing); do not restate it here. (No Python runtime → fall back to grepping `verify:` across the deck + `archive/` by hand.)
 
 4. **Passive git/version note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
 
@@ -85,24 +86,11 @@ Don't auto-start anything. The data source is the **folder INDEX rows** (which c
 Root INDEX: specs/ — 2 (1 active, 1 done) | plans/ — 1 active | incidents/ — 1 active | checklists/ — 2 active
 Cockpit (Last updated: 2026-05-25; Active focus: <X>)
 
-Routing catalog (know-what-exists — read on demand; status audit → /flightdeck:walkaround):
+Routing catalog (loaded into context — read on demand; status audit → /flightdeck:walkaround):
+docs 3 · checklist 2 · incident 1
 
-[Checklists]
-| File | when_to_read |
-|---|---|
-| checklists/comments.md | before writing or editing any source-code comment |
-
-[Incidents]
-| File | when_to_read |
-|---|---|
-| incidents/parser-recursion.md | before designing a recursive parser |
-
-[Docs]
-| Area / File | 用途 | last_updated |
-|---|---|---|
-| docs/api-design/ | REST API 设计规范与决策记录 | 2026-05-20 |
-
-(状态/合法性审计见 /flightdeck:walkaround)
+待验证:
+⚠未验证: specs/2026-05-20-cross-host-hooks.md — 相位4 各家 live 实证
 
 下一步 (item #1): <item description>
 关键上下文: <load-bearing literals from last session, if any — omit the line when - (none)>
@@ -110,7 +98,7 @@ Routing catalog (know-what-exists — read on demand; status audit → /flightde
 Preflight complete (read-only). → Say "go" to execute item #1.
 ```
 
-Omit any table group with no entries. If all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. Append any triggered git/version note from step 4 on its own line. Place any step 4a findings (stale flips, graduate reminders, obsolete reminders) **before** the routing catalog. The Land-readiness line is always last.
+The catalog line shows **counts only** (`docs N · checklist N · incident N`) — the folder INDEX files are still read in full into context (routing/priming unchanged); only the echo is trimmed (READ ≠ DISPLAY), so `when_to_read` / `applies_to` are in context for routing but not printed. A zero-count kind is omitted from the line; if all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. The **待验证** block lists every `--verify-pending` scan row as `⚠未验证: <file> — <怎么验>`; omit the block entirely when the scan is empty (the list is re-derived each preflight from the `verify` fields on disk, so it is never lost to a cockpit edit). Append any triggered git/version note from step 4 on its own line. Place any step 4a findings (stale flips, graduate reminders, obsolete reminders) **before** the routing catalog. The Land-readiness line is always last.
 
 ## Don't do
 
