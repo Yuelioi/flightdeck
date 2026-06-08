@@ -68,6 +68,14 @@ A create→`idea` write does **not** change the active set → no `## 进行中`
 When the user approves / signs off:
 
 1. **Set `done` automatically** — "review passed" is an asserted fact; do not ask to confirm `done` itself. Regenerate the cockpit `## 进行中` region (the artifact leaves the active set — see Step 5a).
+
+   **Verify branch** — when flipping to `done`, first determine whether the task is **needs-verify** (rule: anything mechanically executed by AI/scripts where a misjudgment is not easily noticed; full rule + examples in [exit-ritual § Self-asserting done](../preflight/exit-ritual.md#self-asserting-done--non-blocking-carry-verify)):
+
+   - **needs-verify** → also write `verify: <一行怎么验>` to the artifact's frontmatter, then print: `[判定: <理由>; 待验证: <怎么验>; done + verify]`
+   - **no-verify** → plain `done` (no `verify` field), print: `[判定: <理由>; 无需验证; done]`
+
+   `verify` is a **status附加标记, not a new status** — the full per-kind semantics (present = owes verification, absent = verified, no `verify: failed` value, non-blocking re-surfacing every preflight) live in [protocol § verify field](../preflight/protocol.md#verify--the-verification-marker) and [exit-ritual § 验证非阻塞](../preflight/protocol.md#验证非阻塞-non-blocking-verification). **The WHEN — when `done` is offered and confirmed — is unchanged.**
+
 2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unarchived). Whether to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it evaluates `--archivable` deterministically — see [exit-ritual § Land Routine](../preflight/exit-ritual.md#land-routine)). Emit the land-readiness nudge (Step 7) so the user / model knows landing is available.
 
 ## Step 7 — land-readiness (signal 1)
