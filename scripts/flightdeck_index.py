@@ -543,6 +543,24 @@ def changed_since_anchor(deck):
     return sorted(paths)
 
 
+def verify_pending(deck):
+    """(path, verify-note) for every artifact carrying a `verify` field,
+    across the active tree AND archive/ — the待验证 source of truth.
+    Path is deck-relative, POSIX-slashed; sorted by path."""
+    deck = Path(deck)
+    out = []
+    for p in deck.rglob("*.md"):
+        if p.name == "INDEX.md":
+            continue
+        try:
+            v = parse_frontmatter(p.read_text(encoding="utf-8")).get("verify")
+        except OSError:
+            continue
+        if v:
+            out.append((str(p.relative_to(deck)).replace("\\", "/"), v))
+    return sorted(set(out))
+
+
 def _index_targets(deck):
     """Yield (label, index_path, new_block) for every regenerable INDEX."""
     deck = Path(deck)
@@ -620,6 +638,11 @@ def main(argv=None):
         action="store_true",
         help="print paths changed since the last Flightdeck-Sync anchor commit (one per line); read-only",
     )
+    ap.add_argument(
+        "--verify-pending",
+        action="store_true",
+        help="print (path<TAB>verify-note) for every artifact carrying a `verify` field, across active+archive; read-only",
+    )
     args = ap.parse_args(argv)
 
     if args.verdict:
@@ -644,6 +667,11 @@ def main(argv=None):
     if args.changed_since_anchor:
         for p in changed_since_anchor(args.deck):
             print(p)
+        return 0
+
+    if args.verify_pending:
+        for path, note in verify_pending(args.deck):
+            print(f"{path}\t{note}")
         return 0
 
     mismatch = version_mismatch(args.deck)

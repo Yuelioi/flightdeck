@@ -1052,5 +1052,33 @@ class AnchorTest(unittest.TestCase):
             self.assertNotIn("a", changed)
 
 
+class VerifyPendingTest(unittest.TestCase):
+    def test_verify_pending_scans_active_and_archive(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "flightdeck"
+            (deck / "checklists").mkdir(parents=True)
+            (deck / "archive" / "specs").mkdir(parents=True)
+            (deck / "checklists" / "foo.md").write_text(
+                "---\nstatus: stale\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-08\nverify: 跑一遍 foo 流程\n---\n# foo\n",
+                encoding="utf-8",
+            )
+            (deck / "archive" / "specs" / "bar.md").write_text(
+                "---\nstatus: done\nsummary: bar\nverify: 相位4 各家 live 实证\n---\n# bar\n",
+                encoding="utf-8",
+            )
+            (deck / "checklists" / "clean.md").write_text(
+                "---\nstatus: active\nwhen_to_read: y\napplies_to: [b]\nlast_updated: 2026-06-08\n---\n# clean\n",
+                encoding="utf-8",
+            )
+            rows = flightdeck_index.verify_pending(str(deck))
+            self.assertEqual(
+                rows,
+                [
+                    ("archive/specs/bar.md", "相位4 各家 live 实证"),
+                    ("checklists/foo.md", "跑一遍 foo 流程"),
+                ],
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
