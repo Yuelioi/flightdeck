@@ -62,6 +62,7 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 # optional: graduate: true
 #   — 结构性设计稿完工后本体变身常驻 docs；命中"约束后续开发/大概率反复参考"判据时
 #     由 /flightdeck:new 或 plan 执行中提示打标；landing 负责将 done 的 graduate 本体改写搬入 docs/
+# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
 ---
 ```
 
@@ -80,6 +81,7 @@ note: <one-line diagnostic>  # optional; "why it hasn't moved". Rendered in cock
 implements: specs/<x>.md     # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"
 supersedes: <path>           # optional; forward edge to the artifact this replaces
 related: [<path>, ...]       # optional; weak cross-links
+# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
 ---
 ```
 
@@ -102,7 +104,7 @@ current: Task 3 — wire the checkpoint subpath into landing SKILL.md
 ```markdown
 ---
 status: active            # active / stale / obsolete
-                          # stale=疑似过期·待复核；obsolete=已死·待归档排水态
+                          # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
 applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
@@ -113,6 +115,7 @@ last_updated: YYYY-MM-DD
 # optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
 # incidents only: recurrences: 1   # auto-bumped at landing on a clear recurrence; renders to INDEX as `recur: N` when > 1
 # incidents only: resolved_by:     # empty = not yet root-fixed; fill commit SHA / test id = retirement basis (then flip status: obsolete)
+# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
 ---
 ```
 
@@ -123,7 +126,7 @@ last_updated: YYYY-MM-DD
 ```markdown
 ---
 status: active            # active / stale / obsolete
-                          # stale=疑似过期·待复核；obsolete=已死·待归档排水态
+                          # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
 applies_to: [<tag>, ...]
 last_updated: YYYY-MM-DD
@@ -132,6 +135,7 @@ summary: <one-line gist>  # optional but recommended; drives INDEX row
 #   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
 #   GOOD: 改了 plugin 加载协议 / 动了 hooks/stop.sh
 #   BAD:  有任何改动时
+# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
 ---
 ```
 
