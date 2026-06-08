@@ -1108,5 +1108,30 @@ class VerifyPendingTest(unittest.TestCase):
             self.assertNotIn("checklists/INDEX.md", paths)
 
 
+class VerifyPendingUtf8CliTest(unittest.TestCase):
+    """Regression: --verify-pending CJK notes must survive subprocess stdout as UTF-8.
+
+    On Windows, sys.stdout defaults to the locale codepage (e.g. gbk).
+    The fix (sys.stdout.reconfigure(encoding='utf-8') at the start of main)
+    must ensure the subprocess consumer can decode as UTF-8 and see the CJK intact.
+    """
+
+    def test_verify_pending_cli_emits_utf8_cjk(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "flightdeck"
+            (deck / "specs").mkdir(parents=True)
+            (deck / "specs" / "x.md").write_text(
+                "---\nstatus: done\nsummary: s\nverify: 相位4 各家 live 实证（resync 后新会话）\n---\n# x\n",
+                encoding="utf-8",
+            )
+            script = Path(__file__).resolve().parents[1] / "flightdeck_index.py"
+            result = subprocess.run(
+                [sys.executable, str(script), str(deck), "--verify-pending"],
+                capture_output=True,
+            )
+            out = result.stdout.decode("utf-8")
+            self.assertIn("相位4 各家 live 实证（resync 后新会话）", out)
+
+
 if __name__ == "__main__":
     unittest.main()

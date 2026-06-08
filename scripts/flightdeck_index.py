@@ -605,6 +605,12 @@ def index_drift(deck):
 
 
 def main(argv=None):
+    # Force UTF-8 stdout on Windows (locale codepage, e.g. gbk, would mojibake
+    # CJK verify notes when stdout is piped/captured).  reconfigure() is
+    # available on Python 3.7+ TextIOWrapper; guard for safety.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     ap = argparse.ArgumentParser(
         description="Regenerate flightdeck INDEX AUTO blocks from artifact frontmatter."
     )
