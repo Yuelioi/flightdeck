@@ -944,6 +944,25 @@ class ObsoleteRoutingExcludeTest(unittest.TestCase):
             self.assertNotIn("dead.md", block)   # obsolete 不进路由
 
 
+class FormatRowVerifyMarkerTest(unittest.TestCase):
+    def test_format_row_verify_vs_stale_markers(self):
+        # 知识件：stale + verify → ⚠未验证
+        r1 = flightdeck_index.format_row("checklists", "a.md",
+            {"status": "stale", "when_to_read": "x", "applies_to": "[a]", "verify": "跑一遍"})
+        self.assertTrue(r1.startswith("⚠未验证 "))
+        # 知识件：stale 单独（过期）→ ⚠待复核
+        r2 = flightdeck_index.format_row("checklists", "b.md",
+            {"status": "stale", "when_to_read": "x", "applies_to": "[a]"})
+        self.assertTrue(r2.startswith("⚠待复核 "))
+        # 工作流件：done + verify → ⚠未验证
+        r3 = flightdeck_index.format_row("specs", "c.md",
+            {"status": "done", "summary": "s", "verify": "相位4 实证"})
+        self.assertTrue(r3.startswith("⚠未验证 "))
+        # 工作流件：done 干净 → 无标记
+        r4 = flightdeck_index.format_row("specs", "d.md", {"status": "done", "summary": "s"})
+        self.assertFalse(r4.startswith("⚠"))
+
+
 class StaleIndexRenderTest(unittest.TestCase):
     def test_index_marks_stale_and_excludes_obsolete(self):
         with tempfile.TemporaryDirectory() as d:

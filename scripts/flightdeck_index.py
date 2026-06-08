@@ -117,7 +117,10 @@ def format_row(kind, filename, fm):
     link = f"- [{filename}]({filename})"
     status = fm.get("status", "?")
     if kind in SUMMARY_KINDS:
-        return f"{link} {DASH} {status} {DASH} {fm.get('summary', '⚠ summary 缺失')}"
+        row = f"{link} {DASH} {status} {DASH} {fm.get('summary', '⚠ summary 缺失')}"
+        if fm.get("verify"):
+            row = "⚠未验证 " + row
+        return row
     if kind in KNOWLEDGE_KINDS:
         row = (
             f"{link} {DASH} {status} {DASH} "
@@ -133,8 +136,10 @@ def format_row(kind, filename, fm):
                 n = 1
             if n > 1:
                 row += f" {DASH} recur: {n}"
-        if status == "stale":
-            row = "⚠ " + row
+        if fm.get("verify"):
+            row = "⚠未验证 " + row
+        elif status == "stale":
+            row = "⚠待复核 " + row
         return row
     raise ValueError(f"unknown folder kind: {kind}")
 
