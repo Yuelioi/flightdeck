@@ -75,7 +75,7 @@ Step 3b: Graduate finish (landing = primary path).
          Idempotency key = source file still in `specs/`. Once moved, the key is gone;
          re-runs are safe no-ops. Preflight is the compensating path if landing didn't run.
 
-Step 3c: Stale detection (landing/soft-landing = primary detector).
+Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = primary detector).
          Run: `flightdeck_index.py <deck> --changed-since-anchor`
          (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
          worktree uncommitted changes).
@@ -89,6 +89,20 @@ Step 3c: Stale detection (landing/soft-landing = primary detector).
          Fallback (no Python runtime or no anchor yet): compare this session's changed
          paths against each doc's `when_to_update` by hand (same semantic match,
          anchored to this session's changes only).
+
+         待验证 (the verify-debt list) rides the SAME surfacing channel, but is
+         NOT hand-written — it is **derived by scanning every `verify`-carrying
+         artifact across the active tree + archive/** (fast path:
+         `flightdeck_index.py <deck> --verify-pending`, which prints `path<TAB>note`
+         for each; semantically a full scan — the implementation may index/cache).
+         The two debts are distinguished by the `verify` field on the same 待复核
+         channel: `⚠未验证: <file> — <怎么验>` (verify present) vs the outdated
+         `⚠待复核: <file>` (stale, no verify). The cockpit line is a **derived
+         display, NOT the source of truth** — editing or regenerating cockpit cannot
+         lose the debt: the next scan rebuilds it from the `verify` fields on disk.
+         An archived `done + verify` item still being scanned-out every preflight is
+         **intentional** (non-blocking + persistently visible until verified), not an
+         archive-semantics bug.
 
 Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
         below. Gist: bump Last updated only on the 4 sanctioned triggers;
@@ -241,14 +255,28 @@ Which do you want? Or skip the write?
 
 This forces a structured decision in seconds. The "skip the write" option is critical — defaulting to write is the failure mode.
 
-## Self-asserting `done` — safety valve (pure-do tasks only)
+## Self-asserting `done` — non-blocking, carry `verify`
 
-soft-landing may flip `done` itself **only** for a pure-do, no-verify task. The boundary is **rule-first, examples-second** (avoid the "list = exhaustive" trap):
+The AI **may** self-assert `done` on **any** task — including needs-verify work — but a needs-verify `done` **must carry a `verify: <一行怎么验>` marker** (the verification debt, not a refusal to mark it done). The old needs-verify *block* (which forbade self-asserting `done` on such work) is **removed**: verification is now a [non-blocking marker, not a gate](protocol.md#验证非阻塞-non-blocking-verification). The boundary is still **rule-first, examples-second** (avoid the "list = exhaustive" trap):
 
-- **Rule:** anything that will be **mechanically executed by AI or scripts, where a misjudgment is not easily noticed**, is **needs-verify** (AI must NOT self-assert `done`).
-- **Examples (non-exhaustive):** any external-system change (open PR, deploy, write DB, send email…); governance / data-model edits (`protocol.md`, `rules.md`, `AGENTS.md`, frontmatter fields, script contracts).
-- When self-asserting `done`, the AI **must print a verdict line**: `[判定: <reason>; 无需验证; 自动 done]` — making the call observable and auditable.
-- Self-asserting `done` is a **state write only** — soft-landing still does **not** archive (archival stays full landing's). Misjudgment is cheap: `done` is one frontmatter field the user can flip back, and no commit/move was produced.
+- **Rule:** anything that will be **mechanically executed by AI or scripts, where a misjudgment is not easily noticed**, is **needs-verify** — self-assert `done` **and** stamp `verify:` so the debt survives. Everything else is no-verify (`done`, no `verify`).
+- **Examples (non-exhaustive, needs-verify):** any external-system change (open PR, deploy, write DB, send email…); governance / data-model edits (`protocol.md`, `rules.md`, `AGENTS.md`, frontmatter fields, script contracts).
+- **Print a verdict line** so the call is observable and auditable:
+  - needs-verify → `[判定: <理由>; 待验证: <怎么验>; done + verify]`
+  - no-verify → `[判定: <理由>; 无需验证; done]`
+- The `verify:` **value** is the one-line how-to-verify (e.g. `verify: 相位4 各家 live 实证`) — its *content* survives any cockpit edit/regen and the deterministic scan re-surfaces it. Binary present/absent only — **no `verify: failed` value** (see [verify field](protocol.md#verify--the-verification-marker)).
+- **Boundary this does NOT loosen — 外发先问.** Loosening only touches the **self-assert-done marker**. Whether the AI may *execute* an outward action (open PR, deploy, send email) is a **separate, unchanged** concern governed by the commit/push default + 外发先问 — marking a deploy task `done + verify` is not permission to run the deploy.
+- Self-asserting `done` is a **state write only** — soft-landing still does **not** archive (archival stays full landing's). The safety that used to come from *blocking* now comes from **visibility** (the `verify` debt is re-surfaced every preflight via the deterministic scan) **plus reversibility** (`done` + `verify` are frontmatter fields the user can flip / clear; no commit/move was produced).
+
+### Resolving a `verify` debt — per-kind pass/fail
+
+When the user performs the verification, act per the artifact's kind. The canonical pass/fail table lives in [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification) — the operational steps here defer to it. **First identify the kind** (knowledge vs workflow — by folder), then:
+
+- **Verify passes:**
+  - **workflow** (`done` + `verify`): **drop the `verify` field**; it stays `done` and now enters the `--archivable` set (no inbound `active` edge → lands on the next sweep).
+  - **knowledge** (`stale` + `verify`): **drop the `verify` field** **and** flip `stale → active` (the verify-pass exception to "stale→active is user-asserted only" — see [protocol § Status transition authority](protocol.md#status-transition-authority-table-single-source-of-truth)).
+- **Verify fails** (both kinds): **revive to `active`** (`mv` back from `archive/` if it had already landed) and **KEEP the `verify` field** — the work is re-done + re-verified. There is **no `verify: failed` value**; the marker just stays present.
+- **One at a time.** Multiple pending verify items are resolved **independently, one per verification** — never batch-cleared.
 
 ## Hanging tasks — block session exit
 
