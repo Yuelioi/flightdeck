@@ -18,7 +18,7 @@ User-triggered explicit landing ritual. Thin entry-point that runs the [exit-rit
 | | **full** (default) | **soft-landing** | **checkpoint** |
 |---|---|---|---|
 | Trigger | session wrap · `/flightdeck:landing` · end-of-turn `done`-flip | **end-of-turn with a knowledge increment** (signal 3) | plan / plan-task boundary · end-of-turn state-only |
-| Runs | the whole checklist (Steps 0–7) | Steps 2–4 (classify knowledge · regen changed INDEX · cockpit board) + 「已保存」marker | only Step 4's board-sync |
+| Runs | the whole checklist (Steps 0–7) | Steps 2–4 (classify knowledge · regen changed INDEX · cockpit board) + 🛬 已保存 marker | only Step 4's board-sync |
 | Skips | nothing | archive (3a) · promotion gate (3z) · smoke-check (6) · **commit (7)** | everything except Step 4 |
 | Commit / archive | local commit (push asks) + archive | **neither** (durability deferred to full landing) | none |
 
@@ -78,6 +78,7 @@ If `flightdeck/cockpit.md` > 80 lines: propose a trim. `## 进行中` is AUTO-de
 ## Output format
 
 ```
+🛬 已着陆
 Hanging tasks: none / [resolved X / blocking on Y]
 New knowledge classified:
   - specs/ +1: <file>

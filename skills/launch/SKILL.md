@@ -26,7 +26,7 @@ If `flightdeck/cockpit.md` already exists, this project already has a deck → *
 
 ## Final report (one line + optional hints)
 
-> ✈ Deck created at `flightdeck/` (full layout, version `<v>`). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start — or just run `/flightdeck:preflight`.
+> 🛠️ Deck created at `flightdeck/` (full layout, version `<v>`). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start — or just run `/flightdeck:preflight`.
 > Tune autonomy in `flightdeck/rules.md` → `### Autonomy overrides` (a commented catalog is there: auto-landing, auto-commit, no-git, run-scripts…). Defaults are safe — `landing` is manual; nothing archives or commits without you.
 > Optional, anytime: `git init` (if you want history) · `/flightdeck:emit-agents-md` (cross-tool AGENTS.md bridge). Created it by mistake? Delete `flightdeck/`.
 

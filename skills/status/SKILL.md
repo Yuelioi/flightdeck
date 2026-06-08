@@ -71,8 +71,8 @@ When the user approves / signs off:
 
    **Verify branch** — when flipping to `done`, first determine whether the task is **needs-verify** (rule: anything mechanically executed by AI/scripts where a misjudgment is not easily noticed; full rule + examples in [exit-ritual § Self-asserting done](../preflight/exit-ritual.md#self-asserting-done--non-blocking-carry-verify)):
 
-   - **needs-verify** → also write `verify: <一行怎么验>` to the artifact's frontmatter, then print: `[判定: <理由>; 待验证: <怎么验>; done + verify]`
-   - **no-verify** → plain `done` (no `verify` field), print: `[判定: <理由>; 无需验证; done]`
+   - **needs-verify** → also write `verify: <一行怎么验>` to the artifact's frontmatter, then print: `🔄 [判定: <理由>; 待验证: <怎么验>; done + verify]`
+   - **no-verify** → plain `done` (no `verify` field), print: `🔄 [判定: <理由>; 无需验证; done]`
 
    `verify` is a **status附加标记, not a new status** — the full per-kind semantics (present = owes verification, absent = verified, no `verify: failed` value, non-blocking re-surfacing every preflight) live in [protocol § verify field](../preflight/protocol.md#verify--the-verification-marker) and [exit-ritual § 验证非阻塞](../preflight/protocol.md#验证非阻塞-non-blocking-verification). **The WHEN — when `done` is offered and confirmed — is unchanged.**
 

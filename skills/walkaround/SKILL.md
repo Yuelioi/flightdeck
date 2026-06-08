@@ -187,7 +187,7 @@ A `status: done` workflow artifact still sitting in its source folder (`specs/` 
 ## Output format
 
 ```
-=== /flightdeck:walkaround report ===
+=== 🔍 /flightdeck:walkaround report ===
 Audit run: <ISO date>
 Flightdeck root: <path>
 
@@ -207,7 +207,7 @@ Total: N findings (X CRITICAL, Y WARNING, Z INFO)
 If no findings overall:
 
 ```
-=== /flightdeck:walkaround report ===
+=== 🔍 /flightdeck:walkaround report ===
 Audit run: <ISO date>
 Flightdeck root: <path>
 

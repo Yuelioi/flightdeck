@@ -94,6 +94,14 @@ matching change is detected). See `skills/preflight/templates.md` for the format
 good/bad examples. Graduate-out docs **must** carry `when_to_update` (omitting it opts
 the doc out of stale detection immediately, defeating the point).
 
+## Report (one line)
+
+壳建好、正文写入后，给用户一行报告：
+
+> ✍️ 已建 <kind>: <path>
+
+这一行带图标的确认**就是** new 的用户可见报告——不要再单独复述脚本的 `created … at …` 原始 stdout。
+
 ## Relationship to landing
 
 `landing` already knows the knowledge-artifact convention and creates incidents/checklists

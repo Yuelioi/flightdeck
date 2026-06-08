@@ -103,7 +103,7 @@ Any miss is a construction bug — fix the block directly, don't mask it by clai
 Report concisely:
 
 ```
-AGENTS.md regenerated.
+🌉 AGENTS.md regenerated.
   Active focus: <one-line>
   进行中 (active artifacts): <N>
   下一步: <one-line, or none>

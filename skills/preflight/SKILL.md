@@ -66,7 +66,7 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
 
    Include any findings from (i)–(iii) in the preflight output before the routing catalog. If all three checks are clean, omit the section silently.
 
-5. **Report item #1, then STOP.** Read-only recon doesn't fly the mission. State the `## 下一步` item in one sentence and hand off: "Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
+5. **Report item #1, then STOP.** Read-only recon doesn't fly the mission. State the `## 下一步` item in one sentence and hand off: "🛫 Preflight complete (read-only). Say 'go' to execute item #1." Do not load any file body or start the task — that's the next turn.
 
    **Land-readiness as the FINAL output line** (skip under no-git): if `git status` shows **≥ 5** changed files under `flightdeck/`, append "⚠ N unlanded changes since last land — consider `/flightdeck:landing`". Below the threshold, say nothing.
 
@@ -95,7 +95,7 @@ docs 3 · checklist 2 · incident 1
 下一步 (item #1): <item description>
 关键上下文: <load-bearing literals from last session, if any — omit the line when - (none)>
 
-Preflight complete (read-only). → Say "go" to execute item #1.
+🛫 Preflight complete (read-only). → Say "go" to execute item #1.
 ```
 
 The catalog line shows **counts only** (`docs N · checklist N · incident N`) — the folder INDEX files are still read in full into context (routing/priming unchanged); only the echo is trimmed (READ ≠ DISPLAY), so `when_to_read` / `applies_to` are in context for routing but not printed. A zero-count kind is omitted from the line; if all three folder INDEX files are absent or empty, print `Routing catalog: (empty — no routed resources yet)`. The **待验证** block lists every `--verify-pending` scan row as `⚠未验证: <file> — <怎么验>`; omit the block entirely when the scan is empty (the list is re-derived each preflight from the `verify` fields on disk, so it is never lost to a cockpit edit). Append any triggered git/version note from step 4 on its own line. Place any step 4a findings (stale flips, graduate reminders, obsolete reminders) **before** the routing catalog. The Land-readiness line is always last.
