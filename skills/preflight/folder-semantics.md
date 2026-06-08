@@ -200,7 +200,7 @@ Four boundaries that keep it distinct:
 
 Naming: `<topic>.md` (no date prefix — resident reference, same as checklists/incidents).
 
-Frontmatter: the **knowledge** set (`status: active/stale/obsolete` + `when_to_read` + `applies_to` + `last_updated` + `summary` + optional `when_to_update`), so preflight can warm it in the routing catalog. `stale` = 疑似过期·待复核；`obsolete` = 已死·待归档排水态（knowledge 版的 workflow `done`），被仪式排入 `archive/`。
+Frontmatter: the **knowledge** set (`status: active/stale/obsolete` + `when_to_read` + `applies_to` + `last_updated` + `summary` + optional `when_to_update`), so preflight can warm it in the routing catalog. `stale` = 待复核：疑似过期 或 新产出未验证（由 verify 字段区分）；`obsolete` = 已死·待归档排水态（knowledge 版的 workflow `done`），被仪式排入 `archive/`。
 
 ### `references/` — external material
 
