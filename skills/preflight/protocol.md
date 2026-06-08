@@ -435,6 +435,22 @@ When an incident's root cause is permanently fixed (e.g. a guard test now preven
 
 Producing a new deck artifact (spec / plan / incident / checklist / chart) — including from an external authoring skill (brainstorming / writing-plans) — goes through **`/flightdeck:new`** (script: `scripts/flightdeck_new.py`), which stamps the correct per-kind frontmatter + naming and regenerates INDEX/cockpit. The full contract (kind→folder, naming, per-kind frontmatter, default status, slug rule) lives in `skills/new/SKILL.md` — the single authority, so the shape is never re-derived from scattered docs. **Shell-first**: create the shell via `new` first, then write the body into the returned path; do not hand-derive a path or write to `docs/`.
 
+## Brand glyphs (per command)
+
+每个 flightdeck 命令在其**运行时主报告/完成行**带一枚品牌 emoji（仅报告行，不进 deck 文件、不进 scaffolds）。这是**文档级单一真相源**——各 skill 硬编码自己那枚，新增命令照此表配字形。`✈️`（U+2708 + FE0F）保留作项目 wordmark（README 标题），**不**作命令字形。
+
+| 命令 | 图标 | codepoint | 语义 |
+|---|---|---|---|
+| launch | 🛠️ | U+1F6E0 FE0F | 造甲板 / 首次建机 |
+| preflight | 🛫 | U+1F6EB | 起飞前就绪 |
+| walkaround | 🔍 | U+1F50D | 绕机巡检 / 审计 |
+| new | ✍️ | U+270D FE0F | 新建工件 |
+| status | 🔄 | U+1F504 | 状态流转 |
+| landing | 🛬 | U+1F6EC | 着陆归档 |
+| emit-agents-md | 🌉 | U+1F309 | 跨工具桥 |
+
+效力边界：被动文档约定，无程序强制——改某命令字形须人工同步本表（preflight 不自动校验）。
+
 ## Cross-references
 
 The flightdeck convention describes WHAT to write and WHERE; the tool that produces the content is up to you (hand-write, use any AI skill, or ad-hoc LLM).
