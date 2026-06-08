@@ -24,7 +24,11 @@ implements: specs/2026-06-08-nonblocking-verify-preflight-slim.md
 
 ## Progress
 
-current: **Task 1.1 — flightdeck_index.py 加 `--verify-pending` 子命令（TDD）。** 全 Phase 未起。
+current: **Phase 4 — 套用 hook spec+plan + resync 后 live 实证（停地板；4.2 本会话做不了）。** Phase 1–3 全 done、逐任务本地 commit、subagent-driven 两段审 + 最终全量审过：
+- **Phase 1 脚本基座 ✅**（1.1 `--verify-pending`、1.2 `format_row` ⚠未验证/⚠待复核；178 tests 绿、`--check` clean）。
+- **Phase 2 治理契约 ✅**（2.1 protocol：verify 语义/done 拆分/stale 拓宽/非阻塞/per-kind；2.2 templates：verify 字段 + stale 文案）。期间修了 2.1 的内部矛盾（verify-pass 与状态转换表/stale 退出规则）。
+- **Phase 3 仪式 skill ✅**（3.1 exit-ritual 门重写、3.2 landing、3.3 status、3.4 preflight 扫描+瘦身C+docs计数D）。
+- **最终全量审**：修 2 处跨文件矛盾（landing `superseded_by` 钉扣残留 + folder-semantics 窄义 stale）。
 
 > **复选框说明**：步骤 `- [ ]` 仅供执行者本地跟踪，不回勾、不当缺陷修（看板只认 cockpit `## 进行中` + 本 Progress 指针）。
 
