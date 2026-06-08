@@ -177,6 +177,7 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 |---|---|---|---|
 | Recent change matches doc's `when_to_update` | `active→stale` (or no-op if already `stale`) | exit-ritual (landing/soft-landing) **and** preflight | **auto** (both rituals; idempotent) |
 | User confirms doc is now current | `stale→active` | user-asserted only | **never auto** |
+| Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [验证非阻塞](#验证非阻塞-non-blocking-verification)) |
 | User confirms doc is dead / obsolete | `→obsolete` | user-asserted only | **never auto** |
 | Ritual detects `obsolete` knowledge artifact | drain to `archive/` (location change, not a new status) | landing / preflight | **auto** (same drain logic as `done`) |
 
@@ -188,7 +189,7 @@ Iron rules:
 - **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [验证非阻塞](#验证非阻塞-non-blocking-verification).
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
-Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: exit-ritual (landing/soft-landing) and preflight each compare recent changes against `when_to_update` fields and auto-flip `status: stale` when a match is detected (idempotent — already-stale is a no-op). The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the `→done` rule for workflow. Set `obsolete` by hand; rituals drain it to `archive/`.
+Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: exit-ritual (landing/soft-landing) and preflight each compare recent changes against `when_to_update` fields and auto-flip `status: stale` when a match is detected (idempotent — already-stale is a no-op). The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; rituals drain it to `archive/`.
 
 ### The status / landing seam
 
@@ -273,7 +274,7 @@ Knowledge files (incidents / checklists / docs / references) **MUST** carry fron
 
 Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong"). When a change hits a doc's trigger, the ritual auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode).
 
-`stale` covers **two待复核 sources** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠待复核` vs `⚠未验证`).
+`stale` covers **两个待复核来源** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠待复核` vs `⚠未验证`).
 
 **Detection runs at both rituals (landing=primary, preflight=compensating):**
 - **Exit-ritual (landing/soft-landing)** — primary: at turn end, compare this turn's changes against each doc's `when_to_update`; auto-flip stale on a match.
@@ -283,7 +284,7 @@ Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase (
 
 **Idempotency:** `stale` detection is idempotent — already-`stale` docs are a no-op. If landing already flipped it, preflight's re-check just confirms the same result without extra side-effects.
 
-**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the `→done` rule. The AI does not self-certify either direction.
+**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the **no-verify** `→done` rule. The AI does not self-certify either direction — except via the verify-pass path (see [验证非阻塞](#验证非阻塞-non-blocking-verification)), where the SKILL flips `stale→active` on a user-performed verification that passes.
 
 ### Proactive incident resurfacing
 
