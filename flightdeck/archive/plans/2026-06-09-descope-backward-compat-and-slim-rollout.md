@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 把 de-scope spec 逐文件落地：相位1 删向后兼容子系统（flightdeck_index.py 删 verdict/version 6 函数 + --verdict 子命令 + version_mismatch 守卫，TDD 同步删测试；MIGRATION.md 200 行史→极简戳；legacy/pre-3.0 处理）→相位2 命令职责重划（preflight 删 step1/4/4a 收敛纯读零写、landing 剥 version/verdict 留 stale 单仪式、walkaround 删 migration 审查聚焦本版内）→相位3 incidents 吸纳-退役（逐条 triage：可设计防范/仅可警示，吸纳进必经路径后翻 obsolete，过时删）→相位4 热/冷预算扫尾（注入≤25行/preflight SKILL≤45/walkaround≤80 + 冷路径上限 + cockpit 软上限）；每相位测试绿+regen clean+before/after token，行为恢复验收，可逐相位 git revert
 last_updated: 2026-06-09
-implements: specs/2026-06-09-descope-backward-compat-and-slim.md
+implements: docs/descope-baseline.md
 ---
 
 # flightdeck 3.0 大瘦身 Implementation Plan
