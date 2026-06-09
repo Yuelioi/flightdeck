@@ -26,10 +26,10 @@ class InitTest(unittest.TestCase):
             self.assertIn("decide what to build", cockpit)
             self.assertNotIn("<ACTIVE_FOCUS", cockpit)
             self.assertNotIn("<FIRST_NEXT_ITEM", cockpit)
-            # full layout + 2-file contract present
+            # full layout + 2-file contract present (cockpit.md + rules.md; no root INDEX ships)
             for f in FOLDERS:
                 self.assertTrue((deck / f / "INDEX.md").exists(), f"missing {f}/INDEX.md")
-            self.assertTrue((deck / "INDEX.md").exists())
+            self.assertFalse((deck / "INDEX.md").exists(), "root INDEX must not ship (de-scoped)")
             self.assertTrue((deck / "rules.md").exists())
             # references/ exists, charts/ is gone
             self.assertTrue((deck / "references").exists(), "references/ should exist")
