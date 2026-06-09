@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: 用 git mv 重命名/归档一个还要改内容的文件后、用 git add 暂存提交前（尤其 Land Routine 把 done 件 git mv 进 archive/ 再翻 status 时）
 applies_to: [git, git-mv, staging, rename, RM, R100, land-routine, archive, commit, skills/landing]
-last_updated: 2026-06-07
-resolved_by:
+last_updated: 2026-06-09
+resolved_by: flightdeck/checklists/commits.md §「暂存前扫 RM/MM」（本任务写入，2026-06-09）
 ---
 
 # git add 暂存 RM 文件只捕获 R100 重命名、漏工作区内容半边

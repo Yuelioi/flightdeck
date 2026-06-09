@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: before changing flightdeck's git-mode inference, the Land Routine move, or any code that assumes a deck sitting inside a git repo is itself git-tracked
 applies_to: [git, gitignore, no-git, land-routine, git-mv, commit, skills/preflight/protocol.md, skills/preflight/exit-ritual.md, flightdeck_init]
-last_updated: 2026-06-06
-resolved_by:
+last_updated: 2026-06-09
+resolved_by: skills/preflight/protocol.md §Rule resolution order（git 判定加 ignore 检查） + skills/preflight/exit-ritual.md landing Step0（land move 永远普通 mv）
 ---
 
 # 被 gitignore 的 deck：git-mode 判定的接缝

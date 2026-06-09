@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: 改 regen_cockpit_inprogress / format_row 的 INDEX 行渲染，或新增 active 的 spec/plan 却可能漏写 summary 前
 applies_to: [scripts/flightdeck_index.py, regen_cockpit_inprogress, format_row, summary, cockpit]
-last_updated: 2026-06-05
-resolved_by:
+last_updated: 2026-06-09
+resolved_by: scripts/flightdeck_index.py regen_cockpit_inprogress .get() 防御写法 + CockpitProjectionRobustnessTest 守卫测试
 ---
 
 # active workflow 缺 summary 让 cockpit 进行中投影抛 KeyError

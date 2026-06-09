@@ -83,3 +83,7 @@ BREAKING CHANGE: /login 响应去掉 token 字段, 改 accessToken + refreshToke
 - 最稳, 跨 shell 通用: 把信息写进文件, `git commit -F <file>`.
 
 → 错题本 [incidents/powershell-herestring-in-bash-tool.md](../incidents/powershell-herestring-in-bash-tool.md)(已 3 次, 由 promotion gate 升级到此).
+
+### 暂存前扫 `RM`/`MM`（重命名+内容改动）
+
+`git mv` 重命名文件后再编辑内容，`git status --short` 会显示 `RM`（index 已暂存重命名、工作区内容未暂存）；`R100` = 内容改动**未暂存**（只提交了纯重命名）。**提交前扫一遍 `RM`/`MM` 行，对命中的文件再 `git add <file>` 暂存内容**，直到 `git status --short` 干净（或只剩预期的未跟踪文件）再 commit。

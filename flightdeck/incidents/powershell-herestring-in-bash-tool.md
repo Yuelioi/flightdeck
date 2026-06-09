@@ -1,10 +1,10 @@
 ---
-status: active
+status: obsolete
 when_to_read: before passing any multiline string (commit message, heredoc, file content) to a native command through the Bash tool on this dual-shell repo
 applies_to: [commit, git, bash, powershell, here-string, heredoc, multiline]
-last_updated: 2026-06-05
+last_updated: 2026-06-09
 recurrences: 3
-resolved_by:
+resolved_by: flightdeck/checklists/commits.md §项目覆盖「双 shell：多行 commit message 别串 shell」（promotion gate 升级，已写入必经路径）
 ---
 
 # PowerShell here-string (`@'...'@`) used in the Bash tool

@@ -54,7 +54,7 @@ has AGENTS.md but don't auto-regen
 ```markdown
 ---
 status: idea          # idea / active / done (idea = unstarted, no date prefix; flip to active to start)
-summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines (use commas/dashes). Drives the INDEX row.
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row. ⚠ 禁用 ` — `（前后带空格的 em-dash）：INDEX 行用它作字段分隔符，summary 含它会产生列歧义。用「：」「,」或连字符替代。
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a real change (not typos)
 note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pending reason). Rendered in cockpit 进行中 + walkaround as [note: …]
 supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
@@ -75,7 +75,7 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 ```markdown
 ---
 status: active               # idea / active / done
-summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row.
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. ⚠ 禁用 ` — `（前后带空格的 em-dash）：INDEX 行用它作字段分隔符，summary 含它会产生列歧义。用「：」「,」或连字符替代。Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing
 note: <one-line diagnostic>  # optional; "why it hasn't moved". Rendered in cockpit 进行中 + walkaround as [note: …]
 implements: specs/<x>.md     # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"

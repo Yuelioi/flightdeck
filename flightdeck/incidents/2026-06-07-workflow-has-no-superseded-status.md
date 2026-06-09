@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: 想把一个 spec/plan 标记为被取代/收编、或给 workflow 工件设 active/done 以外的状态前
 applies_to: [specs, plans, status, superseded, workflow, lifecycle, flightdeck_lint.py, supersedes, archive]
-last_updated: 2026-06-07
-resolved_by:
+last_updated: 2026-06-09
+resolved_by: skills/preflight/protocol.md §Status ⟂ location（两轴状态值文档化） + scripts/flightdeck_lint.py WORKFLOW_STATUSES 硬拒（enforcement）
 ---
 
 # workflow 工件无 superseded 状态——收编走 done+archive+supersedes 边

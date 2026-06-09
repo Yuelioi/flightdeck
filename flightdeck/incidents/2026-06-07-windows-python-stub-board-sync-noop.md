@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: 改 hook 的 python 运行时探测，或排查 Windows 上 board-sync/Stop hook 为何没生效前
 applies_to: [hooks/stop, hooks/session-start, python, windows, board-sync, command-v, store-stub, run-hook.cmd]
-last_updated: 2026-06-07
-resolved_by: hooks/stop（python 可用性自检 `-c ''`）
+last_updated: 2026-06-09
+resolved_by: hooks/stop 代码修复（python 可用性自检 `-c ''` + `py` 候选 + FLIGHTDECK_HOOK_DEBUG 开关）
 ---
 
 # Windows python3 桩致 board-sync Stop hook 静默失效

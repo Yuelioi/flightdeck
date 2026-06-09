@@ -1,9 +1,9 @@
 ---
-status: active
+status: obsolete
 when_to_read: before changing the INDEX row format or the workflow `summary` field rules
 applies_to: [index, summary, row-format, exit-ritual, status]
-last_updated: 2026-06-05
-resolved_by:
+last_updated: 2026-06-09
+resolved_by: skills/preflight/templates.md summary 字段注释（禁用 ` — ` em-dash 硬规则写入模板，2026-06-09）
 ---
 
 # INDEX row summary can collide with the ` — ` field separator
