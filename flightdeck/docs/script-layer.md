@@ -2,7 +2,7 @@
 status: active
 when_to_read: 改 flightdeck_index.py 或脚本层行为前
 applies_to: [scripts/flightdeck_index.py, scripts/flightdeck_lint.py]
-last_updated: 2026-06-09
+last_updated: 2026-06-10
 summary: 脚本层（flightdeck_index.py / flightdeck_lint.py）的职责——确定性 INDEX 再生、archivable_done/obsolete、knowledge 嵌套 INDEX-of-INDEXes；以及 model/judgment 与 script/facts 的分工
 ---
 
@@ -26,7 +26,7 @@ summary: 脚本层（flightdeck_index.py / flightdeck_lint.py）的职责——�
 
 纯 stdlib（`uv run` 没东西要装）。核心是**从 frontmatter 重生、绝不解析旧行**——所以 summary 里含 ` — `（行分隔符）也不会把再生搞乱。几个职责：
 
-- **确定性 INDEX 再生**：每个工件文件夹的 `<!-- AUTO:<kind> -->` 区按 kind 渲染行（`SUMMARY_KINDS` = specs/plans 出 summary 行；`KNOWLEDGE_KINDS` = checklists/incidents/docs 出 when_to_read + applies_to 行；`references` 是手维护的导入，只汇总条目数）。root INDEX 按 `FOLDER_ORDER` 每文件夹一行——注意 `FOLDER_ORDER` **不含 `archive`**（archive 是 location 不是 kind）。
+- **确定性 INDEX 再生**：每个工件文件夹的 `<!-- AUTO:<kind> -->` 区按 kind 渲染行（`SUMMARY_KINDS` = specs/plans 出 summary 行；`KNOWLEDGE_KINDS` = checklists/incidents/docs 出 when_to_read + applies_to 行；`references` 是手维护的导入，不进自动再生）。`FOLDER_ORDER` 派生 `REGEN_FOLDERS`，决定哪些文件夹被再生及顺序——注意它 **不含 `archive`**（archive 是 location 不是 kind）。无 root INDEX：deck 不带顶层索引（3.0 de-scope），preflight 直接读 cockpit + 各 folder INDEX。
 - **specs/ 特殊分组**：idea 文件无日期前缀，混进 dated 的 active/done 会乱序，所以 AUTO 区**按 status 分组**（`### 待启动（idea）` / `### 进行中·完成（active·done）`）。（3.0 无 scrapped 状态——rejected spec 直接删，不留墓碑分组。）
 - **cockpit `## 进行中` 派生**：从每个 `status: active` 的 spec/plan 派生（specs 后 plans，各按文件名）——cockpit 因此是活跃集的**状态投影**，工件 active 当且仅当它在 cockpit。
 - **knowledge 嵌套 INDEX-of-INDEXes**：`NESTABLE_KINDS`（incidents/checklists/docs/references）有子目录时，顶层 INDEX 退化成每个 area 一行（purpose + last_updated 取自 area/INDEX.md frontmatter），preflight 只读顶层、按需下钻。

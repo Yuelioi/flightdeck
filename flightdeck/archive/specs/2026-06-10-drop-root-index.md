@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 删 root flightdeck/INDEX.md 及其派生链：cockpit 是唯一的板，root INDEX 纯机制件、其唯一可见产物(preflight 计数行)相对 cockpit 进行中+step3 Routing catalog 完全冗余。删脚本 regen_root_index/folder_summary/imported_summary + yield root（保留 FOLDER_ORDER/IMPORTED_KINDS，仍被 REGEN_FOLDERS+lint 用）、相关测试、dogfood+scaffold 两份 INDEX.md、preflight step2/报告首行、walkaround Audit5 根计数、landing/exit-ritual 刷新 root 表述、protocol 文件夹图根 token、templates root 段。folder INDEX 全保留、恢复载荷红线零影响。
 last_updated: 2026-06-10
 graduate: false

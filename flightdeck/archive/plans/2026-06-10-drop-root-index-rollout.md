@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 把 drop-root-index spec 逐文件落地：相位1 脚本+测试（删 regen_root_index/folder_summary/imported_summary + _index_targets 的 yield root；改 2 处 lint 测试、删 index 测试；删 dogfood+scaffold 两份 root INDEX.md；pytest 绿 + --check clean）→相位2 skills 文案（preflight step2 子句+报告首行 / walkaround Audit5 根计数子句 / landing step3 / exit-ritual / protocol 图 token / templates root 段）→相位3 验收扫尾（残留 grep 两类、AGENTS.md regen、新 deck e2e --check）。每相位可独立 git revert。
 last_updated: 2026-06-10
-implements: specs/2026-06-10-drop-root-index.md
+implements: archive/specs/2026-06-10-drop-root-index.md
 ---
 
 # 删除 root INDEX.md —— 落地计划

@@ -3,7 +3,7 @@ status: active
 when_to_read: 改 flightdeck 数据模型 / 文件夹分类 / 状态语义前
 when_to_update: 改了 status 枚举 / 文件夹 kind 分类 / 确定性归档判据时
 applies_to: [skills/preflight/protocol.md, skills/preflight/folder-semantics.md, scripts/flightdeck_index.py]
-last_updated: 2026-06-07
+last_updated: 2026-06-10
 summary: flightdeck 数据模型怎么运作——status⟂location 两条正交轴、文件夹按 kind 分类（自撰/导入 × 一次性/常驻）、命名铁律、确定性归档判据
 ---
 
@@ -42,7 +42,7 @@ summary: flightdeck 数据模型怎么运作——status⟂location 两条正交
 
 三个 knowledge 文件夹的边界要分清：`checklists/` = 你**执行**的过程；`docs/` = 你**读来理解**系统的解释性知识；`references/` = **外部导入**的材料。最常见的错误是把常青参考资料塞进 `specs/`——spec 是「打算实现然后归档的设计」，常青资源属于 knowledge 文件夹。
 
-`archive/` 不在上表里：它**不是一个 kind**，是 location 轴落到磁盘上的样子。它按需镜像源文件夹（`archive/specs/`、`archive/plans/`…），工件搬进去仍保留自己的 kind，只是退出了活跃区。所以脚本的 `FOLDER_ORDER` 里没有 `archive`，root INDEX 也不为它出行。
+`archive/` 不在上表里：它**不是一个 kind**，是 location 轴落到磁盘上的样子。它按需镜像源文件夹（`archive/specs/`、`archive/plans/`…），工件搬进去仍保留自己的 kind，只是退出了活跃区。所以脚本的 `FOLDER_ORDER` 里没有 `archive`（它派生 `REGEN_FOLDERS`，决定哪些文件夹被再生）。
 
 **drain vs accumulate** 是「一次性/常驻」这条轴的深层理由：workflow 一旦 `done` 就排进 `archive/`，活跃集容量有界，扁平 + INDEX 日期排序就够；knowledge 常驻且只增长（永不因完成而归档），所以需要按 area 嵌套来在规模下保持可导航。这也解释了为什么 `specs/`/`plans/` 严禁子文件夹、而 `incidents/`/`checklists/`/`docs/`/`references/` 可按 area 嵌套成 INDEX-of-INDEXes。
 
