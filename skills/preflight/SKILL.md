@@ -29,7 +29,7 @@ The protocol "textbook" (data model, folder semantics, routing, write gate, life
    - Do NOT drill into individual checklist/incident/doc files until a trigger matches at execution time (read folder INDEX only).
    - **待验证 report (derived from a deterministic scan, source = files not cockpit).** Run `flightdeck_index.py <deck> --verify-pending` (prints `path<TAB>note` for every artifact carrying `verify`, across the active tree + `archive/`). Render each scan row as `⚠未验证: <file> — <怎么验>` (the `<note>` is the row's how-to-verify value). Because the list is re-derived fresh from the `verify` fields on disk each preflight, a hand-edited or trimmed cockpit **cannot lose the debt**. This is the non-blocking verification marker — canonical contract: [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification) + [exit-ritual § Step 3c](exit-ritual.md#decision-tree) (待验证 surfacing); do not restate it here. (No Python runtime → fall back to grepping `verify:` across the deck + `archive/` by hand.)
 
-4. **Passive git/version note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
+4. **Passive git note (non-blocking — skip git entirely when no-git).** Gather `git branch --show-current` + `git status --short` in one pass; emit a one-line note only when a row below triggers, never a blocking "Resolve which?" prompt:
 
    | Signal | Trigger? | Note |
    |---|---|---|

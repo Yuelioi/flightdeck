@@ -6,8 +6,7 @@ The mechanical part of `flightdeck/checklists/version-bump.md`:
 - `--check` verifies the 5 agree and match the CHANGELOG top heading.
 
 Judgment stays manual (see the checklist): semver level, CHANGELOG prose, `MIGRATION.md`
-`current` / `layout_need_update` (a separate layout-version axis — deliberately NOT touched
-here), commit, annotated tag, push.
+`current` (deliberately NOT touched here — manual), commit, annotated tag, push.
 
 This operates on flightdeck's OWN repo, not a user deck — it is sibling to flightdeck_index.py
 (which regenerates user-deck INDEXes), not part of the shipped deck mechanical layer.
