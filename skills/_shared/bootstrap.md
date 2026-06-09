@@ -1,31 +1,19 @@
 <EXTREMELY_IMPORTANT>
 This project uses **flightdeck** — a `flightdeck/` deck is present at the project root.
 
-**On entry (handoff, from turn 0):** before doing anything else, take over per the
-`/flightdeck:preflight` protocol — read `flightdeck/cockpit.md` (`Active focus`, `## 进行中`,
-`## 下一步`) and the folder `INDEX.md` files, then report the next step. You are already in
-*handoff* mode; the user does NOT need to type `/flightdeck:preflight` for you to read the
-cockpit and continue the prior thread.
+**On entry (handoff):** before doing anything else, read `flightdeck/cockpit.md`
+(`Active focus`, `## 进行中`, `## 下一步`) and the folder `INDEX.md` files, then report the
+next step. You are already in handoff mode; the user does NOT need to type `/flightdeck:preflight`.
 
-**On exit (end-of-turn, before returning control):** if this turn produced **write-gated
-knowledge** — something that changes future behavior, influences a decision, or will be
-referenced repeatedly (protocol § Write gate; transient byproducts and pure Q&A do NOT count) —
-you MUST **soft-land** before you stop: persist the knowledge + board state and print the
-「已保存」marker. Do not answer-then-stop and leave the increment unpersisted. A **state-only**
-increment (board moved, no new knowledge) → run a silent **checkpoint** instead. **No** increment
-→ say nothing.
+**On exit (end-of-turn):** if this turn produced **write-gated knowledge** — something that
+changes future behavior, influences a decision, or will be referenced repeatedly — you MUST
+**soft-land**: persist the knowledge + board state and print the「已保存」marker. Do not
+answer-then-stop and leave the increment unpersisted. A **state-only** increment (board moved,
+no new knowledge) → run a silent **checkpoint**. **No** increment → say nothing.
 
-This directive is the single source of truth shared across every host (Claude Code, Cursor,
-Gemini, Codex). The mechanical part of board-sync (`## 进行中` + each `INDEX.md` AUTO region) is
-welded by the **turn-end hook on every host that fires it** (Claude/Codex `Stop`, Cursor `stop`,
-Gemini `AfterAgent`) — but the *judgment* parts above (entry handoff, knowledge classification,
-`## 下一步` / `Active focus`) are always yours.
+**Board-sync:** the mechanical part (`## 进行中` + each `INDEX.md` AUTO region) is welded by the
+turn-end hook — the *judgment* parts (entry handoff, knowledge classification, `## 下一步` /
+`Active focus`) are always yours.
 
-**How this directive reaches you (primary → floor):** primary is the entry hook — Claude/Codex/Gemini
-inject it as `SessionStart` `additionalContext`; Cursor writes `.cursor/rules/flightdeck-context.mdc`
-(`alwaysApply`, the stable-loading path). The floor is a `GEMINI.md` / `AGENTS.md` `@`-include, load-bearing
-only when the hook is unavailable — config/script missing, no bash/python present, or live delivery not yet
-confirmed on that host. (Non-Claude hook delivery is **pending Phase 0 live verification**; the `@`-include
-floor and a manual `/flightdeck:preflight` always work meanwhile. The manifest never re-includes this body —
-one host, one injection.)
+Details → `/flightdeck:preflight` skill / protocol.
 </EXTREMELY_IMPORTANT>
