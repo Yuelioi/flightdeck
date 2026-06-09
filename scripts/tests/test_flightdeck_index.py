@@ -12,10 +12,7 @@ from flightdeck_index import (
     parse_frontmatter,
     format_row,
     regen_folder_index,
-    folder_summary,
     replace_auto_block,
-    imported_summary,
-    regen_root_index,
     regen_cockpit_inprogress,
     main,
     STATUS_ORDER,
@@ -210,79 +207,6 @@ class ReplaceAutoBlockTest(unittest.TestCase):
         )
 
 
-class RegenRootIndexTest(unittest.TestCase):
-    def test_assembles_rows_in_folder_order_skipping_missing(self):
-        with tempfile.TemporaryDirectory() as d:
-            deck = Path(d)
-            (deck / "specs").mkdir()
-            (deck / "specs" / "a.md").write_text(
-                "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
-            )
-            (deck / "plans").mkdir()
-            (deck / "plans" / "b.md").write_text(
-                "---\nstatus: active\nsummary: y\n---\n", encoding="utf-8"
-            )
-            # incidents/checklists/charts absent -> skipped
-            expected = (
-                "<!-- AUTO:root -->\n"
-                f"- specs/ {DASH} 1 done\n"
-                f"- plans/ {DASH} 1 active\n"
-                "<!-- /AUTO -->"
-            )
-            self.assertEqual(regen_root_index(deck), expected)
-
-
-class FolderSummaryTest(unittest.TestCase):
-    def test_counts_and_uses_uniform_status(self):
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "specs"
-            folder.mkdir()
-            (folder / "a.md").write_text(
-                "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
-            )
-            (folder / "b.md").write_text(
-                "---\nstatus: done\nsummary: y\n---\n", encoding="utf-8"
-            )
-            (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
-            self.assertEqual(folder_summary(folder), "2 done")
-
-    def test_mixed_status_breaks_down_in_lifecycle_order(self):
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "specs"
-            folder.mkdir()
-            (folder / "a.md").write_text(
-                "---\nstatus: done\nsummary: x\n---\n", encoding="utf-8"
-            )
-            (folder / "b.md").write_text(
-                "---\nstatus: active\nsummary: y\n---\n", encoding="utf-8"
-            )
-            (folder / "c.md").write_text(
-                "---\nstatus: done\nsummary: z\n---\n", encoding="utf-8"
-            )
-            # active before done (lifecycle order), per folder-semantics example
-            self.assertEqual(folder_summary(folder), "3 (1 active, 2 done)")
-
-
-    def test_empty_folder_is_zero(self):
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "specs"
-            folder.mkdir()
-            (folder / "INDEX.md").write_text("ignored", encoding="utf-8")
-            self.assertEqual(folder_summary(folder), "0")
-
-    def test_imported_summary_counts_imported_entries(self):
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "references"
-            folder.mkdir()
-            (folder / "INDEX.md").write_text(
-                "# references\n<!-- AUTO:references -->\n"
-                f"- [a/](a/) {DASH} 1 project imported {DASH} desc\n"
-                "<!-- /AUTO -->\n",
-                encoding="utf-8",
-            )
-            self.assertEqual(imported_summary(folder), "1 project imported")
-
-
 class CockpitInprogressTest(unittest.TestCase):
     def _deck(self, d):
         deck = Path(d)
@@ -354,12 +278,6 @@ class MainCliTest(unittest.TestCase):
                 "<!-- /AUTO -->\n",
                 encoding="utf-8",
             )
-            (deck / "INDEX.md").write_text(
-                "# root\n\n<!-- AUTO:root -->\n"
-                f"- specs/ {DASH} 1 done\n"
-                "<!-- /AUTO -->\n",
-                encoding="utf-8",
-            )
 
             # --check: detects drift (exit 1) and writes nothing
             self.assertEqual(main([str(deck), "--check"]), 1)
@@ -387,9 +305,6 @@ class CockpitWiredIntoMainTest(unittest.TestCase):
             (specs / "INDEX.md").write_text(
                 "# specs\n\n<!-- AUTO:specs -->\nstale\n<!-- /AUTO -->\n", encoding="utf-8"
             )
-            (deck / "INDEX.md").write_text(
-                "# root\n\n<!-- AUTO:root -->\nstale\n<!-- /AUTO -->\n", encoding="utf-8"
-            )
             (deck / "cockpit.md").write_text(
                 "# Cockpit\n\n## 进行中\n\n<!-- AUTO:inprogress -->\nSTALE\n<!-- /AUTO -->\n\n## 下一步\n",
                 encoding="utf-8",
@@ -400,31 +315,6 @@ class CockpitWiredIntoMainTest(unittest.TestCase):
             self.assertNotIn("STALE", cockpit)
             self.assertIn("real work", cockpit)
             self.assertIn("## 下一步", cockpit)  # hand region preserved
-
-
-class RootIndexDocsTest(unittest.TestCase):
-    def _deck(self, root):
-        deck = Path(root)
-        for k in ("specs", "plans", "incidents", "checklists", "docs", "references"):
-            (deck / k).mkdir()
-        (deck / "docs" / "arch.md").write_text(
-            "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
-            encoding="utf-8",
-        )
-        (deck / "references" / "INDEX.md").write_text(
-            "# references\n<!-- AUTO:references -->\n- [rfc.md](rfc.md)\n<!-- /AUTO -->\n", encoding="utf-8"
-        )
-        (deck / "INDEX.md").write_text(
-            "# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8"
-        )
-        return deck
-
-    def test_root_has_docs_status_row_and_references_imported_row(self):
-        with tempfile.TemporaryDirectory() as d:
-            deck = self._deck(d)
-            block = flightdeck_index.regen_root_index(deck)
-            self.assertIn("docs/ — 1 active", block)
-            self.assertIn("references/ — 1 project imported", block)
 
 
 class ArchivableDoneTest(unittest.TestCase):
@@ -567,7 +457,6 @@ class MainMissingAreaIndexTest(unittest.TestCase):
                 encoding="utf-8",
             )
             (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
-            (deck / "INDEX.md").write_text("# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):
                 rc = main([str(deck)])          # 默认 regen，不应崩
@@ -589,7 +478,6 @@ class MainMissingAreaIndexTest(unittest.TestCase):
                 encoding="utf-8",
             )
             (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
-            (deck / "INDEX.md").write_text("# INDEX\n<!-- AUTO:root -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):
                 rc = main([str(deck), "--check"])   # 只读，不应崩
@@ -749,19 +637,6 @@ class MatchSignatureCliTest(unittest.TestCase):
             self.assertEqual(rc, 0)
             self.assertIn("active", buf.getvalue())
             self.assertIn("2026-06-05-a.md", buf.getvalue())
-
-
-class ObsoleteCountExcludeTest(unittest.TestCase):
-    def test_obsolete_excluded_from_knowledge_count(self):
-        from flightdeck_index import folder_summary
-        with tempfile.TemporaryDirectory() as d:
-            folder = Path(d) / "incidents"
-            folder.mkdir()
-            for n, s in [("a.md", "active"), ("b.md", "active"), ("c.md", "obsolete")]:
-                (folder / n).write_text(
-                    f"---\nstatus: {s}\nwhen_to_read: w\napplies_to: [x]\nlast_updated: 2026-06-05\n---\n# t\n",
-                    encoding="utf-8")
-            self.assertEqual(folder_summary(folder), "2 active")   # obsolete 不计
 
 
 class ObsoleteRoutingExcludeTest(unittest.TestCase):

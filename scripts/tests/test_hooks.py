@@ -160,23 +160,30 @@ def _mk_regenerable_deck(tmp_path):
         "# Cockpit\n**Active focus**: t\n\n## 进行中\n\n"
         "<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n\n## 下一步\n- x\n",
     )
+    # A specs/ folder with an artifact but no specs/INDEX.md — the stop hook's
+    # regen must create that folder INDEX, the side-effect we assert below.
+    specs = proj / "flightdeck" / "specs"
+    specs.mkdir()
+    (specs / "2026-06-01-a.md").write_text(
+        "---\nstatus: active\nsummary: regen proof\n---\n", encoding="utf-8"
+    )
     return proj
 
 
 def test_stop_projectdir_via_gemini_var(tmp_path):
     # GEMINI_PROJECT_DIR is the only project signal; $PWD points at REPO. The side
-    # effect (INDEX.md created in the TEMP deck, not REPO) proves resolution used it.
+    # effect (specs/INDEX.md created in the TEMP deck, not REPO) proves resolution used it.
     proj = _mk_regenerable_deck(tmp_path)
     r = _run_host("stop", {"GEMINI_PROJECT_DIR": str(proj)})
     assert r.returncode == 0
-    assert (proj / "flightdeck" / "INDEX.md").exists()
+    assert (proj / "flightdeck" / "specs" / "INDEX.md").exists()
 
 
 def test_stop_projectdir_via_cursor_var(tmp_path):
     proj = _mk_regenerable_deck(tmp_path)
     r = _run_host("stop", {"CURSOR_PROJECT_ROOT": str(proj)})
     assert r.returncode == 0
-    assert (proj / "flightdeck" / "INDEX.md").exists()
+    assert (proj / "flightdeck" / "specs" / "INDEX.md").exists()
 
 
 def test_hook_debug_stop_emits_diagnostics(tmp_path):

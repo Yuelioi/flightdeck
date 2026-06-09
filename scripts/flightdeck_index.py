@@ -172,57 +172,6 @@ def replace_auto_block(text, new_block):
     return text[:start] + new_block + text[end:]
 
 
-def folder_summary(folder):
-    """`<count> <status>` for a deck folder's root-INDEX row.
-
-    Status is the shared `status:` across artifacts, or "mixed" if they differ.
-
-    Knowledge folders exclude `obsolete` (it stays on disk but off the routing
-    INDEX, so the root count must match the visible rows).
-    """
-    folder = Path(folder)
-    names = [p for p in folder.glob("*.md") if p.name != "INDEX.md"]
-    statuses = [
-        parse_frontmatter(p.read_text(encoding="utf-8")).get("status", "")
-        for p in names
-    ]
-    if folder.name in KNOWLEDGE_KINDS:
-        statuses = [s for s in statuses if s != "obsolete"]
-    total = len(statuses)
-    if total == 0:
-        return "0"
-    if len(set(statuses)) == 1:
-        return f"{total} {statuses[0]}"
-    counts = Counter(statuses)
-    ordered = [s for s in STATUS_ORDER if counts.get(s)]
-    ordered += [s for s in counts if s not in STATUS_ORDER]  # unknown statuses last
-    parts = ", ".join(f"{counts[s]} {s}" for s in ordered)
-    return f"{total} ({parts})"
-
-
-def imported_summary(folder):
-    """references/ 是手维护的外部导入，按条目数汇总。"""
-    idx = (Path(folder) / "INDEX.md").read_text(encoding="utf-8")
-    start = idx.index("<!-- AUTO:")
-    end = idx.index(AUTO_END)
-    n = sum(1 for line in idx[start:end].splitlines() if line.startswith("- "))
-    return f"{n} project imported"
-
-
-def regen_root_index(deck):
-    """Regenerate the root `<!-- AUTO:root -->` block (one row per folder)."""
-    deck = Path(deck)
-    rows = []
-    for name in FOLDER_ORDER:
-        folder = deck / name
-        if not folder.is_dir():
-            continue
-        summ = imported_summary(folder) if name in IMPORTED_KINDS else folder_summary(folder)
-        rows.append(f"- {name}/ {DASH} {summ}")
-    body = "\n".join(rows)
-    return f"<!-- AUTO:root -->\n{body}\n{AUTO_END}"
-
-
 def _area_row(area_dir):
     """顶层 INDEX 里一个 area 的行：链接 + 用途 + last_updated（取 area/INDEX.md frontmatter）。"""
     idx = area_dir / "INDEX.md"
@@ -481,7 +430,6 @@ def _index_targets(deck):
                 for area in sorted(d for d in folder.iterdir() if d.is_dir()):
                     if (area / "INDEX.md").is_file() or any(area.glob("*.md")):
                         yield f"{name}/{area.name}", area / "INDEX.md", regen_folder_index(area)
-    yield "root", deck / "INDEX.md", regen_root_index(deck)
     cockpit = deck / "cockpit.md"
     if cockpit.is_file() and "<!-- AUTO:inprogress -->" in cockpit.read_text(encoding="utf-8"):
         yield "cockpit", cockpit, regen_cockpit_inprogress(deck)

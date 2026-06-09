@@ -235,13 +235,9 @@ class AuditIndexConsistencyTest(unittest.TestCase):
             (specs / "INDEX.md").write_text(
                 "# specs\n\n<!-- AUTO:specs -->\nSTALE\n<!-- /AUTO -->\n", encoding="utf-8"
             )
-            (deck / "INDEX.md").write_text(
-                "# root\n\n<!-- AUTO:root -->\nSTALE\n<!-- /AUTO -->\n", encoding="utf-8"
-            )
             warn = _sev(audit_index_consistency(deck), "WARNING")
             labels = " ".join(f["message"] for f in warn)
             self.assertIn("specs", labels)
-            self.assertIn("root", labels)
 
     def test_clean_index_no_finding(self):
         with tempfile.TemporaryDirectory() as d:
@@ -249,10 +245,6 @@ class AuditIndexConsistencyTest(unittest.TestCase):
             import flightdeck_index
             (specs / "INDEX.md").write_text(
                 "# specs\n\n" + flightdeck_index.regen_folder_index(specs) + "\n",
-                encoding="utf-8",
-            )
-            (deck / "INDEX.md").write_text(
-                "# root\n\n" + flightdeck_index.regen_root_index(deck) + "\n",
                 encoding="utf-8",
             )
             self.assertEqual(audit_index_consistency(deck), [])
