@@ -11,7 +11,7 @@ It edits one artifact's frontmatter `status:` (and, on every flip, that artifact
 
 ## Step 1 — read config
 
-**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off (on a not-yet-migrated deck a pre-3.0 `status_auto` list is honored for compat). The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
+**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off. The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
 
 ## Step 2 — identify the target artifact (confidence rule)
 

@@ -204,7 +204,7 @@ Frontmatter: the **knowledge** set (`status: active/stale/obsolete` + `when_to_r
 
 ### `references/` — external material
 
-External docs, competitor source code, RFCs, blog posts, etc. — a single place for "where do I find that thing". (Formerly `charts/`; the semantics — imported external material — are unchanged, only the name is mainstream now.)
+External docs, competitor source code, RFCs, blog posts, etc. — a single place for "where do I find that thing".
 
 Naming: `<source>-<topic>.md` (e.g. `boltframe-shape-layer.md`, `rfc-6749.md`).
 
@@ -224,7 +224,7 @@ Top-level archive for completed or retired work. `archive/` **mirrors any source
 
 - `archive/specs/` — specs archived after the work is done.
 - `archive/plans/` — plans archived after execution.
-- `archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/` — obsolete-but-historical reference moved out of the active set. (A pre-3.0 deck may still carry a historical `landed/` tree or `landed/debriefs/` — left in place, not regenerated.)
+- `archive/incidents/`, `archive/checklists/`, `archive/docs/`, `archive/references/` — obsolete-but-historical reference moved out of the active set.
 
 Archiving vs `status: obsolete`: flip `status: obsolete` to signal "dead, awaiting archive" (still reachable, marked dead — knowledge analog of workflow `done`); the ritual then drains it to `archive/`. **Moving to `archive/`** removes it from the active routing set while preserving history. Archived files lose to current state in [source-of-truth precedence](protocol.md#source-of-truth-precedence-when-sources-disagree). Routing already excludes everything under `archive/`.
 
