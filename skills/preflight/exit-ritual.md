@@ -75,20 +75,25 @@ Step 3b: Graduate finish (landing = primary path).
          Idempotency key = source file still in `specs/`. Once moved, the key is gone;
          re-runs are safe no-ops. Preflight is the compensating path if landing didn't run.
 
-Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = primary detector).
+Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单仪式).
+         stale 翻转只在此退场步骤执行；preflight 入场不再翻 stale。
+         触发机制是**机械路径重叠**：
          Run: `flightdeck_index.py <deck> --changed-since-anchor`
          (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
          worktree uncommitted changes).
-         For each `docs/` + knowledge artifact whose `when_to_update` is semantically
-         matched by any of those changed paths:
+         将返回的变更路径与每个 `docs/` + 知识件 `applies_to` 字段声明的源路径
+         做集合交集——命中即翻 stale。**不读文档全文、不求值 `when_to_update` 作
+         为运行时条件**：`when_to_update` 是给人看的理由；runtime 判断用 `applies_to`
+         路径集。
+         For each knowledge artifact whose `applies_to` paths intersect the changed set:
          - Auto-flip `status: stale` in its frontmatter (no pre-ask — stale is
            reversible, local, purely a warning; "docs quietly lying" is the worst outcome).
          - Idempotent: already-`stale` = no-op.
          - Surface a one-line "待复核: <file>" note in cockpit (append under ## 下一步
            or a dedicated "## 待复核" subsection if one exists — do not bury it).
          Fallback (no Python runtime or no anchor yet): compare this session's changed
-         paths against each doc's `when_to_update` by hand (same semantic match,
-         anchored to this session's changes only).
+         paths against each doc's `applies_to` paths by hand,
+         anchored to this session's changes only.
 
          待验证 (the verify-debt list) rides the SAME surfacing channel, but is
          NOT hand-written — it is **derived by scanning every `verify`-carrying
@@ -120,9 +125,9 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - **`Flightdeck-Sync:` trailer (REQUIRED on every landing/soft-land commit):**
           append `Flightdeck-Sync: <git-ref>` as a commit trailer (the ref is `HEAD`
           *after* the commit — i.e. the new SHA, or the current branch tip). This is
-          the anchor that `--changed-since-anchor` and `preflight`'s retroactive stale
-          sweep key on for the next session. Without it, the anchor is absent and
-          preflight must fall back to a full worktree diff.
+          the anchor that `--changed-since-anchor` keys on for the next landing's
+          stale-detection pass (退场单仪式). Without it, the anchor is absent and
+          the next landing must fall back to a full worktree diff.
           Under no-git: skip (no commit → no anchor trailer; preflight falls back).
 ```
 
@@ -428,7 +433,6 @@ Mechanics:
 - **signal 1 auto-landing is end-of-turn debounced.** A `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, replacing the old unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. This is why landing rescans the whole `done`-in-place set (Land Routine step 0) rather than only the just-flipped artifact.
 - signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
-- **Compatibility-window consequence (known cost, not a bug).** On a deck that is `structural-behind` — not yet migrated to the 3.0 names, so it still has `landed/` / `charts/` — end-of-turn landing **hits the layout guard** and STOPs with "migrate first" instead of archiving. So during the compatibility window, auto-archival is **effectively paused** on un-migrated decks: `done` items stay in place until the author runs the migration. This is the deliberate guard against mixing old/new structure, not a malfunction — don't read it as "auto-landing broke."
 - **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion gate**. It is landing's no-`done` natural form + a visible marker. Timing is pinned: persist → print the 「已保存」marker → end the turn (never "reply then persist"). The 「已保存」marker format is in [§ Cockpit update](#cockpit-update--what-changes); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
 - **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## 进行中` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## 下一步` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
