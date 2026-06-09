@@ -7,7 +7,7 @@ description: Keep a flightdeck artifact's lifecycle status fresh and its folder 
 
 The only **high-frequency, lightweight, model-invocable** flightdeck ritual. It keeps a single artifact's lifecycle `status:` honest mid-session, so state doesn't drift and the next `preflight` reads truth from the INDEX. It is complementary to `landing`, not a replacement: `landing` is the low-frequency batch wrap-up; `status` is the in-flight keep-fresh.
 
-It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md` (+ that folder's count in the root INDEX). On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## 进行中` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it). Beyond regenerating `## 进行中`, it does **not** touch `cockpit.md` (`Active focus` / `## 下一步` / `Hanging tasks`), does **not** archive (archiving is `landing`'s smart judgment), does **not** commit, does **not** run length / AGENTS.md regeneration.
+It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md`. On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## 进行中` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it). Beyond regenerating `## 进行中`, it does **not** touch `cockpit.md` (`Active focus` / `## 下一步` / `Hanging tasks`), does **not** archive (archiving is `landing`'s smart judgment), does **not** commit, does **not** run length / AGENTS.md regeneration.
 
 ## Step 1 — read config
 
@@ -52,7 +52,7 @@ After flipping frontmatter, reuse landing's single-folder regeneration (see [exi
 1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs).
 2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.
 
-(The script fast path regenerates the folder INDEX, the root INDEX, **and** the cockpit `## 进行中` block in one run — `flightdeck_index.py <deck>` covers Step 5a too.)
+(The script fast path regenerates the folder INDEX **and** the cockpit `## 进行中` block in one run — `flightdeck_index.py <deck>` covers Step 5a too.)
 
 ## Step 5a — regen cockpit `## 进行中` (only on a flip that changes the active set)
 

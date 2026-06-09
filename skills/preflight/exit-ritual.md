@@ -35,8 +35,7 @@ Step 2: Did this session produce new knowledge / discover a bug / agree on a dec
 
 Step 3: Regenerate INDEX for changed folders — full rules in "## INDEX regeneration —
         scope rules" below. Gist: regenerate the <!-- AUTO --> region only for folders
-        with activity this session; refresh root INDEX if counts changed; walkaround
-        owns the full INDEX↔frontmatter check.
+        with activity this session; walkaround owns the full INDEX↔frontmatter check.
 
 Step 3a: Suggest status for affected artifacts
          For each artifact written or touched this session, the AI MAY suggest the next
@@ -298,8 +297,6 @@ Regenerate the `<!-- AUTO -->` region of a folder's `INDEX.md` **only when that 
 - Activity = file added, modified, moved, landed, or status changed
 - Non-activity = the folder was only read (grep, preflight routing, etc.) — leave its INDEX alone
 
-After regenerating any folder INDEX, check whether that folder's file count or status breakdown changed relative to what the root `flightdeck/INDEX.md` currently shows. If yes, regenerate the root INDEX's `<!-- AUTO -->` region too.
-
 The hand area outside `<!-- AUTO -->` is never touched by the AI — grouping notes, cross-references, and other hand-written content are preserved.
 
 Walkaround is responsible for the **full-consistency check** — it regenerates all indexes and validates every frontmatter. Exit ritual only touches changed folders.
@@ -412,7 +409,7 @@ Landing operates on a **land set**: the one-or-more `done` artifacts archived in
 1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = archive/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → archive/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
 2. **Move (plain filesystem rename — never `git mv`).** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent. Use a plain `mv` / rename, **not `git mv`**: `git mv` assumes the deck is tracked and aborts with `fatal: not under version control` on a gitignored deck (the common case — projects routinely keep `flightdeck/` out of their code history), forcing fragile improvisation. A plain move works identically whether the deck is git-backed (the later commit step records the rename) or no-git.
 3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
-4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region, then recompute the affected folders' count lines in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
+4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
 
 The land record is the moved files in `archive/` (+ `git log` on git-backed decks) — flightdeck keeps **no separate landing log** under any git mode. `archive/<folder>/<file>` *is* the durable history; `preflight` reads files, not a journal.
 

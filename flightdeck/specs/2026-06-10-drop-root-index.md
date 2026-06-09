@@ -45,6 +45,9 @@ root `flightdeck/INDEX.md` 不是用户看的板（记忆 `cockpit-is-the-only-b
 ### 2. 测试
 
 - `scripts/tests/test_flightdeck_index.py`：删与 `regen_root_index` / `folder_summary` / `imported_summary` 相关的导入与用例（涉及行约 15–18、232、247、263、271、273、425、756、764 处——以实际为准，删到这三个名字零引用）。
+- `scripts/tests/test_flightdeck_index.py`：除删 4 个测试类外，还需清 4 处 *incidental* root INDEX fixture（`MainCliTest` / `CockpitWiredIntoMainTest` / 两个 area-INDEX 测试在 deck 里顺手写了 `<!-- AUTO:root -->` 的 root INDEX，但断言无关 root）——删这些 fixture 写入即可（`AUTO:root` 字面量归零，断言不变仍通过）。
+- `scripts/tests/test_flightdeck_init.py`：`test_creates_full_deck_and_substitutes_cockpit` 原断言 `assertTrue((deck/"INDEX.md").exists())`（新 deck 出厂带 root INDEX）→ **反转为 `assertFalse(..., "root INDEX must not ship")`**，把「root INDEX 不出厂」钉成测试（呼应「合法状态」意图）。
+- `scripts/tests/test_hooks.py`：`test_stop_projectdir_via_{gemini,cursor}_var` 原用「hook 重建 root INDEX」作 projectdir 解析的副作用证据——改用 `specs/INDEX.md` 被创建作等价副作用（`_mk_regenerable_deck` 加一个 specs/ 工件、断言改 `specs/INDEX.md`）。
 - `scripts/tests/test_flightdeck_lint.py`：**两处**（已核实断言，给单一改法，不留分叉）——
   - `test_drifted_index_is_warning`（约 232–244）：当前同时造 specs 与 root 的 drift INDEX，断言 `assertIn("specs", labels)` + `assertIn("root", labels)`。root 退出 `_index_targets` 后 `audit_index_consistency` 不再产出 "root" 标签 → **删第 238–240 行的 root INDEX.md 写入 + 删第 244 行 `self.assertIn("root", labels)`**；保留 specs drift 断言（仍验 drift 检测）。
   - `test_clean_index_no_finding`（约 246–258）：写干净 specs+root INDEX，断言 `audit_index_consistency(deck) == []`。**删第 254–257 行的 root INDEX.md 写入**；断言不变——它现在额外坐实「无 root INDEX 的 deck 不被误报」。
@@ -62,6 +65,8 @@ root `flightdeck/INDEX.md` 不是用户看的板（记忆 `cockpit-is-the-only-b
 - `skills/preflight/exit-ritual.md`：去掉同款「refresh root INDEX if counts changed」表述（第 38 行附近）；「each `INDEX.md` AUTO region」这类泛指措辞保留（root 只是不再在列，措辞仍成立）。
 - `skills/preflight/protocol.md`：文件夹图第 223 行形如 `├── cockpit.md   rules.md   INDEX.md   [comment]`——**只删该行的 `INDEX.md` token**，保留同行 `cockpit.md` + `rules.md` + 注释；删后收敛多余空格、目视该 ASCII 图与上下行对齐；下方各 folder 行的 `INDEX.md` 全保留。
 - `skills/preflight/templates.md`：删 `## INDEX.md — root` 模板段（约第 187–192 行）；folder INDEX 模板保留。
+- `skills/preflight/folder-semantics.md`：删整个 `### \`INDEX.md\` — root index` 子节（含 `AUTO:root` 示例 + 「downgradeable component」注）；其余 folder/layout 说明保留。
+- `skills/status/SKILL.md`：删两处 root INDEX 引用——「(+ that folder's count in the root INDEX)」与 fast-path 句里的「the root INDEX, 」。folder INDEX 引用保留。
 
 ### 5. bootstrap / 注入 / AGENTS.md
 
@@ -80,15 +85,14 @@ root `flightdeck/INDEX.md` 不是用户看的板（记忆 `cockpit-is-the-only-b
 1. `uv run pytest scripts/tests/` 全绿。
 2. `uv run scripts/flightdeck_index.py flightdeck` regen 后**不生成** root INDEX（`flightdeck/INDEX.md` 不存在）；`uv run scripts/flightdeck_index.py flightdeck --check` 退出码 0（clean）。
 3. preflight 跑一遍：报告**首行无 `Root INDEX: …` 计数行**；以下核心块照常产出且内容等价——Cockpit 行、Routing catalog 行、待验证块、下一步（item #1）。（不强求逐字节「不变」——行数/空行受首行删除影响属预期；断言的是这些块仍在且语义不变。）
-4. **残留扫描**（在仓库根执行；两类扫描范围不同，分列）：
-   - **符号名 / 标记 / 字面量——全仓零命中**，固定命令（POSIX 可移植，逐个 `--exclude-dir`）：
+4. **残留扫描**（在仓库根执行；扫描对象是**活的代码 + skill 散文 + 出厂脚手架**这三个 surface，**不含本 deck 自描述件**）：
+   - **符号名 / 标记 / 字面量——`scripts/ skills/ scaffolds/` 零命中**，固定命令（POSIX 可移植）：
      ```
-     grep -rn -e regen_root_index -e folder_summary -e imported_summary -e 'AUTO:root' -e 'Root INDEX' . \
-       --exclude-dir=.git --exclude-dir=__pycache__ \
-       --exclude-dir=references --exclude-dir=archive
+     grep -rn -e regen_root_index -e folder_summary -e imported_summary -e 'AUTO:root' -e 'Root INDEX' \
+       scripts/ skills/ scaffolds/ --exclude-dir=__pycache__
      ```
-     （`references/`、`archive/` 含外部导入/历史快照，排除；其余全仓须为空。）
-   - **描述性提法（`根 INDEX` / `顶层 INDEX` / `root INDEX`）——仅 `skills/` + `scaffolds/` 零命中**。**刻意不扫全仓**：`docs/`、commit message、迁移注释里出现「曾有 root INDEX」是合法历史叙述，不在删除范围；删除目标只是「活的运行时引用」，它们都在 `skills/` 与 `scaffolds/`。
+     **刻意不扫全仓**：drop-root-index 的 spec/plan/cockpit/INDEX 本身在描述这次删除，必然出现这些符号名（自描述件），那是合法内容，不是残留。`references/`、`archive/`、`tmp/`（外评原文）同理排除。要验证的不变量是「**活 surface 零引用**」。
+   - **描述性提法（`根 INDEX` / `顶层 INDEX` / `root INDEX`）——仅 `skills/` + `scaffolds/` 零命中**。同理：`docs/`、commit message、迁移注释里「曾有 root INDEX」是合法历史叙述，删除目标只是活的运行时引用。
 5. 两份 `INDEX.md`（dogfood `flightdeck/INDEX.md` + 出厂 `scaffolds/full/flightdeck/INDEX.md`）已删除；`scaffolds/full/flightdeck/` 下各 folder INDEX（specs/plans/…）保留。
 6. **AGENTS.md**（手动，合并前）：跑 `/flightdeck:emit-agents-md` 后，`AGENTS.md` 既无 root INDEX 引用、也未新增任何根级索引概念的等价表述（现状本就无；「the folder `INDEX.md` files」指 folder INDEX，保留）。
 7. **新建 deck 端到端**（手动；`/flightdeck:launch` 依赖能跑脚本的环境，本仓有 `uv`）：起一个全新 deck——

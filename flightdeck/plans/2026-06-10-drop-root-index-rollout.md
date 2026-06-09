@@ -104,7 +104,7 @@ EOF
 ## 相位 2 — skills 散文（6 处运行时引用）
 
 **Files:**
-- Modify: `skills/preflight/SKILL.md`、`skills/walkaround/SKILL.md`、`skills/landing/SKILL.md`、`skills/preflight/exit-ritual.md`、`skills/preflight/protocol.md`、`skills/preflight/templates.md`
+- Modify: `skills/preflight/SKILL.md`、`skills/walkaround/SKILL.md`、`skills/landing/SKILL.md`、`skills/preflight/exit-ritual.md`、`skills/preflight/protocol.md`、`skills/preflight/templates.md`、`skills/preflight/folder-semantics.md`、`skills/status/SKILL.md`
 
 - [ ] **Step 2.1：preflight SKILL.md**
 
@@ -133,7 +133,15 @@ EOF
 
 `skills/preflight/templates.md`：删 `## INDEX.md — root` 整段模板（含其 `<!-- AUTO:root -->` 示例）。folder INDEX 模板保留。
 
-- [ ] **Step 2.7：提交相位 2**
+- [ ] **Step 2.7：folder-semantics.md**（残留扫描补漏 surface）
+
+`skills/preflight/folder-semantics.md`：删整个 `### \`INDEX.md\` — root index` 子节（root INDEX 说明 + `AUTO:root` 示例块 + 「downgradeable component」注），保留前后 layout/landing-log 说明。
+
+- [ ] **Step 2.8：status/SKILL.md**（残留扫描补漏 surface）
+
+`skills/status/SKILL.md`：删两处——「(+ that folder's count in the root INDEX)」与 fast-path 句里的「the root INDEX, 」（保留 folder INDEX + cockpit）。
+
+- [ ] **Step 2.9：提交相位 2**
 
 ```bash
 git add -A
@@ -152,14 +160,14 @@ EOF
 
 **Files:** 无源码改动（验收 + 可能的回扫修补）
 
-- [ ] **Step 3.1：符号名/标记/字面量全仓零命中**
+- [ ] **Step 3.1：符号名/标记/字面量——活 surface 零命中**
 
 Run:
 ```bash
-grep -rn -e regen_root_index -e folder_summary -e imported_summary -e 'AUTO:root' -e 'Root INDEX' . \
-  --exclude-dir=.git --exclude-dir=__pycache__ --exclude-dir=references --exclude-dir=archive
+grep -rn -e regen_root_index -e folder_summary -e imported_summary -e 'AUTO:root' -e 'Root INDEX' \
+  scripts/ skills/ scaffolds/ --exclude-dir=__pycache__
 ```
-Expected: 无输出（退出码 1 = 无匹配即通过）。有命中 → 回对应相位补删。
+Expected: 无输出（退出码 1）。**不扫全仓**：drop-root-index 的 spec/plan/cockpit/INDEX 自描述件必然含这些符号名，是合法内容非残留；要验证的是活的代码+skill+脚手架零引用。有命中 → 回对应相位补删（本轮就是这样补到了 folder-semantics.md / status/SKILL.md）。
 
 - [ ] **Step 3.2：描述性提法仅限 skills/ + scaffolds/ 零命中**
 

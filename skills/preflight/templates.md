@@ -184,22 +184,6 @@ last_updated: YYYY-MM-DD
 
 ---
 
-## INDEX.md — root (flightdeck/INDEX.md)
-
-```markdown
-# flightdeck — INDEX
-
-<!-- AUTO:root -->
-- specs/ — 5 (1 idea, 2 active, 2 done)
-- plans/ — 2 (2 active)
-- incidents/ — 1 active
-- checklists/ — 1 active
-- references/ — 2 projects imported
-<!-- /AUTO -->
-```
-
----
-
 ## status flow (recommended, not enforced)
 
 Status values (by kind) + location semantics are canonical in [protocol § Status ⟂ location](protocol.md#status--location-two-orthogonal-axes) — not restated here.

@@ -80,27 +80,6 @@ Contains:
 
 Read first by every entry skill. As of 3.0 it carries just `version` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit/scripts from `.git` / `AGENTS.md` / runtime presence), decided by skill judgment (landing's archive call), or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the minimal contract — `walkaround` CRITICAL if `rules.md`/`version` missing) and must carry `version`; its **content** is optional — a minimal `rules.md` = the built-in defaults (local commit auto, push asks; all rituals self-invoke; landing archives by judgment). Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
-### `INDEX.md` — root index
-
-The root `flightdeck/INDEX.md` is a subfolder directory plus global status summary, generated from each subfolder's `INDEX.md`. Example:
-
-```markdown
-# flightdeck — INDEX
-
-<!-- AUTO:root -->
-- specs/ — 5 (1 idea, 2 active, 2 done)
-- plans/ — 2 (2 active)
-- incidents/ — 1 active
-- checklists/ — 1 active
-- docs/ — 3 active
-- references/ — 2 imported
-<!-- /AUTO -->
-```
-
-Note: `references/` rows show a file/project count and "imported" rather than a status count, because imported external files do not carry uniform flightdeck frontmatter.
-
-The root INDEX is a **downgradeable component** — if the project finds per-folder INDEXes sufficient and the root INDEX underused, it may be removed without affecting the model.
-
 ### No separate landing log
 
 flightdeck keeps **no history-log file** under any git mode. The durable landing record is the moved files in `archive/` (+ `git log` on git-backed decks) — `preflight` reads files, not a journal. A no-git deck (e.g. a gitignored `flightdeck/`) loses nothing: the archived artifacts themselves are the history.

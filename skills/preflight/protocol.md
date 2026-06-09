@@ -220,7 +220,7 @@ The root `flightdeck/INDEX.md` is a sub-folder directory + global status summary
 
 ```
 flightdeck/                  [product name — kept]
-├── cockpit.md   rules.md   INDEX.md   [cockpit.md = interaction surface — metaphor kept]
+├── cockpit.md   rules.md   [cockpit.md = interaction surface — metaphor kept]
 ├── specs/       INDEX.md   (idea / active / done)              workflow · self-authored · flat
 ├── plans/       INDEX.md                                       workflow · self-authored · flat
 ├── incidents/   INDEX.md   bug post-mortems                    knowledge · resident · nestable
