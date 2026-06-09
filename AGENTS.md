@@ -5,19 +5,22 @@
 
 ## Current focus
 
-flightdeck 3.0——持续把模型/功能**完善到位**（**不急发布、避免迁移债**）。**核心卖点=随时可关对话、下次 preflight 干净接手、上下文不丢**；载体 checkpoint + soft-landing + auto-land 执行层（注入入场 + Stop board-sync）+ HISTORY 移除/gitignored-deck 接缝 均已实施，待 resync 部署 + live 复验。
+flightdeck 3.0 完善到位（**不急发布、避免迁移债**）。**核心卖点=随时可关、下次 preflight 干净接手、上下文不丢（红线）**。当前主线 = **大瘦身 / de-scope**：3.0 定为格式基线第0版，砍向后兼容/校验子系统、校验只在 walkaround、preflight 纯读零写、热/冷预算——根治 token 失控（preflight 单次 ~9k）。
 
 ## 进行中
 
-- [2026-06-07-hook-primary-refactor.md](flightdeck/specs/2026-06-07-hook-primary-refactor.md) — 四家 hook 趋同后的大重构——给 Codex/Gemini 补真 hook、Cursor 补 stop（机制 A：每家一份小 config + 共享 session-start/stop/run-hook 脚本），四家吃满 SessionStart 注入 + Stop board-sync；删 why-no-hooks（理由已入 cross-host-hooks）；全 skill 文案以 hook 为主路径重写、删无-hook 双路径对冲与「仅 Claude 焊/Codex 退指令文件/未实证」措辞，保留知识分类归 agent + 一行环境降级地板；保行为紧致 protocol/templates/folder-semantics；收编 auto-land-executor + soft-landing + 2 rollout，取代部分标 superseded
-- [2026-06-07-hook-primary-refactor-rollout.md](flightdeck/plans/2026-06-07-hook-primary-refactor-rollout.md) — 把 hook-primary 大重构落地的逐文件实施：相位1 机制（Codex/Gemini config + Cursor stop + 脚本 project-dir/emit 四家泛化 + HOOK_DEBUG + 自动化脚本测试）→ 相位2 文案（删 why-no-hooks + 引用清理、bootstrap 三链路、exit-ritual board-AUTO 移出 agent、preflight/protocol/landing/status/session-flow hook-primary 重写、保行为紧致 diff 自检）→ 相位3 spec 收编（auto-land 标 superseded、两 rollout 并入）→ 相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）
+- [2026-06-08-nonblocking-verify-preflight-slim.md](flightdeck/specs/2026-06-08-nonblocking-verify-preflight-slim.md) — 验证由阻塞门降为非阻塞标记——复用 stale 外加可编程锚点字段 verify（有字段即欠验证、值=怎么验，随文件进 archive，preflight 扫 active+archive 确定性重建待验证清单，不依赖手写 cockpit 行）；知识件 stale+verify、工作流 done+verify 照常由 landing --archivable 完整归档、可逆复活；并 preflight 输出瘦身（folder INDEX 仍读只显计数 + docs 载入上下文不刷屏）——兑现随时关不丢上下文
+- [2026-06-08-stage-brand-glyphs.md](flightdeck/specs/2026-06-08-stage-brand-glyphs.md) — 给 7 个 flightdeck 阶段各配一枚彩色 emoji 品牌图标（🛫preflight/🛬landing/🔍walkaround/✍️new/🔄status/🛠️launch/🌉emit-agents），加在各 skill 主报告/完成行；字形映射表落 skills/preflight/protocol.md 作文档级单一真相源；✈️ 留作整体 wordmark；scaffolds/模板/脚本/测试不动（横幅是模型 prose）
+- [2026-06-09-descope-backward-compat-and-slim.md](flightdeck/specs/2026-06-09-descope-backward-compat-and-slim.md) — 3.0 定为格式基线第0版：砍掉整个向后兼容/迁移/版本校验子系统（layout verdict/MIGRATION 迁移/legacy 路径全删，3.1 再就地建迁移）；校验只许活在按需跑的 walkaround，preflight 退化纯读零写、landing 仅核心仪式；assume 良构 deck 不做防御性存在检查；incidents 教训吸纳进权威件后退役清理；热/冷路径预算铁律防再膨胀——根治 preflight 固定成本，上下文不丢零损失
+- [2026-06-08-nonblocking-verify-preflight-slim-rollout.md](flightdeck/plans/2026-06-08-nonblocking-verify-preflight-slim-rollout.md) — 把'验证非阻塞+preflight瘦身'spec逐文件落地：相位1 脚本TDD（flightdeck_index.py 加 --verify-pending 子命令 + format_row 按 verify 渲染 ⚠未验证/⚠待复核 + 测试）→相位2 治理文案契约（protocol/templates 定 verify 字段语义、stale 拓宽、done 语义、per-kind 通过失败）→相位3 仪式 skill（exit-ritual 门重写+扫描浮出、landing 3a3c+archivable、status done+verify、preflight 扫描+瘦身C+docs计数D）→相位4 套用 hook spec+plan 打 verify+归档清看板 + resync 后新会话 live 实证（停地板）
+- [2026-06-09-descope-backward-compat-and-slim-rollout.md](flightdeck/plans/2026-06-09-descope-backward-compat-and-slim-rollout.md) — 把 de-scope spec 逐文件落地：相位1 删向后兼容子系统（flightdeck_index.py 删 verdict/version 6 函数 + --verdict 子命令 + version_mismatch 守卫，TDD 同步删测试；MIGRATION.md 200 行史→极简戳；legacy/pre-3.0 处理）→相位2 命令职责重划（preflight 删 step1/4/4a 收敛纯读零写、landing 剥 version/verdict 留 stale 单仪式、walkaround 删 migration 审查聚焦本版内）→相位3 incidents 吸纳-退役（逐条 triage：可设计防范/仅可警示，吸纳进必经路径后翻 obsolete，过时删）→相位4 热/冷预算扫尾（注入≤25行/preflight SKILL≤45/walkaround≤80 + 冷路径上限 + cockpit 软上限）；每相位测试绿+regen clean+before/after token，行为恢复验收，可逐相位 git revert
+- [2026-06-09-stage-brand-glyphs-rollout.md](flightdeck/plans/2026-06-09-stage-brand-glyphs-rollout.md) — 把每命令品牌图标 spec 逐落点落地：protocol.md 建权威字形表 → 7 命令各改运行时报告行加 emoji（launch🛠️/preflight🛫/walkaround🔍/status🔄/landing🛬/new✍️/emit🌉）→ 末轮一致性核对（字形↔表三列、scaffolds/脚本零改动 grep）+ 目标终端目视；纯 SKILL.md/protocol.md prose 编辑，无脚本/测试改动
 
 ## 下一步
 
-- **✅ graduate + 知识保鲜 已实施+归档**（spec+plan 进 `archive/`）：knowledge status `{active, stale, obsolete}`、`obsolete`=knowledge 版 done 排水、`supersedes` 纯溯源非钉扣、`superseded`/`superseded_by` 退役；graduate（结构性设计稿 done 时本体变身常驻 docs）、`when_to_update`→`stale` 双仪式保鲜（锚点=git `Flightdeck-Sync:` trailer）。脚本：`archivable_obsolete` / `match_signature` 扩扫 archive / `audit_when_to_update` / stale ⚠ 渲染 / `last_anchor_ref`+`changed_since_anchor`。详见 archive 双件 + git log。cache 已 resync——**新会话**才吃到新 skill/脚本行为。
-- **#2 执行 hook rollout（当前·先行）**：执行 `plans/2026-06-07-hook-primary-refactor-rollout`。**相位1 机制 ✅ + 相位2 文案 ✅ + 相位3 收编 ✅**（Task 全 commit，2.6 无可压跳过；163 测试绿；auto-land spec+rollout done+archive+supersedes、soft-landing spec+rollout 均 done+archive）。**仅剩相位4 = 每家 Phase0 live 实证门**：resync 进各宿主缓存后**新会话**手动跑（Claude/Codex/Gemini/Cursor 注入到达 + 回合末 board `--check` clean + 缺 deck/bash/python 静默）；过了才把该家"待 Phase 0 实证"措辞翻最终态。**本会话做不了（hook 只在 resync 后新会话触发）——停在此地板。**
-- **相位3 模型坑（已记）**：plan 原写"标 status superseded"，但 workflow 无此状态 → incident `workflow-has-no-superseded-status`；正确=done+archive+新工件 supersedes 反向边，已照此执行。
-- **本轮新并入（外部记忆系统借鉴，用户拍板）**：① Cursor 注入改 `.cursor/rules/*.mdc` 规则文件为**主路径**（稳定加载>优雅加载，Task 1.7）；② cockpit `## 关键上下文` 槽（#2，Task 2.7）；③ 失败/弯路捕获入 incidents（#4，Task 2.8）。**单独 backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试）。
+- **当前主线 → 执行 de-scope rollout 相位 1**：`plans/2026-06-09-descope-backward-compat-and-slim-rollout`。相位1 = 脚本层 TDD（`flightdeck_index.py` 删 verdict/version 6 函数 + `--verdict` + version_mismatch 守卫 + 同步删测试；MIGRATION 200 行→极简戳）。风险最低、立竿见影。执行方式待定（推荐 subagent-driven；相位3 incidents triage 有用户签收闸）。
+- **Parked（各待自身完工/land，非本主线）**：① hook rollout 相位4 live 实证（resync 后新会话手动跑各家最小矩阵）；② nonblocking-verify rollout、③ stage-brand-glyphs rollout（commits 已落、status 仍 active，待用户签收 done+land）。
+- **Backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试，de-scope 验收也用它）。
 
 ## Hanging tasks
 
