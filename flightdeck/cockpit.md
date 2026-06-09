@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-09 by 月离 (de-scope 执行中：相位1–3 done+commit——脚本砍向后兼容子系统 −479 行、命令职责重划 preflight 纯读零写/校验只在 walkaround、incidents 9→2 吸纳退役归档；剩相位4 预算扫尾。)
+**Last updated**: 2026-06-09 by 月离 (de-scope 全 4 相完成：preflight/SKILL 13554→3750 字符(−72%)、walkaround→4631(−81%)、注入→1118(−49%)、step4a 删 + incidents 9→2；164 测试绿、恢复载荷不动。待签收 done+graduate。)
 **Active focus**: flightdeck 3.0 完善到位（**不急发布、避免迁移债**）。**核心卖点=随时可关、下次 preflight 干净接手、上下文不丢（红线）**。当前主线 = **大瘦身 / de-scope**：3.0 定为格式基线第0版，砍向后兼容/校验子系统、校验只在 walkaround、preflight 纯读零写、热/冷预算——根治 token 失控（preflight 单次 ~9k）。
 
 ## 进行中
@@ -16,7 +16,7 @@
 
 ## 下一步
 
-- **当前主线 → de-scope rollout：相位 1–3 ✅，剩相位 4**。① 脚本删向后兼容子系统（−479 行）② 命令职责重划（preflight 纯读零写、校验只在 walkaround、stale 退场单仪式）③ incidents 吸纳退役（**9→2 活跃**：留 scaffold-ships-verbatim + skill-prose-links，均维护者 gotcha 无必经落点；7 条 drained 进 `archive/incidents/`）均 done+commit。**相位 4 = 热/冷预算扫尾**（注入≤25行 / preflight SKILL≤45 / walkaround≤80 + 冷路径上限 + cockpit 软上限）+ 终验收（token 总账 + 行为恢复）。
+- **de-scope rollout 相位 1–4 全 ✅ 实现完成**（~13 commits）：①脚本砍向后兼容子系统 −479 行 ②命令职责重划（preflight 纯读零写、校验只在 walkaround、stale 退场单仪式）③incidents 9→2 退役归档 ④热路径预算压缩（preflight −72% / walkaround −81% / 注入 −49%）。164 测试绿，恢复载荷不动。**待你签收 done**：flip descope spec+plan → `done`（spec 是 `graduate:true` → landing 时本体改写进 `docs/` 常驻——较重改写，需你点头）。
 - **Parked（各待自身完工/land，非本主线）**：① hook rollout 相位4 live 实证（resync 后新会话手动跑各家最小矩阵）；② nonblocking-verify rollout、③ stage-brand-glyphs rollout（commits 已落、status 仍 active，待用户签收 done+land）。
 - **Backlog**：#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试，de-scope 验收也用它）。
 
