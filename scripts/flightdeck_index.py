@@ -111,8 +111,7 @@ def format_row(kind, filename, fm):
     """Render one folder-INDEX row for an artifact, by folder kind.
 
     Missing required fields are rendered with a visible sentinel rather than
-    raising, so a malformed file never crashes a regen (it is surfaced as a
-    `malformed` verdict by `layout_verdict` instead).
+    raising, so a malformed file never crashes a regen.
     """
     link = f"- [{filename}]({filename})"
     status = fm.get("status", "?")
@@ -327,36 +326,6 @@ def _fm_field(path, field):
         return None
 
 
-RETIRED_STATUSES = {"pending", "awaiting-review", "blocked"}
-
-
-def _migration_layout():
-    """(current, [need_update]) read from bundled MIGRATION.md frontmatter."""
-    mig = Path(__file__).resolve().parent.parent / "MIGRATION.md"
-    fm = parse_frontmatter(mig.read_text(encoding="utf-8"))
-    current = (fm.get("current") or "").split("#")[0].strip() or None
-    raw = (fm.get("layout_need_update") or "[]").split("#")[0]
-    need = [v.strip() for v in raw.strip().strip("[]").split(",") if v.strip()]
-    return current, need
-
-
-def _vtuple(v):
-    try:
-        return tuple(int(x) for x in str(v).strip().split("."))
-    except (ValueError, AttributeError):
-        return None
-
-
-def _workflow_fms(deck):
-    """Yield parsed frontmatter dicts for every spec/plan file (skip INDEX)."""
-    for kind in ("specs", "plans"):
-        folder = Path(deck) / kind
-        if folder.is_dir():
-            for p in folder.glob("*.md"):
-                if p.name != "INDEX.md":
-                    yield parse_frontmatter(p.read_text(encoding="utf-8"))
-
-
 def _active_inbound_targets(deck):
     """deck 内任何 status:active 工件经结构化边（implements:）指向的目标路径集。"""
     deck = Path(deck)
@@ -448,71 +417,6 @@ def spec_advance_candidates(deck):
         if "done" in statuses and statuses <= {"done"}:
             result.append(spec_rel)
     return sorted(result)
-
-
-def _structural_signal(deck):
-    """True if the deck shows any pre-3.0-coherence structural signal."""
-    deck = Path(deck)
-    if (deck / "charts").is_dir() or (deck / "landed").is_dir():
-        return True  # 旧主流前名 → 需改名迁移（charts→references / landed→archive）
-    if (deck / "sketches").is_dir() or (deck / "debriefs").is_dir():
-        return True
-    if any(fm.get("status") in RETIRED_STATUSES for fm in _workflow_fms(deck)):
-        return True
-    cockpit = deck / "cockpit.md"
-    if cockpit.is_file() and "<!-- AUTO:inprogress -->" not in cockpit.read_text(encoding="utf-8"):
-        return True
-    return False
-
-
-def _classify_version(deck_v, current, need):
-    """Pure version-number classifier (no filesystem)."""
-    dv = _vtuple(deck_v)
-    if deck_v is None or dv is None:
-        return "structural-behind"  # 无 version / 不可解析 → 需迁移
-    for n in need:
-        nv = _vtuple(n)
-        if nv and dv < nv:
-            return "structural-behind"
-    cv = _vtuple(current)
-    if cv and dv < cv:
-        return "compatible-behind"
-    return "current"
-
-
-def layout_verdict(deck):
-    """Machine verdict on a deck's layout currency.
-
-    One of: 'structural-behind' | 'malformed' | 'compatible-behind' | 'current'.
-    Read-only. Version data comes from MIGRATION.md frontmatter (not prose).
-    """
-    if _structural_signal(deck):
-        return "structural-behind"
-    current, need = _migration_layout()
-    deck_v = _fm_field(Path(deck) / "rules.md", "version")
-    vclass = _classify_version(deck_v, current, need)
-    if vclass == "structural-behind":
-        return vclass
-    # 版本不落后 → 再查 malformed（缺必需 workflow 字段）
-    for fm in _workflow_fms(deck):
-        if "status" not in fm or "summary" not in fm:
-            return "malformed"
-    return vclass
-
-
-def version_mismatch(deck):
-    """Return (deck_version, script_version) if they disagree, else None.
-
-    The script encodes a layout version; running it against a deck on a
-    different version risks corrupting it. Compares the deck's `rules.md`
-    `version` against the bundled `MIGRATION.md` `current`. Either side
-    missing → no comparison (None).
-    """
-    deck_v = _fm_field(Path(deck) / "rules.md", "version")
-    script_v = _fm_field(Path(__file__).resolve().parent.parent / "MIGRATION.md", "current")
-    if deck_v and script_v and deck_v != script_v:
-        return (deck_v, script_v)
-    return None
 
 
 def last_anchor_ref(deck):
@@ -621,16 +525,6 @@ def main(argv=None):
         help="report drift and write nothing; exit 1 if any INDEX is stale",
     )
     ap.add_argument(
-        "--force",
-        action="store_true",
-        help="bypass the version guard (deck version != script version)",
-    )
-    ap.add_argument(
-        "--verdict",
-        action="store_true",
-        help="print the deck's layout verdict (current/compatible-behind/structural-behind/malformed) and exit",
-    )
-    ap.add_argument(
         "--archivable",
         action="store_true",
         help="print the deck's archivable done set (one path per line) and exit; read-only",
@@ -656,10 +550,6 @@ def main(argv=None):
     )
     args = ap.parse_args(argv)
 
-    if args.verdict:
-        print(layout_verdict(args.deck))
-        return 0
-
     if args.archivable:
         for rel in sorted(set(archivable_done(args.deck)) | set(archivable_obsolete(args.deck))):
             print(rel)
@@ -684,14 +574,6 @@ def main(argv=None):
         for path, note in verify_pending(args.deck):
             print(f"{path}\t{note}")
         return 0
-
-    mismatch = version_mismatch(args.deck)
-    if mismatch and not args.force:
-        print(
-            f"version guard: deck version {mismatch[0]} != script expects {mismatch[1]}; "
-            "regenerate by hand (manual fallback) or pass --force"
-        )
-        return 2
 
     drift = []
     for label, path, new_block in _index_targets(args.deck):
