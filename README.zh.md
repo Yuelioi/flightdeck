@@ -135,7 +135,6 @@ flightdeck/
 |「测试怎么跑？」 | `checklists/` |
 |「来设计个 X」 | `specs/` |
 |「拆成任务」 | `plans/` |
-|「这是 review 反馈」 | 折进对应 spec 的 `## 评审纪要`（原文留 `tmp/`） |
 
 ## 配置
 
@@ -217,7 +216,12 @@ skill 改动遵循 **RED-GREEN-REFACTOR** —— 没有失败测试不许改（[
 
 ## 致谢
 
-[AGENTS.md](https://agents.md) —— wire format · [OpenSpec](https://github.com/openspec/openspec) —— spec 演化标记 · [Cursor MDC](https://docs.cursor.com) —— 路径范围 frontmatter · [Letta Code](https://github.com/letta-ai/letta) —— 晋升门模式 · [superpowers](https://github.com/anthropic-experimental/superpowers) —— 协议风格 · [Cline Memory Bank](https://docs.cline.bot) —— 启发写入门控的那个模式。
+- [AGENTS.md](https://agents.md) —— wire format
+- [OpenSpec](https://github.com/openspec/openspec) —— spec 演化标记
+- [Cursor MDC](https://docs.cursor.com) —— 路径范围 frontmatter
+- [Letta Code](https://github.com/letta-ai/letta) —— 晋升门模式
+- [superpowers](https://github.com/anthropic-experimental/superpowers) —— 协议风格
+- [Cline Memory Bank](https://docs.cline.bot) —— 启发写入门控的那个模式
 
 ## License
 

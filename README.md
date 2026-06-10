@@ -135,7 +135,6 @@ Artifact `status` advances **automatically** (idea→active→done). All five ri
 | "how do I run the tests?" | `checklists/` |
 | "let's design X" | `specs/` |
 | "break this into tasks" | `plans/` |
-| "here's review feedback" | the reviewed spec's `## 评审纪要` (raw text stays in `tmp/`) |
 
 ## Configuration
 
@@ -217,7 +216,12 @@ Optional folders (`briefing/`, `blackbox/`, `crew-handover/`, `experiments/`) ·
 
 ## Acknowledgments
 
-[AGENTS.md](https://agents.md) — wire format · [OpenSpec](https://github.com/openspec/openspec) — spec-evolution markers · [Cursor MDC](https://docs.cursor.com) — path-scoped frontmatter · [Letta Code](https://github.com/letta-ai/letta) — promotion-gate pattern · [superpowers](https://github.com/anthropic-experimental/superpowers) — protocol style · [Cline Memory Bank](https://docs.cline.bot) — the pattern that motivated the write gate.
+- [AGENTS.md](https://agents.md) — wire format
+- [OpenSpec](https://github.com/openspec/openspec) — spec-evolution markers
+- [Cursor MDC](https://docs.cursor.com) — path-scoped frontmatter
+- [Letta Code](https://github.com/letta-ai/letta) — promotion-gate pattern
+- [superpowers](https://github.com/anthropic-experimental/superpowers) — protocol style
+- [Cline Memory Bank](https://docs.cline.bot) — the pattern that motivated the write gate
 
 ## License
 
