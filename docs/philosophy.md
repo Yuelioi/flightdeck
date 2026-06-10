@@ -10,7 +10,7 @@ A static notes file (CLAUDE.md, project notes) is append-only — it rots. fligh
 
 - a new mistake → `incidents/` with mandatory root-cause analysis (forbidden phrasings: "forgot", "careless");
 - the same mistake recurs → a promotion gate offers to elevate it to `checklists/`, then to project rules;
-- work ships → `status` advances to `done`, the file moves to `landed/`, no longer authoritative for current state.
+- work ships → `status` advances to `done`; the landing ritual moves it to `archive/` once nothing active references it (`done` alone never auto-archives — status is orthogonal to location), and it stops being authoritative for current state.
 
 The lifecycle is what prevents the junk-drawer failure mode that static rules files always succumb to.
 

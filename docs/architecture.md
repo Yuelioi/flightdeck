@@ -14,8 +14,8 @@ flowchart LR
         Cockpit[cockpit.md<br/>≤80 lines · must-read]
         Rules[rules.md<br/>config + house rules]
         Index[INDEX.md<br/>global status summary]
-        Folders[sketches/ · specs/ · plans/<br/>incidents/ · checklists/<br/>charts/ · debriefs/]
-        Archive[landed/]
+        Folders[sketches/ · specs/ · plans/<br/>incidents/ · checklists/ · docs/<br/>references/ · debriefs/]
+        Archive[archive/]
         Cockpit --- Rules
         Index --- Folders --- Archive
     end

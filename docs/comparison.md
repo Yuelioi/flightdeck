@@ -6,7 +6,7 @@ flightdeck sits **on top of** [AGENTS.md](https://agents.md), not against it, an
 | --- | --- | --- | --- | --- | --- | --- |
 | Static project rules | via emit | ✅ native | — | — | ✅ | — |
 | Session-to-session continuity | ✅ | — | ✅ | — | — | ✅ |
-| Lifecycle model (folder=kind · status · landed) | ✅ | — | — | ✅ | — | — |
+| Lifecycle model (folder=kind · status · archive) | ✅ | — | — | ✅ | — | — |
 | Strict write gate (anti junk-drawer) | ✅ | — | — | — | — | — |
 | Incident / lesson tracking (root-cause) | ✅ | — | — | — | — | — |
 | External review disposition | ✅ | — | — | — | — | — |
