@@ -17,7 +17,7 @@ flightdeck sits **on top of** [AGENTS.md](https://agents.md), not against it, an
 - **AGENTS.md** — the wire format for static rules. flightdeck **emits into** it, doesn't compete with it.
 - **Cline Memory Bank** — raw memory persistence; flightdeck adds lifecycle + write discipline.
 - **OpenSpec** — the closest sibling for spec evolution; flightdeck adopts its `ADDED:` / `MODIFIED:` / `REMOVED:` markers.
-- **Cursor MDC** — a path-scoped frontmatter tag; flightdeck carries MDC frontmatter on incidents / checklists for Cursor interop.
+- **Cursor MDC** — a path-scoped frontmatter pattern; it inspired the `when_to_read` / `applies_to` routing frontmatter on flightdeck's knowledge artifacts (Cursor interop itself goes through the adapter's `.mdc` rule file, not deck frontmatter).
 - **Letta Code** — a skill-library promotion pattern; flightdeck adopts the gate-based incident → checklist promotion.
 
-flightdeck is **opinionated**: write gate before storage, lifecycle before memory, peer reviews before merge. If only static project rules are what you need, **AGENTS.md alone is enough** — flightdeck is for the cases that need continuity and discipline on top.
+flightdeck is **opinionated**: write gate before storage, lifecycle before memory, disposition before adopting review feedback. If only static project rules are what you need, **AGENTS.md alone is enough** — flightdeck is for the cases that need continuity and discipline on top.
