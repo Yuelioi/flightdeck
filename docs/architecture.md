@@ -13,11 +13,10 @@ flowchart LR
         direction TB
         Cockpit[cockpit.md<br/>≤80 lines · must-read]
         Rules[rules.md<br/>config + house rules]
-        Index[INDEX.md<br/>global status summary]
-        Folders[sketches/ · specs/ · plans/<br/>incidents/ · checklists/ · docs/<br/>references/ · debriefs/]
+        Folders[specs/ · plans/ · incidents/<br/>checklists/ · docs/ · references/<br/>each with its own INDEX.md]
         Archive[archive/]
         Cockpit --- Rules
-        Index --- Folders --- Archive
+        Folders --- Archive
     end
 
     style Cockpit fill:#dbeafe,stroke:#2563eb

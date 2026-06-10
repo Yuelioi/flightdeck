@@ -35,20 +35,19 @@
 
 ```
 flightdeck/
-├── cockpit.md          # 必读入口 —— Active focus / Next session / Hanging tasks
+├── cockpit.md          # 必读入口 —— Active focus / 下一步 / Hanging tasks
 ├── rules.md            # 项目配置 —— version + 自由散文 house rules
-├── INDEX.md            # 跨所有文件夹的全局状态汇总
 │
-├── sketches/           # 早期想法、草稿
-├── specs/              # 范围化的设计文档
+├── specs/              # 范围化的设计文档（status: idea = 待启动池）
 ├── plans/              # 分步实施计划
 ├── incidents/          # 教训记录（根因，不许"忘了"）
 ├── checklists/         # 可复用流程
-├── references/         # 导入的外部材料（RFC、竞品代码）
-├── debriefs/           # 外部 review 反馈（原文 + 处置）
 ├── docs/               # 自撰常驻技术资料
-└── archive/            # 完成工作的归档
+├── references/         # 导入的外部材料（RFC、竞品代码）
+└── archive/            # 完成的工作，移出活跃区
 ```
+
+每个知识文件夹各带一份自动重生成的 `INDEX.md`（文件 · status · 一行摘要）—— 没有根级 INDEX。
 
 ### cockpit.md —— 唯一必读文件
 
@@ -60,18 +59,23 @@ flightdeck/
 **Last updated**: 2026-05-28 by alice (shipped Stripe webhook refactor)
 **Active focus**: stabilize Stripe webhook handler — failing edge cases in incidents/
 
-## Next session
+## 进行中
+
+<!-- AUTO:inprogress -->
+- specs/2026-05-26-stripe-hardening.md — active
+<!-- /AUTO -->
+
+## 下一步
 
 1. Reproduce the duplicate-event bug from incidents/stripe-idempotency.md (Case 3).
 2. Decide: idempotency key in DB vs Redis.
-3. Update plans/2026-05-26-stripe-hardening.md Phase 2 with the decision.
 
 ## Hanging tasks
 
 - (none)
 ```
 
-没有 500 行的上下文倾倒 —— 历史内容都在更深一层的文件夹里，按需从 `INDEX.md` 读取。
+没有 500 行的上下文倾倒 —— 历史内容都在更深一层的文件夹里，按需从各文件夹的 `INDEX.md` 读取。
 
 ## 安装
 
@@ -131,7 +135,7 @@ flightdeck/
 |「测试怎么跑？」 | `checklists/` |
 |「来设计个 X」 | `specs/` |
 |「拆成任务」 | `plans/` |
-|「这是 review 反馈」 | `debriefs/`（带处置） |
+|「这是 review 反馈」 | 折进对应 spec 的 `## 评审纪要`（原文留 `tmp/`） |
 
 ## 配置
 

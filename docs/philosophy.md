@@ -22,4 +22,4 @@ The lifecycle is what prevents the junk-drawer failure mode that static rules fi
 
 Session lifecycle, checklists under uncertainty, incident tracking, operator handoffs, controlled autonomy with periodic re-anchoring — these are aviation concepts, used as **structure**, not decoration.
 
-> ✨ **Semantic clarity outranks thematic consistency.** The metaphor is used only where it sharpens operational intent. Folder names are chosen for clarity first — `specs/` and `sketches/` keep neutral names because no aviation term improves them. A word that fits the metaphor but reads confusingly is rejected.
+> ✨ **Semantic clarity outranks thematic consistency.** The metaphor is used only where it sharpens operational intent. Folder names are chosen for clarity first — `specs/`, `plans/`, and `docs/` keep neutral names because no aviation term improves them. A word that fits the metaphor but reads confusingly is rejected.

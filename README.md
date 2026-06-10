@@ -35,20 +35,19 @@ A `flightdeck/` directory your AI reads and writes by convention:
 
 ```
 flightdeck/
-├── cockpit.md          # must-read entry — Active focus / Next session / Hanging tasks
+├── cockpit.md          # must-read entry — Active focus / 下一步 / Hanging tasks
 ├── rules.md            # project config — version + free-prose house rules
-├── INDEX.md            # global status summary across all folders
 │
-├── sketches/           # early ideas, scratchpad
-├── specs/              # scoped design documents
+├── specs/              # scoped design documents (status: idea = the to-start pool)
 ├── plans/              # step-by-step implementation plans
 ├── incidents/          # lessons learned (root-cause, no "forgot")
 ├── checklists/         # repeatable procedures
-├── references/         # imported external material (RFCs, competitor code)
-├── debriefs/           # external review feedback (raw + disposition)
 ├── docs/               # authored standing technical reference
-└── archive/            # archive of completed work
+├── references/         # imported external material (RFCs, competitor code)
+└── archive/            # completed work, moved out of the active area
 ```
+
+Each knowledge folder carries its own auto-regenerated `INDEX.md` (file · status · one-line summary) — there is no root-level INDEX.
 
 ### cockpit.md — the one must-read file
 
@@ -60,18 +59,23 @@ Read first every session, hard-capped at 80 lines:
 **Last updated**: 2026-05-28 by alice (shipped Stripe webhook refactor)
 **Active focus**: stabilize Stripe webhook handler — failing edge cases in incidents/
 
-## Next session
+## 进行中
+
+<!-- AUTO:inprogress -->
+- specs/2026-05-26-stripe-hardening.md — active
+<!-- /AUTO -->
+
+## 下一步
 
 1. Reproduce the duplicate-event bug from incidents/stripe-idempotency.md (Case 3).
 2. Decide: idempotency key in DB vs Redis.
-3. Update plans/2026-05-26-stripe-hardening.md Phase 2 with the decision.
 
 ## Hanging tasks
 
 - (none)
 ```
 
-No 500-line context dump — anything historical is one folder deeper, read from `INDEX.md` on demand.
+No 500-line context dump — anything historical is one folder deeper, read from the folder `INDEX.md` files on demand.
 
 ## Install
 
@@ -131,7 +135,7 @@ Artifact `status` advances **automatically** (idea→active→done). All five ri
 | "how do I run the tests?" | `checklists/` |
 | "let's design X" | `specs/` |
 | "break this into tasks" | `plans/` |
-| "here's review feedback" | `debriefs/` (with disposition) |
+| "here's review feedback" | the reviewed spec's `## 评审纪要` (raw text stays in `tmp/`) |
 
 ## Configuration
 

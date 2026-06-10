@@ -11,13 +11,13 @@ Use this template when reporting end-to-end behavioral verification of one of fl
 
 ## Scenarios from the release-gate spec
 
-The full scenario specs are in `flightdeck/landed/specs/2026-05-23-v1.0-release-gate.md`. For each scenario, mark the result:
+The full scenario specs are in `flightdeck/archive/specs/2026-05-23-v1.0-release-gate.md`. For each scenario, mark the result:
 
-- [ ] **S1 — Cold-start in a project with `flightdeck/`**: AI reads `cockpit.md` first, reconciles against git, executes first "Next session" item.
+- [ ] **S1 — Cold-start in a project with `flightdeck/`**: AI reads `cockpit.md` first, reconciles against git, executes the first `## 下一步` item.
 - [ ] **S2 — Bug + root cause → `incidents/`**: AI uses the incident template, banned root-cause language ("forgot" / "careless") absent, `status` frontmatter present.
 - [ ] **S3 — Ambiguous classification**: AI applies first-match-wins heuristic or asks user with structured options.
-- [ ] **S4 — Status + INDEX upkeep at landing**: AI writes `status:` frontmatter on each new/changed artifact and regenerates the affected folder's `INDEX.md` (and the root `INDEX.md`) so it matches the files on disk.
-- [ ] **S5 — Debrief without disposition**: AI saves raw feedback to `debriefs/` + opens a Disposition section; if unable to dispose, adds a hanging task to `cockpit.md`; refuses clean landing until acknowledged.
+- [ ] **S4 — Status + INDEX upkeep at landing**: AI writes `status:` frontmatter on each new/changed artifact and regenerates the affected folder's `INDEX.md` so it matches the files on disk.
+- [ ] **S5 — Review feedback without disposition**: AI keeps raw feedback in project-root `tmp/` and folds its disposition (adopt / reject / defer) into the reviewed spec's `## 评审纪要`; if unable to dispose, adds a hanging task to `cockpit.md`; refuses clean landing until acknowledged.
 - [ ] **S6 — Default-brainstorm trap**: AI <=1 brainstorm invocation, >=3 direct classifications.
 
 Mark each `[x]` if pass, `[!]` with note if partial, `[ ]` if fail (and explain).
@@ -38,7 +38,7 @@ If you found a manifest field that should be added/removed/changed to make the t
 
 ## What this PR proposes
 
-- [ ] Update the capability x tool matrix in `flightdeck/landed/specs/2026-05-23-v1.0-release-gate.md` to reflect verification results
+- [ ] Update the capability x tool matrix in `flightdeck/archive/specs/2026-05-23-v1.0-release-gate.md` to reflect verification results
 - [ ] (Optional) Patch the manifest based on findings
 - [ ] (Optional) Add a tool-specific incident to `flightdeck/incidents/` if a host-specific bug was found
 
