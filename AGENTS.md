@@ -14,8 +14,7 @@ None.
 ## 下一步
 
 - **alpha 发布收尾（维护者手动）**：已在 main 上，执行 `git push origin main --follow-tags` 即对外可装 v3.0.0-alpha.1；push 后 `git ls-remote --tags origin` 确认 tag 到位。本仓库 AI 绝不 push。
-- **skills 失实清扫已全量收口 ✅**（处置纪要见 [archive/specs/2026-06-10-skills-doc-drift-cleanup.md](flightdeck/archive/specs/2026-06-10-skills-doc-drift-cleanup.md)）。欠账=同步 cache 后新会话跑一次完整 landing 验证（verify 标记会自动浮出）。
-- **Backlog（下一步从这里挑）**：消化 alpha 试用反馈、#1 写门负例（纯 prompt 低风险）、#7 恢复回归测试（待恢复模型稳定再做，首个核心价值行为测试）。
+- **push 后进入 alpha 反馈收集期**：试用反馈逐条折进 specs/ 处置；正式 3.0.0 完善到位再发。
 
 ## Hanging tasks
 
