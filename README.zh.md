@@ -20,6 +20,11 @@
 
 > 你的 AI 助手在两次对话之间会失忆。**flightdeck** 是一套目录约定加一个 skill，给它跨会话的操作连续性 —— 让下一次会话知道你在做什么、为什么、下一步做什么。
 
+## ✨ 3.0 亮点
+
+- **自动着陆 —— 会话自己持久化自己。** 不用记着跑收尾命令：纯状态推进的一轮会静默 checkpoint 看板；产出真知识的一轮会自动软着陆（分类 + 入 INDEX）并以醒目的「已保存」标记收尾；一项工作完成则自动触发 full landing（归档 + 本地 commit）。`/flightdeck:landing` 仍保留为显式收尾入口。
+- **随时关对话 —— 什么都不丢。** 看板（`cockpit.md` + 活跃 plan）在每个任务边界都与真实进度保持一致，干到一半把聊天窗口杀掉也是设计内的安全操作：下一次 `/flightdeck:preflight` 从真实现场接手，而不是从过期快照。
+
 ## TL;DR
 
 ```text
@@ -111,7 +116,7 @@ flightdeck/
 
 全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## 下一步`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
 
-**会话结束** —— 运行 `/flightdeck:landing`。它把新知识分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）、刷新 `cockpit.md`、提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
+**会话结束** —— 通常什么都不用做：flightdeck 在轮末自己着陆。纯状态推进 → 静默 **checkpoint**（看板保持真实）；新知识 → **软着陆**，分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）并打出「已保存」标记，看到它就可以放心关窗口；一项工作完成 → **full landing**（刷新 `cockpit.md`、归档、本地 commit）。想显式收尾就运行 `/flightdeck:landing`。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
 ### 命令
 
