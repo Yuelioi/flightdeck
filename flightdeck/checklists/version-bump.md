@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-06-02
+last_updated: 2026-06-11
 when_to_read: before cutting a new flightdeck release / bumping the version number
 applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.json, CHANGELOG.md, MIGRATION.md, scripts/bump_version.py]
 ---
@@ -26,6 +26,7 @@ It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate t
    - **patch** (`x.y.Z`) — backward-compatible fixes / wording / reliability hardening of existing skills. No new folders, fields, or commands.
    - **minor** (`x.Y.0`) — new backward-compatible capability (new folder, frontmatter field, audit, skill).
    - **major** (`X.0.0`) — breaking change (renamed folder/command, removed field). Post-v1.0 these need a migration note.
+   - **pre-release** (`X.Y.Z-alpha.N` → `-beta.N` → bare `X.Y.Z`) — early-tester cut of an unfinished release; semver sorts it before the final. Script regexes accept the suffix (since v3.0.0-alpha.1). **Never four-part `X.Y.Z.W`** — not valid semver; marketplaces/npm won't parse it.
 2. **Bump the version string in all five manifests** (keep them identical) — or run `uv run scripts/bump_version.py set X.Y.Z`:
    - `.claude-plugin/plugin.json`
    - `.claude-plugin/marketplace.json`
