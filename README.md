@@ -4,6 +4,7 @@
 
 **An operational protocol for AI-assisted engineering sessions.**
 
+[![Version: 3.0.0-alpha.1](https://img.shields.io/badge/version-3.0.0--alpha.1-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -13,6 +14,9 @@
 </div>
 
 ---
+
+> [!WARNING]
+> **`3.0.0-alpha.1` — pre-release for early testers.** 3.0 is a **breaking** release and the new format baseline: decks created by 2.x are **not** auto-migrated — start fresh with `/flightdeck:launch` and hand-copy what's still relevant from your old `cockpit.md`. Format and behavior may still change before the final 3.0.0; don't rely on it for production projects yet. Feedback is the whole point — [issues](https://github.com/Yuelioi/flightdeck/issues) welcome.
 
 > Your AI assistant forgets everything between chats. **flightdeck** is a directory convention plus a skill that gives it operational continuity across sessions — so the next session knows what you were doing, why, and what to do next.
 
@@ -189,7 +193,7 @@ Skill content under [`skills/`](skills/) is **tool-agnostic markdown**; manifest
 <details>
 <summary><b>I have an older <code>flightdeck/</code> — how do I upgrade?</b></summary>
 
-`/flightdeck:walkaround` reads the deck `version` and offers a guided migration — never silent; you confirm before anything moves. `/flightdeck:preflight` only flags a structurally-behind version and points you there (it silently stamps a compatible-but-behind version). See [MIGRATION.md](MIGRATION.md).
+3.0 is the format baseline (version 0) — it ships **no** automatic migration machinery, and decks created by 2.x are not auto-upgraded. Recommended path: create a fresh deck with `/flightdeck:launch`, then hand-copy your old `cockpit.md` content and any still-relevant artifacts. Starting from the first release after 3.0 that changes the deck structure, concrete migration steps will be written into [MIGRATION.md](MIGRATION.md) as needed.
 
 </details>
 

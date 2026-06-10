@@ -70,6 +70,23 @@ class SetTest(unittest.TestCase):
             self.assertEqual(changelog_version(root), "2.3.0")
 
 
+class PrereleaseTest(unittest.TestCase):
+    def test_set_and_check_prerelease_version(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="2.3.0", changelog="3.0.0-alpha.1")
+            set_version(root, "3.0.0-alpha.1")
+            versions = read_versions(root)
+            self.assertEqual(set(versions.values()), {"3.0.0-alpha.1"})
+            self.assertEqual(changelog_version(root), "3.0.0-alpha.1")
+            self.assertEqual(check(root), [])
+
+    def test_set_back_to_release_from_prerelease(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="3.0.0-alpha.1", changelog="3.0.0")
+            set_version(root, "3.0.0")
+            self.assertEqual(set(read_versions(root).values()), {"3.0.0"})
+
+
 class MainTest(unittest.TestCase):
     def test_check_exits_nonzero_on_drift(self):
         with tempfile.TemporaryDirectory() as d:

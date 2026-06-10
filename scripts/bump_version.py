@@ -24,9 +24,11 @@ MANIFESTS = [
     "gemini-extension.json",
 ]
 
-# Only quoted three-part semver — never an unquoted integer schema version.
-VERSION_RE = re.compile(r'("version"\s*:\s*")(\d+\.\d+\.\d+)(")')
-CHANGELOG_RE = re.compile(r"^##\s*\[(\d+\.\d+\.\d+)\]", re.MULTILINE)
+# Only quoted semver (optional pre-release, e.g. 3.0.0-alpha.1) — never an
+# unquoted integer schema version.
+_SEMVER = r"\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?"
+VERSION_RE = re.compile(r'("version"\s*:\s*")(' + _SEMVER + r')(")')
+CHANGELOG_RE = re.compile(r"^##\s*\[(" + _SEMVER + r")\]", re.MULTILINE)
 
 
 def read_versions(root):

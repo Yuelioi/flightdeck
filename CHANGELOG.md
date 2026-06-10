@@ -5,9 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] — Unreleased
+## [3.0.0-alpha.1] — 2026-06-11
 
-自治面收敛 + 主流命名铁律 + 确定性归档判据。**Breaking**：存量 deck 需迁移，见 [MIGRATION.md](MIGRATION.md)。
+3.0 的首个 **alpha 预发布**——邀请早期试用、收集反馈；正式 3.0.0 之前格式与行为仍可能再次破坏性调整，**不要在生产项目上依赖它**。
+
+自治面收敛 + 主流命名铁律 + 确定性归档判据。**Breaking**：3.0 是新的格式基线（第 0 版），不自动迁移 2.x deck——建议用 `/flightdeck:launch` 新建 deck 后手工搬运 cockpit 内容，见 [MIGRATION.md](MIGRATION.md)。
 
 ### Added
 - **`docs/` 文件夹** — 自撰常驻技术资料（区别于 `references/` 导入的外部材料）；knowledge 可按 area 嵌套形成 INDEX-of-INDEXes，撑大型项目。

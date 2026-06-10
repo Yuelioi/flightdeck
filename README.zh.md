@@ -4,6 +4,7 @@
 
 **面向 AI 辅助工程会话的操作协议。**
 
+[![Version: 3.0.0-alpha.1](https://img.shields.io/badge/version-3.0.0--alpha.1-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -13,6 +14,9 @@
 </div>
 
 ---
+
+> [!WARNING]
+> **`3.0.0-alpha.1` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
 
 > 你的 AI 助手在两次对话之间会失忆。**flightdeck** 是一套目录约定加一个 skill，给它跨会话的操作连续性 —— 让下一次会话知道你在做什么、为什么、下一步做什么。
 
@@ -189,7 +193,7 @@ version: <release>       # 唯一的结构化字段
 <details>
 <summary><b>我有个旧的 <code>flightdeck/</code> —— 怎么升级？</b></summary>
 
-`/flightdeck:walkaround` 读 deck 的 `version`、并提示引导式迁移 —— 绝不静默，任何移动前都先征得你同意。`/flightdeck:preflight` 只在版本结构落后时提示并指向它（兼容但落后的版本由它静默 stamp）。见 [MIGRATION.md](MIGRATION.md)。
+3.0 是格式基线（第 0 版）—— **没有**自动迁移机制，2.x 创建的 deck 不会被自动升级。推荐路径：用 `/flightdeck:launch` 新建 deck，把旧 `cockpit.md` 内容和仍有用的工件手工搬过来。从 3.0 之后第一个改变 deck 结构的版本开始，具体迁移步骤会按需写进 [MIGRATION.md](MIGRATION.md)。
 
 </details>
 
