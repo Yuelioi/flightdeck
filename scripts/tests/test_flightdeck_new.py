@@ -57,20 +57,31 @@ class NewHappyPathTest(unittest.TestCase):
             path = new(deck, "incident", slug="oops", title="Oops",
                        when_to_read="before X", applies_to=["a", "b"],
                        date="2026-06-04", regen=False)
-            self.assertEqual(path, deck / "incidents" / "2026-06-04-oops.md")
+            # knowledge is dateless: <topic>.md, never a date prefix (folder-semantics)
+            self.assertEqual(path, deck / "incidents" / "oops.md")
             text = path.read_text(encoding="utf-8")
             self.assertIn("status: active", text)           # knowledge default
             self.assertIn("when_to_read: before X", text)
             self.assertIn("applies_to: [a, b]", text)
 
-    def test_chart_falls_in_references_folder(self):
+    def test_reference_falls_in_references_folder_dateless(self):
         with tempfile.TemporaryDirectory() as d:
             deck = _deck(d)
-            path = new(deck, "chart", slug="arch-overview", title="Arch Overview",
+            path = new(deck, "reference", slug="arch-overview", title="Arch Overview",
                        when_to_read="when designing", applies_to=["arch"],
                        date="2026-06-05", regen=False)
-            self.assertEqual(path, deck / "references" / "2026-06-05-arch-overview.md")
+            # knowledge is dateless: <source>-<topic>.md per folder-semantics
+            self.assertEqual(path, deck / "references" / "arch-overview.md")
             self.assertNotIn("charts", str(path))
+
+    def test_chart_kind_is_retired(self):
+        """naming iron-rule: the metaphor kind name `chart` died with charts/ — only `reference`."""
+        self.assertNotIn("chart", KIND_FOLDER)
+        with tempfile.TemporaryDirectory() as d:
+            deck = _deck(d)
+            with self.assertRaises(ValueError):
+                new(deck, "chart", slug="x", title="X",
+                    when_to_read="w", applies_to=["a"], date="2026-06-05", regen=False)
 
     def test_doc_kind_falls_in_docs_dateless(self):
         with tempfile.TemporaryDirectory() as d:

@@ -9,13 +9,13 @@ As of 3.x, both `/flightdeck:launch` (first-time deck creation) and `install --s
 | Concept | What it means |
 | --- | --- |
 | **Full layout** (what init creates) | all folders (`specs/ plans/ incidents/ checklists/ docs/ references/`), each with its `INDEX.md`, + `cockpit.md` + `rules.md`. `archive/` is created on demand at first land — not pre-shipped |
-| **Minimal contract** (validation floor) | `rules.md` (+ `version`) + `cockpit.md` must exist (walkaround CRITICAL if `rules.md`/`version` missing) — the *floor*, not a scaffold variant |
+| **Minimal contract** (validation floor) | `rules.md` (+ `version`) + `cockpit.md` must exist — the *floor*, not a scaffold variant (a legal deck always has them: `launch` copies the scaffold verbatim) |
 
 **Empty is the normal initial state.** A freshly scaffolded deck has empty folders + empty `INDEX.md` files — expected, not an anti-pattern. Under the full layout a **missing** known folder is the anomaly (walkaround flags it); an **empty-but-present** folder / `INDEX.md` is fine and never flagged. (This reverses the pre-3.x "add folders on demand" guidance.)
 
 ## Routing model
 
-**Flightdeck is graph-routed, not filesystem-routed.** A file is "active" only if it is reachable from some entry — `cockpit.md`, `INDEX.md`, or `rules.md`. **A file not reachable from any entry effectively does not exist** (no session will ever read it). `walkaround` audits reachability.
+**Flightdeck is graph-routed, not filesystem-routed.** A file is "active" only if it is reachable from some entry — `cockpit.md`, `rules.md`, or a folder `INDEX.md`. **A file not reachable from any entry effectively does not exist** (no session will ever read it). `walkaround` audits reachability.
 
 Reachability edges are markdown links from an entry. Custom folders / root files are allowed — flightdeck favors extensible conventions over a locked taxonomy — **but they must be reachable from an entry**, or `walkaround` flags them as orphans.
 
@@ -41,7 +41,6 @@ The common mistake is keeping an evergreen reference in `specs/` or `plans/`. A 
 flightdeck/
 ├── cockpit.md          # The single must-read entry (≤80 lines): focus / next / hanging
 ├── rules.md            # Mandatory file (minimal contract); content optional — read first by every entry skill
-├── INDEX.md            # Root index: subfolder directory + global status summary
 │
 ├── specs/              # Designs & ideas (status: idea / active / done)
 │   └── INDEX.md
@@ -78,7 +77,7 @@ Contains:
 
 ### `rules.md` — project config (mandatory file, optional content)
 
-Read first by every entry skill. As of 3.0 it carries just `version` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit/scripts from `.git` / `AGENTS.md` / runtime presence), decided by skill judgment (landing's archive call), or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the minimal contract — `walkaround` CRITICAL if `rules.md`/`version` missing) and must carry `version`; its **content** is optional — a minimal `rules.md` = the built-in defaults (local commit auto, push asks; all rituals self-invoke; landing archives by judgment). Full schema: [templates.md § rules.md](templates.md#rulesmd).
+Read first by every entry skill. As of 3.0 it carries just `version` + free-prose house rules (`### Project conventions` + `### Autonomy overrides`). Most behavior is inferred (git/emit/scripts from `.git` / `AGENTS.md` / runtime presence), decided by skill judgment (landing's archive call), or defaulted and overridden via the `### Autonomy overrides` segment — see [protocol § Rule resolution order](protocol.md#rule-resolution-order). The **file** is mandatory (part of the minimal contract) and must carry `version`; its **content** is optional — a minimal `rules.md` = the built-in defaults (local commit auto, push asks; all rituals self-invoke; landing archives by judgment). Full schema: [templates.md § rules.md](templates.md#rulesmd).
 
 ### No separate landing log
 

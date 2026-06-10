@@ -72,7 +72,9 @@ Step 3b: Graduate finish (landing = primary path).
            source spec.
          - Remove the source `specs/` file; update both `specs/INDEX` and `docs/INDEX`.
          Idempotency key = source file still in `specs/`. Once moved, the key is gone;
-         re-runs are safe no-ops. Preflight is the compensating path if landing didn't run.
+         re-runs are safe no-ops. A missed window is caught by the next landing's rescan
+         (this step walks every `graduate: true` done spec still in `specs/`, not just
+         this session's).
 
 Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单仪式).
          stale 翻转只在此退场步骤执行；preflight 入场不再翻 stale。
@@ -390,9 +392,9 @@ Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge
 
 **Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
 
-**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's Step 4 uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs Step 4's board-sync and skips Steps 1–3 and 5–7 (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full-vs-checkpoint)).
+**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's Step 4 uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs Step 4's board-sync and skips Steps 1–3 and 5–7 (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
 
-**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## 进行中` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## 下一步`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). (Hook delivery is live-verified on Claude Code; Codex/Gemini/Cursor are **pending Phase 0 live verification** — until then those hosts' AUTO regions also ride the next `landing` / `status` / `checkpoint` regen as a floor.) This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
+**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## 进行中` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## 下一步`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
 
 ## Land Routine
 

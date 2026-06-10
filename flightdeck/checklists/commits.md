@@ -82,7 +82,7 @@ BREAKING CHANGE: /login 响应去掉 token 字段, 改 accessToken + refreshToke
 - **Bash 工具** → 真 heredoc(`git commit -F - <<'EOF' … EOF`)或 `-F <file>`; **别用 `@'...'@`** —— bash 没有 here-string, `@` 会当字面量混进 subject(`@ chore: …`).
 - 最稳, 跨 shell 通用: 把信息写进文件, `git commit -F <file>`.
 
-→ 错题本 [incidents/powershell-herestring-in-bash-tool.md](../incidents/powershell-herestring-in-bash-tool.md)(已 3 次, 由 promotion gate 升级到此).
+→ 错题本 [archive/incidents/powershell-herestring-in-bash-tool.md](../archive/incidents/powershell-herestring-in-bash-tool.md)(已 3 次, 由 promotion gate 升级到此后退役归档).
 
 ### 暂存前扫 `RM`/`MM`（重命名+内容改动）
 

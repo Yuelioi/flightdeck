@@ -10,7 +10,7 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 
 ```markdown
 ---
-version: 3.0             # REQUIRED — flightdeck release this deck conforms to (walkaround reads/writes this)
+version: 3.0             # REQUIRED — static identity stamp written by launch (future migration anchor; no ritual reads it at runtime)
 ---
 
 ## House rules
@@ -33,7 +33,7 @@ has AGENTS.md but don't auto-regen
 ### Rules
 
 - **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
-- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to; **`walkaround` is the only command that reads and writes `version`** (version bump + migration). `preflight` does not read or report `version`.
+- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to — a static stamp written by `launch` at deck creation, deliberately kept as the future (3.0→3.1) migration anchor. **No ritual reads or bumps it at runtime.**
 - **No structured toggles remain (3.0).** `version` is the sole frontmatter field; everything else is inference / default / skill-judgment / House-Rule phrase:
   - `git` → inferred: deck is git-backed iff an ancestor `.git` exists **and** the deck is not gitignored (`git -C <deck> check-ignore .` empty); a gitignored `flightdeck/` is **no-git for deck ops** even inside a git repo. House Rule `this deck doesn't use git` overrides.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
@@ -43,7 +43,6 @@ has AGENTS.md but don't auto-regen
   - `scripts` → **inferred** from runtime availability (`uv`/`python` reachable → use the bundled `flightdeck_index.py` fast path; else the markdown fallback, which is always valid). No toggle.
   - folder suppression → **none** (no `disabled_folders`); empty/unused folders are simply not flagged by `walkaround`.
 - **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
-- **Compatibility**: pre-3.0 keys (`git`/`emit_agents_md`/`disabled_gates`/`disabled_folders`/`model_invocable`/`status_auto`/`commit_mode`) are **read but ignored through 3.x**, removed at 4.0; `walkaround` offers structural migration for a deck still carrying them.
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
 

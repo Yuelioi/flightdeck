@@ -488,7 +488,11 @@ class LintAndMainTest(unittest.TestCase):
         from contextlib import redirect_stdout
 
         with tempfile.TemporaryDirectory() as d:
-            deck = Path(d)
+            # nest the deck so main()'s default repo_root (deck.parent) is this
+            # empty temp dir — not the shared %TEMP%, where stray .md files
+            # from other sessions would leak dangling-ref findings in.
+            deck = Path(d) / "flightdeck"
+            deck.mkdir()
             (deck / "cockpit.md").write_text(FULL_COCKPIT, encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):

@@ -31,7 +31,7 @@ Run all 13 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 5** — 查各 artifact 文件夹的 `INDEX.md` → flag 缺 INDEX（WARNING）、文件无对应行（WARNING）、行对应文件不存在（WARNING）、行 status 与实际 frontmatter 不符（WARNING）；检查嵌套 knowledge area 子目录的 INDEX 及父 INDEX 引用行。快速路径：`flightdeck_index.py --check <deck>`。
 
-**Audit 6** — 查 `archive/` 下各带 `status` 的 `.md` → flag workflow 文件非 `done`（WARNING）、knowledge 文件非 `obsolete`（WARNING；pre-3.0 遗留 `superseded` 可容忍）。
+**Audit 6** — 查 `archive/` 下各带 `status` 的 `.md` → flag workflow 文件非 `done`（WARNING）、knowledge 文件非 `obsolete`（WARNING）。
 
 **Audit 7** — 查 `flightdeck/` 及 repo 根 `*.md` 内所有非 HTTP、非纯锚点的 markdown 链接 → flag 目标文件不存在者（CRITICAL；报 source file:line + 断链路径）。
 

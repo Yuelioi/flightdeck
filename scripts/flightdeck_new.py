@@ -1,8 +1,9 @@
 """flightdeck_new.py — create a new deck artifact with correct frontmatter + naming + regen.
 
 The mechanical "authoring entry": instead of an agent re-deriving where a spec/plan/
-incident/checklist/chart goes, what frontmatter it needs, and remembering to regen the
-INDEX/cockpit, this stamps it deterministically. Mirrors flightdeck_init.py. Pure stdlib.
+incident/checklist/reference/doc goes, what frontmatter it needs, and remembering to
+regen the INDEX/cockpit, this stamps it deterministically. Mirrors flightdeck_init.py.
+Pure stdlib.
 """
 
 import argparse
@@ -18,16 +19,16 @@ KIND_FOLDER = {
     "plan": "plans",
     "incident": "incidents",
     "checklist": "checklists",
-    "chart": "references",
+    "reference": "references",
     "doc": "docs",
 }
 WORKFLOW = {"spec", "plan"}
-KNOWLEDGE = {"incident", "checklist", "chart", "doc"}
-DATELESS = {"doc"}   # always <slug>.md, never date-prefixed (standing reference)
+KNOWLEDGE = {"incident", "checklist", "reference", "doc"}
+DATELESS = KNOWLEDGE   # knowledge is always <slug>.md, never date-prefixed (standing reference, not a log — see folder-semantics)
 SLUG_RE = re.compile(r"^[a-z0-9-]+$")
 _DEFAULT_STATUS = {
     "spec": "idea", "plan": "idea",
-    "incident": "active", "checklist": "active", "chart": "active", "doc": "active",
+    "incident": "active", "checklist": "active", "reference": "active", "doc": "active",
 }
 
 

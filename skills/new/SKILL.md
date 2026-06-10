@@ -1,6 +1,6 @@
 ---
 name: new
-description: Create a new flightdeck deck artifact (spec / plan / incident / checklist / chart / doc) with correct per-kind frontmatter, naming, and auto-regenerated INDEX/cockpit — use this instead of hand-writing the file. Triggered by /flightdeck:new.
+description: Create a new flightdeck deck artifact (spec / plan / incident / checklist / reference / doc) with correct per-kind frontmatter, naming, and auto-regenerated INDEX/cockpit — use this instead of hand-writing the file. Triggered by /flightdeck:new.
 ---
 
 # Flightdeck New — author a deck artifact
@@ -35,7 +35,7 @@ It prints the created path. Then write the artifact body into that file.
 | plan | `plans/` |
 | incident | `incidents/` |
 | checklist | `checklists/` |
-| chart | `references/` |
+| reference | `references/` |
 | doc | `docs/` |
 
 **Naming:** `[<date>-]<slug>.md`. Add the `<YYYY-MM-DD>-` prefix **iff `status != idea`**;
@@ -47,7 +47,7 @@ a title: drop non-ascii, spaces → `-`, lowercase, keep `a-z0-9-`.
 
 **Per-kind frontmatter**
 - workflow (`spec` / `plan`): `status` + **`summary` (required** — it drives the INDEX row; `flightdeck_index` needs it) + `last_updated` (omit for `idea`) + `implements:` (plan, optional).
-- knowledge (`incident` / `checklist` / `chart` / `doc`): `status` + `when_to_read` + `applies_to: [..]` + `last_updated` (all required); `summary` optional.
+- knowledge (`incident` / `checklist` / `reference` / `doc`): `status` + `when_to_read` + `applies_to: [..]` + `last_updated` (all required); `summary` optional.
 
 **Default status:** workflow → `idea` (park; flip to `active` to start — that adds the date prefix). knowledge → `active` (knowledge is consumable the moment it exists; that's why its default differs from workflow's).
 

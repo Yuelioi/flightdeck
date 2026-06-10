@@ -49,8 +49,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 
 After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when a script runtime is available (inferred — `uv`/`python` reachable), `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
 
-1. Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs).
-2. Recompute **only that folder's** count line in the root `flightdeck/INDEX.md` `<!-- AUTO -->` region. Touch no other folder.
+Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs). Touch no other folder.
 
 (The script fast path regenerates the folder INDEX **and** the cockpit `## 进行中` block in one run — `flightdeck_index.py <deck>` covers Step 5a too.)
 
