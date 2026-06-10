@@ -105,7 +105,7 @@ current: Task 3 — wire the checkpoint subpath into landing SKILL.md
 status: active            # active / stale / obsolete
                           # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
-applies_to: [<tag>, ...]
+applies_to: [<tag>, <source/path>, ...]   # 混装：纯词=路由标签；含 / 的条目=源路径，参与 stale 检测（要保鲜至少放一条路径）
 last_updated: YYYY-MM-DD
 # optional: when_to_update: <什么样的改动会让我失效>
 #   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
@@ -127,7 +127,7 @@ last_updated: YYYY-MM-DD
 status: active            # active / stale / obsolete
                           # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
 when_to_read: <one-line trigger>
-applies_to: [<tag>, ...]
+applies_to: [<tag>, <source/path>, ...]   # 混装：纯词=路由标签；含 / 的条目=源路径，参与 stale 检测（要保鲜至少放一条路径）
 last_updated: YYYY-MM-DD
 summary: <one-line gist>  # optional but recommended; drives INDEX row
 # optional: when_to_update: <什么样的改动会让我失效>
@@ -234,6 +234,7 @@ The specific next-time action. Not "be careful". Concrete behavior or check.
   - `when_to_read: "before designing a recursive parser"` / `applies_to: [parser, recursion, stack-depth]`
   - `when_to_read: "before adding a new migration"` / `applies_to: [migration, schema, postgres]`
   - Keep tags **short and concrete** — `[parser, recursion]` beats `[code-quality, architecture]`. Generic tags don't help AI choose.
+  - **Path entries opt into stale detection** — an `applies_to` entry containing `/` (e.g. `src/parser/lexer.py`) is treated as a source path and prefix-matched against changed paths at landing; tags-only = no stale detection for this artifact.
 - **Frontmatter `last_updated`**: bump on every meaningful change (Case append / status flip / advice rewrite). Lets AI judge staleness: a `last_updated` 2 years ago about a removed module is probably obsolete — promote to `status: obsolete` or delete. Lets users sort by recency when triaging.
 
 ---

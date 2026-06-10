@@ -82,11 +82,11 @@ Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单
          Run: `flightdeck_index.py <deck> --changed-since-anchor`
          (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
          worktree uncommitted changes).
-         将返回的变更路径与每个 `docs/` + 知识件 `applies_to` 字段声明的源路径
-         做集合交集——命中即翻 stale。**不读文档全文、不求值 `when_to_update` 作
-         为运行时条件**：`when_to_update` 是给人看的理由；runtime 判断用 `applies_to`
-         路径集。
-         For each knowledge artifact whose `applies_to` paths intersect the changed set:
+         将返回的变更路径与每个 `docs/` + 知识件 `applies_to` 中的**路径条目**
+         （含 `/` 的条目，前缀匹配；纯词标签只做路由、不参与）做集合交集——
+         命中即翻 stale。**不读文档全文、不求值 `when_to_update` 作为运行时条件**：
+         `when_to_update` 是给人看的理由；runtime 判断用 `applies_to` 路径条目。
+         For each knowledge artifact whose `applies_to` path entries intersect the changed set:
          - Auto-flip `status: stale` in its frontmatter (no pre-ask — stale is
            reversible, local, purely a warning; "docs quietly lying" is the worst outcome).
          - Idempotent: already-`stale` = no-op.
@@ -392,7 +392,7 @@ Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge
 
 **Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
 
-**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's Step 4 uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs Step 4's board-sync and skips Steps 1–3 and 5–7 (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
+**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's cockpit board-sync step uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs only that board-sync step and skips everything else (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
 
 **The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## 进行中` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## 下一步`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
 

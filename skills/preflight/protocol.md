@@ -75,7 +75,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `supersedes` | workflow + knowledge | optional | grep (traceability only — NOT an archival-pinning edge) | author/status | dangling-edge INFO (optional) |
 | `related` | workflow | optional | grep | author | dangling-edge INFO (optional) |
 | `when_to_read` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
-| `applies_to` | incidents/checklists/docs/references | **required** | preflight routing | author | Audit 2 |
+| `applies_to` | incidents/checklists/docs/references | **required** | preflight routing + landing stale detection (mixed list: plain words = routing tags; entries containing `/` = source paths, prefix-matched against changed paths) | author | Audit 2 |
 | `when_to_update` | docs/references (knowledge) | recommended for graduate-out docs; optional otherwise | humans (the stale *reason*; runtime stale detection matches `applies_to` paths) | author (set at graduate time) | flag if absent on a graduate-tagged doc |
 | `skip_when` | incidents/checklists | optional | match-time negative routing | author | not enforced |
 | `recurrences` | incidents | optional (default 1) | INDEX-row render + promotion gate | landing/status (auto-bump on a clear recurrence) | int ≥ 1; ≈ 1 + `[Case N]` count |
@@ -255,7 +255,7 @@ Knowledge files (incidents / checklists / docs / references) **MUST** carry fron
 
 ### Stale detection (`when_to_update` + `applies_to` paths, 退场单仪式)
 
-Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong") — the human-facing *reason*, not a runtime condition. The runtime trigger is mechanical: the exit ritual intersects the changed paths with the artifact's `applies_to` source paths; a hit auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode).
+Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong") — the human-facing *reason*, not a runtime condition. The runtime trigger is mechanical: the exit ritual intersects the changed paths with the artifact's `applies_to` **path entries** (the entries containing `/` — prefix match; plain-word tags are routing-only and never match a path); a hit auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode). A knowledge artifact that wants stale freshness must therefore list **at least one source-path entry** in `applies_to`; a tags-only artifact simply opts out of stale detection.
 
 `stale` covers **两个待复核来源** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠待复核` vs `⚠未验证`).
 
@@ -343,7 +343,7 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 
 The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
 
-Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's Step-4 board-sync and writes nothing else (no INDEX, no archive, no commit). `preflight` stays read-only; checkpoint never runs at entry.
+Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's cockpit board-sync step and writes nothing else (no INDEX, no archive, no commit). `preflight` stays read-only; checkpoint never runs at entry.
 
 ## Write gate
 

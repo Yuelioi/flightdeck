@@ -1,6 +1,7 @@
 ---
-status: active
+status: done
 last_updated: 2026-06-10
+verify: 同步 cache 后新会话跑一次完整 /flightdeck:landing，确认瘦身后清单 0–11 无缺步、模式表照常生效
 summary: 新模型全量 review skills/ 发现 6 组失实/矛盾：root INDEX 残留引用、hook 相位4 已实证但仍标 pending、preflight 补偿路径残留违反纯读零写、version/walkaround 权责矛盾、pre-3.0 向后兼容文案残留违反 descope 基线、new 的 kind 清单与 chart 命名不一致；另 3 项设计层疑点（applies_to tags vs paths、landing SKILL 超重、断锚点）
 ---
 
@@ -87,6 +88,6 @@ summary: 新模型全量 review skills/ 发现 6 组失实/矛盾：root INDEX �
 
 - **已修**：A1–A7 全部 + B3 前两项（断锚点、preflight git 推断措辞）。A6 采用 kind 改名 `reference`（含 `flightdeck_new.py` + 契约测试 + README 双语 + emit 模板句重写）；A7 顺带修正 `DATELESS = KNOWLEDGE`。emit 模板那句改为「Don't hand-write deck artifacts or hand-derive their paths」，与 doc kind 不再矛盾。
 - **顺带修**：`test_flightdeck_lint.py::test_main_exits_zero_when_clean` 测试隔离缺陷（deck 直接建在 `%TEMP%` 根、`main()` 默认 `repo_root=deck.parent` 扫到共享 Temp 的杂散 md）——deck 嵌套一层隔离；cockpit 与 `checklists/commits.md` 两条真断链（后者指向已归档 incident，改指 archive 路径）。
-- **未动**：B3 第三项（landing 步骤编号顺序）——纯观感，重排会牵动文内交叉引用，不值得。
-- **遗留**：B1（applies_to tags vs paths 双重语义）待单独讨论；B2（landing SKILL 瘦身）后置。二者清掉前本 spec 不翻 done。
-- **环境记录**：`test_hooks.py` 17 个失败 = 本机 PATH 把 bash 解析到 WSL（System32），见 [incidents/wsl-bash-shadows-git-bash-in-tests.md](../incidents/wsl-bash-shadows-git-bash-in-tests.md)；其余 138 测试全绿。
+- **B1 定案（第二轮）**：`applies_to` 允许混装「路由标签 + 源路径」——含 `/` 的条目=源路径、参与 stale 检测（前缀匹配变更路径）；纯词条目只做路由；要保鲜至少放一条路径条目。最小成文化、不加新字段。落点：protocol 字段表 + § Stale detection、exit-ritual Step 3c、templates 两处 frontmatter 注释 + incident rules、deck `docs/descope-baseline.md`。
+- **B2 完成（第二轮）**：`landing/SKILL.md` 整体重写——113 行压至约 75 行，细则全部指针化归 exit-ritual；步骤 0–11 顺序编号（B3 第三项的 3z/3a 乱序随之消失）；保住外部引用的两个标题锚点（`#modes--full--soft-landing--checkpoint`、`#recurrence-sweep-wiring`）；exit-ritual/protocol 两处按编号引用 board-sync 的句子改按名引用，防再漂移。
+- **环境记录**：`test_hooks.py` 17 个失败 = 本机 PATH 把 bash 解析到 WSL（System32），见 [incidents/wsl-bash-shadows-git-bash-in-tests.md](../incidents/wsl-bash-shadows-git-bash-in-tests.md)；其余 138 测试全绿、`--check` clean。
