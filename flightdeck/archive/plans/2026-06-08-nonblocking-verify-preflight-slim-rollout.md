@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 把'验证非阻塞+preflight瘦身'spec逐文件落地：相位1 脚本TDD（flightdeck_index.py 加 --verify-pending 子命令 + format_row 按 verify 渲染 ⚠未验证/⚠待复核 + 测试）→相位2 治理文案契约（protocol/templates 定 verify 字段语义、stale 拓宽、done 语义、per-kind 通过失败）→相位3 仪式 skill（exit-ritual 门重写+扫描浮出、landing 3a3c+archivable、status done+verify、preflight 扫描+瘦身C+docs计数D）→相位4 套用 hook spec+plan 打 verify+归档清看板 + resync 后新会话 live 实证（停地板）
-last_updated: 2026-06-08
-implements: specs/2026-06-08-nonblocking-verify-preflight-slim.md
+last_updated: 2026-06-10
+implements: archive/specs/2026-06-08-nonblocking-verify-preflight-slim.md
 ---
 
 # 验证非阻塞 + preflight 瘦身 rollout（逐文件实施）

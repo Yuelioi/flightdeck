@@ -1,8 +1,7 @@
 ---
 status: done
 summary: 把 hook-primary 大重构落地的逐文件实施：相位1 机制（Codex/Gemini config + Cursor stop + 脚本 project-dir/emit 四家泛化 + HOOK_DEBUG + 自动化脚本测试）→ 相位2 文案（删 why-no-hooks + 引用清理、bootstrap 三链路、exit-ritual board-AUTO 移出 agent、preflight/protocol/landing/status/session-flow hook-primary 重写、保行为紧致 diff 自检）→ 相位3 spec 收编（auto-land 标 superseded、两 rollout 并入）→ 相位4 每家 Phase0 live 实证门（resync 后新会话，未过停地板）
-last_updated: 2026-06-08
-verify: 相位4 各家 live 实证（resync 后新会话）
+last_updated: 2026-06-10
 implements: archive/specs/2026-06-07-hook-primary-refactor.md
 supersedes: archive/plans/2026-06-06-auto-land-executor-rollout.md
 ---

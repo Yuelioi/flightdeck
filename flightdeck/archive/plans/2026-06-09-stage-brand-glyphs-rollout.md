@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: 把每命令品牌图标 spec 逐落点落地：protocol.md 建权威字形表 → 7 命令各改运行时报告行加 emoji（launch🛠️/preflight🛫/walkaround🔍/status🔄/landing🛬/new✍️/emit🌉）→ 末轮一致性核对（字形↔表三列、scaffolds/脚本零改动 grep）+ 目标终端目视；纯 SKILL.md/protocol.md prose 编辑，无脚本/测试改动
-last_updated: 2026-06-09
-implements: specs/2026-06-08-stage-brand-glyphs.md
+last_updated: 2026-06-10
+implements: archive/specs/2026-06-08-stage-brand-glyphs.md
 ---
 
 # 每命令品牌图标——逐落点落地

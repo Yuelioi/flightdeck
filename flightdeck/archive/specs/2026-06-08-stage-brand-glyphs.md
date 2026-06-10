@@ -1,7 +1,7 @@
 ---
-status: active
+status: done
 summary: 给 7 个 flightdeck 阶段各配一枚彩色 emoji 品牌图标（🛫preflight/🛬landing/🔍walkaround/✍️new/🔄status/🛠️launch/🌉emit-agents），加在各 skill 主报告/完成行；字形映射表落 skills/preflight/protocol.md 作文档级单一真相源；✈️ 留作整体 wordmark；scaffolds/模板/脚本/测试不动（横幅是模型 prose）
-last_updated: 2026-06-08
+last_updated: 2026-06-10
 ---
 
 # 每阶段品牌图标（彩色 emoji 套 + protocol.md 单一真相源）
