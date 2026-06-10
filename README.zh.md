@@ -173,6 +173,22 @@ version: <release>       # 唯一的结构化字段
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 
+## 横向对比
+
+flightdeck 架在 [AGENTS.md](https://agents.md) **之上**而非与之竞争，并补上裸记忆工具没有的生命周期 + 写入纪律：
+
+| | flightdeck | [AGENTS.md](https://agents.md) | Cline Memory Bank | OpenSpec | Cursor MDC | Letta Code |
+| --- | --- | --- | --- | --- | --- | --- |
+| 静态项目规则 | 经 emit | ✅ 原生 | — | — | ✅ | — |
+| 跨会话接续 | ✅ | — | ✅ | — | — | ✅ |
+| 生命周期模型（文件夹=类型 · status · archive） | ✅ | — | — | ✅ | — | — |
+| 严格写入门控（防垃圾抽屉） | ✅ | — | — | — | — | — |
+| 错题/教训追踪（根因） | ✅ | — | — | — | — | — |
+| 外部评审处置 | ✅ | — | — | — | — | — |
+| INDEX 优先省 token | ✅ | — | — | — | — | — |
+| 单一显式入口（`/preflight`） | ✅ | — | — | — | — | — |
+| 工具无关（markdown + 文件系统） | ✅ | ✅ | 部分 | ✅ | 仅 Cursor | — |
+
 ## 兼容性
 
 | 工具 | 状态 | Manifest |
@@ -202,7 +218,7 @@ version: <release>       # 唯一的结构化字段
 
 ## 文档
 
-**深入指南** —— 见 [`docs/`](docs/)：[架构](docs/architecture.md) · [设计哲学](docs/philosophy.md) · [横向对比](docs/comparison.md)
+**深入指南** —— 见 [`docs/`](docs/)：[架构](docs/architecture.md) · [设计哲学](docs/philosophy.md)
 
 **协议参考**（canonical，AI 向）：[protocol.md](skills/preflight/protocol.md) · [文件夹语义](skills/preflight/folder-semantics.md) · [模板](skills/preflight/templates.md) · [landing 仪式](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 

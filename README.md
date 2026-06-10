@@ -173,6 +173,22 @@ Most "AI memory" systems fail by saving everything — the signal drowns in a ju
 
 > ✨ Semantic clarity outranks thematic consistency — the aviation metaphor is used only where it sharpens intent, never as a theme.
 
+## How it compares
+
+flightdeck sits **on top of** [AGENTS.md](https://agents.md), not against it, and adds the lifecycle + write discipline that raw memory tools don't have:
+
+| | flightdeck | [AGENTS.md](https://agents.md) | Cline Memory Bank | OpenSpec | Cursor MDC | Letta Code |
+| --- | --- | --- | --- | --- | --- | --- |
+| Static project rules | via emit | ✅ native | — | — | ✅ | — |
+| Session-to-session continuity | ✅ | — | ✅ | — | — | ✅ |
+| Lifecycle model (folder=kind · status · archive) | ✅ | — | — | ✅ | — | — |
+| Strict write gate (anti junk-drawer) | ✅ | — | — | — | — | — |
+| Incident / lesson tracking (root-cause) | ✅ | — | — | — | — | — |
+| External review disposition | ✅ | — | — | — | — | — |
+| INDEX-first token saving | ✅ | — | — | — | — | — |
+| Single explicit entry (`/preflight`) | ✅ | — | — | — | — | — |
+| Tool-agnostic (markdown + filesystem) | ✅ | ✅ | partial | ✅ | Cursor-only | — |
+
 ## Compatibility
 
 | Tool | Status | Manifest |
@@ -202,7 +218,7 @@ Skill content under [`skills/`](skills/) is **tool-agnostic markdown**; manifest
 
 ## Documentation
 
-**Guides** — go deeper in [`docs/`](docs/): [Architecture](docs/architecture.md) · [Design philosophy](docs/philosophy.md) · [How it compares](docs/comparison.md)
+**Guides** — go deeper in [`docs/`](docs/): [Architecture](docs/architecture.md) · [Design philosophy](docs/philosophy.md)
 
 **Protocol reference** (canonical, AI-facing): [protocol.md](skills/preflight/protocol.md) · [folder semantics](skills/preflight/folder-semantics.md) · [templates](skills/preflight/templates.md) · [the landing ritual](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
 
