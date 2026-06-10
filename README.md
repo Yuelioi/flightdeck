@@ -22,8 +22,8 @@
 
 ## ✨ 3.0 highlights
 
-- **Auto-landing — sessions persist themselves.** No wrap-up command to remember: a state-only turn silently checkpoints the board; a turn that produced real knowledge soft-lands it (classified + indexed) and ends with a visible 「已保存 (saved)」 marker; a finished item triggers a full landing (archive + local commit) on its own. `/flightdeck:landing` remains as the explicit wrap-up.
-- **Close the conversation anytime — nothing is lost.** The board (`cockpit.md` + the active plan) is kept equal to actual progress at every task boundary, so killing the chat mid-work is safe by design: the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
+- **Auto-landing — real increments persist themselves.** When a turn produces something worth keeping, there's no wrap-up command to remember: new knowledge soft-lands (classified + indexed) and ends with a visible 「已保存 (saved)」 marker; a finished item triggers a full landing (archive + local commit) on its own. A small turn with nothing worth persisting lands nothing — silence is by design. `/flightdeck:landing` remains as the explicit wrap-up.
+- **See the marker, close the window — nothing is lost.** The 「已保存」 marker / landing output is the signal that board and knowledge are on disk; from there, killing the chat is safe: the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
 
 ## TL;DR
 
@@ -116,7 +116,7 @@ You don't scaffold the deck by hand — run `/flightdeck:launch` once and it cre
 
 On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
 
-**Session end** — usually nothing: flightdeck lands itself at end-of-turn. State-only progress → a silent **checkpoint** (board stays true); new knowledge → a **soft-landing** that classifies it (bug → `incidents/`, procedure → `checklists/`, one-off → discard) and prints 「已保存」 so you know it's safe to close; a finished item → a **full landing** (refresh `cockpit.md`, archive, local commit). Run `/flightdeck:landing` to force the full wrap-up explicitly. The next session — even a different AI or developer — picks up exactly here.
+**Session end** — when a turn produced a real increment, flightdeck lands it at end-of-turn on its own. State-only progress → a silent **checkpoint** (board stays true); new knowledge → a **soft-landing** that classifies it (bug → `incidents/`, procedure → `checklists/`, one-off → discard) and prints 「已保存」 — the visible signal it's safe to close; a finished item → a **full landing** (refresh `cockpit.md`, archive, local commit). A small turn with no increment lands nothing. Run `/flightdeck:landing` to force the full wrap-up explicitly. The next session — even a different AI or developer — picks up exactly here.
 
 ### Commands
 
