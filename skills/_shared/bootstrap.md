@@ -5,11 +5,16 @@ This project uses **flightdeck** — a `flightdeck/` deck is present at the proj
 (`Active focus`, `## In Progress`, `## Next`) and the folder `INDEX.md` files, then report the
 next step. You are already in handoff mode; the user does NOT need to type `/flightdeck:preflight`.
 
-**On exit (end-of-turn):** if this turn produced **write-gated knowledge** — something that
-changes future behavior, influences a decision, or will be referenced repeatedly — you MUST
-**soft-land**: persist the knowledge + board state and print the「已保存」marker. Do not
-answer-then-stop and leave the increment unpersisted. A **state-only** increment (board moved,
-no new knowledge) → run a silent **checkpoint**. **No** increment → say nothing.
+**On exit (end-of-turn):** an **execution turn** (you ran a flow or did real work) ends with
+**exactly one soft-landing banner, last, after the prose** — `─── 🛬 soft landing ───` + key info
++ a "you can close anytime" line — so the user always has a visible safe-to-close signal. Scale the
+body to the increment: **write-gated knowledge** (changes future behavior / a decision / referenced
+repeatedly) → you MUST persist it + board state and report `[Saved]` (never answer-then-stop with the
+increment unpersisted); **state-only** (board moved, no new knowledge) → checkpoint + one line; **no
+new knowledge** → `[No change]` (an honest "nothing to save, board current"). Always carry `[Stage]`,
+plus `[Pending]` when cockpit Pending Review is non-empty. A **pure conversation / clarification
+turn** (no flow, no deck change) emits no banner. Full banner / reversible-action / undo / lifecycle
+rules → protocol § Act-report-close loop.
 
 **Board-sync:** the mechanical part (`## In Progress` + each `INDEX.md` AUTO region) is welded by the
 turn-end hook — the *judgment* parts (entry handoff, knowledge classification, `## Next` /
