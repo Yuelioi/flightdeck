@@ -121,7 +121,7 @@ Report concisely:
 
 ## Don't do
 
-- Don't read or modify content OUTSIDE the fenced markers in AGENTS.md.
+- **NEVER read or modify content OUTSIDE the fenced markers** — those blocks are the user's hand-authored prose; touching them clobbers their content (Step 2 already requires it be preserved verbatim).
 - Don't add markers around pre-existing hand-authored content — leave it alone, add the flightdeck block above it.
 - Don't include checklist / spec / artifact details in the regenerated block — those are linked, not embedded. AGENTS.md stays terse.
 - Don't run this from a non-clean working tree without warning the user — mid-edit `cockpit.md` produces a stale snapshot.

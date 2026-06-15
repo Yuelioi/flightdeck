@@ -20,5 +20,10 @@ rules → protocol § Act-report-close loop.
 turn-end hook — the *judgment* parts (entry handoff, knowledge classification, `## Next` /
 `Active focus`) are always yours.
 
+**Authoritative skills own their shape — DO NOT re-derive it.** When a skill declares itself the
+authority for a product shape or flow (`/flightdeck:new` for artifact shape, `landing` for the wrap
+ritual, `status` for transitions), you MUST NOT pre-read sibling files to "match format / learn style
+/ verify naming" before invoking it — that is what the skill does for you. Supply only the input it asks for.
+
 Details → `/flightdeck:preflight` skill / protocol.
 </EXTREMELY_IMPORTANT>

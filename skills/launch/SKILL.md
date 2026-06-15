@@ -9,7 +9,7 @@ The **one-time** command that brings a flightdeck deck into existence. Run `/fli
 
 `launch` is the only flightdeck command that scaffolds. `preflight` no longer creates a deck — in a deckless project it just points here and stops.
 
-**Do not inspect the repo** (no `ls`, no reading `package.json`, no `git ls-files`). The scaffold is fixed; nothing about it depends on the project's contents.
+**You MUST NOT inspect the repo** (no `ls`, no reading `package.json`, no `git ls-files`). The scaffold is fixed; nothing about it depends on the project's contents.
 
 ## Refuse if a deck already exists
 

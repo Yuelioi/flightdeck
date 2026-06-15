@@ -5,15 +5,15 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha——**「AI 化精简」方向两根支柱均已 land**：Spec 1 `act-report-close-loop`（可逆无门自动 + 统一翻回 + 全 flow banner + 全生命周期恢复）+ Spec 2 `ai-authored-config`（删 7 人工开关 + resolution-order、rules.md 改 AI 落盘）。**铁律＝纯 AI 操作 + 上下文随时可关可恢复** 已落地。运行契约真相源 = `protocol § Act-report-close loop` + `§ Rule resolution order`；de-scope 基线见 `docs/descope-baseline.md`。
+flightdeck 3.0 alpha 打磨——`skill-constraint-imperative-hardening` 已 land（强命令式措辞 + pre-read 红旗护栏）；剩 `cockpit-bloat-control` 待复核/排期。「AI 化精简」两支柱已 land。
 
 ## In Progress
 
-None.
+- [2026-06-16-cockpit-bloat-control.md](flightdeck/specs/2026-06-16-cockpit-bloat-control.md) — cockpit 膨胀治理：着陆归档时自动排空引用刚归档 artifact 的冗余散文（可逆，自动）；规范字段替换而非追加 + 逐字段密度检查（门控 trim）；walkaround 守卫野章节 + active 计数非阻塞提示。规范字段集本就精简，膨胀来自野章节与散文不排空。
 
 ## Next
 
-- **复核两 spec 实现**（act-report-close-loop + ai-authored-config；不满意可「翻回」最近着陆单元）。之后回到 3.0 alpha 整体打磨 / 待你指方向。
+- **复核 `cockpit-bloat-control`**（着陆排空冗余散文 + 字段密度门控 trim + walkaround 野章节/active 计数）→ 满意则写 plan 执行。
 
 ## Hanging Tasks
 

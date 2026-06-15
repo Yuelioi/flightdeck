@@ -7,7 +7,7 @@ description: Use when explicitly invoking the flightdeck integrity audit — che
 
 User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drift loudly so the author can fix it. The markdown checklist below is always the source of truth; mechanical audits (Audits 1/4/5/7/8) MAY use `flightdeck_lint.py` (JSON findings) or `flightdeck_index.py --check` as optional fast paths.
 
-**只审不修（walkaround invariant）：** walkaround 只浮出漂移，**不改任何文件**。修复路径 = `flightdeck_index.py <deck>` 或 `/flightdeck:landing`。
+**只审不修（walkaround invariant）：** walkaround **MUST NOT modify any file** —— 只浮出漂移。修复路径 = `flightdeck_index.py <deck>` 或 `/flightdeck:landing`。
 
 **Field authority**: [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical) is the source of truth; these audits check against it.
 
@@ -72,7 +72,7 @@ Total: N findings (X CRITICAL, Y WARNING, Z INFO)
 
 ## Don't do
 
-- Don't auto-fix — walkaround 只浮出，作者决策。`rules.md` version 是 `launch` 写入的静态戳，walkaround 不读、不写、不 bump。
+- **walkaround MUST NOT modify any file. NEVER auto-fix** —— 只浮出，作者决策。`rules.md` version 是 `launch` 写入的静态戳，walkaround 不读、不写、不 bump。
 - Don't run against other repos / foreign `flightdeck/` — 误报。
 - Don't include archive 文件于大多数 audit（Audit 6 除外）。
 - Don't flag empty-but-present folders / INDEX — 空是正常初始态；missing known folder 才是 INFO。
