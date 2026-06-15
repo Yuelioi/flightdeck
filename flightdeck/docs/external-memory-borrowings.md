@@ -19,7 +19,7 @@ last_updated: 2026-06-07
 
 1. **写门 prompt 加负例 + 动词表 + skip-list（claude-mem observer prompt）。** flightdeck 写门现为抽象标准（"改变未来行为"）；claude-mem 用 **GOOD/BAD 成对例**（GOOD="认证现支持 OAuth2 PKCE"；BAD="分析了认证实现并记录"）+ 动词表（implemented/fixed/deployed）+ **skip 清单**（空状态检查、装包无错、空 file-research、已记过的重复操作）+ "facts 无代词、每条自立、含文件名/函数/值"。→ 落进 `rules.md` 或 landing/soft-land 提示。**低成本高收益。**
 
-2. **cockpit 加 `## 关键上下文` 槽（ReMe Compactor `## Critical Context`）。** ReMe 摘要强制保留**精确 file path / 函数名 / 错误串**；flightdeck cockpit 有 focus + 下一步但缺"承重字面量"（正改的路径、失败的测试名）。→ 给 cockpit 加一个软落盘的 `## 关键上下文` AUTO/半 AUTO 区。**纯 markdown。**
+2. **cockpit 加 `## Key Context` 槽（ReMe Compactor `## Critical Context`）。** ReMe 摘要强制保留**精确 file path / 函数名 / 错误串**；flightdeck cockpit 有 focus + Next 但缺"承重字面量"（正改的路径、失败的测试名）。→ 给 cockpit 加一个软落盘的 `## Key Context` AUTO/半 AUTO 区。**纯 markdown。**
 
 3. **`when_to_read` 升为强制主路由键（ReMe `when_to_use`）。** ReMe **嵌入的是 `when_to_use` 条件本身**（不是 body）、并以它为检索主键 + `MemoryValidationOp` 质量闸。flightdeck 已有 `when_to_read`/`applies_to` 但当被动提示。→ `walkaround` flag 泛化/空的 `when_to_read`；preflight 路由**按 `when_to_read` 串**建目录。lint + 读取顺序，无 DB。
 
@@ -47,7 +47,7 @@ last_updated: 2026-06-07
 
 **优先级（按"离核心价值=暂停后正确恢复"最近排序）**：
 
-1. **#2 关键上下文 + #4 失败捕获**——直接提高恢复成功率，**并入 hook refactor**（二者本质是 landing/exit-ritual 产物，重构正在动进出场流程，顺手定义"恢复时真正需要的信息"成本最低）。
+1. **#2 Key Context + #4 失败捕获**——直接提高恢复成功率，**并入 hook refactor**（二者本质是 landing/exit-ritual 产物，重构正在动进出场流程，顺手定义"恢复时真正需要的信息"成本最低）。
 2. **#1 写门负例**——提升写入端质量、纯 prompt 层低风险，**单独推进**（不绑进重构）。
 3. **#7 恢复回归测试**——最重要，但**放后面**：先让恢复模型稳定，再固化成测试，否则把测试绑死在还会变的流程上（"别测一个还在变的目标"）。
 

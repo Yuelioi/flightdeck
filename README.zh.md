@@ -40,7 +40,7 @@
 
 ```
 flightdeck/
-├── cockpit.md          # 必读入口 —— Active focus / 下一步 / Hanging tasks
+├── cockpit.md          # 必读入口 —— Active focus / Next / Hanging Tasks
 ├── rules.md            # 项目配置 —— version + 自由散文 house rules
 │
 ├── specs/              # 范围化的设计文档（status: idea = 待启动池）
@@ -64,18 +64,18 @@ flightdeck/
 **Last updated**: 2026-05-28 by alice (shipped Stripe webhook refactor)
 **Active focus**: stabilize Stripe webhook handler — failing edge cases in incidents/
 
-## 进行中
+## In Progress
 
 <!-- AUTO:inprogress -->
 - specs/2026-05-26-stripe-hardening.md — active
 <!-- /AUTO -->
 
-## 下一步
+## Next
 
 1. Reproduce the duplicate-event bug from incidents/stripe-idempotency.md (Case 3).
 2. Decide: idempotency key in DB vs Redis.
 
-## Hanging tasks
+## Hanging Tasks
 
 - (none)
 ```
@@ -114,7 +114,7 @@ flightdeck/
 2. 瞥一眼 `git status`（分支 / 版本）—— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
 3. 报告下一项 —— 说 "go" 执行。
 
-全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## 下一步`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
+全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## Next`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
 
 **会话结束** —— 一轮产出了真实增量时，flightdeck 在轮末自己着陆。纯状态推进 → 静默 **checkpoint**（看板保持真实）；新知识 → **软着陆**，分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）并打出「已保存」标记 —— 看到它才表示可以放心关窗口；一项工作完成 → **full landing**（刷新 `cockpit.md`、归档、本地 commit）。很小的一轮（没有增量）不会触发任何 landing。想显式收尾就运行 `/flightdeck:landing`。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 

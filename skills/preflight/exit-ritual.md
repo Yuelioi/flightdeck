@@ -12,7 +12,7 @@ The protocol for closing an AI coding session cleanly so the next preflight can 
 Session is wrapping up
 ↓
 Step 1: Are there pending hanging tasks?
-        (open items in cockpit ## Hanging tasks)
+        (open items in cockpit ## Hanging Tasks)
 ├─ yes → resolve them first, then continue
 └─ no  → proceed to step 2
 
@@ -90,8 +90,8 @@ Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单
          - Auto-flip `status: stale` in its frontmatter (no pre-ask — stale is
            reversible, local, purely a warning; "docs quietly lying" is the worst outcome).
          - Idempotent: already-`stale` = no-op.
-         - Surface a one-line "待复核: <file>" note in cockpit (append under ## 下一步
-           or a dedicated "## 待复核" subsection if one exists — do not bury it).
+         - Surface a one-line `待复核: <file>` note in cockpit `## Pending Review`
+           (the standing awaiting-review home — no longer an optional subsection).
          Fallback (no Python runtime or no anchor yet): compare this session's changed
          paths against each doc's `applies_to` paths by hand,
          anchored to this session's changes only.
@@ -112,8 +112,8 @@ Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单
 
 Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
         below. Gist: bump Last updated only on the 4 sanctioned triggers;
-        regen the ## 进行中 AUTO region from status:active; auto-write ## 下一步;
-        Active focus / Hanging tasks as needed. Then run the Length check (§ below).
+        regen the ## In Progress AUTO region from status:active; auto-write ## Next;
+        Active focus / Hanging Tasks as needed. Then run the Length check (§ below).
 
 Step 5: Commit (local) + push (ask) — default: commit locally without asking
         (local commits are reversible); NEVER push without asking (push is outward).
@@ -284,11 +284,11 @@ When the user performs the verification, act per the artifact's kind. The canoni
 - **Verify fails** (both kinds): **revive to `active`** (`mv` back from `archive/` if it had already landed) and **KEEP the `verify` field** — the work is re-done + re-verified. There is **no `verify: failed` value**; the marker just stays present.
 - **One at a time.** Multiple pending verify items are resolved **independently, one per verification** — never batch-cleared.
 
-## Hanging tasks — block session exit
+## Hanging Tasks — block session exit
 
-A session **cannot be closed cleanly** while an open `## Hanging tasks` item remains. Either resolve it now, or record it explicitly in `cockpit.md` "Hanging tasks" (`- [ ] <blocking item>`) so the next preflight sees it on entry and resolves.
+A session **cannot be closed cleanly** while an open `## Hanging Tasks` item remains. Either resolve it now, or record it explicitly in `cockpit.md` "Hanging Tasks" (`- [ ] <blocking item>`) so the next preflight sees it on entry and resolves.
 
-`Hanging tasks` in cockpit is a **hand-maintained** list — the AI does not auto-derive it from INDEX. Add and clear entries explicitly.
+`Hanging Tasks` in cockpit is a **hand-maintained** list — the AI does not auto-derive it from INDEX. Add and clear entries explicitly.
 
 (There is **no debrief-disposition gate** — `debriefs/` was removed. External review feedback is transient (project-root `tmp/`); its disposition folds into the reviewed spec's `## 评审纪要` as part of normal spec editing, not as an exit-blocking gate.)
 
@@ -307,7 +307,7 @@ Walkaround is responsible for the **full-consistency check** — it regenerates 
 
 Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — never its body** (a further token saving, complementing read-INDEX-first). `status`, `landing`, and `walkaround` all build rows this way; do not reimplement it elsewhere.
 
-- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region into two sections: `待启动（idea）` / `进行中·完成（active·done）` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+- **Workflow folders** (`specs/` `plans/`): `- [<file>](<file>) — <status> — <summary>`, where `<summary>` is the file's `summary` frontmatter copied **verbatim**. If the file has no `summary` (it is recommended, not required), omit the trailing ` — <summary>` segment entirely. `implements` / `supersedes` / `related` / `note` are never shown in the INDEX (reverse links are grep-derived). `specs/INDEX` groups its AUTO region into two sections: `Backlog (idea)` / `Active · Done` — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 - **Knowledge folders** (`incidents/` `checklists/` `docs/` `references/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`references/` rows show project/file count, not per-file status; `docs/` rows read `<status> — when_to_read: <…> — applies_to: <…>` like the other authored knowledge folders.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
@@ -328,30 +328,35 @@ Never let the script make judgments (classification, status decisions, routing) 
 
 ```
 Last updated:     ONLY in these cases (otherwise leave alone):
-                  (a) 下一步 content changes
+                  (a) Next content changes
                   (b) Active focus shifts (main thread moved)
                   (c) A major task / phase completes (user-perceivable progress)
                   (d) An artifact lands or a blocker resolves
-Active focus:     update if main thread shifted (otherwise leave) — coarse session main thread
-## 进行中:        AUTO — regen from every status:active spec/plan (do NOT hand-write)
-## 下一步:        auto-written — the next concrete single action (start an idea / advance an active)
-## 关键上下文:    agent-judged — load-bearing literals a next session needs to resume (or - (none))
-Hanging tasks:    hand-maintained list — add new blocking items, clear resolved ones
+Active focus:      update if main thread shifted (otherwise leave) — coarse session main thread
+## In Progress:    AUTO — regen from every status:active spec/plan (do NOT hand-write)
+## Next:           auto-written — the next concrete single action (start an idea / advance an active)
+## Key Context:    agent-judged — load-bearing literals a next session needs to resume; drain/shrink entries that no longer carry (or - (none))
+## Pending Review: agent-judged — AI work awaiting your sign-off + surfaced stale 待复核 notes; drains when reviewed (or - (none))
+Hanging Tasks:     hand-maintained list — add new blocking items, clear resolved ones
 ```
 
-**`## 进行中` is AUTO-derived, not hand-written.** Regenerate its `<!-- AUTO:inprogress -->` region from every `status: active` spec/plan (same mechanism + row format as INDEX; a file's `note:` appends `[note: …]`). The `status` skill regenerates it on a status flip; landing regenerates it here. A hand edit is overwritten on the next regen. This is what makes cockpit a **status projection** of the active set — an artifact is in cockpit iff it is `active`, so orphans are structurally impossible.
+**`## In Progress` is AUTO-derived, not hand-written.** Regenerate its `<!-- AUTO:inprogress -->` region from every `status: active` spec/plan (same mechanism + row format as INDEX; a file's `note:` appends `[note: …]`). The `status` skill regenerates it on a status flip; landing regenerates it here. A hand edit is overwritten on the next regen. This is what makes cockpit a **status projection** of the active set — an artifact is in cockpit iff it is `active`, so orphans are structurally impossible.
 
-**`## 下一步` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
+**`## Next` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
 
-**`Active focus` vs `## 下一步` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## 下一步` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
+**`Active focus` vs `## Next` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## Next` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
 
-**`## 关键上下文` is the recovery slot.** At a checkpoint / soft-land / landing, refresh it with the **load-bearing literals a next session needs to resume**: the file under edit, a failing test name, an error string, a key value. Literals, not prose; nothing to carry → `- (none)`. Same agent-maintained model as `## 下一步` (not AUTO). It is cockpit's *transient resume hint* — distinct from a durable knowledge artifact's body (see § 写工件 body 的质量 above): both stress load-bearing literals, but one is the dashboard, the other is the record.
+**`## Key Context` is the recovery slot.** At a checkpoint / soft-land / landing, refresh it with the **load-bearing literals a next session needs to resume**: the file under edit, a failing test name, an error string, a key value. Literals, not prose; nothing to carry → `- (none)`. Same agent-maintained model as `## Next` (not AUTO). It is cockpit's *transient resume hint* — distinct from a durable knowledge artifact's body (see § 写工件 body 的质量 above): both stress load-bearing literals, but one is the dashboard, the other is the record.
+
+**`## Pending Review` is the sign-off queue (agent-judged, not AUTO).** Things the AI completed and self-judged `done` but you haven't approved yet — plus the surfaced stale `待复核` notes from Step 3c (both are "awaiting your eyes"). Each row `- [<artifact/topic>] <what changed · how to look>`. **Non-blocking** (you can land with items queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike the objective `verify:` / `⚠未验证` scan). Drains when you sign off, or at the next landing once confirmed; nothing queued → `- (none)`.
+
+**Accumulator-drain discipline.** `## Key Context` and `## Pending Review` are the two non-AUTO sections that *accumulate*; each MUST drain or it rots into a junk drawer. Draining is a judgment step → it runs at **landing** (which already rewrites cockpit by judgment), not at the mechanical checkpoint. `Key Context`: **clear** an entry when its literal no longer needs carrying (target archived / graduated into `docs/` / next session won't need it); **shrink** a long entry to a one-line pointer, merge same-source entries. `Pending Review`: drain on sign-off. The 80-line cap is the ceiling, not the discipline — prune per-entry first. (`walkaround` only flags a suspected-stale / oversized `Key Context` as a non-blocking INFO; it never drains.)
 
 **`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. **When it does bump, keep the parenthetical a terse one-line phrase** (what shifted + the next pointer) — **not a multi-sentence changelog of everything done this session.** A blow-by-blow narrative here is the same "session-log" smell in a different field: it bloats cockpit, costs tokens every landing, and duplicates what the spec/plan body and the commit message already hold. Aim ≤ ~200 chars; detail goes to the artifact, not the dashboard.
 
-**When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## 下一步` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
+**When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## Next` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 
-**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## 进行中` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` + the `archive/` folder, never cockpit.
+**Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` + the `archive/` folder, never cockpit.
 
 ### The 「已保存」(saved) marker — soft-landing's visible signal
 
@@ -376,7 +381,7 @@ A **checkpoint** is the cheapest possible status-write: it keeps the persisted b
 
 | Tier | Essence | Trigger | Range | commit / archive |
 |---|---|---|---|---|
-| **checkpoint** | save **state** | plan-task boundary / end-of-turn state-only increment | board only (`## 下一步` + plan `current:`), disk-only | none |
+| **checkpoint** | save **state** | plan-task boundary / end-of-turn state-only increment | board only (`## Next` + plan `current:`), disk-only | none |
 | **soft-landing** | save **state + knowledge** | end-of-turn with a **knowledge increment** (signal 3) | checkpoint + classify knowledge + regen changed INDEX | **neither** |
 | **full landing** | + **advance lifecycle** | `done` / explicit `/flightdeck:landing` | soft-landing + archive done + promotion gate | + local commit + archive |
 
@@ -385,16 +390,16 @@ A **checkpoint** is the cheapest possible status-write: it keeps the persisted b
 **Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (consistent with flightdeck's deliberate no-startup-hooks design).
 
 **Action — exactly two board writes, then stop:**
-1. Refresh cockpit `## 下一步` to the next concrete single action (the next task).
+1. Refresh cockpit `## Next` to the next concrete single action (the next task).
 2. Advance the active plan's `## Progress` `current:` pointer to the next task.
 
 Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge · regen any INDEX · archive a `done` item · run the smoke-check · bump `Last updated` for a non-milestone task · **commit**.
 
 **Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
 
-**Reuse, don't fork:** a checkpoint's two writes are the *same* `## 下一步` / `## Progress` logic landing's cockpit board-sync step uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs only that board-sync step and skips everything else (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
+**Reuse, don't fork:** a checkpoint's two writes are the *same* `## Next` / `## Progress` logic landing's cockpit board-sync step uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs only that board-sync step and skips everything else (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
 
-**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## 进行中` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## 下一步`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
+**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## In Progress` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## Next`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
 
 ## Land Routine
 
@@ -425,7 +430,7 @@ Shared predicate, called by `status` (mid-session) and `preflight` (entry). **la
 
 - **signal 1** — this `status` invocation just flipped an artifact to `done`.
 - **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
-- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## 进行中` / `## 下一步` / `Active focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
+- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## In Progress` / `## Next` / `Active focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
 
 Mechanics:
 - signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
@@ -434,7 +439,7 @@ Mechanics:
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
 - **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion gate**. It is landing's no-`done` natural form + a visible marker. Timing is pinned: persist → print the 「已保存」marker → end the turn (never "reply then persist"). The 「已保存」marker format is in [§ Cockpit update](#cockpit-update--what-changes); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
-- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## 进行中` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## 下一步` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
+- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
 - **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state.
 
 ## See also

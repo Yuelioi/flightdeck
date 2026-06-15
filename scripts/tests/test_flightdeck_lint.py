@@ -24,17 +24,17 @@ FULL_COCKPIT = """# Cockpit — test
 **Last updated**: 2026-06-06 by t
 **Active focus**: x
 
-## 进行中
+## In Progress
 
 <!-- AUTO:inprogress -->
 - item
 <!-- /AUTO -->
 
-## 下一步
+## Next
 
 - do the thing
 
-## Hanging tasks
+## Hanging Tasks
 
 - (none)
 """
@@ -370,27 +370,27 @@ class AuditRequiredStructureTest(unittest.TestCase):
     def test_missing_inprogress_heading_is_critical(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            self._write_cockpit(deck, FULL_COCKPIT.replace("## 进行中\n", ""))
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## In Progress\n", ""))
             crit = _sev(audit_required_structure(deck), "CRITICAL")
             self.assertEqual(len(crit), 1)
-            self.assertIn("进行中", crit[0]["message"])
+            self.assertIn("In Progress", crit[0]["message"])
             self.assertTrue(crit[0]["path"].endswith("cockpit.md"))
 
     def test_missing_next_step_heading_is_critical(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            self._write_cockpit(deck, FULL_COCKPIT.replace("## 下一步\n", ""))
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Next\n", ""))
             crit = _sev(audit_required_structure(deck), "CRITICAL")
             self.assertEqual(len(crit), 1)
-            self.assertIn("下一步", crit[0]["message"])
+            self.assertIn("Next", crit[0]["message"])
 
     def test_missing_hanging_tasks_heading_is_critical(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging tasks\n", ""))
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging Tasks\n", ""))
             crit = _sev(audit_required_structure(deck), "CRITICAL")
             self.assertEqual(len(crit), 1)
-            self.assertIn("Hanging tasks", crit[0]["message"])
+            self.assertIn("Hanging Tasks", crit[0]["message"])
 
     def test_missing_auto_open_anchor_is_critical(self):
         with tempfile.TemporaryDirectory() as d:
@@ -416,13 +416,13 @@ class AuditRequiredStructureTest(unittest.TestCase):
     def test_heading_with_trailing_whitespace_still_matches(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            self._write_cockpit(deck, FULL_COCKPIT.replace("## 下一步\n", "## 下一步   \n"))
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Next\n", "## Next   \n"))
             self.assertEqual(audit_required_structure(deck), [])
 
     def test_lint_includes_required_structure(self):
         with tempfile.TemporaryDirectory() as d:
             deck = Path(d)
-            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging tasks\n", ""))
+            self._write_cockpit(deck, FULL_COCKPIT.replace("## Hanging Tasks\n", ""))
             findings = lint(deck)
             self.assertTrue(any(f["audit"] == "required-structure" for f in findings))
 

@@ -40,7 +40,7 @@ A `flightdeck/` directory your AI reads and writes by convention:
 
 ```
 flightdeck/
-├── cockpit.md          # must-read entry — Active focus / 下一步 / Hanging tasks
+├── cockpit.md          # must-read entry — Active focus / Next / Hanging Tasks
 ├── rules.md            # project config — version + free-prose house rules
 │
 ├── specs/              # scoped design documents (status: idea = the to-start pool)
@@ -64,18 +64,18 @@ Read first every session, hard-capped at 80 lines:
 **Last updated**: 2026-05-28 by alice (shipped Stripe webhook refactor)
 **Active focus**: stabilize Stripe webhook handler — failing edge cases in incidents/
 
-## 进行中
+## In Progress
 
 <!-- AUTO:inprogress -->
 - specs/2026-05-26-stripe-hardening.md — active
 <!-- /AUTO -->
 
-## 下一步
+## Next
 
 1. Reproduce the duplicate-event bug from incidents/stripe-idempotency.md (Case 3).
 2. Decide: idempotency key in DB vs Redis.
 
-## Hanging tasks
+## Hanging Tasks
 
 - (none)
 ```
@@ -114,7 +114,7 @@ You don't scaffold the deck by hand — run `/flightdeck:launch` once and it cre
 2. Glances at `git status` (branch / version) — a passive one-line note only when something looks off, never a blocking prompt.
 3. Reports the next item — say "go" to execute.
 
-On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## 下一步` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
+On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## Next` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
 
 **Session end** — when a turn produced a real increment, flightdeck lands it at end-of-turn on its own. State-only progress → a silent **checkpoint** (board stays true); new knowledge → a **soft-landing** that classifies it (bug → `incidents/`, procedure → `checklists/`, one-off → discard) and prints 「已保存」 — the visible signal it's safe to close; a finished item → a **full landing** (refresh `cockpit.md`, archive, local commit). A small turn with no increment lands nothing. Run `/flightdeck:landing` to force the full wrap-up explicitly. The next session — even a different AI or developer — picks up exactly here.
 

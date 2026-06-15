@@ -20,7 +20,7 @@ flightdeck 3.0 是**格式基线第 0 版**。本篇记录这一版**蓄意的�
 
 ## 校验单一归宿 = walkaround
 
-「校验」（跨版本兼容验证 **+** 本版内结构完整性审查：INDEX↔folder、孤儿 plan、死链、status 合法性、cockpit `## 进行中` AUTO 一致、stray 文件、AGENTS.md drift）**只许活在按需跑的 walkaround**。
+「校验」（跨版本兼容验证 **+** 本版内结构完整性审查：INDEX↔folder、孤儿 plan、死链、status 合法性、cockpit `## In Progress` AUTO 一致、stray 文件、AGENTS.md drift）**只许活在按需跑的 walkaround**。
 
 - **preflight = 纯读 + 报告，零写入**：读 cockpit + INDEX + folder INDEX（只显计数）+ `--verify-pending` 扫描 + 报下一步。不翻 stale、不 advance 锚点、不做补偿检查。
 - **landing = 核心仪式**：分类知识、重生成变动 INDEX、回写 cockpit、堵 hanging task、轻量 smoke、本地 commit（push 先问）。**保留** `applies_to` 路径重叠触发的 stale 保鲜翻转（判为知识保鲜，非版本校验），收敛为 landing 退场单仪式。
@@ -36,7 +36,7 @@ flightdeck 3.0 是**格式基线第 0 版**。本篇记录这一版**蓄意的�
 
 ## 热/冷路径预算铁律（防再膨胀）
 
-永远/经常载入的表面（注入 directive、每个 `SKILL.md`）只放**最小祈使式清单**；解释 / 边角 / why / edge-case 一律下沉到按需读的冷路径（`protocol.md` 等）。冷路径文件**同样设字符上限**——否则砍掉的散文只是从热路径流到冷路径。cockpit 的 `## 下一步` / `## 关键上下文` 设**软上限**（= 触发复核的警戒线，**非**自动截断；与「cockpit 语义神圣不动」不冲突——后者指角色/结构不变，前者只是膨胀预警），防被砍内容回灌让成本反弹。
+永远/经常载入的表面（注入 directive、每个 `SKILL.md`）只放**最小祈使式清单**；解释 / 边角 / why / edge-case 一律下沉到按需读的冷路径（`protocol.md` 等）。冷路径文件**同样设字符上限**——否则砍掉的散文只是从热路径流到冷路径。cockpit 的 `## Next` / `## Key Context` 设**软上限**（= 触发复核的警戒线，**非**自动截断；与「cockpit 语义神圣不动」不冲突——后者指角色/结构不变，前者只是膨胀预警），防被砍内容回灌让成本反弹。
 
 ## incidents：吸纳即退役
 

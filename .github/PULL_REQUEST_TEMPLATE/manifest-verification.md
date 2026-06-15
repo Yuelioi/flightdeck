@@ -13,7 +13,7 @@ Use this template when reporting end-to-end behavioral verification of one of fl
 
 The full scenario specs are in `flightdeck/archive/specs/2026-05-23-v1.0-release-gate.md`. For each scenario, mark the result:
 
-- [ ] **S1 — Cold-start in a project with `flightdeck/`**: AI reads `cockpit.md` first, reconciles against git, executes the first `## 下一步` item.
+- [ ] **S1 — Cold-start in a project with `flightdeck/`**: AI reads `cockpit.md` first, reconciles against git, executes the first `## Next` item.
 - [ ] **S2 — Bug + root cause → `incidents/`**: AI uses the incident template, banned root-cause language ("forgot" / "careless") absent, `status` frontmatter present.
 - [ ] **S3 — Ambiguous classification**: AI applies first-match-wins heuristic or asks user with structured options.
 - [ ] **S4 — Status + INDEX upkeep at landing**: AI writes `status:` frontmatter on each new/changed artifact and regenerates the affected folder's `INDEX.md` so it matches the files on disk.

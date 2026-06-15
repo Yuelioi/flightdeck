@@ -31,4 +31,4 @@ flowchart LR
 
 There's no database, server, or background process — it's plain files. Reads are **INDEX-first**: each folder's `INDEX.md` is a derived table (file · status · one-line summary) the AI scans before opening individual files, so token cost scales with folder count, not file count.
 
-One deterministic enhancement: on hosts that fire end-of-turn hooks (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`), a passive **turn-end hook** regenerates the mechanical board regions (cockpit `## 进行中` + each `INDEX.md`) so they never go stale between landings. It never blocks or writes judgment fields, and the protocol does not depend on it.
+One deterministic enhancement: on hosts that fire end-of-turn hooks (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`), a passive **turn-end hook** regenerates the mechanical board regions (cockpit `## In Progress` + each `INDEX.md`) so they never go stale between landings. It never blocks or writes judgment fields, and the protocol does not depend on it.

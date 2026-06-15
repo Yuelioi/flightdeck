@@ -35,7 +35,7 @@ def _mk_deck(tmp_path, cockpit_text=None):
 
 
 def test_session_start_injects_when_deck_present(tmp_path):
-    proj = _mk_deck(tmp_path, "# Cockpit\n**Active focus**: ship X\n\n## 下一步\n\n- do Y\n")
+    proj = _mk_deck(tmp_path, "# Cockpit\n**Active focus**: ship X\n\n## Next\n\n- do Y\n")
     r = _run("session-start", proj)
     assert r.returncode == 0
     ctx = json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"]
@@ -60,7 +60,7 @@ def test_session_start_static_only_when_cockpit_missing(tmp_path):
 
 
 def test_session_start_cursor_field(tmp_path):
-    proj = _mk_deck(tmp_path, "**Active focus**: z\n\n## 下一步\n- w\n")
+    proj = _mk_deck(tmp_path, "**Active focus**: z\n\n## Next\n- w\n")
     r = _run("session-start", proj, extra_env={"CURSOR_PLUGIN_ROOT": str(REPO)})
     assert r.returncode == 0
     assert "additional_context" in json.loads(r.stdout)
@@ -134,7 +134,7 @@ def _run_host(script, host_env, *, project_env=None, stdin=""):
 
 
 def test_codex_emit_uses_hookSpecificOutput(tmp_path):
-    proj = _mk_deck(tmp_path, "**Active focus**: c\n\n## 下一步\n- c1\n")
+    proj = _mk_deck(tmp_path, "**Active focus**: c\n\n## Next\n- c1\n")
     r = _run_host("session-start", {"CODEX_PLUGIN_ROOT": "x"},
                   project_env={"CLAUDE_PROJECT_DIR": proj})
     assert r.returncode == 0
@@ -145,7 +145,7 @@ def test_codex_emit_uses_hookSpecificOutput(tmp_path):
 
 def test_gemini_emit_and_projectdir_via_gemini_var(tmp_path):
     # GEMINI_PROJECT_DIR is the ONLY project signal → also tests project-dir resolution.
-    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## 下一步\n- g1\n")
+    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## Next\n- g1\n")
     r = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(proj)})
     assert r.returncode == 0
     out = json.loads(r.stdout)
@@ -157,8 +157,8 @@ def test_gemini_emit_and_projectdir_via_gemini_var(tmp_path):
 def _mk_regenerable_deck(tmp_path):
     proj = _mk_deck(
         tmp_path,
-        "# Cockpit\n**Active focus**: t\n\n## 进行中\n\n"
-        "<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n\n## 下一步\n- x\n",
+        "# Cockpit\n**Active focus**: t\n\n## In Progress\n\n"
+        "<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n\n## Next\n- x\n",
     )
     # A specs/ folder with an artifact but no specs/INDEX.md — the stop hook's
     # regen must create that folder INDEX, the side-effect we assert below.
@@ -213,7 +213,7 @@ def _cursor_rule(proj):
 
 
 def test_cursor_session_start_writes_rule_file(tmp_path):
-    proj = _mk_deck(tmp_path, "**Active focus**: cur\n\n## 下一步\n- cur1\n")
+    proj = _mk_deck(tmp_path, "**Active focus**: cur\n\n## Next\n- cur1\n")
     r = _run_host("session-start",
                   {"CURSOR_PLUGIN_ROOT": "x", "CURSOR_PROJECT_ROOT": str(proj)})
     assert r.returncode == 0
@@ -223,7 +223,7 @@ def test_cursor_session_start_writes_rule_file(tmp_path):
     txt = rule.read_text(encoding="utf-8")
     assert "alwaysApply: true" in txt
     assert "EXTREMELY_IMPORTANT" in txt       # bootstrap body
-    assert "cur1" in txt                       # cockpit anchor (下一步)
+    assert "cur1" in txt                       # cockpit anchor (Next)
     assert "flightdeck-cockpit-anchor" in txt
 
 
@@ -238,7 +238,7 @@ def test_cursor_stop_refreshes_rule_file(tmp_path):
 
 def test_non_cursor_writes_no_rule_file(tmp_path):
     # A Gemini/Claude session must NOT spray a .cursor/ dir into the project.
-    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## 下一步\n- g1\n")
+    proj = _mk_deck(tmp_path, "**Active focus**: g\n\n## Next\n- g1\n")
     r = _run_host("session-start", {"GEMINI_PROJECT_DIR": str(proj)})
     assert r.returncode == 0
     assert not _cursor_rule(proj).exists()

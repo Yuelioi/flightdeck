@@ -189,8 +189,8 @@ def regen_folder_index(folder):
 
     `specs/` is special (model-v4 §1.4): idea files are timeless (no date
     prefix) and would sort badly mixed with the dated active/done files, so the
-    block is split into two in-AUTO subgroups — `### 待启动（idea）` (idea,
-    alphabetical) and `### 进行中·完成（active·done）` (active/done, by filename
+    block is split into two in-AUTO subgroups — `### Backlog (idea)` (idea,
+    alphabetical) and `### Active · Done` (active/done, by filename
     date descending). A rejected spec is deleted outright (3.0), not parked — so
     there is no scrapped/tombstone group.
 
@@ -230,16 +230,16 @@ def _specs_grouped_body(folder, names):
     active_done = sorted((n for n in names if fms[n].get("status") in ("active", "done")), reverse=True)
     groups = []
     if ideas:
-        groups.append("### 待启动（idea）\n" + "\n".join(format_row("specs", n, fms[n]) for n in ideas))
+        groups.append("### Backlog (idea)\n" + "\n".join(format_row("specs", n, fms[n]) for n in ideas))
     if active_done:
-        groups.append("### 进行中·完成（active·done）\n" + "\n".join(format_row("specs", n, fms[n]) for n in active_done))
+        groups.append("### Active · Done\n" + "\n".join(format_row("specs", n, fms[n]) for n in active_done))
     return "\n\n".join(groups)
 
 
 def regen_cockpit_inprogress(deck):
     """Regenerate the cockpit `<!-- AUTO:inprogress -->` block (model-v4 §2).
 
-    cockpit is a status projection of the active set: the `## 进行中` region is
+    cockpit is a status projection of the active set: the `## In Progress` region is
     derived from every `status: active` spec/plan, walked specs-then-plans, each
     alphabetically by filename. Each row mirrors the INDEX row (link + summary),
     with the folder prefix in the link path; an optional `note:` is appended as

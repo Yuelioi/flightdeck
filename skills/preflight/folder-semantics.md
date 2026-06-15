@@ -69,11 +69,11 @@ The 80-line ceiling is cognitive-load engineering for the human + AI reading coc
 Contains:
 - `Last updated: YYYY-MM-DD by <who> (<one-line>)`
 - `Active focus: <current main thread>`
-- `## 进行中` — AUTO region derived from every `status: active` spec/plan (machine-maintained; not hand-written).
-- `## 下一步` — the next concrete single action (AI-maintained, auto-written at landing).
-- `## Hanging tasks` — open items blocking a clean landing (hand-maintained; decoupled from INDEX auto-summaries).
+- `## In Progress` — AUTO region derived from every `status: active` spec/plan (machine-maintained; not hand-written).
+- `## Next` — the next concrete single action (AI-maintained, auto-written at landing).
+- `## Hanging Tasks` — open items blocking a clean landing (hand-maintained; decoupled from INDEX auto-summaries).
 
-`cockpit.md` is no longer a hand-maintained workspace — it is a **status projection** of the active set: `## 进行中` is derived from `status: active`, so an artifact is in cockpit iff it is active. Full structure + AUTO markers: [templates.md § cockpit.md](templates.md#cockpitmd).
+`cockpit.md` is no longer a hand-maintained workspace — it is a **status projection** of the active set: `## In Progress` is derived from `status: active`, so an artifact is in cockpit iff it is active. Full structure + AUTO markers: [templates.md § cockpit.md](templates.md#cockpitmd).
 
 ### `rules.md` — project config (mandatory file, optional content)
 
@@ -113,7 +113,7 @@ Rules (canonical elsewhere — pointers, not restated here):
 
 Design documents **and** unstarted ideas — one folder, status tells them apart. A spec captures the *what* and *why* of a change; it is the output of the brainstorming / design stage. An unstarted idea is just a spec at `status: idea`.
 
-**`status: idea`** = an unstarted thought / design (the to-start pool). No date prefix — ideas are timeless until acted on (`<topic>.md`). Starting it is a single field flip `idea → active`, which **adds the `YYYY-MM-DD-` prefix** (date helps order active/done by recency) and surfaces it in cockpit `## 进行中`. No folder move, no relation-edge rewrite — that is the whole point of merging sketches in.
+**`status: idea`** = an unstarted thought / design (the to-start pool). No date prefix — ideas are timeless until acted on (`<topic>.md`). Starting it is a single field flip `idea → active`, which **adds the `YYYY-MM-DD-` prefix** (date helps order active/done by recency) and surfaces it in cockpit `## In Progress`. No folder move, no relation-edge rewrite — that is the whole point of merging sketches in.
 
 **Rejecting a spec** = the idea / design is abandoned, so the file is **deleted** (only on explicit user instruction — the AI never abandons work unilaterally). git log keeps the history; record the reason in the commit body. There is no `scrapped` status value, no tombstone, no `graveyard/` subfolder — `specs/` holds only live designs (idea / active / done).
 
@@ -121,11 +121,11 @@ The folder is the kind — files carry no type field. No `implements:` (that goe
 
 Lifecycle: when a spec is done and all its plans are complete, `land` it — move to `archive/specs/foo.md`. The spec leaves the active routing set but its history is preserved.
 
-**`specs/INDEX` status grouping**: idea files have no date prefix, so mixing them with the `YYYY-MM-DD-` active/done files would sort badly. The INDEX AUTO region **groups by status**: `待启动（idea）`, `进行中·完成（active·done）` — active/done by date descending, idea alphabetically.
+**`specs/INDEX` status grouping**: idea files have no date prefix, so mixing them with the `YYYY-MM-DD-` active/done files would sort badly. The INDEX AUTO region **groups by status**: `Backlog (idea)`, `Active · Done` — active/done by date descending, idea alphabetically.
 
 ### `plans/` — implementation plans
 
-Task-level breakdowns of how to execute a spec (or a standalone piece of work). Plans carry the optional `implements:` back-reference to the spec they execute. A plan body carries a `## Progress` block with a `current:` pointer to the next-to-execute task; checkpoints advance it at task boundaries and cockpit `## 下一步` quotes it (see [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath)). The pointer is body-only — it is **not** a frontmatter field and does not enter any INDEX.
+Task-level breakdowns of how to execute a spec (or a standalone piece of work). Plans carry the optional `implements:` back-reference to the spec they execute. A plan body carries a `## Progress` block with a `current:` pointer to the next-to-execute task; checkpoints advance it at task boundaries and cockpit `## Next` quotes it (see [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath)). The pointer is body-only — it is **not** a frontmatter field and does not enter any INDEX.
 
 Naming: `YYYY-MM-DD-<topic>.md`.
 

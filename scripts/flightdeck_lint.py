@@ -62,11 +62,11 @@ VAGUE_TOKENS = ("任何", "所有", "any change", "all changes", "anything", "ev
 # any deck-specific section (e.g. dogfood's `## Note on dogfooding`).
 REQUIRED_SECTIONS = {
     "cockpit.md": [
-        ("## 进行中", re.compile(r"(?m)^##\s+进行中\s*$")),
+        ("## In Progress", re.compile(r"(?m)^##\s+In Progress\s*$")),
         ("<!-- AUTO:inprogress -->", re.compile(r"<!--\s*AUTO:inprogress\s*-->")),
         ("<!-- /AUTO -->", re.compile(r"<!--\s*/AUTO\s*-->")),
-        ("## 下一步", re.compile(r"(?m)^##\s+下一步\s*$")),
-        ("## Hanging tasks", re.compile(r"(?m)^##\s+Hanging tasks\s*$")),
+        ("## Next", re.compile(r"(?m)^##\s+Next\s*$")),
+        ("## Hanging Tasks", re.compile(r"(?m)^##\s+Hanging Tasks\s*$")),
     ],
 }
 

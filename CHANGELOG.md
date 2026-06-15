@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+cockpit 模型升级（alpha 反馈驱动）。**Breaking**：cockpit 段名全英文化，存量中文-header deck 过不了新 lint——alpha 期可破坏，本仓 dogfood 已同步；其它 deck 用 `/flightdeck:launch` 新建后搬运，或等 3.1 就地迁移。
+
+### Added
+- **`## Pending Review` cockpit 段** — AI 自认 done、等用户拍板过目的产出队列（非阻塞、主观，区别于 `verify` 客观）；既有 stale `待复核` 浮出项归入此段，审过即 drain。
+- **累积段排水纪律** — 给 `Key Context` / `Pending Review` 立逐条 drain 规则（清理 when：目标已归档/已 graduate/下一会话不需要；收缩 when：长条压成一行指针、同源合并），landing 执行 drain、walkaround 出非阻塞 INFO（新增 Audit 14）。
+
+### Changed
+- **cockpit 段名英文化**：`进行中→In Progress`、`下一步→Next`、`关键上下文→Key Context`、`Hanging tasks→Hanging Tasks`；specs INDEX 分组头 `待启动（idea）→Backlog (idea)`、`进行中·完成（active·done）→Active · Done`；AGENTS.md emit 块同步英文。AUTO 锚 `<!-- AUTO:inprogress -->` 不变（脚本靠锚不靠段名）。结构英文、内容仍随用户工作语言。
+
+### Breaking
+- cockpit 段名英文化＝破坏性 deck 格式变更：`flightdeck_lint.py` 的 cockpit 结构校验改认英文段名，存量中文-header deck 报 CRITICAL。无双语兼容层（de-scope：无向后兼容，3.1 再就地迁移）。
+
 ## [3.0.0-alpha.1] — 2026-06-11
 
 3.0 的首个 **alpha 预发布**——邀请早期试用、收集反馈；正式 3.0.0 之前格式与行为仍可能再次破坏性调整，**不要在生产项目上依赖它**。

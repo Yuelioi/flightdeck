@@ -24,9 +24,9 @@ This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.m
 Use Read on `flightdeck/cockpit.md`. Extract these fields (content copied as-is — the only transformation is the relative-link prefixing applied per-block in Step 3):
 
 - The `**Active focus**:` line value.
-- All bullet items inside the `## 进行中` AUTO region (between `<!-- AUTO:inprogress -->` and `<!-- /AUTO -->`). This is the machine-derived active set — copy the rows verbatim; do not re-derive or reorder. Empty region → no items.
-- The `## 下一步` body — the single next concrete action (free prose, usually one line; may itself contain a markdown link).
-- All bullet items under `## Hanging tasks` whose content is not literally `(none)`.
+- All bullet items inside the `## In Progress` AUTO region (between `<!-- AUTO:inprogress -->` and `<!-- /AUTO -->`). This is the machine-derived active set — copy the rows verbatim; do not re-derive or reorder. Empty region → no items.
+- The `## Next` body — the single next concrete action (free prose, usually one line; may itself contain a markdown link).
+- All bullet items under `## Hanging Tasks` whose content is not literally `(none)`.
 
 Extract only these fields; ignore all other cockpit sections.
 
@@ -52,17 +52,17 @@ The block to insert between markers (or as the whole new file body if AGENTS.md 
 
 <Active focus value, verbatim from cockpit.md>
 
-## 进行中
+## In Progress
 
-<Bullet list copied from cockpit.md `## 进行中` AUTO region, verbatim.
+<Bullet list copied from cockpit.md `## In Progress` AUTO region, verbatim.
  Else (empty region): single line "None.">
 
-## 下一步
+## Next
 
-<The `## 下一步` body copied from cockpit.md, verbatim.
+<The `## Next` body copied from cockpit.md, verbatim.
  Else (empty / placeholder): single line "None.">
 
-## Hanging tasks
+## Hanging Tasks
 
 <If cockpit has hanging tasks: bullet list copied verbatim.
  Else: single line "None.">
@@ -76,7 +76,7 @@ To author a new deck artifact (spec / plan / incident / checklist / reference / 
 <!-- END: flightdeck -->
 ```
 
-**Relative-link rewrite (applies to every copied block — `## 进行中`, `## 下一步`, `## Hanging tasks`):** any link target that is NOT an HTTP/HTTPS URL, NOT an anchor (`#...`), and NOT already absolute (`/...`) must be prefixed with `flightdeck/` — since cockpit.md lives in `flightdeck/` but AGENTS.md lives at repo root. This includes `./` and `../` targets (prefix as-is, no normalization). Example: `[checklists/foo.md](checklists/foo.md)` → `[checklists/foo.md](flightdeck/checklists/foo.md)`. Link text stays unchanged; only the path inside the parentheses is rewritten.
+**Relative-link rewrite (applies to every copied block — `## In Progress`, `## Next`, `## Hanging Tasks`):** any link target that is NOT an HTTP/HTTPS URL, NOT an anchor (`#...`), and NOT already absolute (`/...`) must be prefixed with `flightdeck/` — since cockpit.md lives in `flightdeck/` but AGENTS.md lives at repo root. This includes `./` and `../` targets (prefix as-is, no normalization). Example: `[checklists/foo.md](checklists/foo.md)` → `[checklists/foo.md](flightdeck/checklists/foo.md)`. Link text stays unchanged; only the path inside the parentheses is rewritten.
 
 ### Step 4: Write the regenerated AGENTS.md
 
@@ -91,8 +91,8 @@ Use Write to save.
 The transform must be deterministic — a hypothetical re-run would produce a byte-identical block. Don't actually re-run Steps 1–4 or re-write the file; instead self-check the block you just wrote against this checklist:
 
 - `## Current focus` appears once, with the `Active focus` value present and not duplicated.
-- `## 进行中` rows match the cockpit AUTO region verbatim (same order, same count); empty region rendered as `None.`.
-- `## 下一步` carries the cockpit body (or `None.`); not merged with `Active focus`.
+- `## In Progress` rows match the cockpit AUTO region verbatim (same order, same count); empty region rendered as `None.`.
+- `## Next` carries the cockpit body (or `None.`); not merged with `Active focus`.
 - Every relative link `](...)` inside the block carries the `flightdeck/` prefix — scan each one.
 - No trailing whitespace on any line inside the markers; exactly one blank line between sections.
 
@@ -105,15 +105,15 @@ Report concisely:
 ```
 🌉 AGENTS.md regenerated.
   Active focus: <one-line>
-  进行中 (active artifacts): <N>
-  下一步: <one-line, or none>
+  In Progress (active artifacts): <N>
+  Next: <one-line, or none>
   Hanging tasks: <N>
   Hand-authored content preserved: <yes / no / n/a (file missing before)>
 ```
 
 ## Idempotency rules
 
-- Read cockpit.md fields in a fixed order (Active focus → 进行中 → 下一步 → Hanging tasks). Don't reorder.
+- Read cockpit.md fields in a fixed order (Active focus → In Progress → Next → Hanging Tasks). Don't reorder.
 - Empty sections must produce the placeholder text — never be omitted (otherwise the second run might re-omit, but the first might have included, causing diffs).
 - One blank line between sections inside the flightdeck block. No trailing whitespace inside markers.
 - **Link prefixing is deterministic**: a relative link `(path)` always becomes `(flightdeck/path)` — no path normalization (e.g., do NOT collapse `flightdeck/../README.md` to `README.md`; emit the prefixed path). Determinism beats prettiness.

@@ -5,17 +5,17 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha 试用期——**v3.0.0-alpha.1 已上线 GitHub（main+tag 已 push）**，邀请早期试用者收集反馈；alpha 期间仍可破坏性调整，正式 3.0.0 完善到位再发。**核心卖点=随时可关、下次 preflight 干净接手、上下文不丢（红线）**。de-scope 基线见 `docs/descope-baseline.md`。
+flightdeck 3.0 alpha——「cockpit 模型升级」已 land（段名英文化 + `Pending Review` 段 + 累积段排水纪律）。**新方向：把工具推向「几乎零人工操作」的纯 AI 调用**——盘点并删减历史上为「人工手改」而写的内容（看板维护/改状态/人工旋钮），先 brainstorm 出清单。**核心卖点=随时可关、上下文不丢（红线）**；de-scope 基线见 `docs/descope-baseline.md`。
 
-## 进行中
+## In Progress
 
 None.
 
-## 下一步
+## Next
 
-- **alpha 反馈收集期**：v3.0.0-alpha.1 已上线（main+tag 在 origin，`ls-remote` 已验证）；试用反馈逐条折进 specs/ 处置，正式 3.0.0 完善到位再发。
+- **界定「AI 化精简」范围**：盘点历史上为「人工手动维护/修改」而写的内容（看板维护指引、改状态、人工开关/旋钮），判断纯 AI 调用下哪些可删——先 brainstorm 出清单再动手成 spec。
 
-## Hanging tasks
+## Hanging Tasks
 
 None.
 

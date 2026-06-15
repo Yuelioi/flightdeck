@@ -68,7 +68,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | --- | --- | --- | --- | --- | --- |
 | `status` | all workflow + knowledge | **required** | preflight/landing/status/walkaround | status/landing/user | Audit 1 |
 | `summary` | workflow (specs/plans) | recommended | INDEX generation | status/landing/author | INFO if missing |
-| `note` | workflow | optional | cockpit `## 进行中` row + walkaround render | author/status | rendered as `[note: …]`, not validated |
+| `note` | workflow | optional | cockpit `## In Progress` row + walkaround render | author/status | rendered as `[note: …]`, not validated |
 | `verify` | workflow (`done`) + knowledge (`stale`) | optional | preflight/landing/walkaround verify-debt scan + `flightdeck_index.py --verify-pending` | author/status/landing | present = owes verification, value = one-line how-to (see [verify field](#verify--the-verification-marker)) |
 | `last_updated` | knowledge + workflow | knowledge **required**; workflow recommended | routing (staleness judgment) | status/landing (auto-bump) | knowledge: Audit 2; workflow: INFO |
 | `implements` | plans | optional | reverse-lookup via `plans/INDEX.md` | author | Audit 4 (orphan INFO) |
@@ -83,7 +83,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | — (static identity stamp; future 3.0→3.1 migration anchor) | **launch only** (init) | — |
 
-`cockpit.md` board fields (`Last updated` / `Active focus` / `## 进行中` / `## 下一步` / `## Hanging tasks`) are not YAML frontmatter. `## 进行中` is an AUTO region derived from `status: active` spec/plan; `## 下一步` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
+`cockpit.md` board fields (`Last updated` / `Active focus` / `## In Progress` / `## Next` / `## Hanging Tasks`) are not YAML frontmatter. `## In Progress` is an AUTO region derived from `status: active` spec/plan; `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 
 ### Supersession model
 
@@ -136,7 +136,7 @@ knowledge: active → stale (auto, ritual) → active (user-reviewed) | obsolete
 `stale` = **待复核：疑似过期 _或_ 新产出未验证** — two sources distinguished by the [`verify` field](#verify--the-verification-marker): **has `verify`** = written-but-unverified; **no `verify`** = `when_to_update`-matched suspected-outdated. The status token is unchanged; only the meaning broadens.
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
-- `active` = being worked on; **auto-appears in cockpit `## 进行中`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
+- `active` = being worked on; **auto-appears in cockpit `## In Progress`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
 - `done` = 工作完成；留在源文件夹直到 landing ritual 把它归档进 `archive/`（**done ≠ archived**）.
 - **Rejected / abandoned** = the artifact is **deleted outright** (only on explicit user instruction). git log is the history, with a one-line reason in the commit body. There is no `scrapped` status value and no tombstone group.
 
@@ -152,7 +152,7 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 |---|---|---|---|
 | Write a new spec/plan (capture only, not yet started) | →`idea` | status | always |
 | Write a new spec/plan **and already working on it** | direct →`active` (legal skip past idea) | status | always |
-| Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## 进行中`) | status | default (House Rule `status: don't auto start` can disable) |
+| Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## In Progress`) | status | default (House Rule `status: don't auto start` can disable) |
 | User approves / signs off | `active→done` (flips `done` only, **does not archive**) | status / landing seam | always |
 | A direction is rejected | **delete the file** (git log + commit-body reason) | **user-explicit instruction only** | **never auto** |
 
@@ -206,7 +206,7 @@ Fail keeps `verify` (re-do + re-verify) — binary present/absent only, no `veri
 
 ## INDEX.md (per-folder + root)
 
-Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`待启动（idea）` / `进行中·完成（active·done）`) — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
+Every artifact folder has an `INDEX.md` — a derived index of that folder's files: one row per file `[file](file) — status — one-line summary` (knowledge folders add `when_to_read`/`applies_to`). The `<!-- AUTO -->` region is machine-maintained (regenerated from each file's frontmatter); an optional hand area sits outside it. `specs/INDEX` groups by status (`Backlog (idea)` / `Active · Done`) — see [folder-semantics § specs/](folder-semantics.md#specs--designs).
 
 There is **no root `flightdeck/INDEX.md`** — the folder INDEXes are the whole index layer; deck root holds only `cockpit.md` + `rules.md`.
 
@@ -313,11 +313,11 @@ idea →(flip one field)→ active → done   →(land = move to archive/)
                                   (rejected = delete the file)
 ```
 
-A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## 进行中`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## 下一步` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
+A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## In Progress`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## Next` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
 
 Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus 「已保存」marker, no commit/archive); default-on, downgradable via House Rule `landing: don't soft-land at end-of-turn`. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
 
-A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## 进行中` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## 下一步` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
+A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
@@ -329,7 +329,7 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + regen `## 进行中` from `status: active` + auto-write `## 下一步` + any `Hanging tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Last updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
 
 ## Ritual responsibilities — who owns what
 

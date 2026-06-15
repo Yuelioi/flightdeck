@@ -11,7 +11,7 @@ This stub remains so links from `README.md` / `README.zh.md` / `CHANGELOG.md` st
 - **Migration**: a synthetic 1.1.x layout (`manifest.md` / `logbook.md` / `kneeboard/` / `flight-plans/` / `incident-reports/` / `safety-reviews/`) triggers the 1.1.x→1.2 detection in `preflight`/`walkaround`; an idempotent re-run skips already-migrated artifacts.
 - **walkaround**: the 10 audits surface illegal status, INDEX↔folder drift, missing `superseded_by`, orphan plan (INFO), and legacy 1.x paths.
 - **rules.md**: a no-git deck (House Rule `this deck doesn't use git`, or a gitignored `flightdeck/`) makes `landing` skip the commit step and write **no** separate log — `archive/` files are the record. (Pre-3.0 `disabled_folders` / `disabled_gates` are read-but-ignored in 3.x.)
-- **emit-agents-md**: renders Current focus / Next session / Hanging tasks from `cockpit.md`.
+- **emit-agents-md**: renders Current focus / Next session / Hanging Tasks from `cockpit.md`.
 
 ## 2.0 test points
 

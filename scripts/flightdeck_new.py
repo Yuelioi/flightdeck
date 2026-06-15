@@ -146,7 +146,7 @@ def main(argv=None):
     if args.kind in WORKFLOW and status == "idea":
         print("INDEX updated; cockpit unchanged (status=idea)")
     elif args.kind in WORKFLOW:
-        print("INDEX + cockpit (## 进行中) updated")
+        print("INDEX + cockpit (## In Progress) updated")
     else:
         print("folder INDEX updated")
     return 0

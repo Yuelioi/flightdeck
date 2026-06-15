@@ -174,11 +174,11 @@ class SpecsGroupingTest(unittest.TestCase):
             folder = self._specs(d)
             expected = (
                 "<!-- AUTO:specs -->\n"
-                "### 待启动（idea）\n"
+                "### Backlog (idea)\n"
                 f"- [alpha-idea.md](alpha-idea.md) {DASH} idea {DASH} a idea\n"
                 f"- [zeta-idea.md](zeta-idea.md) {DASH} idea {DASH} z idea\n"
                 "\n"
-                "### 进行中·完成（active·done）\n"
+                "### Active · Done\n"
                 f"- [2026-06-03-new-done.md](2026-06-03-new-done.md) {DASH} done {DASH} new done\n"
                 f"- [2026-06-01-old-active.md](2026-06-01-old-active.md) {DASH} active {DASH} old active\n"
                 "<!-- /AUTO -->"
@@ -193,8 +193,8 @@ class SpecsGroupingTest(unittest.TestCase):
                 "---\nstatus: active\nsummary: a\n---\n", encoding="utf-8"
             )
             out = regen_folder_index(folder)
-            self.assertNotIn("待启动", out)
-            self.assertIn("进行中·完成（active·done）", out)
+            self.assertNotIn("Backlog", out)
+            self.assertIn("Active · Done", out)
 
 
 class ReplaceAutoBlockTest(unittest.TestCase):
@@ -306,7 +306,7 @@ class CockpitWiredIntoMainTest(unittest.TestCase):
                 "# specs\n\n<!-- AUTO:specs -->\nstale\n<!-- /AUTO -->\n", encoding="utf-8"
             )
             (deck / "cockpit.md").write_text(
-                "# Cockpit\n\n## 进行中\n\n<!-- AUTO:inprogress -->\nSTALE\n<!-- /AUTO -->\n\n## 下一步\n",
+                "# Cockpit\n\n## In Progress\n\n<!-- AUTO:inprogress -->\nSTALE\n<!-- /AUTO -->\n\n## Next\n",
                 encoding="utf-8",
             )
             self.assertEqual(main([str(deck), "--check"]), 1)
@@ -314,7 +314,7 @@ class CockpitWiredIntoMainTest(unittest.TestCase):
             cockpit = (deck / "cockpit.md").read_text(encoding="utf-8")
             self.assertNotIn("STALE", cockpit)
             self.assertIn("real work", cockpit)
-            self.assertIn("## 下一步", cockpit)  # hand region preserved
+            self.assertIn("## Next", cockpit)  # hand region preserved
 
 
 class ArchivableDoneTest(unittest.TestCase):

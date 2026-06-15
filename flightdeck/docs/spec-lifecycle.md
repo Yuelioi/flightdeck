@@ -32,12 +32,12 @@ knowledge 工件（graduate 后沉进 `docs/` 的那份）走自己的 status �
   spec 诞生   ─flip─▶   开工            ─批准/签收─▶  工作完成        ─landing─▶  历史冻结
   status:idea          status:active               status:done               （从 specs/ 移走）
   无日期前缀            自动加 YYYY-MM-DD- 前缀      留在 specs/ 直到被搬
-  只在 specs/INDEX      进 cockpit ## 进行中        （done ≠ archived）
+  只在 specs/INDEX      进 cockpit ## In Progress     （done ≠ archived）
   不在 cockpit          │
                         │ 可派生出 plan（plans/，frontmatter implements: specs/<x>.md）
                         ▼
                     plan 同样走 idea→active→done；active 期间每个 task 边界做
-                    checkpoint（同步 cockpit ## 下一步 + plan 的 ## Progress current: 指针）
+                    checkpoint（同步 cockpit ## Next + plan 的 ## Progress current: 指针）
                                                                           │
                                        知识 graduate ──▶ docs/（当前真相，常驻、完工不归档）
 ```
@@ -46,9 +46,9 @@ knowledge 工件（graduate 后沉进 `docs/` 的那份）走自己的 status �
 
 1. **idea —— 诞生 / 捕获。** 新 spec 默认 `status: idea`：未启动的设计，**无日期前缀**，只出现在 `specs/INDEX` 的"待启动"池，**不进 cockpit**。（若写下来就已经在做，可合法直接起 `active`，跳过 idea。）
 
-2. **active —— 开工（唯一改名点）。** `idea → active` 只是**翻一个字段**：自动补 `YYYY-MM-DD-` 前缀（幂等——已有前缀就跳过），并在 cockpit `## 进行中` 浮现。无文件移动、无关系边重写。每次翻转 bump `last_updated`。
+2. **active —— 开工（唯一改名点）。** `idea → active` 只是**翻一个字段**：自动补 `YYYY-MM-DD-` 前缀（幂等——已有前缀就跳过），并在 cockpit `## In Progress` 浮现。无文件移动、无关系边重写。每次翻转 bump `last_updated`。
 
-3. **（并行）plan —— 把设计变可执行。** spec 可派生 `plans/` 下的 plan，plan 用 `implements: specs/<x>.md` 指回。plan 自己也走 `idea→active→done`；`active` 期间，**每个 plan-task 边界**做一次 **checkpoint**（轻量看板同步：cockpit `## 下一步` + plan 的 `## Progress` `current:` 指针，**只写盘、不 commit**），让中途关掉再开能无损接手。
+3. **（并行）plan —— 把设计变可执行。** spec 可派生 `plans/` 下的 plan，plan 用 `implements: specs/<x>.md` 指回。plan 自己也走 `idea→active→done`；`active` 期间，**每个 plan-task 边界**做一次 **checkpoint**（轻量看板同步：cockpit `## Next` + plan 的 `## Progress` `current:` 指针，**只写盘、不 commit**），让中途关掉再开能无损接手。
 
 4. **done —— 完成接缝。** `active → done` 的触发源是**用户断言的批准/签收**（一个事实），AI **不**自评完成、也不靠 smoke-check 判定。`→done` 是 status 轻仪式与 landing 重仪式之间的**唯一接缝**：到达 done 即把控制权交给 landing 收尾。**done 只翻 status，不归档**。
 

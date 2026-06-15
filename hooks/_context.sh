@@ -23,11 +23,11 @@ build_context() {
   cockpit="${project_dir}/flightdeck/cockpit.md"
   if [ -s "$cockpit" ]; then
     focus="$(grep -m1 -E '^\*\*Active focus\*\*' "$cockpit" 2>/dev/null || true)"
-    # The "## 下一步" section: from its heading to the next "## " heading.
-    next="$(awk '/^## 下一步/{f=1;next} /^## /{f=0} f' "$cockpit" 2>/dev/null || true)"
+    # The "## Next" section: from its heading to the next "## " heading.
+    next="$(awk '/^## Next/{f=1;next} /^## /{f=0} f' "$cockpit" 2>/dev/null || true)"
     if [ -n "$focus" ] || [ -n "$next" ]; then
       anchor=$'\n\n<flightdeck-cockpit-anchor note="may lag last turn; reconcile via /flightdeck:preflight">\n'
-      anchor+="${focus}"$'\n## 下一步:\n'"${next}"
+      anchor+="${focus}"$'\n## Next:\n'"${next}"
       anchor+=$'\n</flightdeck-cockpit-anchor>'
     fi
   fi

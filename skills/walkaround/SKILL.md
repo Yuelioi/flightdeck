@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## 进行中` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges. Triggered by `/flightdeck:walkaround`.
+description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context. Triggered by `/flightdeck:walkaround`.
 ---
 
 # Flightdeck Walkaround
@@ -19,7 +19,7 @@ User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drif
 
 ## Audits
 
-Run all 13 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
+Run all 14 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
 
 **Audit 1** — 查各非-archive `.md` 的 `status` 字段 → flag 缺失（CRITICAL）、非法值（WARNING；`specs/plans` 合法: `idea/active/done`；knowledge 合法: `active/stale/obsolete`；已退役旧值 `pending/awaiting-review/blocked/superseded` 均为 WARNING）。
 
@@ -37,7 +37,7 @@ Run all 13 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 8** — 查 `flightdeck/` 下不属于已知文件夹/已知根条目且不被任何已知入口链接的 `.md` → flag 孤立文件（WARNING）；知识文件夹下的 `<area>/` 子目录不算 stray；`status: idea` spec 不算 orphan；`specs/plans/` 内的子目录算 WARNING；未被文件夹语义覆盖的非 `.md` 文件（WARNING）。
 
-**Audit 9** — 若 repo 根 `AGENTS.md` 带 flightdeck 标记块 → 逐字段比对 `cockpit.md`（active focus / `## 进行中` / `## 下一步` / hanging tasks）与块内内容 → flag 任何字段偏差（WARNING；说明偏差字段）。
+**Audit 9** — 若 repo 根 `AGENTS.md` 带 flightdeck 标记块 → 逐字段比对 `cockpit.md`（active focus / `## In Progress` / `## Next` / hanging tasks）与块内内容 → flag 任何字段偏差（WARNING；说明偏差字段）。
 
 **Audit 10** — 查 `specs/plans/`（非 archive）各文件 → 汇总缺 `summary` / `last_updated` 的文件 → 各输出**一条** aggregated INFO（不逐文件报，避免淹没）。
 
@@ -46,6 +46,8 @@ Run all 13 in order. First read `flightdeck/rules.md` if present; resolve behavi
 **Audit 12** — 查 `cockpit.md` 的 `<!-- AUTO:inprogress -->` 块 → 计算期望集（所有非 archive `status: active` spec/plan）→ flag active 文件无对应行（WARNING）、行对应文件非 active（WARNING）、摘要/note 文字差异（INFO；下次 regen 自愈）；块完全缺失为 WARNING。快速路径：`flightdeck_index.py --check <deck>` 的 `cockpit` drift 标签。
 
 **Audit 13** — 查 `specs/plans/`（非 archive）中 `status: done` 文件 → flag 有 active 入边（`implements:` 指向它）者为 "blocked done"（INFO；报 blocker）、无 active 入边者为 "landable done 可 land"（INFO；运行 `/flightdeck:landing`）。快速路径：`flightdeck_index.py <deck> --archivable`。
+
+**Audit 14** — 查 `cockpit.md` 的 `## Key Context` 累积卫生（非阻塞）→ flag 条目疑似 stale（指向已 archive/已 graduate 的目标）或单条已长成散文而非 literal 指针、或整段明显超长（INFO；提示在下次 `/flightdeck:landing` 做逐条 drain/收缩，见 [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)）。walkaround 只浮出、不 drain。
 
 ## Output format
 

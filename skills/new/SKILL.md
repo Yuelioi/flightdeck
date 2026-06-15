@@ -56,7 +56,7 @@ a title: drop non-ascii, spaces → `-`, lowercase, keep `a-z0-9-`.
 - **Fill the `## Signature` block after creating.** The incident scaffold ships a `## Signature` block — fill its **four keys and only those four** (`symptom` / `error_type` / `where` / `trigger`); this is a **hard boundary** (no severity / owner / component / … — adding a key needs its own spec). `symptom` is the human-readable / grep anchor (the real error string, may be multi-line); `error_type: —` is a first-class case for non-exception problems (UI / perf / data). The fingerprint is computed from it — the author never hand-writes a fingerprint.
 
 **After writing:** run `uv run <flightdeck-pkg>/scripts/flightdeck_index.py <deck>` to
-regenerate INDEX + cockpit. An `active` workflow artifact projects into cockpit `## 进行中`;
+regenerate INDEX + cockpit. An `active` workflow artifact projects into cockpit `## In Progress`;
 an `idea` does not.
 
 **If the target file already exists:** the script refuses; by hand, pick a different slug

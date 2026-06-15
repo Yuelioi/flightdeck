@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stop hook for flightdeck: silently regenerate the board AUTO regions
-# (cockpit ## 进行中 + each INDEX.md AUTO region) at end-of-turn. Passive
+# (cockpit ## In Progress + each INDEX.md AUTO region) at end-of-turn. Passive
 # only — never decision:block, never archive, never touch judgment fields.
 set -uo pipefail
 
