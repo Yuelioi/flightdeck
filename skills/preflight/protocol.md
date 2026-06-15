@@ -189,7 +189,7 @@ Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active /
 
 The optional `note:` field carries the "why it hasn't moved" diagnostic (blocker / pending reason) that the merged `active` state would otherwise lose; cockpit + walkaround render it as `[note: …]`.
 
-Status is just a label — the user edits it freely; at landing the AI may *suggest* the next typical status (per the recommended flow), applied only after the user confirms. walkaround flags odd values as INFO/warning, never blocks.
+Status is just a label — the user edits it freely; at landing the AI **applies** the next typical status by judgment (per the recommended flow) and **reports it in the banner** — reversible, so no confirm gate (the user can undo; see [Act-report-close loop](#act-report-close-loop)). walkaround flags odd values as INFO/warning, never blocks.
 
 ### 验证非阻塞 (non-blocking verification)
 
@@ -315,7 +315,7 @@ idea →(flip one field)→ active → done   →(land = move to archive/)
 
 A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## In Progress`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## Next` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
 
-Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus 「已保存」marker, no commit/archive); default-on, downgradable via House Rule `landing: don't soft-land at end-of-turn`. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
+Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus the **unified soft-landing banner** — see [Act-report-close loop](#act-report-close-loop) — no commit/archive); default-on, downgradable via House Rule `landing: don't soft-land at end-of-turn`. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
 
 A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
 
@@ -330,6 +330,75 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
 After classifying: update `cockpit.md` (`Last updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
+
+## Act-report-close loop
+
+> Runtime contract for "AI acts, reports, you can close anytime" — reversible-auto · unified banner · lifecycle recovery. **Single source of truth**: `bootstrap.md` carries only the minimal runtime pointer; skills reference here, never restate.
+
+### Reversible vs irreversible (the gate criterion)
+
+**Criterion:** a change confined to deck files / local git, reversible by re-editing or a local git operation, is **reversible** → executes automatically, no confirm gate. A change that is **outward or irreversible** stays gated (ask first).
+
+| Class | Examples | Behavior |
+| --- | --- | --- |
+| Reversible (auto) | `status` flip (idea→active, →done), `--advance-candidates`, incident→checklist promotion, `done` archival, applying a status suggestion, stale flip, cockpit section maintenance, local `git commit` | execute by judgment, no gate; report in the banner |
+| Outward / irreversible (gated) | `git push`, publishing outward, calling an external service | ask first (red line) |
+
+This table is the **single authority**; new actions classify by the criterion. A skill author must not reintroduce a confirm gate on a reversible action under another name. A reversible edit that **destroys user-handwritten content** (rewriting / mass-deleting cockpit notes) is still auto, but **must be reported explicitly in the banner** (never silent). `Hanging Tasks` is **not** a confirm gate (see below).
+
+### Unified flow output (the banner)
+
+Every flow turn = **prose first, then exactly one standardized banner at the very end**. Status / landing / recovery info always lands last, never mid-prose.
+
+```
+─── <icon> <flow> ───
+<key info / recovery path, one per line>
+```
+
+- **icon + flow name** per the [Brand glyphs table](#brand-glyphs-per-command) (`preflight` 🛫 · `landing` / `soft landing` 🛬 · `new` ✍️ · `walkaround` 🔍 · `status` 🔄). Flow name + field labels are **structural English** (i18n); content after a label is in the user's working language.
+- **"Turn" =** one user input → one complete AI response (including any internal multi-step actions). **One aggregated banner per turn**, not one per atomic action.
+- **Trigger**: a turn that ran a flow or did real work emits a banner (`preflight` / `landing` / `soft landing` / `new` / `walkaround` / an execution turn). A **pure-conversation / clarification turn** (no flow, no deck change) emits none. "No change" = *a flow ran but produced no new knowledge* (still a banner) — not a pure-chat turn.
+- **Nesting**: a flow nested in another (landing triggers soft-landing) emits only the **outermost** banner; inner `[Saved]` / `[Pending]` info is **merged (union)** in — "one banner" means aggregated into one, inner increments not dropped.
+- **Failure**: a crashed / partial / failed flow **still emits a banner**, with a `[Failed]` line: failure point, what was persisted, how to resume.
+
+**Field set:** always — `[Stage]` (recovery needs it) + the closing "you can close now" line. Conditional — `[Saved]` (knowledge persisted) / `[No change]` (no new knowledge), mutually exclusive; `[Pending]` **only when Pending Review is non-empty** (omit when empty, never an empty `[Pending]`); `[Failed]` (failure). Each flow's minimal field set lives with its SKILL (preflight ≥ `[Next]` + routing counts).
+
+```
+─── 🛬 soft landing ───
+[Stage]     <lifecycle stage, see below>
+[Saved]     specs/ +1 <file>; cockpit Next updated.        (or [No change])
+[No change] No new knowledge this turn; board is current.
+[Pending]   ⚠ N item(s) await verification: … → see cockpit Pending Review.
+You can close / switch the conversation anytime — next preflight resumes from the board.
+```
+
+### Undo channel ("翻回")
+
+One universal undo replaces per-action gates. The undo unit is **the most recent landing unit as a whole** — one `landing` / `checkpoint` commit, or this turn's uncommitted deck changes — not a file-level last change.
+
+- **Cross-session recoverable**: target derived from git + the board, not conversation memory. Read `git log -1 --oneline`; a commit clearly tagged (`landing:` / `checkpoint:`) → revert that unit; **untagged / spans multiple turns / ambiguous → ask the user** (never force-guess). Makes "undo after closing the conversation" deterministically implementable.
+- **Action**: reverse that unit's reversible changes (un-flip status / un-archive / local git revert / delete a just-promoted checklist). `push` is never in undo scope.
+- **No undo stack**: the "most recent landing unit" is reconstructed from git + board.
+
+### Lifecycle recovery (resumable after any interruption)
+
+Work may stop at any stage and be interrupted; the banner `[Stage]` + the board must let the next preflight tell *where it is and how to continue*:
+
+| Stage | Recovery anchor |
+| --- | --- |
+| brainstorming | no artifact yet; cockpit Active focus / Next records "brainstorming X, asked up to …"; decided points incrementally soft-land into a spec |
+| spec written | spec(active) in In Progress; Next = review → write plan |
+| plan written | plan(active) in In Progress; Next = execute plan step N |
+| plan partially done | Next = continue from the next unfinished step (plan `## Progress`); finished parts not redone |
+| plan done, pending review | Pending Review entry recording "after verification passes: how to commit / next step" |
+| review passed | trigger landing: flip done, archive, commit |
+| ad-hoc (no spec/plan) | cockpit Next states "doing X, up to …"; reversible done + reported per the banner |
+
+**Stage derivation (deterministic):** `[Stage]` = **plan status > spec status > cockpit Active focus prose** (no-artifact brainstorm / ad-hoc stages fall to prose). With both a spec and a plan present, the plan's stage wins.
+
+**Two recovery contexts (no conflict):** *preflight recovery* reads only cockpit + INDEX (the recovery payload) — no git, no conversation (keeps preflight read-only). *Undo* is a separate user-invoked action that may read git log + the board. "Recovery only reads the board" refers to the former.
+
+**Guarantee scope:** zero-loss covers the **recovery payload (cockpit + INDEX + persisted artifacts)**, *not* un-persisted in-conversation reasoning. A long brainstorm bounds loss by landing decided points incrementally.
 
 ## Ritual responsibilities — who owns what
 
@@ -379,7 +448,7 @@ Multi-criterion gate evaluated by `landing`. An incident reaches the **checklist
 
 The `recurrences` frontmatter counter (auto-bumped at landing) plus the `[Case N]` block dates surface criteria 1–2; `recurrences` also renders into the `incidents/INDEX.md` row as `recur: N` (when > 1), so the gate is visible at catalog time without opening the file.
 
-When the gate fires, `landing` prompts: "Promote `incidents/X.md` to `checklists/X.md`?". User confirms — promotion is **never automatic**.
+When the gate fires, `landing` **promotes** `incidents/X.md` → `checklists/X.md` by judgment (reversible) and **surfaces it in cockpit Pending Review** for the user to veto (undo reverses it). No pre-confirm gate — promotion is a reversible deck action (see [Act-report-close loop](#act-report-close-loop)); the user retains the final say via Pending Review / undo.
 
 A separate **project-rules upgrade gate** fires when a promoted incident continues to recur after promotion. Then add a one-liner to project agent rules and mark the incident `Status: upgraded → project rules`. Do not delete the incident.
 

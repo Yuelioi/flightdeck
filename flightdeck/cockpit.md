@@ -1,17 +1,18 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-16 by 月离 (land 首个反馈驱动变更「cockpit 模型升级」：段名英文化 + Pending Review 段 + 累积段排水纪律，spec/plan 归档；新方向＝把工具推向「几乎零人工操作」纯 AI 调用。)
-**Active focus**: flightdeck 3.0 alpha——「cockpit 模型升级」已 land（段名英文化 + `Pending Review` 段 + 累积段排水纪律）。**新方向：把工具推向「几乎零人工操作」的纯 AI 调用**——盘点并删减历史上为「人工手改」而写的内容（看板维护/改状态/人工旋钮），先 brainstorm 出清单。**核心卖点=随时可关、上下文不丢（红线）**；de-scope 基线见 `docs/descope-baseline.md`。
+**Last updated**: 2026-06-16 by 月离 (brainstorm「AI 化精简」方向 → 拆成 2 spec：Spec 1 act-report-close-loop active 待复核、Spec 2 ai-authored-config 暂泊 idea。)
+**Active focus**: flightdeck 3.0 alpha——「AI 化精简」方向已 brainstorm 成形并拆为 2 spec。**Spec 1 `act-report-close-loop`（active，待你复核 → 写 plan）**：可逆动作无门自动执行 + 统一「翻回」撤销 + 显式 soft-landing banner + Pending Review 恢复完整性。**Spec 2 `ai-authored-config`（idea，排队）**：删人工开关目录、rules.md 改 AI 落盘。**铁律＝纯 AI 操作 + 上下文随时可关可恢复（红线）**；de-scope 基线见 `docs/descope-baseline.md`。
 
 ## In Progress
 
 <!-- AUTO:inprogress -->
-
+- [2026-06-16-act-report-close-loop.md](specs/2026-06-16-act-report-close-loop.md) — 统一所有流程输出格式（先正文 → 末尾一个标准 banner，状态/着陆恒在最后、一回合一个）+ 可逆动作无门自动执行 + 统一「翻回」撤销 + soft-landing 覆盖全生命周期状态（brainstorm/spec/plan/部分/待审/通过/即席）+ Pending Review 写明验证后动作；确保随时关闭、下次 preflight 从看板恢复
+- [2026-06-16-act-report-close-loop.md](plans/2026-06-16-act-report-close-loop.md) — 按 spec 落地：baseline → protocol.md 单一真相源(判据表+banner 规范+翻回+Hanging 窄定义+阶段派生) → bootstrap 最小指针 → skills 删门+banner → 模板/scaffold → 测试 → 外圈文档+descope 归宿 → dogfood verify(wc-m 降+pytest 绿)+landing
 <!-- /AUTO -->
 
 ## Next
 
-- **界定「AI 化精简」范围**：盘点历史上为「人工手动维护/修改」而写的内容（看板维护指引、改状态、人工开关/旋钮），判断纯 AI 调用下哪些可删——先 brainstorm 出清单再动手成 spec。
+- **复核 Spec 1 `act-report-close-loop`**（specs/2026-06-16-act-report-close-loop.md）；确认后用 writing-plans 写 plan 并执行落地。Spec 2 `ai-authored-config` 排队（Spec 1 落地后启动）。
 
 ## Key Context
 
@@ -21,7 +22,7 @@
 
 ## Pending Review
 
-- (none)
+- [AI 化精简 2 spec] 已写 Spec 1 `act-report-close-loop`(active) + Spec 2 `ai-authored-config`(idea/Backlog) 待你复核（见 [specs INDEX](specs/INDEX.md)）。验证通过后：写 Spec 1 的 plan 并执行；Spec 2 启动。未 commit（复核中）。
 
 ## Hanging Tasks
 
