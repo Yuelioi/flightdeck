@@ -9,7 +9,7 @@ Most "AI memory" systems fail by **saving everything** — the signal drowns in 
 A static notes file (CLAUDE.md, project notes) is append-only — it rots. flightdeck is a state machine with gates:
 
 - a new mistake → `incidents/` with mandatory root-cause analysis (forbidden phrasings: "forgot", "careless");
-- the same mistake recurs → a 3-criterion promotion gate offers to elevate it to `checklists/` (always user-confirmed, never automatic);
+- the same mistake recurs → a 3-criterion promotion gate elevates it to `checklists/` automatically (reversible) and surfaces it in cockpit Pending Review for veto;
 - work ships → `status` advances to `done`; the landing ritual moves it to `archive/` once nothing active references it (`done` alone never auto-archives — status is orthogonal to location), and it stops being authoritative for current state.
 
 The lifecycle is what prevents the junk-drawer failure mode that static rules files always succumb to.

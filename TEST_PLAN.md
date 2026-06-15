@@ -25,7 +25,7 @@ This stub remains so links from `README.md` / `README.zh.md` / `CHANGELOG.md` st
 - **`model_invocable` soft gate**: the four entry skills no longer carry `disable-model-invocation`; self-invocation is allowed only when `rules.md` `model_invocable` lists the ritual. Default (`[]`) = manual-only, identical to before; an explicit user slash is always allowed.
 - **`status` ritual**: `/flightdeck:status` flips one artifact's `status:` + its INDEX row (forward-only; never touches `cockpit.md` or commits). `status_auto: [start, land]` controls the *optional* `start`/`land` transitions; core `create→pending` / `finish→awaiting-review` stay automatic.
 - **Shared Land Routine**: `landing` and `status` both call the single `## Land Routine` in `exit-ritual.md` — no reimplementation in either.
-- **Done-but-unlanded**: declining the `status land` confirm leaves the artifact `done` but un-archived; `preflight` / `landing` surface it and offer to land later (never reverts `done`).
+- **Done-but-unlanded**: a `done` artifact still pinned by an active `implements:` edge stays un-archived; `preflight` / `landing` surface it and land it automatically once the pin clears (never reverts `done`).
 
 ## 2.2 test points
 

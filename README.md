@@ -22,8 +22,8 @@
 
 ## ✨ 3.0 highlights
 
-- **Auto-landing — real increments persist themselves.** When a turn produces something worth keeping, there's no wrap-up command to remember: new knowledge soft-lands (classified + indexed) and ends with a visible 「已保存 (saved)」 marker; a finished item triggers a full landing (archive + local commit) on its own. A small turn with nothing worth persisting lands nothing — silence is by design. `/flightdeck:landing` remains as the explicit wrap-up.
-- **See the marker, close the window — nothing is lost.** The 「已保存」 marker / landing output is the signal that board and knowledge are on disk; from there, killing the chat is safe: the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
+- **Auto-landing — real increments persist themselves.** When a turn produces something worth keeping, there's no wrap-up command to remember: new knowledge soft-lands (classified + indexed); a finished item triggers a full landing (archive + local commit) on its own. Every execution turn ends with a one-line soft-landing banner — `[Saved]` when something persisted, `[No change]` when nothing did (an honest "nothing to save, board current") — so the signal is always there. `/flightdeck:landing` remains as the explicit wrap-up.
+- **See the banner, close the window — nothing is lost.** The soft-landing banner ends every execution turn with a "you can close now" line, signalling the recovery payload (cockpit + INDEX + persisted artifacts) is on disk. From there, killing the chat is safe: the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
 
 ## TL;DR
 

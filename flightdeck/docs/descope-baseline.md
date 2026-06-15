@@ -1,9 +1,9 @@
 ---
 status: active
 when_to_read: 改 preflight/landing/walkaround 的职责边界、考虑给 deck 加向后兼容/迁移/校验机制、或往热路径加散文之前
-applies_to: [skills/preflight/SKILL.md, skills/landing/SKILL.md, skills/walkaround/SKILL.md, skills/preflight/protocol.md, scripts/flightdeck_index.py, scaffolds/full]
+applies_to: [skills/preflight/SKILL.md, skills/landing/SKILL.md, skills/walkaround/SKILL.md, skills/preflight/protocol.md, skills/_shared/bootstrap.md, scripts/flightdeck_index.py, scaffolds/full]
 when_to_update: 3.0→3.1 真正引入格式变更/迁移时、校验归宿从 walkaround 迁移时、或热/冷路径预算政策调整时
-last_updated: 2026-06-10
+last_updated: 2026-06-16
 ---
 
 # 3.0 de-scope 基线：职责边界·无向后兼容·预算铁律
@@ -50,3 +50,13 @@ incident 教训一旦**吸纳进权威 skill/protocol 本体**（设计上防再
 ## 治理取舍（明示）
 
 3.0 **接受完整性问题的发现延迟**，以此换热路径成本下降。**良构性由工具链（`flightdeck_index.py`）+ walkaround 保证，不由运行时（preflight/landing）保证**。代价：长期不跑 walkaround，结构漂移 / 孤儿 / 死链会滞留——这是**自觉取舍，非疏漏**。
+
+## 自治交互边界（act-report-close loop）
+
+3.0 把「AI 操作」定为：**可逆 deck 动作无确认门、自动执行**；外发 / 不可逆（push / 发布 / 调外部服务）**仍先问**——「可逆=自动、外发=先问」是不可关的内置红线，不再是开关。散落的 per-action 确认门删除（promotion / advance / status-apply / retire），代之以**一个统一「翻回」通道**（撤销最近一个着陆单元，从 git + 看板推导，跨会话可恢复）。
+
+- **统一输出格式**：所有 flow 回合 = 先正文 → 末尾一个标准 banner（`─── <icon> <flow> ───`），恒在最后、一回合一个；执行回合无增量也出 `[No change]`（替代旧 print-nothing 静默；纯对话不出）。
+- **零损失的范围**（防过度承诺）：「随时可关、恢复零损失」**专指恢复载荷 = cockpit + INDEX + 已落盘工件**，**不含未落盘的对话推理**；长 brainstorm 靠「边定边落」缩小丢失面。
+- **preflight 纯读零写不变**：恢复（读 cockpit+INDEX）与「翻回」（用户主动触发、可读 git）是两个不同操作，前者只读看板。
+
+完整运行契约（可逆判据表 / banner 字段 / 翻回 / 阶段派生 / 生命周期恢复）的**单一真相源**是 `skills/preflight/protocol.md` § Act-report-close loop；本节只记 de-scope 边界。设计稿 `specs/`（archive 后）`2026-06-16-act-report-close-loop`。
