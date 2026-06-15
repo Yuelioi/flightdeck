@@ -52,7 +52,7 @@ Run all 14 in order. First read `flightdeck/rules.md` if present; resolve behavi
 ## Output format
 
 ```
-=== 🔍 /flightdeck:walkaround report ===
+─── 🔍 walkaround ───
 Audit run: <ISO date>
 Flightdeck root: <path>
 

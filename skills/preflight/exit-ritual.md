@@ -38,12 +38,12 @@ Step 3: Regenerate INDEX for changed folders — full rules in "## INDEX regener
         with activity this session; walkaround owns the full INDEX↔frontmatter check.
 
 Step 3a: Suggest status for affected artifacts
-         For each artifact written or touched this session, the AI MAY suggest the next
+         For each artifact written or touched this session, the AI applies the next
          typical status per the recommended flow ([protocol § Status ⟂ location](protocol.md#status--location-two-orthogonal-axes)).
 
-         Status changes are applied ONLY after the user confirms. The user may
+         Status changes are applied by judgment (reversible — reported in the banner; the user can undo). The user may
          change status to any legal value at any time — the AI does not block.
-         (Status is a label — no table, no verbs. The AI suggests; the user decides.)
+         (Status is a label — no table, no verbs.)
 
          Bump last_updated: for each spec/plan changed substantively this
          session — body OR frontmatter, not a typo/wording-only edit — set its
@@ -144,7 +144,7 @@ Then, **for each incident touched** (newly written, or recurrence-bumped) this s
 2. Recurred across ≥ 2 distinct sessions (distinct `[Case N]` dates)?
 3. Remediation pattern stable across cases?
 
-If ALL three hold: prompt the user "Promote `incidents/<topic>.md` to `checklists/<topic>.md`?". On user confirmation, move the file. On user defer or reject, leave alone — the gate will fire again next time. **No automatic promotion** — the gate guards against false positives; the user always decides.
+If ALL three hold: **promote** `incidents/<topic>.md` → `checklists/<topic>.md` by judgment (reversible — move the file) and **surface it in cockpit `## Pending Review`** for veto; undo reverses it. No pre-confirm gate — the three criteria are themselves the guard against false positives, and the user retains final say via Pending Review / undo ([protocol § Act-report-close loop](protocol.md#act-report-close-loop)).
 
 If any criterion fails: skip silently. Don't promote-prompt for marginal cases.
 
@@ -358,20 +358,20 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 **Length check before exit:** if `cockpit.md` > 80 lines, trim immediately (drop finished items; move design detail to a `specs/` entry). `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal. History is `git log` + the `archive/` folder, never cockpit.
 
-### The 「已保存」(saved) marker — soft-landing's visible signal
+### Soft-landing banner — the visible safe-to-close signal
 
-When a **soft-landing** runs (signal 3), end the turn with this marker so the user knows it is safe to close the conversation:
+A **soft-landing** (signal 3) ends the turn with the **unified banner** (full format / field rules → [protocol § Act-report-close loop](protocol.md#act-report-close-loop)):
 
 ```
-──────────── 💾 上下文已保存 ────────────
-知识 + 状态已落盘 · 现在关闭对话不会丢失
-已落:<最多 3 个文件名;更多写「等 N 个文件」> · cockpit 已更新
-下次 /flightdeck:preflight 干净接手
+─── 🛬 soft landing ───
+[Stage]   <lifecycle stage>
+[Saved]   <≤3 filenames; overflow → "+N more">; cockpit updated.   (no commit hash — soft-landing does not commit)
+[Pending] ⚠ <N> await verification → cockpit Pending Review.   (omit when empty)
+You can close / switch the conversation anytime — next preflight resumes from the board.
 ```
 
-- Wording is deliberately **「已保存 / 已落盘」, never "LANDED / 已归档 / 已完成"** — soft-landing does not archive and may not be `done`; the marker must not collide with `done ≠ archived`.
-- Line 3 is a one-line check summary: **at most 3 filenames**, overflow → 「等 N 个文件」; **no commit hash** (soft-landing does not commit).
-- **Silence rule:** with no knowledge increment (pure Q&A / exploration, or state-only → checkpoint) → **print nothing**. Known trade-off: the user cannot distinguish "nothing to persist" from "AI missed it"; accepted to avoid noise.
+- `[Saved]` wording is **persisted / saved, never "LANDED / archived / done"** — soft-landing does not archive and may not be `done`; never collide with `done ≠ archived`. No commit hash (soft-landing does not commit).
+- **No silence on no-increment:** a flow turn with no new knowledge still emits the banner with `[No change]` (an honest "nothing to save, board current, safe to close") — replacing the old print-nothing rule. Only a **pure conversation / clarification turn** (no flow, no deck change) prints no banner.
 
 ## Checkpoint — lightweight board-sync subpath
 
@@ -437,7 +437,7 @@ Mechanics:
 - **signal 1 auto-landing is end-of-turn debounced.** A `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, replacing the old unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. This is why landing rescans the whole `done`-in-place set (Land Routine step 0) rather than only the just-flipped artifact.
 - signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
-- **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion gate**. It is landing's no-`done` natural form + a visible marker. Timing is pinned: persist → print the 「已保存」marker → end the turn (never "reply then persist"). The 「已保存」marker format is in [§ Cockpit update](#cockpit-update--what-changes); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
+- **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion**. It is landing's no-`done` natural form + a visible banner. Timing is pinned: persist → emit the soft-landing banner → end the turn (never "reply then persist"). The banner format is in [§ Soft-landing banner](#soft-landing-banner--the-visible-safe-to-close-signal); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
 - **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
 - **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state.

@@ -14,7 +14,7 @@ The AI picks the mode by trigger (`checkpoint ⊂ soft-landing ⊂ full` — sam
 | | **full** (default) | **soft-landing** | **checkpoint** |
 |---|---|---|---|
 | Trigger | session wrap · `/flightdeck:landing` · end-of-turn `done`-flip | end-of-turn with a **knowledge increment** (signal 3) | plan-task boundary · end-of-turn state-only |
-| Runs | Steps 0–11 | Steps 2–3 + 5 + 8, then the 「已保存」marker | Step 8's board-sync only |
+| Runs | Steps 0–11 | Steps 2–3 + 5 + 8, then the soft-landing banner | Step 8's board-sync only |
 | Graduate / sweep / archive / smoke / commit | all | **none** (durability deferred to full landing) | none |
 
 Canonical definitions, signal-3 trigger, stateless dedup: [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check) + [§ Checkpoint 三档 table](../preflight/exit-ritual.md#checkpoint--lightweight-board-sync-subpath). **幂等**: re-running a full landing after a soft-landing only fills the diff (commit + archive + gates) — already-persisted steps self-detect `already clean`. When in doubt, a full landing is always safe.
@@ -29,8 +29,8 @@ Canonical definitions, signal-3 trigger, stateless dedup: [exit-ritual § Land-r
 3. **Regenerate INDEX for changed folders only.** Fast path: `flightdeck_index.py <deck>` regenerates every folder INDEX **and** the cockpit `## In Progress` block in one run; hand fallback per [exit-ritual § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules).
 4. **Graduate finish.** Each `graduate: true` spec that is `done` and still in `specs/`: rewrite as a current-truth `docs/` entry (must carry `when_to_read` / `applies_to` / `when_to_update`), move it, update both INDEXes — **no archive twin**; idempotency key = source still in `specs/`. [exit-ritual § Step 3b](../preflight/exit-ritual.md#decision-tree)
 5. **Stale detection + 待验证 surfacing (退场单仪式 — landing/soft-landing only).** `--changed-since-anchor` paths ∩ each knowledge artifact's `applies_to` **path entries** (entries containing `/`) → auto-flip `stale` (idempotent, no pre-ask). Surface verify debt from `--verify-pending` (source of truth = the `verify` fields on disk, never a hand-written cockpit line): `⚠未验证: <file> — <怎么验>` (verify) vs `⚠待复核: <file>` (stale). The `⚠待复核` (stale) items surface into cockpit `## Pending Review` (their awaiting-review home); `⚠未验证` (verify) stays the objective scan, separate. [exit-ritual § Step 3c](../preflight/exit-ritual.md#decision-tree)
-6. **Recurrence sweep + promotion gate** — run [§ Recurrence sweep wiring](#recurrence-sweep-wiring) below for each bug/lesson this session; promotion is always user-gated.
-7. **Status + land.** Suggest next status for touched artifacts (applied only on user confirm); `--advance-candidates` → confirm-gated offer to flip each all-plans-done spec to `done` (never auto — the confirmed spec joins this same landing's archivable set); bump `last_updated` on substantively changed artifacts. Then land the **deterministic `--archivable` set** via the shared [Land Routine](../preflight/exit-ritual.md#land-routine) — the judgment is the `implements:` edge graph, never AI prose-reading; `done + verify` archives normally (the marker rides into `archive/` and keeps surfacing until verified); every landing rescans **all** done-in-place artifacts so the active area drains. A mid-turn `done` flip debounces into **one** landing at end-of-turn ([exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check); House Rule `landing: nudge on done, don't auto-run` downgrades to nudge-only).
+6. **Recurrence sweep + promotion** — run [§ Recurrence sweep wiring](#recurrence-sweep-wiring) below for each bug/lesson this session; promotion **auto-fires** when the gate's criteria hold (reversible) and **surfaces in cockpit `## Pending Review`** for veto — no pre-confirm ([protocol § Act-report-close loop](../preflight/protocol.md#act-report-close-loop)).
+7. **Status + land.** Apply the next typical status to touched artifacts **by judgment** (reversible — reported in the banner, user can undo); `--advance-candidates` **auto-flips** each all-plans-done spec to `done` (it joins this same landing's archivable set; archival is **idempotent** — no double-archive); bump `last_updated` on substantively changed artifacts. Then land the **deterministic `--archivable` set** via the shared [Land Routine](../preflight/exit-ritual.md#land-routine) — the judgment is the `implements:` edge graph, never AI prose-reading; `done + verify` archives normally (the marker rides into `archive/` and keeps surfacing until verified); every landing rescans **all** done-in-place artifacts so the active area drains. A mid-turn `done` flip debounces into **one** landing at end-of-turn ([exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check); House Rule `landing: nudge on done, don't auto-run` downgrades to nudge-only).
 8. **Cockpit board-sync.** Bump `Last updated` only on the 4 sanctioned triggers; regen the `## In Progress` AUTO region; auto-write `## Next`; refresh `## Key Context` / `## Pending Review` / `## Hanging Tasks` as needed, **applying the accumulator-drain discipline** ([templates § cockpit Rules](../preflight/templates.md#cockpitmd)): clear/shrink `Key Context` entries that no longer carry forward (target archived · graduated into `docs/` · next session won't need it); drain signed-off `Pending Review` items and surface new ones (AI work-products awaiting sign-off + stale `待复核` notes). Then the **length check**: cockpit > 80 lines → propose a trim (move detail to specs; confirm before deleting); keep `Last updated` a one-line phrase ≤ ~200 chars — not a session changelog. [exit-ritual § Cockpit update](../preflight/exit-ritual.md#cockpit-update--what-changes)
 9. **Regenerate `AGENTS.md`** if any cockpit field it renders changed this session (judge against session start) — run [`/flightdeck:emit-agents-md`](../emit-agents-md/SKILL.md).
 10. **Workspace smoke-check (non-blocking).** Via `git status --short`: stray root `.md` (root entries are `cockpit.md` / `rules.md` only), files outside the known folders, orphans (skip `archive/`), missing `status` in knowledge folders. Surface **before** the commit prompt; the user decides.
@@ -40,39 +40,38 @@ Canonical definitions, signal-3 trigger, stateless dedup: [exit-ritual § Land-r
 
 Step 6's sweep is a **two-layer** match with a gated regression branch and two rails. Base decision tree: [exit-ritual § Step 5a](../preflight/exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up); this section wires the signature layers on top:
 
-1. **Deterministic layer first.** `flightdeck_index.py <deck> --match-signature "<symptom>" [--sig-error-type <TYPE>]`. Hit on an **`active`** entry → append `## [Case N]` + bump `recurrences` (no per-increment confirm — promotion stays gated). No fingerprint hit → **AI fuzzy layer** (`applies_to` overlap / same root cause): confirmed same / confirmed new / **uncertain → ask the user**. No `## Signature` block → skip straight to the fuzzy layer.
+1. **Deterministic layer first.** `flightdeck_index.py <deck> --match-signature "<symptom>" [--sig-error-type <TYPE>]`. Hit on an **`active`** entry → append `## [Case N]` + bump `recurrences` (auto; promotion itself auto-fires + surfaces in Pending Review). No fingerprint hit → **AI fuzzy layer** (`applies_to` overlap / same root cause): confirmed same / confirmed new / **uncertain → ask the user**. No `## Signature` block → skip straight to the fuzzy layer.
 2. **Gated regression (an `obsolete` hit).** `--match-signature` also scans `archive/incidents/` (retired entries stay matchable — regression detection depends on it). A hit there means "we thought this was root-fixed": **confirm a real regression first** (never silently re-append). On confirmation, **revive**: move back to `incidents/`, flip `active`, clear `resolved_by`, add a Case noting "回归，原根治失效", update both INDEXes; `recurrences` keeps accumulating (lifetime count, never reset). Decline → leave archived; treat as a new incident if warranted.
 3. **Idempotency.** An incident already `+1`'d at create-time is **not** re-counted by this sweep — dedup by Case round / session identity.
-4. **Retire prompt (never auto-flip).** `resolved_by` filled but still `status: active` → prompt "retire (flip `obsolete`)?" — retirement is a deliberate, gated act ([protocol § Retirement semantics](../preflight/protocol.md#retirement-semantics-resolved_by--status-obsolete)).
+4. **Retire (auto when resolved, reversible).** `resolved_by` filled + the fix confirmed (e.g. the guard test exists) → auto-flip `obsolete` (drains to `archive/`) and surface in Pending Review; reversible via undo. Ambiguous (filled but fix unconfirmed) → leave `active`, note in Pending Review. ([protocol § Retirement semantics](../preflight/protocol.md#retirement-semantics-resolved_by--status-obsolete))
 
 Then evaluate the 3-criterion promotion gate per [exit-ritual § Step 5a](../preflight/exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up) for each incident touched this session.
 
 ## Output format
 
+**Prose first** — report what landed (one line each; omit empties):
+
 ```
-🛬 已着陆
 Hanging tasks: none / [resolved X / blocking on Y]
-New knowledge classified:
-  - specs/ +1: <file>
-  - incidents/ +0 (no triggers)
-  - (etc.)
-Graduate: [rewrote specs/<x>.md → docs/<x>.md / none]
+New knowledge: specs/ +1 <file> · incidents/ +0 · (etc.)
+Graduate: [specs/<x>.md → docs/<x>.md / none]
 Stale detected: [docs/<x>.md (applies_to path hit) / none]
-待验证: [N 项 / none]（来自 --verify-pending）
+Verify pending: [N / none]  (--verify-pending)
 INDEX regenerated: [folders / none]
 Status changes: [list / none]
 Landed: [files / none] (incl. obsolete knowledge drained to archive/)
-Cockpit updated:
-  - Last updated: [yes/no, reason]
-  - In Progress: [regenerated from N active / unchanged]
-  - Next: [refreshed / unchanged]
-  - Key Context: [drained N / shrank M / unchanged]
-  - Pending Review: [added N (sign-off + stale 待复核) / drained M / none]
-  - Hanging Tasks: [cleared X / added Y / unchanged]
-Workspace smoke-check: clean / [stray: X | orphan: Y | missing-status: Z]  (run /flightdeck:walkaround for full audit)
+Cockpit: Last updated [y/n, reason] · In Progress [regen N] · Next [refreshed] · Key Context [drained N/shrank M] · Pending Review [added N (sign-off + stale 待复核) / drained M] · Hanging Tasks [unchanged]
+Workspace smoke-check: clean / [stray/orphan/missing-status]  (walkaround for full audit)
+```
 
-Commit: [committed locally (default) / Commit now? (Y/n) (commit: ask) / skipped (don't auto-commit | git:false)]  (push: asked first / n/a)
-  Flightdeck-Sync: <SHA>  ← trailer appended on every landing/soft-land commit
+**Then the standardized banner, last** (per [protocol § Act-report-close loop](../preflight/protocol.md#act-report-close-loop)):
+
+```
+─── 🛬 landing ───
+[Stage]   <lifecycle stage>
+[Saved]   committed locally <SHA> (Flightdeck-Sync: <ref>); landed <N> file(s).   (push: asked first / n/a; skipped under commit: ask / no-git)
+[Pending] ⚠ <N> item(s) await verification → cockpit Pending Review.   (omit when empty)
+You can close / switch the conversation anytime — next preflight resumes from the board.
 ```
 
 ## Red flags

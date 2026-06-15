@@ -269,7 +269,7 @@ Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase (
 
 ### Proactive incident resurfacing
 
-Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Recording a recurrence happens at the **other** end of the session: at landing, a **clear** same-incident match auto-appends `[Case N]` + bumps `recurrences` (see [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up)); an **ambiguous** match asks the user. Auto-counting is safe because the consequential step — *promotion* — stays user-gated.
+Before starting a task whose description / file paths overlap with an incident's `applies_to` tags, surface it: "this touches `[tags]`, overlapping with [incidents/X.md](incidents/X.md) — worth a read first?". Recording a recurrence happens at the **other** end of the session: at landing, a **clear** same-incident match auto-appends `[Case N]` + bumps `recurrences` (see [exit-ritual § Step 5a](exit-ritual.md#step-5a--recurrence-sweep--promotion-gate-wrap-up)); an **ambiguous** match asks the user. Auto-counting is safe because the consequential step — *promotion* — is reversible and surfaces in cockpit Pending Review for veto (see [Act-report-close loop](#act-report-close-loop)).
 
 ### Hit path — check the error library *before* writing a new incident
 
@@ -458,7 +458,7 @@ An incident is not just born and resurfaced — it can also be **retired** once 
 
 ### Retirement semantics (`resolved_by` + `status: obsolete`)
 
-When an incident's root cause is permanently fixed (e.g. a guard test now prevents it), the incident is **retired**: fill `resolved_by` (a single reference — a commit SHA or a test id/path, e.g. `test_flightdeck_index.py::CockpitProjectionRobustnessTest`) **and** flip `status: obsolete`. These two are **one deliberate act**, performed at **landing** (the ritual that owns knowledge classification and retirement; `status` only touches workflow). Landing **never auto-flips** on a filled `resolved_by` — at most it *prompts* "resolved_by is filled but still active — retire?".
+When an incident's root cause is permanently fixed (e.g. a guard test now prevents it), the incident is **retired**: fill `resolved_by` (a single reference — a commit SHA or a test id/path, e.g. `test_flightdeck_index.py::CockpitProjectionRobustnessTest`) **and** flip `status: obsolete`. These two are **one deliberate act**, performed at **landing** (the ritual that owns knowledge classification and retirement; `status` only touches workflow). Landing **auto-flips** when `resolved_by` is filled **and** the fix is confirmed (e.g. the guard test exists) — reversible, surfaced in cockpit Pending Review for veto; ambiguous (filled but unconfirmed) → left `active`, noted in Pending Review (see [Act-report-close loop](#act-report-close-loop)).
 
 `obsolete` here means **"root cause fixed, retired from active routing, pending drain to archive/"** — it is **NOT "outdated / worthless"**. Knowledge status uses `active / stale / obsolete`; `obsolete` is the knowledge analog of workflow `done` (drain state — the ritual moves it to `archive/`).
 

@@ -103,7 +103,8 @@ Any miss is a construction bug — fix the block directly, don't mask it by clai
 Report concisely:
 
 ```
-🌉 AGENTS.md regenerated.
+─── 🌉 emit-agents-md ───
+[Saved] AGENTS.md regenerated.
   Active focus: <one-line>
   In Progress (active artifacts): <N>
   Next: <one-line, or none>

@@ -10,7 +10,7 @@ description: Use when explicitly invoking the flightdeck entry ritual — reads 
 2. **Read `flightdeck/cockpit.md`** (full) — note `Last updated`, `Active focus`, `## In Progress`, `## Next`, `## Key Context`. Do **not** rewrite anything.
 3. **Catalog warm-up (READ ≠ DISPLAY).** Read `flightdeck/checklists/INDEX.md`, `flightdeck/incidents/INDEX.md` fully, and `flightdeck/docs/INDEX.md` top-level only — all fully into context (routing intact); display counts only; do NOT drill sub-folders or individual files. **待验证 scan:** run `flightdeck_index.py <deck> --verify-pending` (fallback: grep `verify:` across deck + `archive/`); render each as `⚠未验证: <file> — <怎么验>`. See [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification).
 4. **Passive git note (skip when no-git).** Run `git branch --show-current` + `git status --short`. Emit one non-blocking line only if: branch token clearly mismatches `Active focus` → `⚠ git state looks off (branch ≠ Active focus) — review before continuing`; or detached HEAD → same pattern. All other git state: say nothing.
-5. **Report item #1, then STOP.** State `## Next` in one sentence + "🛫 Preflight complete (read-only). Say 'go' to execute item #1." Do not load task files or start execution. Final line (skip under no-git): if ≥ 5 changed files under `flightdeck/` → `⚠ N unlanded changes since last land — consider /flightdeck:landing`.
+5. **Report item #1, then STOP.** State `## Next` in one sentence, then emit the standardized **`─── 🛫 preflight ───` banner** (see Output format) carrying `[Stage]` + `[Next]` item #1 + the read-only / "say go" line. Do not load task files or start execution. In-banner final line (skip under no-git): if ≥ 5 changed files under `flightdeck/` → `⚠ N unlanded changes since last land — consider /flightdeck:landing`.
 
 ## Fallback when `## Next` is empty
 
@@ -18,13 +18,22 @@ Don't auto-start. Search in order and present candidates: (1) `plans/INDEX.md` �
 
 ## Output format
 
+**Prose first** — cockpit + catalog + any debt:
+
 ```
 Cockpit (Last updated: …; Active focus: …)
 Routing catalog (loaded into context; audit → /flightdeck:walkaround): docs N · checklist N · incident N
   ← omit zero-count kinds; if all folder INDEXes absent: "Routing catalog: (empty)"
-待验证: ⚠未验证: <file> — <怎么验>   ← omit block when scan empty
-Next (item #1): …  |  Key Context: … (omit when none)
-🛫 Preflight complete (read-only). → Say "go" to execute item #1.
+Verify pending: ⚠ <file> — <how>   ← omit when scan empty
+```
+
+**Then the standardized banner, last** (per [protocol § Act-report-close loop](protocol.md#act-report-close-loop)):
+
+```
+─── 🛫 preflight ───
+[Stage]   <lifecycle stage>
+[Next]    item #1: …   (Key Context: … — omit when none)
+Read-only — say "go" to execute item #1.   (⚠ N unlanded changes — consider /flightdeck:landing)
 ```
 
 ## Don't do
