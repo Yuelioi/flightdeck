@@ -1,11 +1,12 @@
 ---
-status: idea
+status: active
 summary: 删人工开关目录（7 个 magic-string toggle）+ resolution-order 教学机器；rules.md 从「人手填语法」改为「用户自然话→AI 落盘规则」，保留 version:3.0 戳 + Project conventions；AI 读 rule 高于默认执行，化解删开关后『别人没逃生舱』
+last_updated: 2026-06-16
 ---
 
 # AI-authored config: remove human toggle surface, AI-managed rules.md
 
-> Spec 2 / 2（与 `2026-06-16-act-report-close-loop` 配套）。本篇＝铁律第一根「纯 AI 操作」的配置面；Spec 1 落执行 / 报告 / 撤销循环。**暂泊 idea，Spec 1 落地后启动。**
+> Spec 2 / 2（配套 `2026-06-16-act-report-close-loop`，已 land）。本篇＝铁律第一根「纯 AI 操作」的配置面。**已启动。**
 
 ## 背景 / 动机
 
@@ -18,7 +19,7 @@ flightdeck 现有 7 个人工 opt-out 开关（`rules.md` `### Autonomy override
 
 **解法：删人工配置面，不删配置能力。** 入口从「人编辑 magic-string 语法」翻成「用户自然话说 → AI 落盘成 rule」。AI 既是规则作者又是读者，规则可用自由文，不需固定词汇表。
 
-## 决策（方向已与用户拍板，细节待 review）
+## 决策（已拍板）
 
 1. **删开关目录 + resolution-order 教学机器**（散文 / 表 / 分支）。
 2. **rules.md 改作者**：保留文件 + `version: 3.0` 戳 + `### Project conventions`；`### Autonomy overrides` 段从「人填 magic-string」变「AI 按用户自然话写自由文规则」。
@@ -34,7 +35,7 @@ flightdeck 现有 7 个人工 opt-out 开关（`rules.md` `### Autonomy override
 ## Part 2 — rules.md AI-authored
 
 - rules.md 仍必备，**保留 `version: 3.0`**（3.1 迁移锚点，神圣）+ `### Project conventions`。
-- `### Autonomy overrides`（或更名）语义：**用户提持久行为变更 → AI 用自然话追加一条 + 注明来源/日期**，并即刻遵守。例：用户「以后 commit 前先问我」→ AI 写 `- commit 前先问我（用户 2026-06-16）`，后续 commit 即先问。
+- **`### Rules` 段**（原 `### Autonomy overrides`）语义：**用户提持久行为变更 → AI 用自然话追加一条 + 注明来源/日期**，并即刻遵守。例：用户「以后 commit 前先问我」→ AI 写 `- commit 前先问我（用户 2026-06-16）`，后续 commit 即先问。
 - skills 加识别：`以后 / 每次 / always / never` 类持久指令 → 落 rules.md（对齐 harness 自身 update-config / memory 模式）。
 - 写规则发生在正常 turn/landing（非 preflight，**保 preflight 纯读零写**）；这条写动作本身是 Spec 1 的「可逆-自动 + 报告」覆盖的一个动作。
 
@@ -46,11 +47,11 @@ flightdeck 现有 7 个人工 opt-out 开关（`rules.md` `### Autonomy override
 
 rules.md `version: 3.0` 戳保留 · 环境推断（git / emit）保留 · preflight 纯读零写 · CLAUDE.md 仍是最高项目层。
 
-## 待定（启动时拍）
+## 已定（启动时拍板）
 
-- `### Autonomy overrides` 段名是否改（如 `### Rules`）。
-- 全局偏好（跨项目）该进 harness memory 还是仍 rules.md——倾向 deck 本地 rules.md（跨 host 可移植，preflight 已读）。
-- graduate：倾向不 graduate（契约家在 templates/protocol）。
+- **段名 `### Autonomy overrides` → `### Rules`**：不再是「override 开关」，而是 AI 按用户自然话维护的行为规则；保留 `### Project conventions`（deck 约定）与 `### Rules`（行为规则）两段。
+- **偏好归宿**：deck-specific 行为 → deck 本地 `rules.md`（跨 host 可移植、preflight 已读）；cross-project 偏好 → 用户的 `CLAUDE.md`（最高项目层）。不进 harness memory（非 deck 可移植）。
+- **graduate：否**（契约家在 templates/protocol）。
 
 ## 验证
 

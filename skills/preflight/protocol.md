@@ -16,40 +16,26 @@ Consequence: the two metaphor folder names became mainstream — `charts/ → re
 
 `flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`) and must carry a `version` field — a static identity stamp written by `launch` at deck creation, deliberately kept as the 3.0→3.1 migration anchor; no ritual reads or bumps it at runtime.
 
-As of **3.0**, `rules.md` carries just `version` plus free-prose house rules:
+`rules.md` carries `version` (the **only** structured frontmatter field) plus free-prose house rules in two subsections:
 
-- `version` — required identity field (deck-conformance stamp; not a behavior toggle). The **only** structured frontmatter field.
-- **House rules** — free prose in two recommended subsections: `### Project conventions` (deck-local conventions) and `### Autonomy overrides` (behavioral overrides).
+- `### Project conventions` — deck-local conventions.
+- `### Rules` — behavioral rules **the AI maintains from your natural-language requests** (free prose, not a fixed vocabulary). There is **no human toggle catalog**: instead of editing magic-string syntax, you tell the AI a persistent preference ("ask before committing", "this deck doesn't use git") and the AI appends a free-prose rule here (noting source/date) and honors it. The AI is both author and reader, so the rule needs no canonical phrasing.
 
-Everything that used to be a toggle is now **inferred from the environment** (`git`, `emit_agents_md`, `scripts`-runtime), decided by **skill judgment** (landing's archive call), or a **default that House Rules can override** (`commit`). Re-adding a structured toggle faces a high bar (per-project-varying + real-demand-now + not-inferable + not-foldable); almost everything belongs in House Rules, inference, or skill judgment instead. Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
+Everything else resolves from **environment inference** + **built-in defaults** (see Rule resolution order). Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
 
 ## Rule resolution order
 
 Every skill resolves each behavior in this order — **first hit wins**:
 
-1. **House Rules override** (`rules.md` `### Autonomy overrides` segment) — if matched, use it and **skip inference**.
-2. **Environment inference** — `git`: is the **deck** under version control? — `deck root` has (or is under) a `.git` **and** the deck is **not gitignored** (`git -C <deck> check-ignore .` returns empty). A gitignored `flightdeck/` — common when a project deliberately keeps its deck out of code history — is **no-git for deck operations** even though the surrounding repo has git: landing skips the commit step and never invokes git on deck files (plain `mv` for the land move; the repo's own tracked code is committed by its normal flow, which flightdeck doesn't touch). `emit_agents_md`: does deck root already have `AGENTS.md`?
-3. **Built-in default** — `commit` = **local commit auto, push asks** (local commits are reversible — reset/amend; push is outward, so it stays gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment; **`landing` auto-runs on `done`** — a `done` flip relays into a landing run, debounced to **once at end-of-turn** (reversible → automatic; the downgrade `landing: nudge on done, don't auto-run` reverts to nudge-only); `scripts` = **inferred** (use the bundled `flightdeck_index.py` scripts when a `uv`/`python` runtime is reachable, else by hand). The one outward action (push) stays gated; everything reversible runs without asking.
+1. **Deck rule** — a matching free-prose rule in `rules.md` `### Rules` (the AI reads and honors it; it overrides the default).
+2. **Environment inference** — `git`: is the **deck** under version control? — `deck root` has (or is under) a `.git` **and** the deck is **not gitignored** (`git -C <deck> check-ignore .` returns empty). A gitignored `flightdeck/` — common when a project deliberately keeps its deck out of code history — is **no-git for deck operations** even though the surrounding repo has git: landing skips the commit step and never invokes git on deck files (plain `mv` for the land move). `emit_agents_md`: does deck root already have `AGENTS.md`?
+3. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn); `scripts` = **inferred** (use `flightdeck_index.py` when a `uv`/`python` runtime is reachable, else by hand). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
 
 **deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
 
-**Override authority** (which config wins): **CLAUDE.md (project) > flightdeck House Rules (deck) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own House Rules.
+**Override authority** (which config wins): **CLAUDE.md (project) > deck rules (`rules.md` `### Rules`) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own deck rules. Internal conflicts among deck rules are the user's responsibility — flightdeck never auto-resolves contradictory rules (it may passively flag one, never silently pick).
 
-**Behavioral-override matching:** within the literal `### Autonomy overrides` heading, skills match the standard phrases (table below) by **lenient (contiguous) substring** — not per-call semantic guessing (consistent + testable across models) — **skipping HTML-comment lines** (so a `<!-- migrated … -->` provenance note never mis-matches) and recognizing the **legacy Chinese** equivalents (right column). An ON phrase and its negated twin (default `status: auto start` vs the override `status: don't auto start`; `commit without asking` vs `don't auto-commit`) are distinguished by the inserted negation — the contiguous ON substring is absent from the OFF line, so they never cross-match. No `### Autonomy overrides` segment → fall back to tolerant whole-House-Rules reading. **Internal conflicts are the user's responsibility** — flightdeck never auto-resolves contradictory overrides (it may passively flag one, never silently pick).
-
-**Standard-phrase table** (canonical English; migration emits exactly these; hand-written overrides recommended to match):
-
-| Behavior | Standard phrase (canonical English) | Legacy Chinese (compat) |
-| --- | --- | --- |
-| commit confirm before the local commit (default is auto local) | `commit: ask` | `commit 先问我` |
-| commit manually (never) | `don't auto-commit; leave changes for me / CI` | `不要自动 commit，留给我或 CI` |
-| a status transition off (`start` — on by default) | `status: don't auto <transition>` | `status 不要自动 <transition>` |
-| landing auto-run on `done` off (downgrade to nudge-only; on by default) | `landing: nudge on done, don't auto-run` | `landing 完成时只提示不自动跑` |
-| no git | `this deck doesn't use git` | `本 deck 不走 git` |
-| has AGENTS.md but don't regen | `has AGENTS.md but don't auto-regen` | `有 AGENTS.md 但不要自动 regen` |
-| soft-landing at end-of-turn off (signal 3; on by default) | `landing: don't soft-land at end-of-turn` | `landing 结尾不自动落盘` |
-
-There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `run scripts` toggle (script use is inferred from runtime availability), and no `disabled_folders` (empty/unused folders are simply not flagged).
+A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `run scripts` toggle (inferred from runtime), and no `disabled_folders` (empty folders are simply not flagged).
 ## Data model (folder = kind, frontmatter = status)
 
 flightdeck has exactly two axes:
@@ -152,7 +138,7 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 |---|---|---|---|
 | Write a new spec/plan (capture only, not yet started) | →`idea` | status | always |
 | Write a new spec/plan **and already working on it** | direct →`active` (legal skip past idea) | status | always |
-| Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## In Progress`) | status | default (House Rule `status: don't auto start` can disable) |
+| Start working on an existing idea | `idea→active` (+ `YYYY-MM-DD-` prefix + regen cockpit `## In Progress`) | status | default (a deck `### Rules` entry can disable) |
 | User approves / signs off | `active→done` (flips `done` only, **does not archive**) | status / landing seam | always |
 | A direction is rejected | **delete the file** (git log + commit-body reason) | **user-explicit instruction only** | **never auto** |
 
@@ -315,7 +301,7 @@ idea →(flip one field)→ active → done   →(land = move to archive/)
 
 A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## In Progress`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## Next` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
 
-Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus the **unified soft-landing banner** — see [Act-report-close loop](#act-report-close-loop) — no commit/archive); default-on, downgradable via House Rule `landing: don't soft-land at end-of-turn`. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
+Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus the **unified soft-landing banner** — see [Act-report-close loop](#act-report-close-loop) — no commit/archive); default-on, downgradable via a deck `### Rules` entry. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
 
 A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
 
