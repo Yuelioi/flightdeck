@@ -20,29 +20,23 @@ version: 3.0             # REQUIRED — static identity stamp written by launch 
 Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not use references/").
 General project conventions (code style, "branch before committing") belong in CLAUDE.md / AGENTS.md, NOT here.
 
-### Autonomy overrides
-
-Omit = defaults (local commit auto · push asks · all five rituals self-invoke · landing archives by judgment · status auto-`start` · git / emit / scripts inferred). To change one, type its phrase on a line under this heading:
-commit: ask                                   # confirm before each local commit (default: auto local)
-don't auto-commit; leave changes for me / CI  # never commit at all
-status: don't auto start                       # don't auto-flip idea→active when work begins
-this deck doesn't use git                       # deck is gitignored / outside any repo — no commit, plain mv
-has AGENTS.md but don't auto-regen
-```
-
 ### Rules
 
-- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version` — the **only** structured field. All behavior not pinned in House Rules resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (House Rules override → environment inference → built-in default / skill judgment).
-- **`version` is deck identity, not a toggle.** It records the flightdeck release this deck conforms to — a static stamp written by `launch` at deck creation, deliberately kept as the future (3.0→3.1) migration anchor. **No ritual reads or bumps it at runtime.**
-- **No structured toggles remain (3.0).** `version` is the sole frontmatter field; everything else is inference / default / skill-judgment / House-Rule phrase:
-  - `git` → inferred: deck is git-backed iff an ancestor `.git` exists **and** the deck is not gitignored (`git -C <deck> check-ignore .` empty); a gitignored `flightdeck/` is **no-git for deck ops** even inside a git repo. House Rule `this deck doesn't use git` overrides.
-  - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates. **Asymmetry**: from a no-`AGENTS.md` start, only the explicit command can bootstrap it. House Rule `has AGENTS.md but don't auto-regen` opts a deck out while keeping the file.
-  - `commit` → defaults to **local commit auto, push asks** (local commits are reversible; push is outward). House Rules `commit: ask` (confirm before each local commit) / `don't auto-commit; leave changes for me / CI` (never). Under no-git there is no commit regardless.
-  - ritual self-invocation → **all five rituals (`preflight`/`landing`/`walkaround`/`emit-agents-md`/`status`) always self-invoke**; there is no opt-out.
-  - status → `start` (idea→active) defaults **on** (House Rule `status: don't auto start` turns it off); `done` flips on approval. **Archiving is not a toggle** — whether a `done` artifact lands is `landing`'s cross-reference-aware judgment.
-  - `scripts` → **inferred** from runtime availability (`uv`/`python` reachable → use the bundled `flightdeck_index.py` fast path; else the markdown fallback, which is always valid). No toggle.
-  - folder suppression → **none** (no `disabled_folders`); empty/unused folders are simply not flagged by `walkaround`.
-- **House rules are now authoritative** (升级 from advisory): the `### Autonomy overrides` segment overrides flightdeck defaults — but stays below the project's own agent rules (**CLAUDE.md > House Rules > defaults**). General project conventions belong in CLAUDE.md, not here. House Rules internal conflicts are the user's responsibility (no auto-resolution).
+<!-- Behavior rules the AI maintains from your natural-language requests. Leave empty;
+     tell the AI a persistent preference and it appends a free-prose rule here (source + date),
+     e.g. "- ask before committing (you, 2026-06-16)". No magic-string syntax. -->
+```
+
+### Authoring notes
+
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version` — the **only** structured field. Behavior resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (deck `### Rules` → environment inference → built-in default / skill judgment).
+- **`version` is deck identity, not a toggle.** Records the flightdeck release this deck conforms to — a static stamp written by `launch`, the future (3.0→3.1) migration anchor. **No ritual reads or bumps it at runtime.**
+- **`### Rules` is AI-authored, not a toggle catalog (3.0).** There is no magic-string vocabulary. When you state a persistent preference, the AI appends a free-prose rule here (with source/date) and honors it above the default. What used to be toggles are now inference / default / skill-judgment, each overridable by a deck rule:
+  - `git` → inferred: git-backed iff an ancestor `.git` exists **and** the deck is not gitignored; a deck rule (e.g. "this deck doesn't use git") overrides.
+  - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates (the only bootstrap path from a no-`AGENTS.md` start).
+  - `commit` → **local commit auto, push asks** (local reversible; push outward). A deck rule can ask-before-commit or disable auto-commit; under no-git there is no commit regardless.
+  - ritual self-invocation → **all five rituals always self-invoke**; archiving is **landing's judgment** (not a toggle); `scripts` inferred from runtime; no `disabled_folders`.
+- **Authority**: **CLAUDE.md > deck `### Rules` > defaults.** General project conventions belong in CLAUDE.md, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
 
