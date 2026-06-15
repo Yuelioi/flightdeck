@@ -155,8 +155,8 @@ version: <release>       # the only structured field
 ### Project conventions
 # deck-local conventions, e.g. "specs in Chinese", "don't use references/"
 
-### Autonomy overrides
-# behavioral overrides; omit = defaults (local commit auto, push asks; rituals self-invoke)
+### Rules
+# behavioral rules the AI maintains from your natural-language requests; omit = defaults
 ```
 
 `version` is the only structured field. Everything else is **inferred, defaulted, or skill judgment**:
@@ -166,11 +166,7 @@ version: <release>       # the only structured field
 - **scripts** — inferred from a `uv`/`python` runtime being reachable (else the markdown fallback).
 - **rituals** — all five self-invoke; **`status`** auto-advances idea→active→done but **never archives** (archiving is `landing`'s cross-reference-aware judgment); **`commit`** is local-auto, **push asks**.
 
-Override any of these with a one-line standard phrase under `### Autonomy overrides`:
-
-- `commit: ask` (confirm before each local commit) · `don't auto-commit; leave changes for me / CI`
-- `status: don't auto start` — don't auto-flip idea→active
-- `this deck doesn't use git` · `has AGENTS.md but don't auto-regen`
+To change a behavior, **just tell the AI a persistent preference in plain language** — "ask before committing", "this deck doesn't use git", "don't auto-start specs" — and it appends a free-prose rule under `### Rules` (noting source + date) and honors it above the default. There's no magic-string toggle catalog to memorize: the AI authors and reads its own rules.
 
 ## Why it exists
 

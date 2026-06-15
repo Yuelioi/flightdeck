@@ -155,8 +155,8 @@ version: <release>       # 唯一的结构化字段
 ### Project conventions
 # deck 局部约定，如 "specs 用中文"、"不用 references/"
 
-### Autonomy overrides
-# 行为覆盖；省略 = 默认（本地 commit 自动、push 才先问；仪式都可自调）
+### Rules
+# AI 按你自然话维护的行为规则；省略 = 默认（本地 commit 自动、push 才先问；仪式都可自调）
 ```
 
 `version` 是唯一的结构化字段。其余全靠**推断、默认或 skill 判断**：
@@ -166,11 +166,7 @@ version: <release>       # 唯一的结构化字段
 - **脚本** —— 由是否能跑到 `uv`/`python` 推断（否则走 markdown 兜底）。
 - **仪式** —— 五个都可自调；**`status`** 自动推进 idea→active→done，但**从不归档**（归档是 `landing` 按交叉引用的判断）；**`commit`** 本地自动、**push 才先问**。
 
-要改其中任何一条，在 `### Autonomy overrides` 里写一句标准句：
-
-- `commit: ask`（每次本地 commit 前先问）· `don't auto-commit; leave changes for me / CI`
-- `status: don't auto start` —— 不自动 flip idea→active
-- `this deck doesn't use git` · `has AGENTS.md but don't auto-regen`
+要改某个行为，**直接用自然话告诉 AI 一条持久偏好** —— 「commit 前先问我」「这个 deck 不走 git」「specs 别自动 start」—— AI 会在 `### Rules` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录：规则由 AI 自己写、自己读。
 
 ## 为什么需要它
 

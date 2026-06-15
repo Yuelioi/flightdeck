@@ -12,12 +12,18 @@ cockpit 模型升级（alpha 反馈驱动）。**Breaking**：cockpit 段名全�
 ### Added
 - **`## Pending Review` cockpit 段** — AI 自认 done、等用户拍板过目的产出队列（非阻塞、主观，区别于 `verify` 客观）；既有 stale `待复核` 浮出项归入此段，审过即 drain。
 - **累积段排水纪律** — 给 `Key Context` / `Pending Review` 立逐条 drain 规则（清理 when：目标已归档/已 graduate/下一会话不需要；收缩 when：长条压成一行指针、同源合并），landing 执行 drain、walkaround 出非阻塞 INFO（新增 Audit 14）。
+- **Act-report-close loop**（act-report-close-loop spec）— 所有 flow 统一末尾 banner（`─── <icon> <flow> ───`，先正文后 banner、一回合一个）；执行回合无增量也出 `[No change]`；统一「翻回 / undo」通道（撤最近着陆单元，跨会话从 git+看板推导）；全生命周期恢复 + 阶段派生。契约真相源 = `protocol § Act-report-close loop`。
+- **AI-authored config**（ai-authored-config spec）— `rules.md` `### Autonomy overrides` → `### Rules`：行为偏好改由「用户自然话 → AI 落盘自由文规则」，删 7 个 magic-string 开关目录 + resolution-order 匹配机器。
 
 ### Changed
 - **cockpit 段名英文化**：`进行中→In Progress`、`下一步→Next`、`关键上下文→Key Context`、`Hanging tasks→Hanging Tasks`；specs INDEX 分组头 `待启动（idea）→Backlog (idea)`、`进行中·完成（active·done）→Active · Done`；AGENTS.md emit 块同步英文。AUTO 锚 `<!-- AUTO:inprogress -->` 不变（脚本靠锚不靠段名）。结构英文、内容仍随用户工作语言。
+- **可逆 deck 动作无前置确认门**：status flip / incident→checklist promotion / `--advance-candidates` / 归档 / retire 等可逆动作改为按判断自动执行 + banner 报告 + 可翻回；只有外发（push）仍先问。
+- **退场契约**：soft-landing 的「已保存」marker → 统一 banner；「无增量静默」→ banner `[No change]` 一行（纯对话仍不出）。`README` 卖点「零损失」收窄为恢复载荷（cockpit+INDEX+已落盘工件），不含未落盘对话推理。
 
 ### Breaking
 - cockpit 段名英文化＝破坏性 deck 格式变更：`flightdeck_lint.py` 的 cockpit 结构校验改认英文段名，存量中文-header deck 报 CRITICAL。无双语兼容层（de-scope：无向后兼容，3.1 再就地迁移）。
+- **删 magic-string 开关目录**（`commit: ask` / `don't auto-commit` / `status: don't auto start` / `this deck doesn't use git` / `has AGENTS.md but don't auto-regen` 等）+ resolution-order lenient-substring 匹配机器：偏好改走 `### Rules` 自由文。依赖旧短语硬编码的 deck / 脚本 / 测试需改。
+- **可逆动作不再先问** + **执行回合恒出 banner**（含无增量）：行为破坏性变更，alpha 期允许；不可逆（push）仍先问，安全面不降。
 
 ## [3.0.0-alpha.1] — 2026-06-11
 

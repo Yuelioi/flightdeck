@@ -58,5 +58,6 @@ incident 教训一旦**吸纳进权威 skill/protocol 本体**（设计上防再
 - **统一输出格式**：所有 flow 回合 = 先正文 → 末尾一个标准 banner（`─── <icon> <flow> ───`），恒在最后、一回合一个；执行回合无增量也出 `[No change]`（替代旧 print-nothing 静默；纯对话不出）。
 - **零损失的范围**（防过度承诺）：「随时可关、恢复零损失」**专指恢复载荷 = cockpit + INDEX + 已落盘工件**，**不含未落盘的对话推理**；长 brainstorm 靠「边定边落」缩小丢失面。
 - **preflight 纯读零写不变**：恢复（读 cockpit+INDEX）与「翻回」（用户主动触发、可读 git）是两个不同操作，前者只读看板。
+- **配置面 AI-authored**（ai-authored-config spec）：删人工 magic-string 开关目录 + resolution-order 匹配机器；`rules.md` `### Autonomy overrides`→`### Rules` 由 AI 按用户自然话落盘自由文规则，授权序 `CLAUDE.md > deck ### Rules > 默认`；保留 `version:3.0` + 环境推断（git/emit）+ 内置默认。
 
 完整运行契约（可逆判据表 / banner 字段 / 翻回 / 阶段派生 / 生命周期恢复）的**单一真相源**是 `skills/preflight/protocol.md` § Act-report-close loop；本节只记 de-scope 边界。设计稿 `specs/`（archive 后）`2026-06-16-act-report-close-loop`。
