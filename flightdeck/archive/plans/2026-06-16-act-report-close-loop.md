@@ -1,6 +1,6 @@
 ---
-status: active
-summary: 按 spec 落地：baseline → protocol.md 单一真相源(判据表+banner 规范+翻回+Hanging 窄定义+阶段派生) → bootstrap 最小指针 → skills 删门+banner → 模板/scaffold → 测试 → 外圈文档+descope 归宿 → dogfood verify(wc-m 降+pytest 绿)+landing
+status: done
+summary: 按 spec 落地：baseline → protocol.md 单一真相源(判据表+banner 规范+翻回+Hanging 窄定义+阶段派生) → bootstrap 最小指针 → skills 删门+banner → 模板/scaffold → 测试 → 外圈文档+descope 归宿 → dogfood verify(pytest 绿；wc-m 反转：净增非减，瘦身留 Spec 2)+landing
 last_updated: 2026-06-16
 implements: specs/2026-06-16-act-report-close-loop.md
 ---

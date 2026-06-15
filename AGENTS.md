@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha——「cockpit 模型升级」已 land（段名英文化 + `Pending Review` 段 + 累积段排水纪律）。**新方向：把工具推向「几乎零人工操作」的纯 AI 调用**——盘点并删减历史上为「人工手改」而写的内容（看板维护/改状态/人工旋钮），先 brainstorm 出清单。**核心卖点=随时可关、上下文不丢（红线）**；de-scope 基线见 `docs/descope-baseline.md`。
+flightdeck 3.0 alpha——**Spec 1 `act-report-close-loop` 已 land**（可逆动作无门自动执行 + 统一「翻回」+ 所有 flow 统一 banner + 全生命周期恢复；运行契约真相源 = `protocol § Act-report-close loop`）。**下一步：启动 Spec 2 `ai-authored-config`**（删 7 人工开关 + resolution-order、rules.md 改 AI 落盘——真正的热路径瘦身在此）。**铁律＝纯 AI 操作 + 上下文随时可关可恢复（红线）**；de-scope 基线见 `docs/descope-baseline.md`。
 
 ## In Progress
 
@@ -13,7 +13,7 @@ None.
 
 ## Next
 
-- **界定「AI 化精简」范围**：盘点历史上为「人工手动维护/修改」而写的内容（看板维护指引、改状态、人工开关/旋钮），判断纯 AI 调用下哪些可删——先 brainstorm 出清单再动手成 spec。
+- **启动 Spec 2 `ai-authored-config`**（specs/ai-authored-config.md，idea）：flip active → 写 plan → 执行。同时 **复核 Spec 1 实现**（见 Pending Review；不满意可「翻回」）。
 
 ## Hanging Tasks
 

@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 统一所有流程输出格式（先正文 → 末尾一个标准 banner，状态/着陆恒在最后、一回合一个）+ 可逆动作无门自动执行 + 统一「翻回」撤销 + soft-landing 覆盖全生命周期状态（brainstorm/spec/plan/部分/待审/通过/即席）+ Pending Review 写明验证后动作；确保随时关闭、下次 preflight 从看板恢复
 last_updated: 2026-06-16
 ---
