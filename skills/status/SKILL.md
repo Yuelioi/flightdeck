@@ -1,6 +1,6 @@
 ---
 name: status
-description: Keep a flightdeck artifact's lifecycle status fresh and its folder INDEX row + cockpit `## In Progress` in sync. Identify the target artifact with high confidence (currently-edited file → current executing-plan → most-recent unambiguous creation); if none is unambiguous, do nothing. Always-auto: right after writing a new spec/plan into `flightdeck/{specs,plans}` set `idea`. Default-on (unless a House Rule `status: don't auto …` disables it): `start` → when beginning work on an idea, flip `idea → active` (add the `YYYY-MM-DD-` prefix + regen cockpit `## In Progress`); on user approval/sign-off set `done`. Archiving is `/flightdeck:landing`'s smart judgment, not status's. Reads/writes the optional `note:` diagnostic. Never fires on ordinary edits (typo/wording fixes); forward-only, never downgrades. Triggered automatically or by `/flightdeck:status`.
+description: Keep a flightdeck artifact's lifecycle status fresh and its folder INDEX row + cockpit `## In Progress` in sync. Identify the target artifact with high confidence (currently-edited file → current executing-plan → most-recent unambiguous creation); if none is unambiguous, do nothing. Always-auto: right after writing a new spec/plan into `flightdeck/{specs,plans}` set `idea`. Default-on (unless a deck `### Rules` entry disables it): `start` → when beginning work on an idea, flip `idea → active` (add the `YYYY-MM-DD-` prefix + regen cockpit `## In Progress`); on user approval/sign-off set `done`. Archiving is `/flightdeck:landing`'s smart judgment, not status's. Reads/writes the optional `note:` diagnostic. Never fires on ordinary edits (typo/wording fixes); forward-only, never downgrades. Triggered automatically or by `/flightdeck:status`.
 ---
 
 # Flightdeck Status — lifecycle auto-flip
@@ -11,7 +11,7 @@ It edits one artifact's frontmatter `status:` (and, on every flip, that artifact
 
 ## Step 1 — read config
 
-**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a House Rule `status: don't auto start` turns it off. The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
+**Default (3.0): `start` is on.** `start` (idea→active when work begins) fires automatically; a deck `### Rules` entry turns it off. The **core** create→`idea` and approval→`done` transitions below always run. **status no longer archives** — once an artifact flips to `done`, whether/when to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (there is no `auto land` toggle anymore).
 
 ## Step 2 — identify the target artifact (confidence rule)
 
@@ -29,7 +29,7 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 | Trigger | Target | Class | Auto? |
 |---|---|---|---|
 | Wrote a **new spec/plan** into `flightdeck/{specs,plans}` | `idea` (a captured-but-unstarted thought) | core | always |
-| **Began work** on an idea (start executing / fleshing it out) | `idea → active` (+ date prefix + regen cockpit `## In Progress`) | default-on `start` | unless House Rule `status: don't auto start` |
+| **Began work** on an idea (start executing / fleshing it out) | `idea → active` (+ date prefix + regen cockpit `## In Progress`) | default-on `start` | unless a deck `### Rules` entry disables it |
 | User **approved / signed off** | `active → done` (+ regen cockpit `## In Progress`) | core | always — **status sets `done` only; it does not archive** |
 
 - Fire only at **new-artifact writes** and **clear status-semantic moments** — never on ordinary edits (typo/wording fixes).
@@ -82,7 +82,7 @@ When the user approves / signs off:
 If this invocation flipped an artifact to `done`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so:
 
 - **Default (end-of-turn debounce):** queue a single landing at end-of-turn (see [exit-ritual § Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) and [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)). If multiple `done` flips happen in the same turn, the debounce collapses them into one landing run — not one per flip.
-- **Degraded by House Rule `landing: nudge on done, don't auto-run`:** instead of auto-running landing, emit a one-line nudge only ("looks like a landing point — run `/flightdeck:landing`?").
+- **Degraded by a deck `### Rules` nudge-on-done entry:** instead of auto-running landing, emit a one-line nudge only ("looks like a landing point — run `/flightdeck:landing`?").
 
 Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
 

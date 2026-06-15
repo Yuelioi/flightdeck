@@ -17,7 +17,7 @@ AGENTS.md is the cross-tool standard for project-level AI instructions, stewarde
 
 ### Step 0: Apply `flightdeck/rules.md` toggles
 
-This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` (the bootstrap path; the "auto-regen only if `AGENTS.md` already exists" rule applies to *landing*'s call, not to this command). Under no-git, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do". The House Rule `has AGENTS.md but don't auto-regen` only suppresses the *automatic* landing-time regen — never this explicit command.
+This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` (the bootstrap path; the "auto-regen only if `AGENTS.md` already exists" rule applies to *landing*'s call, not to this command). Under no-git, still emit (AGENTS.md is not git-dependent) but skip the working-tree-clean warning in "Don't do". A deck `### Rules` entry that opts out of auto-regen only suppresses the *automatic* landing-time regen — never this explicit command.
 
 ### Step 1: Read `flightdeck/cockpit.md`
 

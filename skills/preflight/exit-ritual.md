@@ -118,8 +118,8 @@ Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
 Step 5: Commit (local) + push (ask) — default: commit locally without asking
         (local commits are reversible); NEVER push without asking (push is outward).
         - default        → generate the message + `git commit` locally, no prompt
-        - `commit: ask`  → ask "Commit now? (Y/n)" before the local commit
-        - `don't auto-commit…` → do NOT commit; leave the changes for you / CI
+        - deck rule (ask-before-commit) → ask "Commit now? (Y/n)" before the local commit
+        - deck rule (don't auto-commit) → do NOT commit; leave the changes for you / CI
         - no-git overrides all → no commit (the land move is on disk; `archive/` is the record — no separate log)
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
@@ -436,7 +436,7 @@ Mechanics:
 - signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
 - **signal 1 auto-landing is end-of-turn debounced.** A `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, replacing the old unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. This is why landing rescans the whole `done`-in-place set (Land Routine step 0) rather than only the just-flipped artifact.
 - signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
-- Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + House Rules).
+- Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + any deck rule).
 - **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion**. It is landing's no-`done` natural form + a visible banner. Timing is pinned: persist → emit the soft-landing banner → end the turn (never "reply then persist"). The banner format is in [§ Soft-landing banner](#soft-landing-banner--the-visible-safe-to-close-signal); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
 - **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
