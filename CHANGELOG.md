@@ -12,6 +12,7 @@ cockpit 模型升级（alpha 反馈驱动）。**Breaking**：cockpit 段名全�
 ### Added
 - **`## Pending Review` cockpit 段** — AI 自认 done、等用户拍板过目的产出队列（非阻塞、主观，区别于 `verify` 客观）；既有 stale `待复核` 浮出项归入此段，审过即 drain。
 - **累积段排水纪律** — 给 `Key Context` / `Pending Review` 立逐条 drain 规则（清理 when：目标已归档/已 graduate/下一会话不需要；收缩 when：长条压成一行指针、同源合并），landing 执行 drain、walkaround 出非阻塞 INFO（新增 Audit 14）。
+- **`/flightdeck:sync` + 共享知识 vendoring**（shared-knowledge-sync spec）— 跨项目共享 checklist/doc：母库为准、谁新谁赢（比 `last_updated`，无 hash）；vendored 文件加可选 `synced_from`，母库根用 `rules.md` frontmatter `shared_master`（env 引用，换机不失效）；`flightdeck_index.py --sync-status` 只读扫描 + walkaround Audit 15；项目专属内容保在 `## 项目覆盖` 段。MVP 单向下发、不自动回流、仅 checklist/doc。
 - **Act-report-close loop**（act-report-close-loop spec）— 所有 flow 统一末尾 banner（`─── <icon> <flow> ───`，先正文后 banner、一回合一个）；执行回合无增量也出 `[No change]`；统一「翻回 / undo」通道（撤最近着陆单元，跨会话从 git+看板推导）；全生命周期恢复 + 阶段派生。契约真相源 = `protocol § Act-report-close loop`。
 - **AI-authored config**（ai-authored-config spec）— `rules.md` `### Autonomy overrides` → `### Rules`：行为偏好改由「用户自然话 → AI 落盘自由文规则」，删 7 个 magic-string 开关目录 + resolution-order 匹配机器。
 
