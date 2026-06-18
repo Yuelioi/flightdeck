@@ -40,7 +40,7 @@ General project conventions (code style, "branch before committing") belong in C
 - **Authority**: **CLAUDE.md > deck `### Rules` > defaults.** General project conventions belong in CLAUDE.md, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
-- **`shared_master`（可选配置）** — 仅出现在 vendoring 共享知识的 deck。值是 **env 引用**（如 `$FLIGHTDECK_SHARED_MASTER`），绝不写字面路径，使提交进 git 的文件跨机可移植；每台机器把该 env 设成本地母库 deck 根。由 `/flightdeck:sync` / `flightdeck_index.py --sync-status` 消费。
+- **`shared_master`（可选配置）** — 仅出现在 vendoring 共享知识的 deck。值是 **env 引用**（如 `$FLIGHTDECK_SHARED_MASTER`），绝不写字面路径，使提交进 git 的文件跨机可移植；每台机器把该 env 设成本地母库 deck 根。由 `/flightdeck:sync` / `flightdeck_index.py --sync-status` 消费。**或**不设 env、改放 gitignored `<deck>/.shared-master`（首行 = 母库路径）——项目里看得见、每台机器各填、不进 git（解析顺序 env → `.shared-master` → 全局 CLAUDE.md）。
 
 ---
 

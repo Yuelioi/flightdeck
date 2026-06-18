@@ -420,25 +420,50 @@ def verify_pending(deck):
     return sorted(out)
 
 
+def _resolve_master_root(deck):
+    """Resolve a consumer deck's shared-master root, or None.
+
+    Order (first existing dir wins): (1) rules.md frontmatter `shared_master`,
+    env-expanded (e.g. `$FLIGHTDECK_SHARED_MASTER`); (2) a gitignored
+    `<deck>/.shared-master` pointer file — first non-empty line, also
+    env-expanded — for a project-visible per-machine path. A Claude-side
+    fallback to the user's global CLAUDE.md asset root lives in the
+    /flightdeck:sync skill, not here (the script stays pure)."""
+    deck = Path(deck)
+    candidates = []
+    rules = deck / "rules.md"
+    if rules.is_file():
+        raw = parse_frontmatter(rules.read_text(encoding="utf-8")).get("shared_master", "") or ""
+        if raw:
+            candidates.append(raw)
+    pointer = deck / ".shared-master"
+    if pointer.is_file():
+        for line in pointer.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                candidates.append(line.strip())
+                break
+    for cand in candidates:
+        p = Path(os.path.expandvars(cand))
+        if p.is_dir():
+            return p
+    return None
+
+
 def sync_status(deck):
     """共享知识漂移只读扫描：对每个带 `synced_from` 的工件，比它与母库源的
     `last_updated`，返回 (state, project_relpath, synced_from)。写任何文件都不。
 
-    母库根从消费 deck 的 rules.md frontmatter `shared_master`（env 引用，
-    os.path.expandvars 展开）解析。状态：
+    母库根解析见 `_resolve_master_root`（rules.md `shared_master` env 展开 →
+    `<deck>/.shared-master` gitignored 指针）。状态：
       upstream-changed  母库更新（母库 last_updated 更大）→ /flightdeck:sync 可拉
       in-sync           相等
-      locally-ahead     项目更新 → 可能想回流母库（MVP：只报）
+      locally-ahead     项目更新 → /flightdeck:sync push 可回流母库
       dangling          母库源文件已删
-      master-missing    shared_master 缺失/未解析（env 未设或路径不存在） → 优雅跳过
+      master-missing    母库根未解析（env 未设/无 .shared-master/路径不存在） → 优雅跳过
     路径相对 deck、POSIX 斜杠；按项目路径排序。排除 archive/。"""
     deck = Path(deck)
-    rules = deck / "rules.md"
-    raw = ""
-    if rules.is_file():
-        raw = parse_frontmatter(rules.read_text(encoding="utf-8")).get("shared_master", "") or ""
-    master_root = Path(os.path.expandvars(raw)) if raw else None
-    master_ok = master_root is not None and master_root.is_dir()
+    master_root = _resolve_master_root(deck)
+    master_ok = master_root is not None
     out = []
     for p in deck.rglob("*.md"):
         if p.name == "INDEX.md" or "archive" in p.relative_to(deck).parts:

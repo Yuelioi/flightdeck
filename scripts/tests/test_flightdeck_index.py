@@ -912,6 +912,18 @@ class SyncStatusTest(unittest.TestCase):
             self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
             self.assertEqual(sync_status(deck)[0][0], "master-missing")
 
+    def test_shared_master_pointer_file_fallback(self):
+        # rules.md 的 env 解不出时，回退读 gitignored <deck>/.shared-master 指针文件
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / "master"
+            self._master_file(master, "checklists/commits.md", "2026-06-20")
+            deck = self._consumer(root, "$FD_UNSET_PTR_XYZ")          # env 不可解
+            (deck / ".shared-master").write_text(str(master) + "\n", encoding="utf-8")
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            self.assertEqual(sync_status(deck)[0][0], "upstream-changed")
+
     def test_env_expansion_resolves_master(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:

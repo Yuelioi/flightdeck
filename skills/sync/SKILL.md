@@ -1,6 +1,6 @@
 ---
 name: sync
-description: Use when explicitly syncing this deck's vendored shared-knowledge files (a checklist/doc carrying `synced_from`) against their master deck — pulls upstream-changed bodies, preserves the reserved project-specific section + routing frontmatter, and surfaces drift it can't auto-resolve. Triggered by `/flightdeck:sync`.
+description: Use when explicitly syncing this deck's vendored shared-knowledge files (a checklist/doc carrying `synced_from`) against their master deck — pulls upstream-changed bodies, preserves the reserved project-specific section + routing frontmatter, surfaces drift it can't auto-resolve, and `push <path>` reverse-adds a local file up to the master (promote / backflow). Triggered by `/flightdeck:sync`.
 ---
 
 # Flightdeck Sync — vendored shared-knowledge refresh
@@ -9,12 +9,13 @@ description: Use when explicitly syncing this deck's vendored shared-knowledge f
 
 ## 母库解析（master resolution）
 
-1. 读消费 deck `rules.md` frontmatter 的 `shared_master`（一个 env 引用，如 `$FLIGHTDECK_SHARED_MASTER`）。
-2. 展开 env 变量 → 母库 deck 根。
-3. （Claude 便利回退）env 未设时，查用户全局 CLAUDE.md 的跨项目资产库根。
-4. 仍解析不到 → 本机没有母库：每文件吐 `master-missing`、**优雅跳过**并报告；vendored 文件本身是自洽真文件，照常可用。
+按序、先命中为准（前两步即脚本 `_resolve_master_root`）：
+1. `rules.md` frontmatter `shared_master`（env 引用，如 `$FLIGHTDECK_SHARED_MASTER`）展开 → 若是存在目录则用。
+2. 否则读 gitignored `<deck>/.shared-master` 指针文件（首行 = 路径，也 env 展开）——**项目里看得见、每台机器各填、不进 git**。
+3. （Claude 便利回退）仍无 → 查用户全局 CLAUDE.md 的跨项目资产库根。
+4. 全不中 → 本机没有母库：每文件吐 `master-missing`、**优雅跳过**并报告；vendored 文件本身自洽，照常可用。
 
-## 两个模式
+## 模式（pull：A 全量 / B 首发；push：C 反向）
 
 ### A. 再同步全部（裸跑 `/flightdeck:sync`）
 
@@ -36,6 +37,15 @@ description: Use when explicitly syncing this deck's vendored shared-knowledge f
 4. 按需本地化路由（项目可改 `when_to_read` / `applies_to`）；项目专属补充另起 `## 项目覆盖` 段。
 5. regen INDEX。
 
+### C. 反向：推回母库（`/flightdeck:sync push <消费相对路径>`）
+
+把消费 deck 的某文件推上母库（撤销早期「单向不回流」MVP 边界）。两种：
+
+- **promote（本地原创、无 `synced_from`）**：项目内部写的、现在够通用 → 拷其**正文**到母库**同一相对路径**，母库 `last_updated` 取该文件的值；然后给本地文件**盖上 `synced_from`**（从此成 vendored 消费者）。母库已存在同名文件 → **停下问**（属冲突/回流，不是 promote）。
+- **回流（已 vendored、`locally-ahead`）**：把该文件的**共享正文**推上母库源，母库 `last_updated` 戳成消费端的 → 两边 in-sync。
+- **`## 项目覆盖` 段永不上推**（项目私有，不进母库）；只推共享正文。
+- 收尾：regen **母库**与本 deck 的 INDEX。
+
 ## `## 项目覆盖` 约定
 
 vendored 文件的项目专属补充写在一个保留标题段下（`## 项目覆盖`，或本 deck 语言的等价标题，如 `## Project-specific`）。sync **永不覆盖**该段下任何内容。该段**之上**（共享正文）归母库所有，`upstream-changed` 时被刷新。
@@ -44,7 +54,8 @@ vendored 文件的项目专属补充写在一个保留标题段下（`## 项目�
 
 - 不碰没有 `synced_from` 的文件（本地原创）。
 - 不覆盖 frontmatter，也不覆盖 `## 项目覆盖` 段。
-- 不自动把 `locally-ahead` 改动回流母库（MVP）。
+- `locally-ahead` 不**自动**回流——回流走显式 `/flightdeck:sync push`（防误推本地实验上母库）。
+- promote / 回流都**只推共享正文，不上推 `## 项目覆盖` 段**（项目私有）。
 - 母库缺席不硬失败 —— 优雅 no-op。
 
 ## Report

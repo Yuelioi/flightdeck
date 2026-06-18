@@ -21,5 +21,9 @@ tmp/
 .current
 .claude
 
+# Shared-knowledge master pointer: per-machine path to the shared-master deck
+# (flightdeck shared-knowledge sync). Project-visible but machine-specific — never commit.
+**/.shared-master
+
 # Cursor injection projection: hook-generated, never hand-edited (flightdeck 3.0).
 **/.cursor/rules/flightdeck-context.mdc
