@@ -14,6 +14,7 @@ Runnable as `uv run flightdeck_index.py <deck>` or `python flightdeck_index.py <
 
 import argparse
 import hashlib
+import os
 import re
 import subprocess
 import sys
@@ -419,6 +420,56 @@ def verify_pending(deck):
     return sorted(out)
 
 
+def sync_status(deck):
+    """共享知识漂移只读扫描：对每个带 `synced_from` 的工件，比它与母库源的
+    `last_updated`，返回 (state, project_relpath, synced_from)。写任何文件都不。
+
+    母库根从消费 deck 的 rules.md frontmatter `shared_master`（env 引用，
+    os.path.expandvars 展开）解析。状态：
+      upstream-changed  母库更新（母库 last_updated 更大）→ /flightdeck:sync 可拉
+      in-sync           相等
+      locally-ahead     项目更新 → 可能想回流母库（MVP：只报）
+      dangling          母库源文件已删
+      master-missing    shared_master 缺失/未解析（本机没设 env） → 优雅跳过
+    路径相对 deck、POSIX 斜杠；按项目路径排序。排除 archive/。"""
+    deck = Path(deck)
+    rules = deck / "rules.md"
+    raw = ""
+    if rules.is_file():
+        raw = parse_frontmatter(rules.read_text(encoding="utf-8")).get("shared_master", "") or ""
+    master_root = Path(os.path.expandvars(raw)) if raw else None
+    master_ok = master_root is not None and master_root.is_dir()
+    out = []
+    for p in deck.rglob("*.md"):
+        if p.name == "INDEX.md" or "archive" in p.relative_to(deck).parts:
+            continue
+        try:
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        src = fm.get("synced_from")
+        if not src:
+            continue
+        rel = str(p.relative_to(deck)).replace("\\", "/")
+        if not master_ok:
+            out.append(("master-missing", rel, src))
+            continue
+        master_file = master_root / src
+        if not master_file.is_file():
+            out.append(("dangling", rel, src))
+            continue
+        proj_lu = fm.get("last_updated", "")
+        mast_lu = parse_frontmatter(master_file.read_text(encoding="utf-8")).get("last_updated", "")
+        if mast_lu > proj_lu:          # ISO 日期字符串比较 == 时序比较
+            state = "upstream-changed"
+        elif mast_lu < proj_lu:
+            state = "locally-ahead"
+        else:
+            state = "in-sync"
+        out.append((state, rel, src))
+    return sorted(out, key=lambda t: t[1])
+
+
 def _index_targets(deck):
     """Yield (label, index_path, new_block) for every regenerable INDEX."""
     deck = Path(deck)
@@ -496,6 +547,12 @@ def main(argv=None):
         action="store_true",
         help="print (path<TAB>verify-note) for every artifact carrying a `verify` field, across active+archive; read-only",
     )
+    ap.add_argument(
+        "--sync-status",
+        action="store_true",
+        help="print (state<TAB>path<TAB>synced_from) for every artifact carrying `synced_from`, "
+        "comparing last_updated against the shared_master source (read-only)",
+    )
     args = ap.parse_args(argv)
 
     if args.archivable:
@@ -521,6 +578,11 @@ def main(argv=None):
     if args.verify_pending:
         for path, note in verify_pending(args.deck):
             print(f"{path}\t{note}")
+        return 0
+
+    if args.sync_status:
+        for state, path, src in sync_status(args.deck):
+            print(f"{state}\t{path}\t{src}")
         return 0
 
     drift = []

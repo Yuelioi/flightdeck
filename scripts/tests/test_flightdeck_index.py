@@ -845,5 +845,101 @@ class VerifyPendingUtf8CliTest(unittest.TestCase):
             self.assertIn("相位4 各家 live 实证（resync 后新会话）", out)
 
 
+class SyncStatusTest(unittest.TestCase):
+    """flightdeck_index.sync_status — 共享知识漂移只读扫描。"""
+
+    def _master_file(self, master, relpath, last_updated):
+        p = master / relpath
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            f"---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\n"
+            f"last_updated: {last_updated}\n---\n# {p.stem}\n",
+            encoding="utf-8",
+        )
+
+    def _consumer(self, root, shared_master_raw):
+        deck = root / "consumer"
+        (deck / "checklists").mkdir(parents=True)
+        rules = "---\nversion: 3.0\n"
+        if shared_master_raw is not None:
+            rules += f"shared_master: {shared_master_raw}\n"
+        rules += "---\n"
+        (deck / "rules.md").write_text(rules, encoding="utf-8")
+        return deck
+
+    def _vendored(self, deck, name, last_updated, synced_from):
+        (deck / "checklists" / name).write_text(
+            f"---\nstatus: active\nsynced_from: {synced_from}\n"
+            f"when_to_read: x\napplies_to: [y]\nlast_updated: {last_updated}\n---\n# {name}\n",
+            encoding="utf-8",
+        )
+
+    def test_states_and_ignores_unsynced(self):
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / "master"
+            self._master_file(master, "checklists/commits.md", "2026-06-20")
+            deck = self._consumer(root, str(master))
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            self._vendored(deck, "ahead.md", "2026-06-25", "checklists/commits.md")
+            self._vendored(deck, "gone.md", "2026-06-18", "checklists/missing.md")
+            (deck / "checklists" / "local.md").write_text(
+                "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-18\n---\n# local\n",
+                encoding="utf-8",
+            )
+            states = {rel: st for st, rel, _ in sync_status(deck)}
+            self.assertEqual(states["checklists/commits.md"], "upstream-changed")
+            self.assertEqual(states["checklists/ahead.md"], "locally-ahead")
+            self.assertEqual(states["checklists/gone.md"], "dangling")
+            self.assertNotIn("checklists/local.md", states)
+
+    def test_in_sync_equal_dates(self):
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / "master"
+            self._master_file(master, "checklists/commits.md", "2026-06-18")
+            deck = self._consumer(root, str(master))
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            self.assertEqual(sync_status(deck)[0][0], "in-sync")
+
+    def test_master_missing_when_env_unset(self):
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            deck = self._consumer(root, "$FD_MASTER_DEFINITELY_UNSET_XYZ")
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            self.assertEqual(sync_status(deck)[0][0], "master-missing")
+
+    def test_env_expansion_resolves_master(self):
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / "master"
+            self._master_file(master, "checklists/commits.md", "2026-06-20")
+            deck = self._consumer(root, "$FD_TEST_MASTER")
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            os.environ["FD_TEST_MASTER"] = str(master)
+            try:
+                self.assertEqual(sync_status(deck)[0][0], "upstream-changed")
+            finally:
+                del os.environ["FD_TEST_MASTER"]
+
+    def test_read_only_writes_nothing(self):
+        from flightdeck_index import sync_status
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / "master"
+            self._master_file(master, "checklists/commits.md", "2026-06-20")
+            deck = self._consumer(root, str(master))
+            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            before = {p: p.read_text(encoding="utf-8") for p in deck.rglob("*.md")}
+            sync_status(deck)
+            after = {p: p.read_text(encoding="utf-8") for p in deck.rglob("*.md")}
+            self.assertEqual(before, after)
+            self.assertFalse((deck / "INDEX.md").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
