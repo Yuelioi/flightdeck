@@ -1,5 +1,5 @@
 ---
-status: active
+status: stale
 when_to_read: 改 flightdeck_index.py 或脚本层行为前
 applies_to: [scripts/flightdeck_index.py, scripts/flightdeck_lint.py]
 last_updated: 2026-06-10

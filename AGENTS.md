@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha 打磨——`skill-constraint-imperative-hardening` 已 land（强命令式措辞 + pre-read 红旗护栏）；剩 `cockpit-bloat-control` 待复核/排期。「AI 化精简」两支柱已 land。
+flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
 
@@ -13,7 +13,7 @@ flightdeck 3.0 alpha 打磨——`skill-constraint-imperative-hardening` 已 lan
 
 ## Next
 
-- **复核 `cockpit-bloat-control`**（着陆排空冗余散文 + 字段密度门控 trim + walkaround 野章节/active 计数）→ 满意则写 plan 执行。
+- **复核 `shared-knowledge-sync`**（审 diff，或真 vendor 一份共享文件跑 `/flightdeck:sync` 做端到端实证）；之后回到 `cockpit-bloat-control` 复核/排期。
 
 ## Hanging Tasks
 

@@ -1,7 +1,7 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-16 by 月离 (land `skill-constraint-imperative-hardening`：7 处 skill 强命令式硬化 + pre-read 红旗护栏，spec+plan 归档，verify 待行为验证)
-**Active focus**: flightdeck 3.0 alpha 打磨——`skill-constraint-imperative-hardening` 已 land（强命令式措辞 + pre-read 红旗护栏）；剩 `cockpit-bloat-control` 待复核/排期。「AI 化精简」两支柱已 land。
+**Last updated**: 2026-06-19 by 月离 (land `shared-knowledge-sync`：/flightdeck:sync + 只读 --sync-status 扫描 + synced_from/shared_master 字段 + walkaround Audit 15；8 任务全绿 66 测试、终审 ready、spec+plan 归档；端到端合并待实证 verify)
+**Active focus**: flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
 
@@ -11,7 +11,7 @@
 
 ## Next
 
-- **复核 `cockpit-bloat-control`**（着陆排空冗余散文 + 字段密度门控 trim + walkaround 野章节/active 计数）→ 满意则写 plan 执行。
+- **复核 `shared-knowledge-sync`**（审 diff，或真 vendor 一份共享文件跑 `/flightdeck:sync` 做端到端实证）；之后回到 `cockpit-bloat-control` 复核/排期。
 
 ## Key Context
 
@@ -21,10 +21,13 @@
 - **AI 化精简两支柱（已 land）**：运行契约真相源 = `protocol § Act-report-close loop`（banner/翻回/判据/恢复）+ `§ Rule resolution order`（deck `### Rules` > 推断 > 默认）。净字符 Spec 1 +8.8k（新契约）/ Spec 2 −3.1k（删开关）。
 - **`cockpit-bloat-control`（active，待复核）**：组件 A 着陆排空冗余散文·B 字段密度门控 trim·C walkaround 野章节 + active 计数；graduate=false。
 - **`skill-constraint-imperative-hardening`（已 land/归档）**：硬约束统一强命令式（MUST/NEVER/DO NOT）；记忆 `constraints-use-strong-imperatives` + `dont-preread-siblings-with-authoritative-skill`。⚠verify：下次走 `/flightdeck:new` 看是否还预读兄弟文件。
+- **`shared-knowledge-sync`（已 land/归档）**：母库为准·谁新谁赢（比 `last_updated`，无 hash）；`synced_from` 纯可选血缘、`shared_master` 用 env 引用（rules.md frontmatter，换机不失效）；事实=`flightdeck_index.py --sync-status` 只读扫描、合并=`/flightdeck:sync` skill 保 `## 项目覆盖` 段；walkaround Audit 15。⚠verify：真 vendor 跑 sync 才端到端实证。
 
 ## Pending Review
 
 - [AI 化精简两 spec 实现] Spec 1 `act-report-close-loop` + Spec 2 `ai-authored-config` 均已 land（多个 per-task commit、160 测试绿、spec/plan 归档）。复核：审 diff 或跑 app（看 banner / `### Rules`）；**不满意就说「翻回」**撤最近着陆单元。已 commit，验证通过无需额外动作。
+- [shared-knowledge-sync 实现] 8 任务全 land（66 测试绿、spec 合规 + 终审 ready、spec+plan 归档）。复核：审 diff，或真 vendor 一份共享文件跑 `/flightdeck:sync` 端到端实证（见 spec verify）；**不满意说「翻回」**撤最近着陆单元。已本地 commit、未 push。
+- ⚠待复核 `docs/script-layer.md`：本会话给 `flightdeck_index.py` 加了 `--sync-status` 扫描，脚本层文档未提及，下次补。
 
 ## Hanging Tasks
 
