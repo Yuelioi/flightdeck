@@ -485,6 +485,27 @@ def register_consumer(master_root, relpath, deck):
     return True
 
 
+def list_consumers(master_root):
+    """Union of every master shared file's `consumers`, normalized + sorted.
+
+    Pure read: a deck whose dir is currently unreachable is **skipped from this
+    result** but never removed from any file (network drive offline / unmounted
+    / symlink target temporarily down must not be mistaken for permanent
+    removal — that is `prune_consumers`'s job). Excludes archive/ and INDEX.md."""
+    master_root = Path(master_root)
+    seen = set()
+    for p in master_root.rglob("*.md"):
+        if p.name == "INDEX.md" or "archive" in p.relative_to(master_root).parts:
+            continue
+        try:
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError):
+            continue
+        for c in _read_consumers(fm):
+            seen.add(_norm_deck(c))
+    return sorted(c for c in seen if Path(c).is_dir())
+
+
 def sync_status(deck):
     """共享知识漂移只读扫描：对每个带 `synced: true` 的工件，用其**自身 relpath**
     去母库找同路径源、比 `last_updated`，返回 (state, relpath)。写任何文件都不。
@@ -505,7 +526,7 @@ def sync_status(deck):
             continue
         try:
             fm = parse_frontmatter(p.read_text(encoding="utf-8"))
-        except OSError:
+        except (OSError, UnicodeDecodeError):
             continue
         if str(fm.get("synced", "")).strip().lower() != "true":
             continue

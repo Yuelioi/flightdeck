@@ -976,6 +976,37 @@ class ConsumersRegistryTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 register_consumer(master, "checklists/missing.md", str(deckdir))  # 不存在
 
+    def test_list_consumers_union_dedup_reachable_only(self):
+        from flightdeck_index import list_consumers
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / ".flightdeck"
+            a = Path(d) / "projA" / "flightdeck"; a.mkdir(parents=True)
+            b = Path(d) / "projB" / "flightdeck"; b.mkdir(parents=True)
+            gone = (Path(d) / "projGONE" / "flightdeck").resolve().as_posix()  # 不存在目录
+            self._mfile(master, "checklists/commits.md",
+                        consumers=[a.resolve().as_posix(), gone])
+            self._mfile(master, "checklists/comments.md",
+                        consumers=[a.resolve().as_posix(), b.resolve().as_posix()])
+            got = list_consumers(master)
+            self.assertEqual(got, sorted([a.resolve().as_posix(), b.resolve().as_posix()]))
+            self.assertNotIn(gone, got)        # 不可达目录被跳过
+            # 纯读：母库文件未被改写
+            self.assertIn(gone, flightdeck_index._read_consumers(
+                flightdeck_index.parse_frontmatter(
+                    (master / "checklists/commits.md").read_text(encoding="utf-8"))))
+
+    def test_list_consumers_skips_non_utf8_file(self):
+        # 非 UTF-8 的 .md（如 GBK/BOM/误命名二进制）应被跳过，不让整个扫描崩
+        # （UnicodeDecodeError 是 ValueError，不是 OSError）。
+        from flightdeck_index import list_consumers
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / ".flightdeck"
+            a = Path(d) / "projA" / "flightdeck"; a.mkdir(parents=True)
+            self._mfile(master, "checklists/commits.md",
+                        consumers=[a.resolve().as_posix()])
+            (master / "checklists" / "junk.md").write_bytes(b"\xff\xfe\x00bad bytes")
+            self.assertEqual(list_consumers(master), [a.resolve().as_posix()])
+
 
 if __name__ == "__main__":
     unittest.main()
