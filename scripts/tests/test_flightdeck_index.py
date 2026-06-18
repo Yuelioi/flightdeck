@@ -936,5 +936,46 @@ class SyncStatusTest(unittest.TestCase):
             self.assertEqual(before, after)
 
 
+class ConsumersRegistryTest(unittest.TestCase):
+    """consumers 注册表：register / list / prune（对母库 frontmatter 读改写）。"""
+
+    def _mfile(self, master, relpath, consumers=None):
+        p = master / relpath
+        p.parent.mkdir(parents=True, exist_ok=True)
+        extra = f"consumers: {json.dumps(consumers)}\n" if consumers is not None else ""
+        p.write_text(
+            f"---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\n{extra}"
+            f"last_updated: 2026-06-19\n---\n# {p.stem}\n",
+            encoding="utf-8",
+        )
+        return p
+
+    def test_register_is_idempotent_and_normalizes(self):
+        from flightdeck_index import register_consumer, _read_consumers
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / ".flightdeck"
+            self._mfile(master, "checklists/commits.md")
+            deckdir = Path(d) / "projA" / "flightdeck"
+            deckdir.mkdir(parents=True)
+            register_consumer(master, "checklists/commits.md", str(deckdir))
+            # 再注册同 deck（带尾斜杠变体）→ 不重复增长
+            register_consumer(master, "checklists/commits.md", str(deckdir) + os.sep)
+            fm = flightdeck_index.parse_frontmatter(
+                (master / "checklists/commits.md").read_text(encoding="utf-8"))
+            self.assertEqual(_read_consumers(fm), [deckdir.resolve().as_posix()])
+
+    def test_register_rejects_non_file_relpath(self):
+        from flightdeck_index import register_consumer
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / ".flightdeck"
+            (master / "checklists").mkdir(parents=True)
+            deckdir = Path(d) / "projA"
+            deckdir.mkdir()
+            with self.assertRaises(ValueError):
+                register_consumer(master, "checklists/", str(deckdir))      # 目录非文件
+            with self.assertRaises(ValueError):
+                register_consumer(master, "checklists/missing.md", str(deckdir))  # 不存在
+
+
 if __name__ == "__main__":
     unittest.main()

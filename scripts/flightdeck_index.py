@@ -14,6 +14,7 @@ Runnable as `uv run flightdeck_index.py <deck>` or `python flightdeck_index.py <
 
 import argparse
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -431,6 +432,59 @@ def _resolve_master_root():
     return root if root.is_dir() else None
 
 
+def _norm_deck(p):
+    """Canonical dedupe key for a consumer deck path: resolved, POSIX slashes."""
+    return Path(p).resolve().as_posix()
+
+
+def _read_consumers(fm):
+    """Parse the `consumers` frontmatter value (single-line JSON array) into a
+    list of strings. Returns [] when absent or unparseable."""
+    raw = fm.get("consumers")
+    if not raw:
+        return []
+    try:
+        val = json.loads(raw)
+    except (ValueError, TypeError):
+        return []
+    return [str(x) for x in val] if isinstance(val, list) else []
+
+
+def _write_consumers_line(text, consumers):
+    """Return `text` with its frontmatter `consumers:` line set to a sorted,
+    deduped single-line JSON array. Inserts the line before the closing `---`
+    when absent. Assumes a leading `---`-fenced block exists."""
+    payload = json.dumps(sorted(set(consumers)))
+    lines = text.splitlines(keepends=True)
+    end = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            end = i
+            break
+    if end is None:
+        return text
+    for i in range(1, end):
+        if lines[i].split(":", 1)[0].strip() == "consumers":
+            lines[i] = f"consumers: {payload}\n"
+            return "".join(lines)
+    lines.insert(end, f"consumers: {payload}\n")
+    return "".join(lines)
+
+
+def register_consumer(master_root, relpath, deck):
+    """Add `deck` (normalized) to master file `relpath`'s `consumers` list.
+    Idempotent. Raises ValueError when `relpath` is not an existing file under
+    `master_root` (the registration is a no-op then; callers warn, don't abort)."""
+    target = Path(master_root) / relpath
+    if not target.is_file():
+        raise ValueError(f"not a master file: {relpath}")
+    text = target.read_text(encoding="utf-8")
+    consumers = _read_consumers(parse_frontmatter(text))
+    consumers.append(_norm_deck(deck))
+    target.write_text(_write_consumers_line(text, consumers), encoding="utf-8")
+    return True
+
+
 def sync_status(deck):
     """共享知识漂移只读扫描：对每个带 `synced: true` 的工件，用其**自身 relpath**
     去母库找同路径源、比 `last_updated`，返回 (state, relpath)。写任何文件都不。
@@ -558,6 +612,20 @@ def main(argv=None):
         help="print (state<TAB>relpath) for every artifact carrying `synced: true`, "
         "comparing last_updated against the same-relpath source under ~/.flightdeck (read-only)",
     )
+    ap.add_argument(
+        "--register-consumer", nargs=2, metavar=("DECK", "RELPATH"), default=None,
+        help="register consumer DECK as a consumer of master file RELPATH (idempotent); "
+        "DECK path is resolve()-normalized; RELPATH must be an existing master file",
+    )
+    ap.add_argument(
+        "--list-consumers", action="store_true",
+        help="print each registered consumer deck (union across master files), reachable dirs only; read-only",
+    )
+    ap.add_argument(
+        "--prune-consumers", action="store_true",
+        help="remove consumer entries whose deck dir is confirmed gone (parent reachable, neither exists nor lexists); "
+        "the ONLY mutating consumer op",
+    )
     args = ap.parse_args(argv)
 
     if args.archivable:
@@ -588,6 +656,26 @@ def main(argv=None):
     if args.sync_status:
         for state, path in sync_status(args.deck):
             print(f"{state}\t{path}")
+        return 0
+
+    if args.register_consumer is not None:
+        deck_arg, rel = args.register_consumer
+        try:
+            register_consumer(args.deck, rel, deck_arg)
+            print(f"registered\t{_norm_deck(deck_arg)}\t{rel}")
+            return 0
+        except ValueError as e:
+            print(f"register failed: {e}", file=sys.stderr)
+            return 1
+
+    if args.list_consumers:
+        for c in list_consumers(args.deck):
+            print(c)
+        return 0
+
+    if args.prune_consumers:
+        for rel, c in prune_consumers(args.deck):
+            print(f"pruned\t{rel}\t{c}")
         return 0
 
     drift = []
