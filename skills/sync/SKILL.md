@@ -54,5 +54,5 @@ vendored 文件的项目专属补充写在一个保留标题段下（`## 项目�
 ```
 ─── 🔄 sync ───
 [Synced]  N pulled · M in-sync · K locally-ahead · D dangling
-[Master]  <已解析母库根>   (或 "master-missing — $FLIGHTDECK_SHARED_MASTER 未设，已跳过")
+[Master]  <已解析母库根>   (或 "master-missing — rules.md 的 shared_master（如 $FLIGHTDECK_SHARED_MASTER）未设/未解析，已跳过")
 ```

@@ -430,7 +430,7 @@ def sync_status(deck):
       in-sync           相等
       locally-ahead     项目更新 → 可能想回流母库（MVP：只报）
       dangling          母库源文件已删
-      master-missing    shared_master 缺失/未解析（本机没设 env） → 优雅跳过
+      master-missing    shared_master 缺失/未解析（env 未设或路径不存在） → 优雅跳过
     路径相对 deck、POSIX 斜杠；按项目路径排序。排除 archive/。"""
     deck = Path(deck)
     rules = deck / "rules.md"
