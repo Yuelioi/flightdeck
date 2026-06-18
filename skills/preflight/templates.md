@@ -11,6 +11,7 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 ```markdown
 ---
 version: 3.0             # REQUIRED — static identity stamp written by launch (future migration anchor; no ritual reads it at runtime)
+# shared_master: $FLIGHTDECK_SHARED_MASTER   # OPTIONAL — only if this deck vendors shared knowledge from a master deck; value is an env-var reference (per-machine path, kept out of git). See protocol field table + /flightdeck:sync.
 ---
 
 ## House rules
@@ -39,6 +40,7 @@ General project conventions (code style, "branch before committing") belong in C
 - **Authority**: **CLAUDE.md > deck `### Rules` > defaults.** General project conventions belong in CLAUDE.md, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
+- **`shared_master`（可选配置）** — 仅出现在 vendoring 共享知识的 deck。值是 **env 引用**（如 `$FLIGHTDECK_SHARED_MASTER`），绝不写字面路径，使提交进 git 的文件跨机可移植；每台机器把该 env 设成本地母库 deck 根。由 `/flightdeck:sync` / `flightdeck_index.py --sync-status` 消费。
 
 ---
 
