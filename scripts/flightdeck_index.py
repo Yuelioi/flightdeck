@@ -506,6 +506,38 @@ def list_consumers(master_root):
     return sorted(c for c in seen if Path(c).is_dir())
 
 
+def prune_consumers(master_root):
+    """Remove, from every master file's `consumers`, decks that are *confirmed
+    gone*: parent dir reachable (`is_dir()`) AND the deck itself neither
+    `exists()` nor `os.path.lexists()`. The lexists() guard keeps a symlinked
+    deck whose target is temporarily unreachable; a fully-unreachable parent
+    (offline drive) means we cannot confirm removal, so we keep it. The ONLY
+    mutating consumer op. Returns [(file_relpath, removed_deck), ...]."""
+    master_root = Path(master_root)
+    removed = []
+    for p in master_root.rglob("*.md"):
+        if p.name == "INDEX.md" or "archive" in p.relative_to(master_root).parts:
+            continue
+        try:
+            text = p.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        consumers = _read_consumers(parse_frontmatter(text))
+        if not consumers:
+            continue
+        kept = []
+        for c in consumers:
+            cp = Path(c)
+            confirmed_gone = cp.parent.is_dir() and not cp.exists() and not os.path.lexists(c)
+            if confirmed_gone:
+                removed.append((str(p.relative_to(master_root)).replace("\\", "/"), c))
+            else:
+                kept.append(c)
+        if len(kept) != len(consumers):
+            p.write_text(_write_consumers_line(text, kept), encoding="utf-8")
+    return removed
+
+
 def sync_status(deck):
     """共享知识漂移只读扫描：对每个带 `synced: true` 的工件，用其**自身 relpath**
     去母库找同路径源、比 `last_updated`，返回 (state, relpath)。写任何文件都不。

@@ -1007,6 +1007,26 @@ class ConsumersRegistryTest(unittest.TestCase):
             (master / "checklists" / "junk.md").write_bytes(b"\xff\xfe\x00bad bytes")
             self.assertEqual(list_consumers(master), [a.resolve().as_posix()])
 
+    def test_prune_removes_only_confirmed_gone(self):
+        from flightdeck_index import prune_consumers, _read_consumers
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / ".flightdeck"
+            alive = Path(d) / "projA" / "flightdeck"; alive.mkdir(parents=True)
+            # gone：父目录 projGONE 存在、deck 本身不存在 → 应剔除
+            gone_parent = Path(d) / "projGONE"; gone_parent.mkdir()
+            gone = (gone_parent / "flightdeck").resolve().as_posix()
+            # unreachable：父目录都不存在（整盘离线模拟）→ 不剔除
+            unreachable = (Path(d) / "noSuchDrive" / "x" / "flightdeck").resolve().as_posix()
+            self._mfile(master, "checklists/commits.md",
+                        consumers=[alive.resolve().as_posix(), gone, unreachable])
+            removed = prune_consumers(master)
+            self.assertIn(("checklists/commits.md", gone), removed)
+            kept = _read_consumers(flightdeck_index.parse_frontmatter(
+                (master / "checklists/commits.md").read_text(encoding="utf-8")))
+            self.assertIn(alive.resolve().as_posix(), kept)
+            self.assertIn(unreachable, kept)       # 父不可达 → 保守保留
+            self.assertNotIn(gone, kept)
+
 
 if __name__ == "__main__":
     unittest.main()
