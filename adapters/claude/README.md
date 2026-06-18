@@ -58,6 +58,8 @@ After install:
 └── SKILL.md
 ~/.claude/skills/status/                # /flightdeck:status lifecycle status flip (model-invocable; opt-in via rules.md)
 └── SKILL.md
+~/.claude/skills/sync/                  # /flightdeck:sync — refresh vendored shared-knowledge against the master deck
+└── SKILL.md
 ```
 
 ## Verification

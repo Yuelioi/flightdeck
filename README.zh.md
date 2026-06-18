@@ -128,6 +128,7 @@ flightdeck/
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
+| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 谁新谁赢（比 `last_updated`），保留项目专属段。 |
 
 工件 `status` **自动**推进（idea→active→done）。五个仪式（`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`）都可自调；`landing` 按判断决定归档（被 active 工件交叉引用的 `done` 工件留在原地）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
 

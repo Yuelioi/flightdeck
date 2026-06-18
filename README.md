@@ -128,6 +128,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
+| `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — newest wins (`last_updated`), preserves the project-specific section. |
 
 Artifact `status` advances **automatically** (idea→active→done). All five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) may self-invoke; `landing` decides archiving by judgment (it keeps a `done` artifact in place while active work still references it). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
 
