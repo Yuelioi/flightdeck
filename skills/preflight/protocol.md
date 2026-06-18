@@ -68,6 +68,8 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `graduate` | specs | optional | landing (graduate seam trigger) | author / AI (front-loads at creation or during active life) | — |
 | `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | — (static identity stamp; future 3.0→3.1 migration anchor) | **launch only** (init) | — |
+| `synced_from` | checklists/docs（仅 vendored） | optional | `/flightdeck:sync` + walkaround sync-drift（`flightdeck_index.py --sync-status`） | `sync`（首次下发时戳） | sync-drift audit；缺失**绝不**报警 |
+| `shared_master` | `rules.md` (root) | optional（仅消费共享知识的 deck） | `/flightdeck:sync` + `--sync-status`（env 展开得母库根） | author（env 引用，逐机器设） | — |
 
 `cockpit.md` board fields (`Last updated` / `Active focus` / `## In Progress` / `## Next` / `## Hanging Tasks`) are not YAML frontmatter. `## In Progress` is an AUTO region derived from `status: active` spec/plan; `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 
