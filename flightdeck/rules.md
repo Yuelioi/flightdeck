@@ -15,4 +15,4 @@ Dogfood：本项目用自身验证 flightdeck 的 status 仪式与软配置面�
 
 ### Rules
 
-- 本仓库只本地 commit，**绝不 `git push`**（即便用户批准提交也不推；推送由维护者手动执行）。
+- 本仓库默认只本地 commit；**`git push` 需用户显式批准**——AI 不主动推送，用户明确说「push」时方可执行（首例：v3.0.0-alpha.2 发版，2026-06-19）。
