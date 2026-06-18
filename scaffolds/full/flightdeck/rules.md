@@ -1,5 +1,6 @@
 ---
 version: 3.0
+# shared_master: $FLIGHTDECK_SHARED_MASTER   # OPTIONAL — only if this deck vendors shared knowledge from a master deck; value is an env-var reference (per-machine path, kept out of git). See protocol field table + /flightdeck:sync.
 ---
 
 ## House rules

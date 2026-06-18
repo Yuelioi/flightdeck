@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-19 by 月离 (land `shared-knowledge-sync`：/flightdeck:sync + 只读 --sync-status 扫描 + synced_from/shared_master 字段 + walkaround Audit 15；8 任务全绿 66 测试、终审 ready、spec+plan 归档；端到端合并待实证 verify)
+**Last updated**: 2026-06-19 by 月离 (wire shared_master：母库建于 `E:\projects\agent\flightdeck` + env FLIGHTDECK_SHARED_MASTER 已设 + scaffold/本 deck rules.md 接 shared_master；--sync-status 端到端实测过 resolve+state。前序 land shared-knowledge-sync 全栈)
 **Active focus**: flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
@@ -21,7 +21,7 @@
 - **AI 化精简两支柱（已 land）**：运行契约真相源 = `protocol § Act-report-close loop`（banner/翻回/判据/恢复）+ `§ Rule resolution order`（deck `### Rules` > 推断 > 默认）。净字符 Spec 1 +8.8k（新契约）/ Spec 2 −3.1k（删开关）。
 - **`cockpit-bloat-control`（active，待复核）**：组件 A 着陆排空冗余散文·B 字段密度门控 trim·C walkaround 野章节 + active 计数；graduate=false。
 - **`skill-constraint-imperative-hardening`（已 land/归档）**：硬约束统一强命令式（MUST/NEVER/DO NOT）；记忆 `constraints-use-strong-imperatives` + `dont-preread-siblings-with-authoritative-skill`。⚠verify：下次走 `/flightdeck:new` 看是否还预读兄弟文件。
-- **`shared-knowledge-sync`（已 land/归档）**：母库为准·谁新谁赢（比 `last_updated`，无 hash）；`synced_from` 纯可选血缘、`shared_master` 用 env 引用（rules.md frontmatter，换机不失效）；事实=`flightdeck_index.py --sync-status` 只读扫描、合并=`/flightdeck:sync` skill 保 `## 项目覆盖` 段；walkaround Audit 15。⚠verify：真 vendor 跑 sync 才端到端实证。
+- **`shared-knowledge-sync`（已 land/归档）**：母库为准·谁新谁赢（比 `last_updated`，无 hash）；`synced_from` 纯可选血缘、`shared_master` 用 env 引用（rules.md frontmatter，换机不失效）；事实=`flightdeck_index.py --sync-status` 只读扫描、合并=`/flightdeck:sync` skill 保 `## 项目覆盖` 段；walkaround Audit 15。母库=`E:\projects\agent\flightdeck`（env `FLIGHTDECK_SHARED_MASTER`，本机 User 级已设）；本 deck rules.md 已接 `shared_master`。scan 层端到端实测过；剩 AI 合并（/flightdeck:sync 刷正文）未实测——⚠verify。
 
 ## Pending Review
 
