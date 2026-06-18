@@ -11,7 +11,6 @@ Reusable file templates for `flightdeck/` files. Each template has a strict stru
 ```markdown
 ---
 version: 3.0             # REQUIRED — static identity stamp written by launch (future migration anchor; no ritual reads it at runtime)
-# shared_master: $FLIGHTDECK_SHARED_MASTER   # OPTIONAL — only if this deck vendors shared knowledge from a master deck; value is an env-var reference (per-machine path, kept out of git). See protocol field table + /flightdeck:sync.
 ---
 
 ## House rules
@@ -40,7 +39,8 @@ General project conventions (code style, "branch before committing") belong in C
 - **Authority**: **CLAUDE.md > deck `### Rules` > defaults.** General project conventions belong in CLAUDE.md, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
-- **`shared_master`（可选配置）** — 仅出现在 vendoring 共享知识的 deck。值是 **env 引用**（如 `$FLIGHTDECK_SHARED_MASTER`），绝不写字面路径，使提交进 git 的文件跨机可移植；每台机器把该 env 设成本地母库 deck 根。由 `/flightdeck:sync` / `flightdeck_index.py --sync-status` 消费。**或**不设 env、改放 gitignored `<deck>/.shared-master`（首行 = 母库路径）——项目里看得见、每台机器各填、不进 git（解析顺序 env → `.shared-master` → 全局 CLAUDE.md）。
+- **`synced: true`（vendored 文件标记）** — 仅出现在从母库同步下来的 checklists/docs 文件。布尔标记，无路径；母库固定 `~/.flightdeck`，源文件 relpath 恒等于消费端自身 relpath，故不需存路径。由 `/flightdeck:sync` 写入；`flightdeck_index.py --sync-status` 消费。母库文件本体**不携带**此字段（母库文件是源头，不是消费副本）。
+- **`consumers`（母库专属注册表）** — 仅出现在母库文件（`~/.flightdeck` 下）的 frontmatter，单行 JSON 数组，记录已注册的消费 deck 路径列表。`--register-consumer` 写入、`--prune-consumers` 清理、`--list-consumers` 只读。`/flightdeck:sync --fanout` 据此扇出到所有下游。消费副本**禁止**携带此字段（walkaround Audit 15 检测非法实例）。
 
 ---
 

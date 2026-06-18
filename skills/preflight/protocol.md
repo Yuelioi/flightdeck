@@ -68,8 +68,8 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `graduate` | specs | optional | landing (graduate seam trigger) | author / AI (front-loads at creation or during active life) | — |
 | `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | — (static identity stamp; future 3.0→3.1 migration anchor) | **launch only** (init) | — |
-| `synced_from` | checklists/docs（仅 vendored） | optional | `/flightdeck:sync` + walkaround sync-drift（`flightdeck_index.py --sync-status`） | `sync`（首发下发 / `push` promote 时戳） | sync-drift audit；缺失**绝不**报警 |
-| `shared_master` | `rules.md` (root) | optional（仅消费共享知识的 deck） | `/flightdeck:sync` + `--sync-status`（env 展开；不可解则回退 gitignored `<deck>/.shared-master` 指针） | author（env 引用，逐机器设） | — |
+| `synced` | checklists/docs（仅 vendored） | optional（布尔标记，无路径） | `/flightdeck:sync` + walkaround sync-drift（`flightdeck_index.py --sync-status`） | `sync`（首发下发 / `push` promote 时戳） | sync-drift audit：校验 relpath 不变量（母库无同 relpath 源 → `dangling`）；缺失**绝不**报警 |
+| `consumers` | checklists/docs（仅母库文件） | 母库专属（消费副本剔除） | `/flightdeck:sync --fanout`（扇出至所有已注册消费 deck） | `--register-consumer` 写入；`--prune-consumers` 清理 | 消费端出现此键 → WARNING（非法） |
 
 `cockpit.md` board fields (`Last updated` / `Active focus` / `## In Progress` / `## Next` / `## Hanging Tasks`) are not YAML frontmatter. `## In Progress` is an AUTO region derived from `status: active` spec/plan; `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 

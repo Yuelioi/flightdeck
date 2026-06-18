@@ -1,6 +1,5 @@
 ---
 version: 3.0
-shared_master: $FLIGHTDECK_SHARED_MASTER
 ---
 
 ## House rules
