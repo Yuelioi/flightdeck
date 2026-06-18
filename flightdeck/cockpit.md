@@ -11,7 +11,9 @@
 
 ## Next
 
-- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）；之后回到 `cockpit-bloat-control` 复核/排期。
+- **发版 `v3.0.0-alpha.2`**（用户拍板）：① 先更 `README.md`（英文发布面）新增「shared-knowledge / 母库」一节——固定 `~/.flightdeck`、`synced` vendoring、`consumers`/`--fanout`，措辞专业不过度宣称；用户要先看 README 效果再继续。② 镜像到 `README.zh.md`。③ 走 `checklists/version-bump.md` bump 到 `3.0.0-alpha.2`（含 README badge 第 7 行、各 manifest、CHANGELOG）。**README 尚未改，工作树干净**。
+- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`，未并 main；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）。
+- 之后回到 `cockpit-bloat-control` 复核/排期。
 
 ## Key Context
 
