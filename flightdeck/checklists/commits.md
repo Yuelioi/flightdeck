@@ -1,6 +1,6 @@
 ---
 status: active
-synced_from: checklists/commits.md
+synced: true
 last_updated: 2026-05-29
 when_to_read: before writing a commit message / staging files / preparing a PR
 applies_to: [commit, git, staging, message, push, pr]
