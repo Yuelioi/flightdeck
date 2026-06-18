@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-alpha.2] — 2026-06-19
+
 cockpit 模型升级（alpha 反馈驱动）。**Breaking**：cockpit 段名全英文化，存量中文-header deck 过不了新 lint——alpha 期可破坏，本仓 dogfood 已同步；其它 deck 用 `/flightdeck:launch` 新建后搬运，或等 3.1 就地迁移。
 
 ### Added
 - **`## Pending Review` cockpit 段** — AI 自认 done、等用户拍板过目的产出队列（非阻塞、主观，区别于 `verify` 客观）；既有 stale `待复核` 浮出项归入此段，审过即 drain。
 - **累积段排水纪律** — 给 `Key Context` / `Pending Review` 立逐条 drain 规则（清理 when：目标已归档/已 graduate/下一会话不需要；收缩 when：长条压成一行指针、同源合并），landing 执行 drain、walkaround 出非阻塞 INFO（新增 Audit 14）。
+- **cockpit 出场密度门控 + active 计数提示**（cockpit-bloat-control spec v2）— landing 出场 Length check 从「纯 80 行」升级为「行数 + 逐字段密度」双判据，抓「行少字密」散文膨胀（`Active focus` / `Last updated` ≤~200 字、`Key Context` / `Pending Review` 每条一行 literal），超限 → 门控 trim（非自动截断，守恢复载荷红线）；`## In Progress` active 项 >~5 → preflight/landing 非阻塞「考虑关停部分」提示。
 - **`/flightdeck:sync` + 共享知识 vendoring**（shared-knowledge-sync spec + v2）— 跨项目共享 checklist/doc：母库为准、谁新谁赢（比 `last_updated`，无 hash）；vendored 文件标 `synced: true`（无路径别名，消费端 relpath 恒等于母库 relpath）；**母库根固定约定 `~/.flightdeck`**（想放别处用 symlink / `mklink /J` junction，`is_dir()` 跟随；缺席 → `master-missing` 优雅跳过）。下发（pull）+ 显式 `/flightdeck:sync push <路径>` 反向（promote 本地原创 / 回流 locally-ahead，`## 项目覆盖` 永不上推）。**双向可发现**：母库共享文件 frontmatter 带 `consumers`（母库专属，vendor 时剔除），脚本 `--register-consumer` / `--list-consumers`（纯读）/ `--prune-consumers`（保守剔除）维护；`/flightdeck:sync --fanout` 把母库改动串行扇出全下游。事实 = `flightdeck_index.py --sync-status`（`state<TAB>relpath`）+ walkaround Audit 15（relpath 不变量 → dangling、消费端非法 `consumers` 键）；仅 checklist/doc。
 - **Act-report-close loop**（act-report-close-loop spec）— 所有 flow 统一末尾 banner（`─── <icon> <flow> ───`，先正文后 banner、一回合一个）；执行回合无增量也出 `[No change]`；统一「翻回 / undo」通道（撤最近着陆单元，跨会话从 git+看板推导）；全生命周期恢复 + 阶段派生。契约真相源 = `protocol § Act-report-close loop`。
 - **AI-authored config**（ai-authored-config spec）— `rules.md` `### Autonomy overrides` → `### Rules`：行为偏好改由「用户自然话 → AI 落盘自由文规则」，删 7 个 magic-string 开关目录 + resolution-order 匹配机器。

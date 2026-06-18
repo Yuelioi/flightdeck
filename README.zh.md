@@ -4,7 +4,7 @@
 
 **面向 AI 辅助工程会话的操作协议。**
 
-[![Version: 3.0.0-alpha.1](https://img.shields.io/badge/version-3.0.0--alpha.1-orange?style=flat-square)](CHANGELOG.md)
+[![Version: 3.0.0-alpha.2](https://img.shields.io/badge/version-3.0.0--alpha.2-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -16,7 +16,7 @@
 ---
 
 > [!WARNING]
-> **`3.0.0-alpha.1` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
+> **`3.0.0-alpha.2` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
 
 > 你的 AI 助手在两次对话之间会失忆。**flightdeck** 是一套目录约定加一个 skill，给它跨会话的操作连续性 —— 让下一次会话知道你在做什么、为什么、下一步做什么。
 
@@ -128,7 +128,7 @@ flightdeck/
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
-| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 谁新谁赢（比 `last_updated`），保留项目专属段。 |
+| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 谁新谁赢（比 `last_updated`），保留项目专属段。`push <path>` 把本地文件上提到母库；`--fanout` 把母库改动推给每个消费者。 |
 
 工件 `status` **自动**推进（idea→active→done）。五个仪式（`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`）都可自调；`landing` 按判断决定归档（被 active 工件交叉引用的 `done` 工件留在原地）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
 
@@ -168,6 +168,18 @@ version: <release>       # 唯一的结构化字段
 - **仪式** —— 五个都可自调；**`status`** 自动推进 idea→active→done，但**从不归档**（归档是 `landing` 按交叉引用的判断）；**`commit`** 本地自动、**push 才先问**。
 
 要改某个行为，**直接用自然话告诉 AI 一条持久偏好** —— 「commit 前先问我」「这个 deck 不走 git」「specs 别自动 start」—— AI 会在 `### Rules` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录：规则由 AI 自己写、自己读。
+
+## 跨项目共享知识
+
+有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用同一份权威副本。flightdeck 用**下发式共享知识（vendored shared-knowledge）**来处理：一份 checklist 或 doc 存在**母库（master deck）**里，被拷贝进各消费 deck，按需保持同步。
+
+- **母库** —— 固定在 `~/.flightdeck`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
+- **下发副本** —— frontmatter 标 `synced: true`，且镜像母库的相对路径。母库是唯一真相源；同步时**谁新谁赢**（比 `last_updated`）。正文合并由 AI 完成，并逐字保留你 deck 的项目专属段。
+- **`/flightdeck:sync`** —— 把上游已改动的文件拉进当前 deck。
+- **`/flightdeck:sync push <path>`** —— 把本地文件上提到母库（backflow），并把本 deck 注册为它的一个消费者。
+- **`/flightdeck:sync --fanout`** —— 改完母库文件后，一次性把改动推给每个消费 deck。母库记录自己的消费者，因此一处共享改动无需逐个项目手动同步即可传播。
+
+只有 `checklists/` 和 `docs/` 参与共享。没有下发文件的 deck 从不碰母库，可独立工作。
 
 ## 为什么需要它
 

@@ -4,7 +4,7 @@
 
 **An operational protocol for AI-assisted engineering sessions.**
 
-[![Version: 3.0.0-alpha.1](https://img.shields.io/badge/version-3.0.0--alpha.1-orange?style=flat-square)](CHANGELOG.md)
+[![Version: 3.0.0-alpha.2](https://img.shields.io/badge/version-3.0.0--alpha.2-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -16,7 +16,7 @@
 ---
 
 > [!WARNING]
-> **`3.0.0-alpha.1` — pre-release for early testers.** 3.0 is a **breaking** release and the new format baseline: decks created by 2.x are **not** auto-migrated — start fresh with `/flightdeck:launch` and hand-copy what's still relevant from your old `cockpit.md`. Format and behavior may still change before the final 3.0.0; don't rely on it for production projects yet. Feedback is the whole point — [issues](https://github.com/Yuelioi/flightdeck/issues) welcome.
+> **`3.0.0-alpha.2` — pre-release for early testers.** 3.0 is a **breaking** release and the new format baseline: decks created by 2.x are **not** auto-migrated — start fresh with `/flightdeck:launch` and hand-copy what's still relevant from your old `cockpit.md`. Format and behavior may still change before the final 3.0.0; don't rely on it for production projects yet. Feedback is the whole point — [issues](https://github.com/Yuelioi/flightdeck/issues) welcome.
 
 > Your AI assistant forgets everything between chats. **flightdeck** is a directory convention plus a skill that gives it operational continuity across sessions — so the next session knows what you were doing, why, and what to do next.
 
@@ -128,7 +128,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
-| `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — newest wins (`last_updated`), preserves the project-specific section. |
+| `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — newest wins (`last_updated`), preserves the project-specific section. `push <path>` promotes a local file up to the master; `--fanout` pushes a master edit to every consumer. |
 
 Artifact `status` advances **automatically** (idea→active→done). All five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) may self-invoke; `landing` decides archiving by judgment (it keeps a `done` artifact in place while active work still references it). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
 
@@ -168,6 +168,18 @@ version: <release>       # the only structured field
 - **rituals** — all five self-invoke; **`status`** auto-advances idea→active→done but **never archives** (archiving is `landing`'s cross-reference-aware judgment); **`commit`** is local-auto, **push asks**.
 
 To change a behavior, **just tell the AI a persistent preference in plain language** — "ask before committing", "this deck doesn't use git", "don't auto-start specs" — and it appends a free-prose rule under `### Rules` (noting source + date) and honors it above the default. There's no magic-string toggle catalog to memorize: the AI authors and reads its own rules.
+
+## Shared knowledge across projects
+
+Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one canonical copy across every deck you run. flightdeck handles this with **vendored shared-knowledge**: a checklist or doc lives in a **master deck** and is copied into each consuming deck, kept in sync on demand.
+
+- **Master deck** — fixed at `~/.flightdeck`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
+- **Vendored copy** — carries `synced: true` in its frontmatter and mirrors the master's relative path. The master is the single source of truth; on sync, **newest wins** (`last_updated`). The AI does the body merge and preserves your deck's project-specific section verbatim.
+- **`/flightdeck:sync`** — pulls upstream-changed files into the current deck.
+- **`/flightdeck:sync push <path>`** — promotes a local file up to the master (backflow), registering this deck as one of its consumers.
+- **`/flightdeck:sync --fanout`** — after you edit a master file, pushes the change to every consuming deck in one pass. The master tracks its consumers, so a shared edit propagates without visiting each project by hand.
+
+Only `checklists/` and `docs/` participate. A deck with no vendored files never touches the master and works standalone.
 
 ## Why it exists
 
