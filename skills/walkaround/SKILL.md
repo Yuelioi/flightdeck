@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context. Triggered by `/flightdeck:walkaround`.
+description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context, sync drift (vendored shared-knowledge upstream-changed / dangling). Triggered by `/flightdeck:walkaround`.
 ---
 
 # Flightdeck Walkaround
@@ -19,7 +19,7 @@ User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drif
 
 ## Audits
 
-Run all 14 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
+Run all 15 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
 
 **Audit 1** — 查各非-archive `.md` 的 `status` 字段 → flag 缺失（CRITICAL）、非法值（WARNING；`specs/plans` 合法: `idea/active/done`；knowledge 合法: `active/stale/obsolete`；已退役旧值 `pending/awaiting-review/blocked/superseded` 均为 WARNING）。
 
@@ -48,6 +48,8 @@ Run all 14 in order. First read `flightdeck/rules.md` if present; resolve behavi
 **Audit 13** — 查 `specs/plans/`（非 archive）中 `status: done` 文件 → flag 有 active 入边（`implements:` 指向它）者为 "blocked done"（INFO；报 blocker）、无 active 入边者为 "landable done 可 land"（INFO；运行 `/flightdeck:landing`）。快速路径：`flightdeck_index.py <deck> --archivable`。
 
 **Audit 14** — 查 `cockpit.md` 的 `## Key Context` 累积卫生（非阻塞）→ flag 条目疑似 stale（指向已 archive/已 graduate 的目标）或单条已长成散文而非 literal 指针、或整段明显超长（INFO；提示在下次 `/flightdeck:landing` 做逐条 drain/收缩，见 [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)）。walkaround 只浮出、不 drain。
+
+**Audit 15** — 查带 `synced_from` 的 vendored 文件的同步态（只读快速路径 `flightdeck_index.py <deck> --sync-status`）→ `upstream-changed` 报 **INFO**「N 个共享文件母库已更新——跑 `/flightdeck:sync`」；`dangling`（母库源已删）报 **WARN**；`locally-ahead` 报 **INFO**（项目这份较新，可能想回流）；`master-missing`（本机未配 `$FLIGHTDECK_SHARED_MASTER`）**不报**（环境噪音，非漂移）。无带 `synced_from` 文件 → N/A。
 
 ## Output format
 
