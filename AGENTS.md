@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
+flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` v2 已 land（母库固定 `~/.flightdeck` + `synced` 标记 + `consumers` 注册表/`--fanout`，已 graduate 至 `docs/shared-knowledge-sync.md`），待跨项目 `--fanout` live 实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
 
@@ -13,7 +13,7 @@ flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共
 
 ## Next
 
-- **复核 `shared-knowledge-sync`**（审 diff，或真 vendor 一份共享文件跑 `/flightdeck:sync` 做端到端实证）；之后回到 `cockpit-bloat-control` 复核/排期。
+- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）；之后回到 `cockpit-bloat-control` 复核/排期。
 
 ## Hanging Tasks
 

@@ -1,6 +1,5 @@
 ---
 status: done
-verify: 下次任一新会话走 /flightdeck:new，确认 AI 直接建壳→写正文、无「先参考 INDEX/旧 spec」前戏（红旗护栏行为效力）
 summary: Skill 约束措辞硬化：一条原则——硬约束用强命令式大写 MUST/NEVER/DO NOT。① new/SKILL.md 加红旗式反模式块拦「调 new 前预读兄弟 spec/INDEX 对格式」（已观察 3+ 次，用户嫌不专业）+ _shared/bootstrap.md 一行通则覆盖同类权威 skill；② 把 5 处核心安全不变量（emit 保留手写区/walkaround 只审不修/preflight 零写入/status 不擅自弃稿/launch 不探仓）从软措辞升强命令式。代码库本已大量用强词，只补这几处载荷重却软的。
 last_updated: 2026-06-16
 ---
