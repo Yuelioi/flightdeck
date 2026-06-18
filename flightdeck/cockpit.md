@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-19 by 月离 (wire shared_master：母库建于 `E:\projects\agent\flightdeck` + env FLIGHTDECK_SHARED_MASTER 已设 + scaffold/本 deck rules.md 接 shared_master；--sync-status 端到端实测过 resolve+state。前序 land shared-knowledge-sync 全栈)
+**Last updated**: 2026-06-19 by 月离 (self-test shared-knowledge-sync 全栈通过：real 母库 comments.md 经 --sync-status→merge→in-sync，刷正文+保 ## 项目覆盖+戳 date；verify 已清。母库 E:\projects\agent\flightdeck + env 已设；scaffold/本 deck rules.md 接 shared_master)
 **Active focus**: flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
@@ -21,12 +21,12 @@
 - **AI 化精简两支柱（已 land）**：运行契约真相源 = `protocol § Act-report-close loop`（banner/翻回/判据/恢复）+ `§ Rule resolution order`（deck `### Rules` > 推断 > 默认）。净字符 Spec 1 +8.8k（新契约）/ Spec 2 −3.1k（删开关）。
 - **`cockpit-bloat-control`（active，待复核）**：组件 A 着陆排空冗余散文·B 字段密度门控 trim·C walkaround 野章节 + active 计数；graduate=false。
 - **`skill-constraint-imperative-hardening`（已 land/归档）**：硬约束统一强命令式（MUST/NEVER/DO NOT）；记忆 `constraints-use-strong-imperatives` + `dont-preread-siblings-with-authoritative-skill`。⚠verify：下次走 `/flightdeck:new` 看是否还预读兄弟文件。
-- **`shared-knowledge-sync`（已 land/归档）**：母库为准·谁新谁赢（比 `last_updated`，无 hash）；`synced_from` 纯可选血缘、`shared_master` 用 env 引用（rules.md frontmatter，换机不失效）；事实=`flightdeck_index.py --sync-status` 只读扫描、合并=`/flightdeck:sync` skill 保 `## 项目覆盖` 段；walkaround Audit 15。母库=`E:\projects\agent\flightdeck`（env `FLIGHTDECK_SHARED_MASTER`，本机 User 级已设）；本 deck rules.md 已接 `shared_master`。scan 层端到端实测过；剩 AI 合并（/flightdeck:sync 刷正文）未实测——⚠verify。
+- **`shared-knowledge-sync`（已 land/归档）**：母库为准·谁新谁赢（比 `last_updated`，无 hash）；`synced_from` 纯可选血缘、`shared_master` 用 env 引用（rules.md frontmatter，换机不失效）；事实=`flightdeck_index.py --sync-status` 只读扫描、合并=`/flightdeck:sync` skill 保 `## 项目覆盖` 段；walkaround Audit 15。母库=`E:\projects\agent\flightdeck`（env `FLIGHTDECK_SHARED_MASTER`，本机 User 级已设）；本 deck rules.md 已接 `shared_master`。**全栈端到端自测过**（real 母库 comments.md：upstream-changed→刷正文+保 `## 项目覆盖`→in-sync，date 戳母库的），verify 已清。
 
 ## Pending Review
 
 - [AI 化精简两 spec 实现] Spec 1 `act-report-close-loop` + Spec 2 `ai-authored-config` 均已 land（多个 per-task commit、160 测试绿、spec/plan 归档）。复核：审 diff 或跑 app（看 banner / `### Rules`）；**不满意就说「翻回」**撤最近着陆单元。已 commit，验证通过无需额外动作。
-- [shared-knowledge-sync 实现] 8 任务全 land（66 测试绿、spec 合规 + 终审 ready、spec+plan 归档）。复核：审 diff，或真 vendor 一份共享文件跑 `/flightdeck:sync` 端到端实证（见 spec verify）；**不满意说「翻回」**撤最近着陆单元。已本地 commit、未 push。
+- [shared-knowledge-sync 实现] 8 任务全 land（66 测试绿、spec 合规 + 终审 ready、spec+plan 归档）；端到端**已自测通过**（real 母库 comments.md：scan→merge→in-sync、`## 项目覆盖` 保留）。剩你审 diff / 拍板；**不满意说「翻回」**。已本地 commit、未 push。
 - ⚠待复核 `docs/script-layer.md`：本会话给 `flightdeck_index.py` 加了 `--sync-status` 扫描，脚本层文档未提及，下次补。
 
 ## Hanging Tasks

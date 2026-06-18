@@ -2,7 +2,6 @@
 status: done
 summary: 跨项目共享 checklist/doc 同步：母库唯一真相源、谁新谁赢（比既有 last_updated，无 hash）、文件加一行 synced_from 作血缘+勾选、母库根用 env 引用（$FLIGHTDECK_SHARED_MASTER）避免换机失效、AI 驱动只换共享正文保留 ## 项目覆盖段；MVP 单向不回流、仅 checklist/doc、不迁内容。
 last_updated: 2026-06-19
-verify: 下次真 vendor 一份共享文件跑 /flightdeck:sync，确认只换共享正文、保 ## 项目覆盖 段、把 last_updated 戳成母库的（--sync-status 已单测；端到端 AI 合并未实证——MVP 未迁内容）
 ---
 
 # 跨项目共享知识同步（母库为准·谁新谁赢·一行 synced_from）
