@@ -1,9 +1,11 @@
+import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -846,7 +848,7 @@ class VerifyPendingUtf8CliTest(unittest.TestCase):
 
 
 class SyncStatusTest(unittest.TestCase):
-    """flightdeck_index.sync_status — 共享知识漂移只读扫描。"""
+    """flightdeck_index.sync_status — 共享知识漂移只读扫描（v2：固定母库 + synced 标记）。"""
 
     def _master_file(self, master, relpath, last_updated):
         p = master / relpath
@@ -857,100 +859,81 @@ class SyncStatusTest(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def _consumer(self, root, shared_master_raw):
+    def _consumer(self, root):
         deck = root / "consumer"
         (deck / "checklists").mkdir(parents=True)
-        rules = "---\nversion: 3.0\n"
-        if shared_master_raw is not None:
-            rules += f"shared_master: {shared_master_raw}\n"
-        rules += "---\n"
-        (deck / "rules.md").write_text(rules, encoding="utf-8")
+        (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
         return deck
 
-    def _vendored(self, deck, name, last_updated, synced_from):
-        (deck / "checklists" / name).write_text(
-            f"---\nstatus: active\nsynced_from: {synced_from}\n"
-            f"when_to_read: x\napplies_to: [y]\nlast_updated: {last_updated}\n---\n# {name}\n",
+    def _vendored(self, deck, relpath, last_updated):
+        p = deck / relpath
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            f"---\nstatus: active\nsynced: true\n"
+            f"when_to_read: x\napplies_to: [y]\nlast_updated: {last_updated}\n---\n# {p.stem}\n",
             encoding="utf-8",
         )
+
+    def _home(self, fake_home):
+        # 母库恒为 ~/.flightdeck —— 测试里把 Path.home() 指到 fake_home，母库 = fake_home/.flightdeck
+        return mock.patch.object(flightdeck_index.Path, "home", return_value=fake_home)
 
     def test_states_and_ignores_unsynced(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
-            master = root / "master"
+            master = root / ".flightdeck"
             self._master_file(master, "checklists/commits.md", "2026-06-20")
-            deck = self._consumer(root, str(master))
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
-            self._vendored(deck, "ahead.md", "2026-06-25", "checklists/commits.md")
-            self._vendored(deck, "gone.md", "2026-06-18", "checklists/missing.md")
+            deck = self._consumer(root)
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # 母库更新 → upstream-changed
+            self._vendored(deck, "checklists/ahead.md", "2026-06-25")     # 母库无源 → dangling（源不存在）
             (deck / "checklists" / "local.md").write_text(
                 "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-18\n---\n# local\n",
                 encoding="utf-8",
             )
-            states = {rel: st for st, rel, _ in sync_status(deck)}
+            with self._home(root):
+                states = {rel: st for st, rel in sync_status(deck)}
             self.assertEqual(states["checklists/commits.md"], "upstream-changed")
-            self.assertEqual(states["checklists/ahead.md"], "locally-ahead")
-            self.assertEqual(states["checklists/gone.md"], "dangling")
+            self.assertEqual(states["checklists/ahead.md"], "dangling")
             self.assertNotIn("checklists/local.md", states)
 
-    def test_in_sync_equal_dates(self):
+    def test_locally_ahead_and_in_sync(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
-            master = root / "master"
+            master = root / ".flightdeck"
             self._master_file(master, "checklists/commits.md", "2026-06-18")
-            deck = self._consumer(root, str(master))
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
-            self.assertEqual(sync_status(deck)[0][0], "in-sync")
+            self._master_file(master, "checklists/comments.md", "2026-06-10")
+            deck = self._consumer(root)
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # 相等 → in-sync
+            self._vendored(deck, "checklists/comments.md", "2026-06-25")  # 项目更新 → locally-ahead
+            with self._home(root):
+                states = {rel: st for st, rel in sync_status(deck)}
+            self.assertEqual(states["checklists/commits.md"], "in-sync")
+            self.assertEqual(states["checklists/comments.md"], "locally-ahead")
 
-    def test_master_missing_when_env_unset(self):
+    def test_master_missing_when_no_flightdeck_home(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            deck = self._consumer(root, "$FD_MASTER_DEFINITELY_UNSET_XYZ")
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
-            self.assertEqual(sync_status(deck)[0][0], "master-missing")
-
-    def test_shared_master_pointer_file_fallback(self):
-        # rules.md 的 env 解不出时，回退读 gitignored <deck>/.shared-master 指针文件
-        from flightdeck_index import sync_status
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            master = root / "master"
-            self._master_file(master, "checklists/commits.md", "2026-06-20")
-            deck = self._consumer(root, "$FD_UNSET_PTR_XYZ")          # env 不可解
-            (deck / ".shared-master").write_text(str(master) + "\n", encoding="utf-8")
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
-            self.assertEqual(sync_status(deck)[0][0], "upstream-changed")
-
-    def test_env_expansion_resolves_master(self):
-        from flightdeck_index import sync_status
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            master = root / "master"
-            self._master_file(master, "checklists/commits.md", "2026-06-20")
-            deck = self._consumer(root, "$FD_TEST_MASTER")
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
-            os.environ["FD_TEST_MASTER"] = str(master)
-            try:
-                self.assertEqual(sync_status(deck)[0][0], "upstream-changed")
-            finally:
-                del os.environ["FD_TEST_MASTER"]
+            root = Path(d)                 # root 下不建 .flightdeck → 母库缺席
+            deck = self._consumer(root)
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")
+            with self._home(root):
+                self.assertEqual(sync_status(deck)[0][0], "master-missing")
 
     def test_read_only_writes_nothing(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
-            master = root / "master"
+            master = root / ".flightdeck"
             self._master_file(master, "checklists/commits.md", "2026-06-20")
-            deck = self._consumer(root, str(master))
-            self._vendored(deck, "commits.md", "2026-06-18", "checklists/commits.md")
+            deck = self._consumer(root)
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")
             before = {p: p.read_text(encoding="utf-8") for p in deck.rglob("*.md")}
-            sync_status(deck)
+            with self._home(root):
+                sync_status(deck)
             after = {p: p.read_text(encoding="utf-8") for p in deck.rglob("*.md")}
             self.assertEqual(before, after)
-            self.assertFalse((deck / "INDEX.md").exists())
 
 
 if __name__ == "__main__":

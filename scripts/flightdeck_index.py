@@ -420,49 +420,30 @@ def verify_pending(deck):
     return sorted(out)
 
 
-def _resolve_master_root(deck):
-    """Resolve a consumer deck's shared-master root, or None.
+def _resolve_master_root():
+    """Resolve the shared-knowledge master deck root, or None.
 
-    Order (first existing dir wins): (1) rules.md frontmatter `shared_master`,
-    env-expanded (e.g. `$FLIGHTDECK_SHARED_MASTER`); (2) a gitignored
-    `<deck>/.shared-master` pointer file — first non-empty line, also
-    env-expanded — for a project-visible per-machine path. A Claude-side
-    fallback to the user's global CLAUDE.md asset root lives in the
-    /flightdeck:sync skill, not here (the script stays pure)."""
-    deck = Path(deck)
-    candidates = []
-    rules = deck / "rules.md"
-    if rules.is_file():
-        raw = parse_frontmatter(rules.read_text(encoding="utf-8")).get("shared_master", "") or ""
-        if raw:
-            candidates.append(raw)
-    pointer = deck / ".shared-master"
-    if pointer.is_file():
-        for line in pointer.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                candidates.append(line.strip())
-                break
-    for cand in candidates:
-        p = Path(os.path.expandvars(cand))
-        if p.is_dir():
-            return p
-    return None
+    Fixed convention: ``~/.flightdeck``. To keep the master elsewhere, make
+    ``~/.flightdeck`` a symlink or directory junction to it — ``is_dir()``
+    follows both. Returns the path when it resolves to a directory, else None
+    (the caller treats None as ``master-missing`` and skips gracefully)."""
+    root = Path.home() / ".flightdeck"
+    return root if root.is_dir() else None
 
 
 def sync_status(deck):
-    """共享知识漂移只读扫描：对每个带 `synced_from` 的工件，比它与母库源的
-    `last_updated`，返回 (state, project_relpath, synced_from)。写任何文件都不。
+    """共享知识漂移只读扫描：对每个带 `synced: true` 的工件，用其**自身 relpath**
+    去母库找同路径源、比 `last_updated`，返回 (state, relpath)。写任何文件都不。
 
-    母库根解析见 `_resolve_master_root`（rules.md `shared_master` env 展开 →
-    `<deck>/.shared-master` gitignored 指针）。状态：
+    母库根解析见 `_resolve_master_root`（固定 `~/.flightdeck`）。状态：
       upstream-changed  母库更新（母库 last_updated 更大）→ /flightdeck:sync 可拉
       in-sync           相等
       locally-ahead     项目更新 → /flightdeck:sync push 可回流母库
-      dangling          母库源文件已删
-      master-missing    母库根未解析（env 未设/无 .shared-master/路径不存在） → 优雅跳过
-    路径相对 deck、POSIX 斜杠；按项目路径排序。排除 archive/。"""
+      dangling          母库根在、但同 relpath 源不是可读文件（缺失/类型错配）
+      master-missing    母库根 ~/.flightdeck 不存在 → 整 deck 优雅跳过
+    路径相对 deck、POSIX 斜杠；按 relpath 排序。排除 archive/。"""
     deck = Path(deck)
-    master_root = _resolve_master_root(deck)
+    master_root = _resolve_master_root()
     master_ok = master_root is not None
     out = []
     for p in deck.rglob("*.md"):
@@ -472,16 +453,15 @@ def sync_status(deck):
             fm = parse_frontmatter(p.read_text(encoding="utf-8"))
         except OSError:
             continue
-        src = fm.get("synced_from")
-        if not src:
+        if str(fm.get("synced", "")).strip().lower() != "true":
             continue
         rel = str(p.relative_to(deck)).replace("\\", "/")
         if not master_ok:
-            out.append(("master-missing", rel, src))
+            out.append(("master-missing", rel))
             continue
-        master_file = master_root / src
+        master_file = master_root / rel
         if not master_file.is_file():
-            out.append(("dangling", rel, src))
+            out.append(("dangling", rel))
             continue
         proj_lu = fm.get("last_updated", "")
         mast_lu = parse_frontmatter(master_file.read_text(encoding="utf-8")).get("last_updated", "")
@@ -491,7 +471,7 @@ def sync_status(deck):
             state = "locally-ahead"
         else:
             state = "in-sync"
-        out.append((state, rel, src))
+        out.append((state, rel))
     return sorted(out, key=lambda t: t[1])
 
 
@@ -575,8 +555,8 @@ def main(argv=None):
     ap.add_argument(
         "--sync-status",
         action="store_true",
-        help="print (state<TAB>path<TAB>synced_from) for every artifact carrying `synced_from`, "
-        "comparing last_updated against the shared_master source (read-only)",
+        help="print (state<TAB>relpath) for every artifact carrying `synced: true`, "
+        "comparing last_updated against the same-relpath source under ~/.flightdeck (read-only)",
     )
     args = ap.parse_args(argv)
 
@@ -606,8 +586,8 @@ def main(argv=None):
         return 0
 
     if args.sync_status:
-        for state, path, src in sync_status(args.deck):
-            print(f"{state}\t{path}\t{src}")
+        for state, path in sync_status(args.deck):
+            print(f"{state}\t{path}")
         return 0
 
     drift = []
