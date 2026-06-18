@@ -5,15 +5,16 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` v2 已 land（母库固定 `~/.flightdeck` + `synced` 标记 + `consumers` 注册表/`--fanout`，已 graduate 至 `docs/shared-knowledge-sync.md`），待跨项目 `--fanout` live 实证；`cockpit-bloat-control` 仍待复核/排期。
+flightdeck 3.0 alpha 打磨——发版 `v3.0.0-alpha.2` 准备中（README shared-knowledge 节已加待过目 → 接 version-bump）；`shared-knowledge-sync` v2 待跨项目 `--fanout` live 实证。
 
 ## In Progress
 
-- [2026-06-16-cockpit-bloat-control.md](flightdeck/specs/2026-06-16-cockpit-bloat-control.md) — cockpit 膨胀治理：着陆归档时自动排空引用刚归档 artifact 的冗余散文（可逆，自动）；规范字段替换而非追加 + 逐字段密度检查（门控 trim）；walkaround 守卫野章节 + active 计数非阻塞提示。规范字段集本就精简，膨胀来自野章节与散文不排空。
+None.
 
 ## Next
 
-- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）；之后回到 `cockpit-bloat-control` 复核/排期。
+- **发版 `v3.0.0-alpha.2`**（用户拍板）：① `README.md` + `README.zh.md` 已加「shared-knowledge / 母库」节（`~/.flightdeck` + `synced` vendoring + `consumers`/`--fanout`，待用户过目，**未 commit**）。② 用户确认 README → 走 `checklists/version-bump.md` bump 到 `3.0.0-alpha.2`（含 README badge 第 7 行、各 manifest、CHANGELOG）。
+- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`，未并 main；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）。
 
 ## Hanging Tasks
 
