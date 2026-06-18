@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-**Last updated**: 2026-06-19 by 月离 (shared-knowledge-sync 增量：双向 push（promote/回流，## 项目覆盖 不上推）+ gitignored .shared-master 母库指针（env 之外的项目可见来源）；A/B 均自测过、67 测试绿)
+**Last updated**: 2026-06-19 by 月离 (shared-knowledge-sync 投入试用：vendor 首份共享内容 comments.md+commits.md（in-sync）、工作树已 robocopy 进插件缓存（build 1c931ee7，--check current）；**需重启会话加载新 skill**，试用几天)
 **Active focus**: flightdeck 3.0 alpha 打磨——`shared-knowledge-sync` 已 land（跨项目共享知识 vendoring：/flightdeck:sync + --sync-status + synced_from/shared_master），待端到端实证；`cockpit-bloat-control` 仍待复核/排期。
 
 ## In Progress
@@ -26,7 +26,7 @@
 ## Pending Review
 
 - [AI 化精简两 spec 实现] Spec 1 `act-report-close-loop` + Spec 2 `ai-authored-config` 均已 land（多个 per-task commit、160 测试绿、spec/plan 归档）。复核：审 diff 或跑 app（看 banner / `### Rules`）；**不满意就说「翻回」**撤最近着陆单元。已 commit，验证通过无需额外动作。
-- [shared-knowledge-sync 实现] 8 任务全 land（66 测试绿、spec 合规 + 终审 ready、spec+plan 归档）；端到端**已自测通过**（real 母库 comments.md：scan→merge→in-sync、`## 项目覆盖` 保留）。剩你审 diff / 拍板；**不满意说「翻回」**。已本地 commit、未 push。
+- [shared-knowledge-sync 实现] 8 任务全 land（66 测试绿、spec 合规 + 终审 ready、spec+plan 归档）；端到端**已自测通过**（real 母库 comments.md：scan→merge→in-sync、`## 项目覆盖` 保留）；首份共享内容已 vendor（comments.md/commits.md，in-sync）、插件缓存已同步——**试用几天中**（需重启会话加载新 skill）。剩你审 diff / 拍板；**不满意说「翻回」**。
 - ⚠待复核 `docs/script-layer.md`：本会话给 `flightdeck_index.py` 加了 `--sync-status` 扫描，脚本层文档未提及，下次补。
 
 ## Hanging Tasks
