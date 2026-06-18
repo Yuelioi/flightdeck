@@ -49,12 +49,14 @@ Run all 15 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 14** — 查 `cockpit.md` 的 `## Key Context` 累积卫生（非阻塞）→ flag 条目疑似 stale（指向已 archive/已 graduate 的目标）或单条已长成散文而非 literal 指针、或整段明显超长（INFO；提示在下次 `/flightdeck:landing` 做逐条 drain/收缩，见 [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)）。walkaround 只浮出、不 drain。
 
-**Audit 15** — 查带 `synced: true` 的 vendored 文件的同步态（只读快速路径 `flightdeck_index.py <deck> --sync-status`，母库固定 `~/.flightdeck`）：
+**Audit 15** — 查带 `synced: true` 的 vendored 文件。同步态走只读快速路径 `flightdeck_index.py <deck> --sync-status`（输出 `state<TAB>relpath`，母库固定 `~/.flightdeck`）：
 - 校验 relpath 不变量：母库无同 relpath 源文件 → `dangling`，报 **WARNING**；
-- 消费端文件出现 `consumers` 字段 → 报 **WARNING**（母库专属字段，消费副本非法）；
 - `upstream-changed`（母库源较新）→ 报 **INFO**「N 个共享文件母库已更新——跑 `/flightdeck:sync`」；
 - `locally-ahead`（消费端较新）→ 报 **INFO**（项目这份较新，可考虑回流）；
 - `master-missing`（`~/.flightdeck` 不存在）→ **不报**（本机未建母库，非漂移）。
+
+另查（直读 frontmatter，非 `--sync-status` 输出）：消费端 `synced: true` 文件出现 `consumers` 字段 → 报 **WARNING**（`consumers` 是母库专属字段，vendor 时应剔除，消费副本非法）。
+
 无带 `synced: true` 文件 → N/A。
 
 ## Output format
