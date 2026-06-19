@@ -68,8 +68,8 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `graduate` | specs | optional | landing (graduate seam trigger) | author / AI (front-loads at creation or during active life) | — |
 | `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | — (static identity stamp; future 3.0→3.1 migration anchor) | **launch only** (init) | — |
-| `synced` | checklists/docs（仅 vendored） | optional（布尔标记，无路径） | `/flightdeck:sync` + walkaround sync-drift（`flightdeck_index.py --sync-status`） | `sync`（首发下发 / `push` promote 时戳） | sync-drift audit：校验 relpath 不变量（母库无同 relpath 源 → `dangling`）；缺失**绝不**报警 |
-| `consumers` | checklists/docs（仅母库文件） | 母库专属（消费副本剔除） | `/flightdeck:sync --fanout`（扇出至所有已注册消费 deck） | `--register-consumer` 写入；`--prune-consumers` 清理 | 消费端出现此键 → WARNING（非法） |
+| `synced` | checklists/docs (vendored only) | optional (boolean marker, no path) | `/flightdeck:sync` + walkaround sync-drift (`flightdeck_index.py --sync-status`) | `sync` (stamped on initial vendoring / on `push` promote) | sync-drift audit: validate the relpath invariant (no source at the same relpath in the master store → `dangling`); absence **never** warns |
+| `consumers` | checklists/docs (master-store files only) | master-store-only (stripped from consumer copies) | `/flightdeck:sync --fanout` (fan out to every registered consumer deck) | written by `--register-consumer`; cleaned by `--prune-consumers` | presence in a consumer copy → WARNING (illegal) |
 
 `cockpit.md` board fields (`Updated` / `Focus` / `Pointers` / `## Next` / `## In Progress` / `## Key Context` / `## Pending Review` / `## Hanging Tasks`) are not YAML frontmatter. **Pointer-vs-record boundary:** cockpit materializes only irreducible judgment plus one cheap projection (`## In Progress`); records live in their homes — history → `git log`, progress → plan `## Progress`, goal/criteria/method → spec body, durable invariants → `rules.md`, knowledge → folder INDEXes — and cockpit only links to them. `## In Progress` is an AUTO region derived from `status: active` spec/plan (rendering a truncated summary head); `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 
@@ -83,20 +83,20 @@ This table is the **single source of truth** for every frontmatter / config fiel
 
 ### `verify` — the verification marker
 
-**`verify` is a status附加标记, NOT a status and NOT a state machine.** It is read **together with** `status` (sibling to `note:` / `resolved_by:` / `when_to_update:`), never on its own. Presence/value/absence carry the whole contract:
+**`verify` is a status add-on marker, NOT a status and NOT a state machine.** It is read **together with** `status` (sibling to `note:` / `resolved_by:` / `when_to_update:`), never on its own. Presence/value/absence carry the whole contract:
 
 - **present** = the artifact **owes verification** (substantively written/done, but not yet confirmed against reality);
-- **value** = a one-line **how-to-verify** note (e.g. `verify: 相位4 各家 live 实证`) — so the debt's *content* survives any cockpit edit/regen and the deterministic scan can re-surface it;
+- **value** = a one-line **how-to-verify** note (e.g. `verify: phase-4 live validation on each host`) — so the debt's *content* survives any cockpit edit/regen and the deterministic scan can re-surface it;
 - **absent** = verified, or no verification needed.
 
-Binary present/absent only — there is **no `verify: failed` value** (a failed verification revives the artifact and **keeps** `verify`; see [验证非阻塞](#non-blocking-verification)). Optional; applies to a knowledge `stale` artifact (written-but-unverified) and a workflow `done` artifact (substantively-done-but-unverified). **It is not a 4th workflow status** — the status value sets are unchanged (workflow `idea/active/done`, knowledge `active/stale/obsolete`); `verify` only modifies how a given status reads. Every preflight/landing/walkaround re-surfaces the debt via a deterministic scan of the `verify` field across the active tree + `archive/` (`flightdeck_index.py --verify-pending`).
+Binary present/absent only — there is **no `verify: failed` value** (a failed verification revives the artifact and **keeps** `verify`; see [Non-blocking verification](#non-blocking-verification)). Optional; applies to a knowledge `stale` artifact (written-but-unverified) and a workflow `done` artifact (substantively-done-but-unverified). **It is not a 4th workflow status** — the status value sets are unchanged (workflow `idea/active/done`, knowledge `active/stale/obsolete`); `verify` only modifies how a given status reads. Every preflight/landing/walkaround re-surfaces the debt via a deterministic scan of the `verify` field across the active tree + `archive/` (`flightdeck_index.py --verify-pending`).
 
 ## Status ⟂ location (two orthogonal axes)
 
 flightdeck separates **two independent axes** — the source of the historical "done = landed" confusion is collapsing them:
 
 - **status** ∈ `{idea, active, done}` (workflow) — *which step the artifact reached*. Explicit frontmatter value.
-- **location** ∈ `{源文件夹, archive/}` — *whether it's still in the active area*. **Derived, NOT a frontmatter field** (computed from "is it under `archive/`?"), **but a first-class concept**: it drives **routing** (`archive/` is excluded from the routing graph entirely) and **archival judgment** (landing decides whether a `done` item lands). Don't dismiss it as unimportant just because it isn't written down.
+- **location** ∈ `{source folder, archive/}` — *whether it's still in the active area*. **Derived, NOT a frontmatter field** (computed from "is it under `archive/`?"), **but a first-class concept**: it drives **routing** (`archive/` is excluded from the routing graph entirely) and **archival judgment** (landing decides whether a `done` item lands). Don't dismiss it as unimportant just because it isn't written down.
 
 A `done` artifact has two legal locations: **done-but-unlanded** (still in `specs/`, because an `active` artifact still references it) or **done-and-archived** (moved into `archive/`).
 
@@ -121,11 +121,11 @@ knowledge: active → stale (auto, ritual) → active (user-reviewed) | obsolete
           active → obsolete (user-confirmed dead, no stale step required)
 ```
 
-`stale` = **待复核：疑似过期 _或_ 新产出未验证** — two sources distinguished by the [`verify` field](#verify--the-verification-marker): **has `verify`** = written-but-unverified; **no `verify`** = `when_to_update`-matched suspected-outdated. The status token is unchanged; only the meaning broadens.
+`stale` = **pending-review: suspected outdated _or_ newly produced but unverified** — two sources distinguished by the [`verify` field](#verify--the-verification-marker): **has `verify`** = written-but-unverified; **no `verify`** = `when_to_update`-matched suspected-outdated. The status token is unchanged; only the meaning broadens.
 
 - `idea` = unstarted thought / design (the to-start pool); only in `specs/INDEX`, **not** in cockpit. No date prefix.
 - `active` = being worked on; **auto-appears in cockpit `## In Progress`**. The `idea→active` flip auto-adds the `YYYY-MM-DD-` prefix.
-- `done` = 工作完成；留在源文件夹直到 landing ritual 把它归档进 `archive/`（**done ≠ archived**）.
+- `done` = work complete; stays in the source folder until the landing ritual archives it into `archive/` (**done ≠ archived**).
 - **Rejected / abandoned** = the artifact is **deleted outright** (only on explicit user instruction). git log is the history, with a one-line reason in the commit body. There is no `scrapped` status value and no tombstone group.
 
 ### Status transition authority table (single source of truth)
@@ -150,19 +150,19 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 |---|---|---|---|
 | Recent changed paths intersect doc's `applies_to` | `active→stale` (or no-op if already `stale`) | exit-ritual (landing/soft-landing) | **auto** (landing; idempotent) |
 | User confirms doc is now current | `stale→active` | user-asserted only | **never auto** |
-| Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [验证非阻塞](#non-blocking-verification)) |
+| Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [Non-blocking verification](#non-blocking-verification)) |
 | User confirms doc is dead / obsolete | `→obsolete` | user-asserted only | **never auto** |
 | Ritual detects `obsolete` knowledge artifact | drain to `archive/` (location change, not a new status) | landing | **auto** (same drain logic as `done`) |
 
 Iron rules:
 - **Forward-only, idempotent** — if target ≤ current, no-op.
 - `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
-- **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (the AI never abandons work unilaterally). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value, no tombstone, no `### 已否决` group.
+- **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (the AI never abandons work unilaterally). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value, no tombstone, no `### Rejected` group.
 - `done`'s trigger source (no-verify task) = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check. **Unchanged.**
-- **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [验证非阻塞](#non-blocking-verification).
+- **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [Non-blocking verification](#non-blocking-verification).
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
-Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: the exit ritual (landing/soft-landing) intersects this turn's changed paths with each knowledge artifact's `applies_to` paths and auto-flips `status: stale` on a hit (idempotent — already-stale is a no-op); preflight neither detects nor flips stale (纯读零写) — stale visibility rides the folder INDEX rows (`⚠`) it already loads. The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; landing drains it to `archive/`.
+Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: the exit ritual (landing/soft-landing) intersects this turn's changed paths with each knowledge artifact's `applies_to` paths and auto-flips `status: stale` on a hit (idempotent — already-stale is a no-op); preflight neither detects nor flips stale (read-only, zero-write) — stale visibility rides the folder INDEX rows (`⚠`) it already loads. The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; landing drains it to `archive/`.
 
 ### The status / landing seam
 
@@ -181,9 +181,9 @@ Status is just a label — the user edits it freely; at landing the AI **applies
 
 ### Non-blocking verification
 
-Verification is a **non-blocking marker, not a blocking gate**. The old "needs-verify → AI may NOT self-assert `done`" gate is **removed**: the AI **may** self-assert `done` (workflow) or write `stale` (knowledge) carrying a [`verify`](#verify--the-verification-marker) note. Safety comes from **visibility** — every preflight re-surfaces the verify debt via a deterministic scan — **plus reversibility**, NOT from blocking. Premise: preflight is the standard, 必经 entry — flightdeck's existing "single explicit entry point" design.
+Verification is a **non-blocking marker, not a blocking gate**. The old "needs-verify → AI may NOT self-assert `done`" gate is **removed**: the AI **may** self-assert `done` (workflow) or write `stale` (knowledge) carrying a [`verify`](#verify--the-verification-marker) note. Safety comes from **visibility** — every preflight re-surfaces the verify debt via a deterministic scan — **plus reversibility**, NOT from blocking. Premise: preflight is the standard, mandatory entry — flightdeck's existing "single explicit entry point" design.
 
-**Per-kind pass/fail** — the SKILL must first 识别 the artifact's kind (knowledge vs workflow), then act:
+**Per-kind pass/fail** — the SKILL must first identify the artifact's kind (knowledge vs workflow), then act:
 
 | | verification **passes** | verification **fails** |
 | --- | --- | --- |
@@ -208,10 +208,10 @@ flightdeck/                  [product name — kept]
 ├── specs/       INDEX.md   (idea / active / done)              workflow · self-authored · flat
 ├── plans/       INDEX.md                                       workflow · self-authored · flat
 ├── incidents/   INDEX.md   bug post-mortems                    knowledge · resident · nestable
-├── checklists/  INDEX.md   process / conventions (执行)         knowledge · resident · nestable
+├── checklists/  INDEX.md   process / conventions (execution)     knowledge · resident · nestable
 ├── docs/        INDEX.md   self-authored technical knowledge ★ knowledge · resident · nestable
-├── references/  INDEX.md   imported external material (旧 charts/) knowledge · imported · nestable
-└── archive/     (旧 landed/)                                   location (not a kind)
+├── references/  INDEX.md   imported external material (was charts/) knowledge · imported · nestable
+└── archive/     (was landed/)                                  location (not a kind)
 ```
 
 `docs/` (★ new in 3.0) holds **self-authored, resident, explanatory** project technical knowledge — architecture, design rationale, subsystem overviews, lifecycle/philosophy. It is what you **read to understand**, vs `checklists/` (what you **execute**), `references/` (what comes from **outside**), and `specs/` (one-shot design intent that archives when built). `archive/` is a first-class structural container (mirrors source kinds, handled specially by landing/index) but is **not a kind** — it answers "in the active area or not", not "what artifact is this" (artifacts keep their own kind). The archived files themselves **are** the landing record — flightdeck keeps no separate history log.
@@ -241,19 +241,19 @@ Reachability entries: `cockpit.md` / `rules.md` / the folder `INDEX.md` files. (
 
 Knowledge files (incidents / checklists / docs / references) **MUST** carry frontmatter with `when_to_read`, `applies_to`, and `last_updated`. On a missing field: STOP, report the file path + missing fields to user, offer (a) add now or (b) delete the file. Silent skip = files invisible while their authors believe they're active. That is the worst failure mode for an advice system.
 
-### Stale detection (`when_to_update` + `applies_to` paths, 退场单仪式)
+### Stale detection (`when_to_update` + `applies_to` paths, single on-exit ritual)
 
 Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase ("what kind of change would make me wrong") — the human-facing *reason*, not a runtime condition. The runtime trigger is mechanical: the exit ritual intersects the changed paths with the artifact's `applies_to` **path entries** (the entries containing `/` — prefix match; plain-word tags are routing-only and never match a path); a hit auto-flips `status: stale` — no pre-ask (stale is reversible, local, purely a warning; "docs quietly lying" is the worst failure mode). A knowledge artifact that wants stale freshness must therefore list **at least one source-path entry** in `applies_to`; a tags-only artifact simply opts out of stale detection.
 
-`stale` covers **两个待复核来源** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠待复核` vs `⚠未验证`).
+`stale` covers **two pending-review sources** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠ pending-review` vs `⚠ unverified`).
 
-**Detection runs only at the exit ritual (landing/soft-landing — the 退场单仪式):** `--changed-since-anchor` emits the paths changed since the anchor plus worktree uncommitted changes; intersect them with each knowledge artifact's `applies_to` paths and flip `stale` on a hit. preflight neither detects nor flips stale (纯读零写) — its only debt scan is `--verify-pending`; un-flipped stale waits for the next landing.
+**Detection runs only at the exit ritual (landing/soft-landing — the single on-exit ritual):** `--changed-since-anchor` emits the paths changed since the anchor plus worktree uncommitted changes; intersect them with each knowledge artifact's `applies_to` paths and flip `stale` on a hit. preflight neither detects nor flips stale (read-only, zero-write) — its only debt scan is `--verify-pending`; un-flipped stale waits for the next landing.
 
 **Anchor:** the git ref recorded by the most recent exit-ritual (stored as a `Flightdeck-Sync:` trailer in the landing commit — a concrete recorded ref, never a guess). The anchor advances at each landing commit.
 
 **Idempotency:** `stale` detection is idempotent — already-`stale` docs are a no-op.
 
-**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the **no-verify** `→done` rule. The AI does not self-certify either direction — except via the verify-pass path (see [验证非阻塞](#non-blocking-verification)), where the SKILL flips `stale→active` on a user-performed verification that passes.
+**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the **no-verify** `→done` rule. The AI does not self-certify either direction — except via the verify-pass path (see [Non-blocking verification](#non-blocking-verification)), where the SKILL flips `stale→active` on a user-performed verification that passes.
 
 ### Proactive incident resurfacing
 
@@ -360,7 +360,7 @@ Every flow turn = **prose first, then exactly one standardized banner at the ver
 You can close / switch the conversation anytime — next preflight resumes from the board.
 ```
 
-### Undo channel ("翻回")
+### Undo channel ("rollback")
 
 One universal undo replaces per-action gates. The undo unit is **the most recent landing unit as a whole** — one `landing` / `checkpoint` commit, or this turn's uncommitted deck changes — not a file-level last change.
 
@@ -396,7 +396,7 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 | --- | --- | --- | --- | --- | --- |
 | `preflight` | read-only takeover at session start | **no (zero writes)** — deckless redirects to /flightdeck:launch | reads only — passive note on git state | reads folder INDEX as catalog | no — audits belong to walkaround |
 | `landing` | write the session's outcome (full mode); board-sync only (checkpoint mode at task boundaries) | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
-| `walkaround` | integrity audit on demand | **no — 只审不修** (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
+| `walkaround` | integrity audit on demand | **no — audit-only, never fix** (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
 
 The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
 
@@ -475,19 +475,19 @@ Producing a new deck artifact (spec / plan / incident / checklist / reference / 
 
 ## Brand glyphs (per command)
 
-每个 flightdeck 命令在其**运行时主报告/完成行**带一枚品牌 emoji（仅报告行，不进 deck 文件、不进 scaffolds）。这是**文档级单一真相源**——各 skill 硬编码自己那枚，新增命令照此表配字形。`✈️`（U+2708 + FE0F）保留作项目 wordmark（README 标题），**不**作命令字形。
+Every flightdeck command carries a brand emoji on its **runtime main report / completion line** (report line only — never in deck files, never in scaffolds). This is the **doc-level single source of truth** — each skill hard-codes its own glyph; a new command picks a glyph per this table. `✈️` (U+2708 + FE0F) is reserved as the project wordmark (README title) and is **not** a command glyph.
 
-| 命令 | 图标 | codepoint | 语义 |
+| Command | Glyph | codepoint | Meaning |
 |---|---|---|---|
-| launch | 🛠️ | U+1F6E0 FE0F | 造甲板 / 首次建机 |
-| preflight | 🛫 | U+1F6EB | 起飞前就绪 |
-| walkaround | 🔍 | U+1F50D | 绕机巡检 / 审计 |
-| new | ✍️ | U+270D FE0F | 新建工件 |
-| status | 🔄 | U+1F504 | 状态流转 |
-| landing | 🛬 | U+1F6EC | 着陆归档 |
-| emit-agents-md | 🌉 | U+1F309 | 跨工具桥 |
+| launch | 🛠️ | U+1F6E0 FE0F | build the deck / first-time setup |
+| preflight | 🛫 | U+1F6EB | pre-flight readiness |
+| walkaround | 🔍 | U+1F50D | walkaround inspection / audit |
+| new | ✍️ | U+270D FE0F | author a new artifact |
+| status | 🔄 | U+1F504 | status transition |
+| landing | 🛬 | U+1F6EC | land & archive |
+| emit-agents-md | 🌉 | U+1F309 | cross-tool bridge |
 
-效力边界：被动文档约定，无程序强制——改某命令字形须人工同步本表（preflight 不自动校验）。
+Scope of force: a passive documentation convention, not program-enforced — changing a command's glyph requires manually syncing this table (preflight does not auto-validate it).
 
 ## Cross-references
 
