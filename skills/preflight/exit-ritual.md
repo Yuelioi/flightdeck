@@ -65,7 +65,7 @@ Step 3b: Graduate finish (landing = primary path).
            The new doc MUST carry `when_to_read`, `applies_to`, and `when_to_update`
            (spec files carry none of these; omitting `when_to_update` opts the doc out
            of stale detection immediately, defeating the point).
-         - A `## 设计权衡` section MAY be preserved in the new doc when the rationale
+         - A `## Design tradeoffs` section MAY be preserved in the new doc when the rationale
            has lasting value; other spec-internal history is not ported.
          - Move the rewritten file to `docs/<slug>.md` (or a nested area if appropriate).
            NO archive twin — one artifact, the docs/ copy. Do NOT also archive the
@@ -76,34 +76,35 @@ Step 3b: Graduate finish (landing = primary path).
          (this step walks every `graduate: true` done spec still in `specs/`, not just
          this session's).
 
-Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单仪式).
-         stale 翻转只在此退场步骤执行；preflight 入场不再翻 stale。
-         触发机制是**机械路径重叠**：
+Step 3c: Stale detection + pending-verify surfacing (landing/soft-landing = single on-exit ritual).
+         The stale flip happens ONLY in this on-exit step; preflight entry no longer flips stale.
+         The trigger is **mechanical path overlap**:
          Run: `flightdeck_index.py <deck> --changed-since-anchor`
          (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
          worktree uncommitted changes).
-         将返回的变更路径与每个 `docs/` + 知识件 `applies_to` 中的**路径条目**
-         （含 `/` 的条目，前缀匹配；纯词标签只做路由、不参与）做集合交集——
-         命中即翻 stale。**不读文档全文、不求值 `when_to_update` 作为运行时条件**：
-         `when_to_update` 是给人看的理由；runtime 判断用 `applies_to` 路径条目。
+         Intersect the returned changed paths with the **path entries** in every `docs/` + knowledge
+         artifact's `applies_to` (entries containing `/`, prefix-matched; plain word-tags are routing-only,
+         excluded) — a hit flips it stale. **Do not read the doc body, do not evaluate `when_to_update`
+         as a runtime condition**: `when_to_update` is a human-facing rationale; the runtime decision
+         uses the `applies_to` path entries.
          For each knowledge artifact whose `applies_to` path entries intersect the changed set:
          - Auto-flip `status: stale` in its frontmatter (no pre-ask — stale is
            reversible, local, purely a warning; "docs quietly lying" is the worst outcome).
          - Idempotent: already-`stale` = no-op.
-         - Surface a one-line `待复核: <file>` note in cockpit `## Pending Review`
+         - Surface a one-line `pending-review: <file>` note in cockpit `## Pending Review`
            (the standing awaiting-review home — no longer an optional subsection).
          Fallback (no Python runtime or no anchor yet): compare this session's changed
          paths against each doc's `applies_to` paths by hand,
          anchored to this session's changes only.
 
-         待验证 (the verify-debt list) rides the SAME surfacing channel, but is
+         Pending-verify (the verify-debt list) rides the SAME surfacing channel, but is
          NOT hand-written — it is **derived by scanning every `verify`-carrying
          artifact across the active tree + archive/** (fast path:
          `flightdeck_index.py <deck> --verify-pending`, which prints `path<TAB>note`
          for each; semantically a full scan — the implementation may index/cache).
-         The two debts are distinguished by the `verify` field on the same 待复核
-         channel: `⚠未验证: <file> — <怎么验>` (verify present) vs the outdated
-         `⚠待复核: <file>` (stale, no verify). The cockpit line is a **derived
+         The two debts are distinguished by the `verify` field on the same pending-review
+         channel: `⚠ unverified: <file> — <how>` (verify present) vs the plain
+         `⚠ pending-review: <file>` (stale, no verify). The cockpit line is a **derived
          display, NOT the source of truth** — editing or regenerating cockpit cannot
          lose the debt: the next scan rebuilds it from the `verify` fields on disk.
          An archived `done + verify` item still being scanned-out every preflight is
@@ -127,7 +128,7 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
           append `Flightdeck-Sync: <git-ref>` as a commit trailer (the ref is `HEAD`
           *after* the commit — i.e. the new SHA, or the current branch tip). This is
           the anchor that `--changed-since-anchor` keys on for the next landing's
-          stale-detection pass (退场单仪式). Without it, the anchor is absent and
+          stale-detection pass (single on-exit ritual). Without it, the anchor is absent and
           the next landing must fall back to a full worktree diff.
           Under no-git: skip (no commit → no anchor trailer; preflight falls back).
 ```
@@ -226,7 +227,7 @@ There is **no `debriefs/` folder**. The raw feedback is a transient input — ke
 
 If genuinely ambiguous, brainstorm with the user. Use the AI-asks-user template below.
 
-### 写工件 body 的质量 — how to write what you keep
+### Quality of the artifact body — how to write what you keep
 
 Once the gate says *keep it*, write the body so it is reusable (this is **not** part of the (a)–(h) match chain above — it is how you write whatever (a)–(f) routed):
 
@@ -263,20 +264,20 @@ This forces a structured decision in seconds. The "skip the write" option is cri
 
 ## Self-asserting `done` — non-blocking, carry `verify`
 
-The AI **may** self-assert `done` on **any** task — including needs-verify work — but a needs-verify `done` **must carry a `verify: <一行怎么验>` marker** (the verification debt, not a refusal to mark it done). The old needs-verify *block* (which forbade self-asserting `done` on such work) is **removed**: verification is now a [non-blocking marker, not a gate](protocol.md#non-blocking-verification). The boundary is still **rule-first, examples-second** (avoid the "list = exhaustive" trap):
+The AI **may** self-assert `done` on **any** task — including needs-verify work — but a needs-verify `done` **must carry a `verify: <one-line how-to-verify>` marker** (the verification debt, not a refusal to mark it done). The old needs-verify *block* (which forbade self-asserting `done` on such work) is **removed**: verification is now a [non-blocking marker, not a gate](protocol.md#non-blocking-verification). The boundary is still **rule-first, examples-second** (avoid the "list = exhaustive" trap):
 
 - **Rule:** anything that will be **mechanically executed by AI or scripts, where a misjudgment is not easily noticed**, is **needs-verify** — self-assert `done` **and** stamp `verify:` so the debt survives. Everything else is no-verify (`done`, no `verify`).
 - **Examples (non-exhaustive, needs-verify):** any external-system change (open PR, deploy, write DB, send email…); governance / data-model edits (`protocol.md`, `rules.md`, `AGENTS.md`, frontmatter fields, script contracts).
 - **Print a verdict line** so the call is observable and auditable:
-  - needs-verify → `[判定: <理由>; 待验证: <怎么验>; done + verify]`
-  - no-verify → `[判定: <理由>; 无需验证; done]`
-- The `verify:` **value** is the one-line how-to-verify (e.g. `verify: 相位4 各家 live 实证`) — its *content* survives any cockpit edit/regen and the deterministic scan re-surfaces it. Binary present/absent only — **no `verify: failed` value** (see [verify field](protocol.md#verify--the-verification-marker)).
-- **Boundary this does NOT loosen — 外发先问.** Loosening only touches the **self-assert-done marker**. Whether the AI may *execute* an outward action (open PR, deploy, send email) is a **separate, unchanged** concern governed by the commit/push default + 外发先问 — marking a deploy task `done + verify` is not permission to run the deploy.
+  - needs-verify → `[decision: <reason>; pending-verify: <how>; done + verify]`
+  - no-verify → `[decision: <reason>; no verify needed; done]`
+- The `verify:` **value** is the one-line how-to-verify (e.g. `verify: phase-4 live validation on each host`) — its *content* survives any cockpit edit/regen and the deterministic scan re-surfaces it. Binary present/absent only — **no `verify: failed` value** (see [verify field](protocol.md#verify--the-verification-marker)).
+- **Boundary this does NOT loosen — ask before outward actions.** Loosening only touches the **self-assert-done marker**. Whether the AI may *execute* an outward action (open PR, deploy, send email) is a **separate, unchanged** concern governed by the commit/push default + the ask-before-outward-action rule — marking a deploy task `done + verify` is not permission to run the deploy.
 - Self-asserting `done` is a **state write only** — soft-landing still does **not** archive (archival stays full landing's). The safety that used to come from *blocking* now comes from **visibility** (the `verify` debt is re-surfaced every preflight via the deterministic scan) **plus reversibility** (`done` + `verify` are frontmatter fields the user can flip / clear; no commit/move was produced).
 
 ### Resolving a `verify` debt — per-kind pass/fail
 
-When the user performs the verification, act per the artifact's kind. The canonical pass/fail table lives in [protocol § 验证非阻塞](protocol.md#non-blocking-verification) — the operational steps here defer to it. **First identify the kind** (knowledge vs workflow — by folder), then:
+When the user performs the verification, act per the artifact's kind. The canonical pass/fail table lives in [protocol § Non-blocking verification](protocol.md#non-blocking-verification) — the operational steps here defer to it. **First identify the kind** (knowledge vs workflow — by folder), then:
 
 - **Verify passes:**
   - **workflow** (`done` + `verify`): **drop the `verify` field**; it stays `done` and now enters the `--archivable` set (no inbound `active` edge → lands on the next sweep).
@@ -337,7 +338,7 @@ Pointers:          thin nav anchors (config/conventions/INDEXes/archive), hand-m
 ## Next:           auto-written — next concrete single action + plan link; progress checklists → plan ## Progress
 ## In Progress:    AUTO — regen from every status:active spec/plan (do NOT hand-write); renders truncated summary head
 ## Key Context:    agent-judged — load-bearing literals a next session needs to resume; drain/shrink entries that no longer carry (or - (none))
-## Pending Review: agent-judged — AI work awaiting your sign-off + surfaced stale 待复核 notes; drains when reviewed (or - (none))
+## Pending Review: agent-judged — AI work awaiting your sign-off + surfaced stale pending-review notes; drains when reviewed (or - (none))
 Hanging Tasks:     hand-maintained list — add new blocking items, clear resolved ones
 ```
 
@@ -364,7 +365,7 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 `rules.md` and the agent instruction file are always-loaded budget — keep them lean; most durable Key Context is conditionally-relevant rationale and belongs in `docs/` (often it is already a duplicate pointer to a doc — then just delete the cockpit copy).
 
-**`## Pending Review` is the sign-off queue (agent-judged, not AUTO).** Things the AI completed and self-judged `done` but you haven't approved yet — plus the surfaced stale `待复核` notes from Step 3c (both are "awaiting your eyes"). Each row `- [<artifact/topic>] <what changed · how to look>`. **Non-blocking** (you can land with items queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike the objective `verify:` / `⚠未验证` scan). Drains when you sign off, or at the next landing once confirmed; nothing queued → `- (none)`. **Aged-item forcing function:** an item that has survived **≥ 1 landing still unsigned** is no longer left to pile up silently — landing surfaces each aged item and prompts you per item: *sign off / keep / drop*. The sign-off stays explicit (items are never auto-deleted); the prompt only stops the queue from rotting into a junk drawer.
+**`## Pending Review` is the sign-off queue (agent-judged, not AUTO).** Things the AI completed and self-judged `done` but you haven't approved yet — plus the surfaced stale `pending-review` notes from Step 3c (both are "awaiting your eyes"). Each row `- [<artifact/topic>] <what changed · how to look>`. **Non-blocking** (you can land with items queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike the objective `verify:` / `⚠未验证` scan). Drains when you sign off, or at the next landing once confirmed; nothing queued → `- (none)`. **Aged-item forcing function:** an item that has survived **≥ 1 landing still unsigned** is no longer left to pile up silently — landing surfaces each aged item and prompts you per item: *sign off / keep / drop*. The sign-off stays explicit (items are never auto-deleted); the prompt only stops the queue from rotting into a junk drawer.
 
 **Accumulator-drain discipline.** `## Key Context` and `## Pending Review` are the two non-AUTO sections that *accumulate*; each MUST converge or it rots into a junk drawer. Convergence is a judgment step → it runs at **landing** (which already rewrites cockpit by judgment), not at the mechanical checkpoint. `Key Context` (transient staging, above): **drain** an entry whose referent died this session, **graduate** a durable entry to its home-by-kind — either exit removes it from cockpit; **shrink** a still-live entry to a one-line pointer. `Pending Review`: drain on sign-off, and **prompt** each item aged past one landing (sign off / keep / drop). The 80-line cap is the ceiling, not the discipline — converge per-entry first. (`walkaround` Audit 14 already flags a referent-died / oversized `Key Context` as a non-blocking INFO; it never drains.)
 
