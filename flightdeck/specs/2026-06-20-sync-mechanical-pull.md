@@ -42,6 +42,19 @@ shared / 项目段的分界用**固定锚注释**：
 - 用固定锚而非匹配本地化标题（`## Project-specific` / `## 项目覆盖`）：标题文字仍可本地化给人看，但脚本切分**语言无关、一刀准**。
 - 文件**没有锚** = 纯 shared（整个 body 都是 shared 段，无项目覆盖）。母库文件通常如此。
 - frontmatter **不属于任何区**：`when_to_read` / `applies_to` 是 consumer 可本地化的路由，pull 永不碰（沿用 v2 现状）。
+- **「锚以上」= 整个 body**（标题 + 导语 + 通用各节），不只是某个 `## 通用` 节。consumer 要项目私货**只能放锚以下**或 frontmatter 路由；导语也不许本地化（会被覆盖）。
+
+**worked example（`commits.md`，回答"有两段是否还要 AI"——不要）：**
+
+```
+frontmatter                          ← consumer 可本地化路由（pull 不碰）
+# Commits Playbook + 依据             ┐
+## 通用 (项目无关)  §1–7              ├─ shared 段（母库 body = 一模一样）
+<!-- flightdeck:project-specific -->  ← 固定锚（迁移时插一行）
+## 项目覆盖 (本仓库专属)              ← 项目私有（pull 不碰）
+```
+
+pull 一刀：`indexOf(锚)` → 锚以上整段用母库 body 覆盖 → 锚以下原样留 → frontmatter 不动。纯文本 splice，**项目覆盖空与否都一样切，AI 一个字不读**。现在"感觉要 AI"只因事实边界是本地化标题 `## 项目覆盖`（匹配脆）；固定锚把"AI 看哪是哪"降成"脚本 `indexOf`"。
 
 ## 4. 同步键：现算现比内容指纹（无状态）
 
