@@ -49,7 +49,7 @@ General project conventions (code style, "branch before committing") belong in t
 ```markdown
 ---
 status: idea          # idea / active / done (idea = unstarted, no date prefix; flip to active to start)
-summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row. ⚠ 禁用 ` — `（前后带空格的 em-dash）：INDEX 行用它作字段分隔符，summary 含它会产生列歧义。用「：」「,」或连字符替代。
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. Drives the INDEX row. ⚠ Do NOT use ` — ` (a space-padded em-dash): the INDEX row uses it as the field delimiter, so a summary containing it causes column ambiguity. Use a colon, comma, or hyphen instead.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing on a real change (not typos)
 note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pending reason). Rendered in cockpit In Progress + walkaround as [note: …]
 supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
@@ -57,7 +57,7 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 # optional: graduate: true
 #   — 结构性设计稿完工后本体变身常驻 docs；命中"约束后续开发/大概率反复参考"判据时
 #     由 /flightdeck:new 或 plan 执行中提示打标；landing 负责将 done 的 graduate 本体改写搬入 docs/
-# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
+# optional: verify: <one-line how-to-verify>  — field present = owes verification (an add-on marker on done/stale; preflight surfaces it); delete the field once verified
 ---
 ```
 
@@ -70,13 +70,13 @@ related: [<path>, ...]       # optional; weak links — shared premise / blast-r
 ```markdown
 ---
 status: active               # idea / active / done
-summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. ⚠ 禁用 ` — `（前后带空格的 em-dash）：INDEX 行用它作字段分隔符，summary 含它会产生列歧义。用「：」「,」或连字符替代。Drives the INDEX row.
+summary: <one-line gist>     # recommended; single-line plain text — no | [ ] or newlines. ⚠ Do NOT use ` — ` (a space-padded em-dash): the INDEX row uses it as the field delimiter, so a summary containing it causes column ambiguity. Use a colon, comma, or hyphen instead.Drives the INDEX row.
 last_updated: YYYY-MM-DD     # recommended; auto-bumped by status/landing
 note: <one-line diagnostic>  # optional; "why it hasn't moved". Rendered in cockpit In Progress + walkaround as [note: …]
 implements: specs/<x>.md     # optional; path relative to flightdeck root; absent → walkaround flags "orphan plan"
 supersedes: <path>           # optional; forward edge to the artifact this replaces
 related: [<path>, ...]       # optional; weak cross-links
-# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
+# optional: verify: <one-line how-to-verify>  — field present = owes verification (an add-on marker on done/stale; preflight surfaces it); delete the field once verified
 ---
 ```
 
@@ -99,18 +99,18 @@ current: Task 3 — wire the checkpoint subpath into landing SKILL.md
 ```markdown
 ---
 status: active            # active / stale / obsolete
-                          # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
+                          # stale=pending-review (suspected outdated, or new-but-unverified, distinguished by the verify field); obsolete=dead, awaiting-archive drain state
 when_to_read: <one-line trigger>
-applies_to: [<tag>, <source/path>, ...]   # 混装：纯词=路由标签；含 / 的条目=源路径，参与 stale 检测（要保鲜至少放一条路径）
+applies_to: [<tag>, <source/path>, ...]   # mixed: plain words = routing tags; entries with / = source paths, used in stale detection (to keep fresh, include at least one path)
 last_updated: YYYY-MM-DD
-# optional: when_to_update: <什么样的改动会让我失效>
-#   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
-#   GOOD: 改了 plugin 加载协议 / 动了 hooks/stop.sh
-#   BAD:  有任何改动时
+# optional: when_to_update: <what kind of change would make me wrong>
+#   — a concrete trigger event, not a blanket condition; contains ≥1 specific noun/path, no "any/all"
+#   GOOD: changed the plugin load protocol / touched hooks/stop.sh
+#   BAD:  on any change
 # optional (incidents/checklists): skip_when: <one-line "when NOT to read this">
 # incidents only: recurrences: 1   # auto-bumped at landing on a clear recurrence; renders to INDEX as `recur: N` when > 1
 # incidents only: resolved_by:     # empty = not yet root-fixed; fill commit SHA / test id = retirement basis (then flip status: obsolete)
-# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
+# optional: verify: <one-line how-to-verify>  — field present = owes verification (an add-on marker on done/stale; preflight surfaces it); delete the field once verified
 ---
 ```
 
@@ -121,16 +121,16 @@ last_updated: YYYY-MM-DD
 ```markdown
 ---
 status: active            # active / stale / obsolete
-                          # stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态
+                          # stale=pending-review (suspected outdated, or new-but-unverified, distinguished by the verify field); obsolete=dead, awaiting-archive drain state
 when_to_read: <one-line trigger>
-applies_to: [<tag>, <source/path>, ...]   # 混装：纯词=路由标签；含 / 的条目=源路径，参与 stale 检测（要保鲜至少放一条路径）
+applies_to: [<tag>, <source/path>, ...]   # mixed: plain words = routing tags; entries with / = source paths, used in stale detection (to keep fresh, include at least one path)
 last_updated: YYYY-MM-DD
 summary: <one-line gist>  # optional but recommended; drives INDEX row
-# optional: when_to_update: <什么样的改动会让我失效>
-#   — 具体命中事件，非泛条件；含 ≥1 具体名词/路径，不含 "任何/所有/any/all"
-#   GOOD: 改了 plugin 加载协议 / 动了 hooks/stop.sh
-#   BAD:  有任何改动时
-# optional: verify: <一行怎么验>  — 有字段=欠验证（done/stale 上的附加标记，preflight 浮出待验证）；验证通过删字段
+# optional: when_to_update: <what kind of change would make me wrong>
+#   — a concrete trigger event, not a blanket condition; contains ≥1 specific noun/path, no "any/all"
+#   GOOD: changed the plugin load protocol / touched hooks/stop.sh
+#   BAD:  on any change
+# optional: verify: <one-line how-to-verify>  — field present = owes verification (an add-on marker on done/stale; preflight surfaces it); delete the field once verified
 ---
 ```
 
@@ -198,19 +198,19 @@ Status values (by kind) + location semantics are canonical in [protocol § Statu
 - where: <function / file / subsystem>
 - trigger: <what action / scenario provokes it>
 
-## 症状/复现
+## Symptom / repro
 <how the user / test / build actually observed it; steps to reproduce>
 
-## 根因
+## Root cause
 (FORBIDDEN: "forgot", "careless", "didn't notice" — must be a wrong assumption / wrong model / wrong process)
 I assumed X, but in reality Y.
 
-## 修法
+## Fix
 The specific next-time action. Not "be careful". Concrete behavior or check.
 
 ## Cases
-- YYYY-MM-DD 首次          ← first line written at create time
-- YYYY-MM-DD 复发，<一句>   ← appended on recurrence; keep only the most recent N
+- YYYY-MM-DD first          ← first line written at create time
+- YYYY-MM-DD recurrence, <one line>   ← appended on recurrence; keep only the most recent N
 ```
 
 ### Rules
@@ -219,9 +219,9 @@ The specific next-time action. Not "be careful". Concrete behavior or check.
 - **`symptom`** holds the actual string AI/grep will see (error text verbatim / exception class), not an abstract narrative title. May be multi-line (indent or `|` for a stack trace). It is the human-read / grep anchor; the fingerprint is **computed** from it — authors never hand-write a fingerprint.
 - **`error_type: —` is a first-class case, not a degenerate one.** UI misalignment / perf regression / deadlock / data corruption have no natural error_type; the incident reduces to `symptom + where`, as expected.
 - **Cases:** write the first line **at create time**. `recurrences` (frontmatter) is the **authoritative lifetime count**; the `## Cases` list keeps only the **most recent N lines** (order of single digits ~ a dozen) — so line count ≤ `recurrences`, and `recurrences` wins when they differ.
-- **One file per topic.** A recurrence appends a Case line (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (deterministic `--match-signature` first; ambiguous → asks); `recurrences` renders into the INDEX row as `recur: N`, so the count is visible without opening the file. On a regression (a `status: obsolete` incident recurring), landing revives it: flip back to `active`, clear `resolved_by`, mark the Case "回归，原根治失效", and keep accumulating `recurrences` (never reset).
+- **One file per topic.** A recurrence appends a Case line (with its session date) **and** bumps the `recurrences` frontmatter counter. **Landing does this automatically** on a clear same-incident match (deterministic `--match-signature` first; ambiguous → asks); `recurrences` renders into the INDEX row as `recur: N`, so the count is visible without opening the file. On a regression (a `status: obsolete` incident recurring), landing revives it: flip back to `active`, clear `resolved_by`, mark the Case "regression — original root-fix no longer holds", and keep accumulating `recurrences` (never reset).
 - **Forbidden root causes**: "forgot", "careless", "didn't notice", "rushed". These hide the real model error.
-- **Status field** (`active` / `stale` / `obsolete` — stale=待复核（疑似过期 或 新产出未验证，由 verify 字段区分）；obsolete=已死·待归档排水态):
+- **Status field** (`active` / `stale` / `obsolete` — stale=pending-review (suspected outdated, or new-but-unverified, distinguished by the verify field); obsolete=dead, awaiting-archive drain state):
   - `active` — still applies to the current codebase
   - `stale` — auto-flipped by the ritual when a `when_to_update` condition is matched (suspected-outdated), or set at write time when a `verify` field is present (unverified new output); needs author review before flipping back to `active`
   - `obsolete` — the underlying constraint no longer exists (framework upgraded, code removed); landing drains it to `archive/` (knowledge analog of workflow `done`)
@@ -333,7 +333,7 @@ Pointers: config → rules.md · conventions → <file> · artifacts → folder 
 - **`## Next` is the next concrete *single* action + a plan link** — AI-maintained, auto-written at landing (and on `idea→active` / a milestone). Keep it to one step; **progress checklists, rationale/citation lists, and milestone links belong in the plan's `## Progress`**, not here (they are not loaded every ritual). The user adjusts it by directing the AI, not by hand-editing.
 - **`## Key Context` is the recovery slot — agent-judged, not AUTO.** The load-bearing literals a *next* session needs to resume: the file path under edit, a failing test name, an error string, a key function/value. Same maintenance model as `## Next` (AI-written at checkpoint/landing, not script-generated). Keep it to **literals, not prose**; nothing to carry → `- (none)`. Distinct from a knowledge artifact's body (that is durable knowledge; this is cockpit's transient resume hint) — both stress load-bearing literals, different layers.
   - **Per-entry drain (apply at landing).** An entry is **cleared** when the literal it points to no longer needs carrying forward: its target has been archived, has graduated into `docs/`, or the next session simply won't need it. An entry is **shrunk** when it has grown past a literal: a long entry collapses to a one-line pointer (link + hook); two same-source entries merge into one. The 80-line cap below is the ceiling, not the discipline — prune per-entry first.
-- **`## Pending Review` is the sign-off queue — agent-judged, not AUTO.** Things the AI completed and self-judged done but you haven't eyeballed/approved yet (fits the AI-drives-autonomously, you-check-in-periodically loop). Each row: `- [<artifact/topic>] <what changed · how to look/verify> → after verification passes: <how to commit / next step>` — recording the post-verify action makes recovery **board-only** (next preflight knows what to do once you sign off, without the conversation). **Non-blocking** (you can land with items still queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike `verify:`, which is an objective run/test). It is also the home where landing surfaces a stale-knowledge `待复核` note (a `stale` artifact awaiting your re-review), and it feeds the soft-landing/landing banner's `[Pending]` field when non-empty ([protocol § Act-report-close loop](protocol.md#act-report-close-loop)). **Drain:** an item is removed when you sign off, or at the next landing once you confirm; nothing queued → `- (none)`.
+- **`## Pending Review` is the sign-off queue — agent-judged, not AUTO.** Things the AI completed and self-judged done but you haven't eyeballed/approved yet (fits the AI-drives-autonomously, you-check-in-periodically loop). Each row: `- [<artifact/topic>] <what changed · how to look/verify> → after verification passes: <how to commit / next step>` — recording the post-verify action makes recovery **board-only** (next preflight knows what to do once you sign off, without the conversation). **Non-blocking** (you can land with items still queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike `verify:`, which is an objective run/test). It is also the home where landing surfaces a stale-knowledge `pending-review` note (a `stale` artifact awaiting your re-review), and it feeds the soft-landing/landing banner's `[Pending]` field when non-empty ([protocol § Act-report-close loop](protocol.md#act-report-close-loop)). **Drain:** an item is removed when you sign off, or at the next landing once you confirm; nothing queued → `- (none)`.
 - **Accumulator-drain principle.** Every non-AUTO section that *accumulates* (`Key Context`, `Pending Review`) MUST have an explicit drain condition, or it rots into a junk drawer. Draining is a judgment step, so it runs at **landing** (which already rewrites cockpit by judgment), not at the mechanical checkpoint. `walkaround` only flags a suspected-stale / oversized `Key Context` as a non-blocking INFO — it never drains.
 - **Length cap + role-creep check.** 80 lines is the hard ceiling — past it, trim immediately. Beyond line count, each field has a soft cap and a role (no changelog in `Updated`, no goal/criteria in `Focus`, no progress checklist in `## Next`); the authoritative per-field density + role-creep check runs at landing — see [exit-ritual § Length check](exit-ritual.md#cockpit-update--what-changes). `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal (walkaround INFO, never blocks).
 - **Keep `summary` short — it is a row descriptor, not an abstract.** `summary` feeds both the folder INDEX and cockpit `## In Progress` (both loaded every session); keep it to ≤~1–2 lines / ~200 chars. In Progress renders only a truncated head, but a bloated `summary` still costs in the INDEX.
