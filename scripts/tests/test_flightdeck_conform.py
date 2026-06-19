@@ -11,6 +11,9 @@ from flightdeck_conform import (
     prune_frontmatter,
     conform_file,
     stamp_rules,
+    add_missing_sections,
+    COCKPIT_SECTIONS,
+    RULES_SECTIONS,
 )
 
 
@@ -147,6 +150,39 @@ class StampRulesTest(unittest.TestCase):
         out = stamp_rules("## House rules\nbody\n", "uv")
         self.assertTrue(out.startswith("---\nversion: 3.0\nruntime: uv\nagents_md: off\n---\n"))
         self.assertIn("## House rules", out)
+
+
+class AddSectionsTest(unittest.TestCase):
+    def test_appends_missing_cockpit_sections(self):
+        text = (
+            "# Cockpit\n\nUpdated: 2026-06-19\n\n## Next\n\n- do x\n\n"
+            "## In Progress\n\n<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n"
+        )
+        out, added = add_missing_sections(text, "cockpit")
+        self.assertEqual(added, ["## Key Context", "## Pending Review", "## Hanging Tasks"])
+        self.assertIn("## Key Context", out)
+        self.assertIn("- (none)", out)
+        # existing sections kept, not duplicated
+        self.assertEqual(out.count("## Next"), 1)
+        self.assertEqual(out.count("## In Progress"), 1)
+
+    def test_in_progress_skeleton_carries_auto_markers(self):
+        out, added = add_missing_sections("# Cockpit\n", "cockpit")
+        self.assertIn("## In Progress", added)
+        self.assertIn("<!-- AUTO:inprogress -->", out)
+        self.assertIn("<!-- /AUTO -->", out)
+
+    def test_no_duplicate_when_all_present(self):
+        text = "".join(s + "\n\n- x\n\n" for s in COCKPIT_SECTIONS)
+        out, added = add_missing_sections(text, "cockpit")
+        self.assertEqual(added, [])
+        self.assertEqual(out, text)
+
+    def test_rules_sections(self):
+        out, added = add_missing_sections("---\nversion: 3.0\n---\n", "rules")
+        self.assertEqual(added, RULES_SECTIONS)
+        for s in RULES_SECTIONS:
+            self.assertIn(s, out)
 
 
 if __name__ == "__main__":

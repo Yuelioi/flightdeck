@@ -168,6 +168,48 @@ def stamp_rules(text, runtime):
     return "".join(lines[:close] + additions + lines[close:])
 
 
+# Canonical section order for the two structure-managed root files. Append-only:
+# the formatter
+# only adds a missing heading + placeholder; deleting / relabeling sections is
+# the /flightdeck:conform AI pass.
+COCKPIT_SECTIONS = [
+    "## Next", "## In Progress", "## Key Context",
+    "## Pending Review", "## Hanging Tasks",
+]
+RULES_SECTIONS = ["## House rules", "### Project conventions", "### Rules"]
+
+_INPROGRESS_SKELETON = "<!-- AUTO:inprogress -->\n- (none)\n<!-- /AUTO -->"
+
+
+def _section_body(section):
+    if section == "## In Progress":
+        return _INPROGRESS_SKELETON
+    return "- (none)"
+
+
+def add_missing_sections(text, which):
+    """Append any missing canonical section to cockpit.md / rules.md.
+
+    ``which`` is ``"cockpit"`` or ``"rules"``. Detection is by exact heading
+    line; a present heading is never duplicated or reordered. Returns
+    ``(new_text, added)`` with the headings appended, in canonical order.
+    """
+    sections = COCKPIT_SECTIONS if which == "cockpit" else RULES_SECTIONS
+    present = {ln.rstrip("\n") for ln in text.splitlines()}
+    added = []
+    out = text
+    for section in sections:
+        if section in present:
+            continue
+        if not out.endswith("\n"):
+            out += "\n"
+        if not out.endswith("\n\n"):
+            out += "\n"
+        out += "%s\n\n%s\n" % (section, _section_body(section))
+        added.append(section)
+    return out, added
+
+
 class Changes:
     """Per-file conform result, accumulated as later passes are added."""
 
