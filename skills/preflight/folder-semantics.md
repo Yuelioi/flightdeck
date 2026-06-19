@@ -31,7 +31,7 @@ Classify by lifecycle — the folder is the kind, so files carry no type field:
 | Repeated procedure / convention you *execute* (second run = pattern) | `checklists/` |
 | Self-authored, resident, explanatory knowledge — "how the system works / why it's built this way" (architecture, design rationale, subsystem overviews) | `docs/` |
 | Imported external material (competitor code, RFCs, articles) | `references/` |
-| External review / AI critique | disposition folds into the reviewed spec's `## 评审纪要`; raw feedback → project-root `tmp/` |
+| External review / AI critique | disposition folds into the reviewed spec's `## Review notes`; raw feedback → project-root `tmp/` |
 
 The common mistake is keeping an evergreen reference in `specs/` or `plans/`. A spec/plan is a *design or plan you intend to build and then archive*; an evergreen resource you consult repeatedly belongs in a knowledge folder. The split among the knowledge folders: `checklists/` = process / conventions you **execute**; `docs/` = explanatory knowledge you **read to understand**; `references/` = imported external material. Keep those distinctions clear.
 
@@ -191,7 +191,7 @@ Naming: `<source>-<topic>.md` (e.g. `boltframe-shape-layer.md`, `rfc-6749.md`).
 
 ### External review feedback (no folder)
 
-There is **no `debriefs/` folder**. External review feedback (other AIs, colleagues) is a **transient input**: keep the raw text in project-root `tmp/` (gitignored), read it, and fold its **disposition** (adopt / reject / defer) into the reviewed spec's own section — conventionally `## 评审纪要`. The raw feedback is discarded once dispositioned; only the decision survives, inside the spec it shaped.
+There is **no `debriefs/` folder**. External review feedback (other AIs, colleagues) is a **transient input**: keep the raw text in project-root `tmp/` (gitignored), read it, and fold its **disposition** (adopt / reject / defer) into the reviewed spec's own section — conventionally `## Review notes`. The raw feedback is discarded once dispositioned; only the decision survives, inside the spec it shaped.
 
 `tmp/` itself is **the user's habit — flightdeck does not regulate its structure or cleanup**. flightdeck only mandates: external-feedback disposition lands in the reviewed spec. Where the raw input lives and how long it stays is up to the user.
 

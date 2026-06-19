@@ -286,7 +286,7 @@ The specific next-time action. Not "be careful". Concrete behavior or check.
 
 ## External review feedback (no template)
 
-There is **no debrief template** — `debriefs/` was removed. External review feedback is transient: keep the raw text in project-root `tmp/` (gitignored), then fold the **disposition** (adopt / reject / defer) into the reviewed spec's own `## 评审纪要` section. The raw feedback is discarded once dispositioned. See [folder-semantics § External review feedback](folder-semantics.md#external-review-feedback-no-folder).
+There is **no debrief template** — `debriefs/` was removed. External review feedback is transient: keep the raw text in project-root `tmp/` (gitignored), then fold the **disposition** (adopt / reject / defer) into the reviewed spec's own `## Review notes` section. The raw feedback is discarded once dispositioned. See [folder-semantics § External review feedback](folder-semantics.md#external-review-feedback-no-folder).
 
 ---
 
@@ -366,7 +366,7 @@ Why this matters:
 
 ## Spec evolution markers (optional convention)
 
-When amending a long-lived spec — especially **backlog specs** that gain items over multiple sessions, or **specs revised after review disposition** (external feedback folded into the spec's `## 评审纪要`) — mark new / modified / removed items with prefix tags so the change history is grep-able and merge-friendly:
+When amending a long-lived spec — especially **backlog specs** that gain items over multiple sessions, or **specs revised after review disposition** (external feedback folded into the spec's `## Review notes`) — mark new / modified / removed items with prefix tags so the change history is grep-able and merge-friendly:
 
 - **`ADDED:`** — new item or section.
 - **`MODIFIED:`** — existing item changed. Note the old + new state inline if the change isn't self-evident.

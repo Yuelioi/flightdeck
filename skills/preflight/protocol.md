@@ -461,7 +461,7 @@ When an incident's root cause is permanently fixed (e.g. a guard test now preven
 | Same fact in cockpit + incident + spec | One authoritative source; others link via `[name](incidents/X.md)` |
 | Scratch written into flightdeck/ | Transient scratch lives in project-root `tmp/` (gitignored), not flightdeck. |
 | `incidents/` writes "forgot / careless" | Root cause must be a wrong assumption / wrong model / wrong process. |
-| External review feedback saved as its own file | Raw feedback is transient → project-root `tmp/`; its disposition (adopt / reject / defer) folds into the reviewed spec's `## 评审纪要`. |
+| External review feedback saved as its own file | Raw feedback is transient → project-root `tmp/`; its disposition (adopt / reject / defer) folds into the reviewed spec's `## Review notes`. |
 | Brainstorming where every knowledge item belongs | Heuristics catch 90%. Default-brainstorm is the failure mode. |
 | Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` + the `archive/` folder, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
 | Bumping `Updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |

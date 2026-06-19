@@ -31,7 +31,7 @@ Step 2: Did this session produce new knowledge / discover a bug / agree on a dec
            (h) ambiguous, no clear primary → brainstorm with user
 
          (External review feedback is NOT a folder: fold its disposition into the
-          reviewed spec's ## 评审纪要; raw text stays in project-root tmp/. See § Classification heuristics.)
+          reviewed spec's ## Review notes; raw text stays in project-root tmp/. See § Classification heuristics.)
 
 Step 3: Regenerate INDEX for changed folders — full rules in "## INDEX regeneration —
         scope rules" below. Gist: regenerate the <!-- AUTO --> region only for folders
@@ -214,11 +214,11 @@ Goes to `specs/` with `status: idea` (no date prefix — the to-start pool). Mar
 
 Do not write. Gate strictly. Flightdeck is not a session log.
 
-### External review feedback → reviewed spec's `## 评审纪要` (no folder)
+### External review feedback → reviewed spec's `## Review notes` (no folder)
 
 **Trigger phrase**: user pastes review text from another AI / colleague
 
-There is **no `debriefs/` folder**. The raw feedback is a transient input — keep it in project-root `tmp/` (gitignored, the user's own habit) and read it. Its lasting value is the **disposition** (adopt / reject / defer), which folds into the **reviewed spec's** own `## 评审纪要` section. Raw text is discarded once dispositioned. See [folder-semantics § External review feedback](folder-semantics.md#external-review-feedback-no-folder).
+There is **no `debriefs/` folder**. The raw feedback is a transient input — keep it in project-root `tmp/` (gitignored, the user's own habit) and read it. Its lasting value is the **disposition** (adopt / reject / defer), which folds into the **reviewed spec's** own `## Review notes` section. Raw text is discarded once dispositioned. See [folder-semantics § External review feedback](folder-semantics.md#external-review-feedback-no-folder).
 
 ### (h) Ambiguous → brainstorm
 
@@ -290,7 +290,7 @@ A session **cannot be closed cleanly** while an open `## Hanging Tasks` item rem
 
 `Hanging Tasks` in cockpit is a **hand-maintained** list — the AI does not auto-derive it from INDEX. Add and clear entries explicitly.
 
-(There is **no debrief-disposition gate** — `debriefs/` was removed. External review feedback is transient (project-root `tmp/`); its disposition folds into the reviewed spec's `## 评审纪要` as part of normal spec editing, not as an exit-blocking gate.)
+(There is **no debrief-disposition gate** — `debriefs/` was removed. External review feedback is transient (project-root `tmp/`); its disposition folds into the reviewed spec's `## Review notes` as part of normal spec editing, not as an exit-blocking gate.)
 
 ## INDEX regeneration — scope rules
 
