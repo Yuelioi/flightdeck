@@ -739,7 +739,8 @@ def main(argv=None):
         "--sync-status",
         action="store_true",
         help="print (state<TAB>relpath) for every artifact carrying `synced: true`, "
-        "comparing last_updated against the same-relpath source under ~/.flightdeck (read-only)",
+        "comparing the shared-region content fingerprint against the same-relpath source "
+        "under ~/.flightdeck (read-only)",
     )
     ap.add_argument(
         "--sync-pull",

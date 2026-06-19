@@ -128,7 +128,7 @@ flightdeck/
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
 | `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
 | `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
-| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 谁新谁赢（比 `last_updated`），保留项目专属段。`push <path>` 把本地文件上提到母库；`--fanout` 把母库改动推给每个消费者。 |
+| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 母库是每个文件 shared 段的唯一写者，靠内容指纹判过期、纯脚本机械替换（无 AI 合并），逐字保留项目专属段。`promote <path>` 把本地新文件上提到母库；`--fanout` 把母库改动推给每个消费者。 |
 
 工件 `status` **自动**推进（idea→active→done）。五个仪式（`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`）都可自调；`landing` 按判断决定归档（被 active 工件交叉引用的 `done` 工件留在原地）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
 
@@ -174,9 +174,10 @@ version: <release>       # 唯一的结构化字段
 有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用同一份权威副本。flightdeck 用**下发式共享知识（vendored shared-knowledge）**来处理：一份 checklist 或 doc 存在**母库（master deck）**里，被拷贝进各消费 deck，按需保持同步。
 
 - **母库** —— 固定在 `~/.flightdeck`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
-- **下发副本** —— frontmatter 标 `synced: true`，且镜像母库的相对路径。母库是唯一真相源；同步时**谁新谁赢**（比 `last_updated`）。正文合并由 AI 完成，并逐字保留你 deck 的项目专属段。
-- **`/flightdeck:sync`** —— 把上游已改动的文件拉进当前 deck。
-- **`/flightdeck:sync push <path>`** —— 把本地文件上提到母库（backflow），并把本 deck 注册为它的一个消费者。
+- **下发副本** —— frontmatter 标 `synced: true`，且镜像母库的相对路径。`<!-- flightdeck:project-specific -->` 锚把文件切两段：锚以上是 **shared 段**（母库所有），锚以下是你 deck 的**项目段**（你的，永不被碰）。
+- **单写者** —— 母库是 shared 段唯一写者，consumer 从不改它。判过期靠 shared 段内容指纹，所以同步是纯脚本文本 splice —— AI 一字不读、零 token。
+- **`/flightdeck:sync`** —— 把过期文件的 shared 段从母库拉下来，逐字保留你的项目段和 frontmatter。
+- **`/flightdeck:sync promote <path>`** —— 把**本地新写**的文件上提到母库（唯一的 consumer→母库 路径；shared 段无 back-flow），并把本 deck 注册为消费者。
 - **`/flightdeck:sync --fanout`** —— 改完母库文件后，一次性把改动推给每个消费 deck。母库记录自己的消费者，因此一处共享改动无需逐个项目手动同步即可传播。
 
 只有 `checklists/` 和 `docs/` 参与共享。没有下发文件的 deck 从不碰母库，可独立工作。

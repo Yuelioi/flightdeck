@@ -129,7 +129,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
 | `/flightdeck:conform` | Format an old deck to the current canonical shape — script prunes non-schema frontmatter + stamps rules + adds missing sections, then the AI reshapes `cockpit.md`/`rules.md` and fills semantic fields. Dry-run first (`--check`). |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
-| `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — newest wins (`last_updated`), preserves the project-specific section. `push <path>` promotes a local file up to the master; `--fanout` pushes a master edit to every consumer. |
+| `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — the master owns each file's shared region; a content fingerprint detects drift and a mechanical splice replaces it (no AI merge), keeping the project-specific section. `promote <path>` lifts a new local file up to the master; `--fanout` pushes a master edit to every consumer. |
 
 Artifact `status` advances **automatically** (idea→active→done). All five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) may self-invoke; `landing` decides archiving by judgment (it keeps a `done` artifact in place while active work still references it). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). `/flightdeck:launch` is an explicit one-time command (it creates a deck), not a session ritual. Nothing fires on session start; there's no background process.
 
@@ -175,9 +175,10 @@ To change a behavior, **just tell the AI a persistent preference in plain langua
 Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one canonical copy across every deck you run. flightdeck handles this with **vendored shared-knowledge**: a checklist or doc lives in a **master deck** and is copied into each consuming deck, kept in sync on demand.
 
 - **Master deck** — fixed at `~/.flightdeck`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
-- **Vendored copy** — carries `synced: true` in its frontmatter and mirrors the master's relative path. The master is the single source of truth; on sync, **newest wins** (`last_updated`). The AI does the body merge and preserves your deck's project-specific section verbatim.
-- **`/flightdeck:sync`** — pulls upstream-changed files into the current deck.
-- **`/flightdeck:sync push <path>`** — promotes a local file up to the master (backflow), registering this deck as one of its consumers.
+- **Vendored copy** — carries `synced: true` in its frontmatter and mirrors the master's relative path. A `<!-- flightdeck:project-specific -->` marker splits the file: everything above is the **shared region** (master-owned), everything below is your deck's **project section** (yours, never touched).
+- **Single writer** — the master is the sole writer of the shared region; a consumer never edits it. Staleness is a content fingerprint over that region, so a sync is a mechanical text splice — the AI reads nothing and spends no tokens.
+- **`/flightdeck:sync`** — pulls any stale file's shared region from the master, keeping your project section and frontmatter verbatim.
+- **`/flightdeck:sync promote <path>`** — lifts a *new* locally-authored file up to the master (the only consumer→master path; there is no shared-region back-flow), registering this deck as a consumer.
 - **`/flightdeck:sync --fanout`** — after you edit a master file, pushes the change to every consuming deck in one pass. The master tracks its consumers, so a shared edit propagates without visiting each project by hand.
 
 Only `checklists/` and `docs/` participate. A deck with no vendored files never touches the master and works standalone.
