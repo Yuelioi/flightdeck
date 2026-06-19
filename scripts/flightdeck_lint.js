@@ -200,7 +200,7 @@ function auditWhenToUpdate(deck) {
       const concrete = /[/.\p{L}\p{N}_]{3,}/u.test(s) && isAlnum(s);
       if (vague || !concrete) {
         findings.push(finding('when_to_update', 'WARNING', f,
-          `${name}/${path.basename(f)} 的 when_to_update 过泛/空：写成具体改动事件（改了X/新增Y/动了Z文件）`));
+          `${name}/${path.basename(f)} when_to_update too vague/empty: write a concrete change event (changed X / added Y / touched file Z)`));
       }
     }
   }

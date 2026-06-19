@@ -48,7 +48,7 @@ def _frontmatter(kind, status, date, summary, implements, when_to_read, applies_
         lines.append(f"applies_to: [{', '.join(applies_to)}]")
         lines.append(f"last_updated: {date}")
         if kind == "incident":
-            lines.append("resolved_by:")     # 空=未根治；填 commit/test = 退役依据
+            lines.append("resolved_by:")     # empty = not root-fixed; fill commit/test = retirement basis
     lines.append("---")
     return "\n".join(lines)
 
@@ -56,19 +56,19 @@ def _frontmatter(kind, status, date, summary, implements, when_to_read, applies_
 _INCIDENT_BODY = """# {title}
 
 ## Signature
-- symptom: `<报错原文 / 可观测症状>`
-- error_type: <异常类型/错误码 或 —>
-- where: <函数/文件/子系统>
-- trigger: <什么动作/场景引发>
+- symptom: `<error text / observable symptom>`
+- error_type: <exception type/error code or —>
+- where: <function/file/subsystem>
+- trigger: <what action/scenario triggers it>
 
-## 症状/复现
+## Symptom / repro
 
-## 根因
+## Root cause
 
-## 修法
+## Fix
 
 ## Cases
-- {date_placeholder} 首次
+- {date_placeholder} first seen
 """
 
 

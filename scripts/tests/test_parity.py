@@ -2,7 +2,7 @@
 
 Runs `python <name>.py <args>` and `node <name>.js <args>` over identical
 fixture copies, LF-normalizes (Python's write_text emits CRLF on Windows; the
-parity contract is *content*, spec §3.3 "换行恒 LF"), and asserts equality of
+parity contract is *content*, spec §3.3 "newlines always LF"), and asserts equality of
 stdout and of the full mutated .md tree. Skips when node is absent or the .js
 does not exist yet — so it arms incrementally as ports land.
 """

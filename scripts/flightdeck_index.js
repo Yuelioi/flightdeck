@@ -138,22 +138,22 @@ function formatRow(kind, filename, fm) {
   const link = `- [${filename}](${filename})`;
   const status = fm.status !== undefined ? fm.status : '?';
   if (SUMMARY_KINDS.has(kind)) {
-    let row = `${link} ${DASH} ${status} ${DASH} ${fm.summary !== undefined ? fm.summary : '⚠ summary 缺失'}`;
-    if (fm.verify) row = '⚠未验证 ' + row;
+    let row = `${link} ${DASH} ${status} ${DASH} ${fm.summary !== undefined ? fm.summary : '⚠ summary missing'}`;
+    if (fm.verify) row = '⚠ unverified ' + row;
     return row;
   }
   if (KNOWLEDGE_KINDS.has(kind)) {
     let row =
       `${link} ${DASH} ${status} ${DASH} ` +
-      `when_to_read: ${fm.when_to_read !== undefined ? fm.when_to_read : '⚠ 缺失'} ${DASH} ` +
+      `when_to_read: ${fm.when_to_read !== undefined ? fm.when_to_read : '⚠ missing'} ${DASH} ` +
       `applies_to: ${fm.applies_to !== undefined ? fm.applies_to : '[]'}`;
     if (kind === 'incidents') {
       const raw = fm.recurrences !== undefined ? String(fm.recurrences) : '1';
       const n = /^\s*[+-]?\d+\s*$/.test(raw) ? parseInt(raw, 10) : 1;
       if (n > 1) row += ` ${DASH} recur: ${n}`;
     }
-    if (fm.verify) row = '⚠未验证 ' + row;
-    else if (status === 'stale') row = '⚠待复核 ' + row;
+    if (fm.verify) row = '⚠ unverified ' + row;
+    else if (status === 'stale') row = '⚠ pending-review ' + row;
     return row;
   }
   throw new Error(`unknown folder kind: ${kind}`);
@@ -168,7 +168,7 @@ function replaceAutoBlock(text, newBlock) {
 function areaRow(areaDir) {
   const idx = path.join(areaDir, 'INDEX.md');
   const fm = isFile(idx) ? parseFrontmatter(readText(idx)) : {};
-  const purpose = fm.purpose !== undefined ? fm.purpose : '⚠ purpose 缺失';
+  const purpose = fm.purpose !== undefined ? fm.purpose : '⚠ purpose missing';
   const updated = fm.last_updated !== undefined ? fm.last_updated : '—';
   const name = path.basename(areaDir);
   return `- [${name}/](${name}/INDEX.md) ${DASH} ${purpose} ${DASH} last_updated: ${updated}`;
@@ -235,7 +235,7 @@ function regenCockpitInprogress(deck) {
     for (const name of names) {
       const fm = fmOf(path.join(folder, name));
       if (fm.status !== 'active') continue;
-      const summary = truncateInprogressSummary(fm.summary !== undefined ? fm.summary : '⚠ summary 缺失');
+      const summary = truncateInprogressSummary(fm.summary !== undefined ? fm.summary : '⚠ summary missing');
       let row = `- [${name}](${kind}/${name}) ${DASH} ${summary}`;
       if (fm.note) row += ` ${DASH} [note: ${fm.note}]`;
       rows.push(row);

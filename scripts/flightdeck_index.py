@@ -24,9 +24,10 @@ from pathlib import Path
 
 STATUS_ORDER = ["idea", "active", "done"]
 
-# 签名归一化：剥掉易变 token（路径/行号/时间戳/hex/uuid/长整数），但保留语义 token
-# （如引号包裹的 key）——`KeyError: 'summary'` 与 `'title'` 必须区分。完整规则在此，
-# 测试套件（SignatureNormalizeTest）是契约；调整规则须先改测试。
+# Signature normalization: strip volatile tokens (path/line/timestamp/hex/uuid/long int)
+# while keeping semantic ones (e.g. a quoted key) — `KeyError: 'summary'` and `'title'`
+# must stay distinct. The full ruleset lives here; the test suite
+# (SignatureNormalizeTest) is the contract — change the tests before the rules.
 _VOLATILE = [
     (re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b"), "_UUID_"),
     (re.compile(r"0x[0-9a-fA-F]+"), "_HEX_"),
@@ -45,15 +46,17 @@ def normalize_symptom(s):
 
 
 def signature_fingerprint(symptom, error_type=""):
-    """主指纹 = error_type + 归一化 symptom。where **不**进指纹（spec：symptom+error_type
-    为主、where 为次/tiebreak，由调用方在多命中时区分）。"""
+    """Primary fingerprint = error_type + normalized symptom. `where` is **not** part
+    of the fingerprint (spec: symptom+error_type are primary, where is the
+    secondary/tiebreak the caller uses to disambiguate multiple hits)."""
     key = f"{(error_type or '').strip()}\n{normalize_symptom(symptom)}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
 
 
 def parse_signature(text):
-    """抽 `## Signature` 块的 key:value 行为 dict（键 symptom/error_type/where/trigger）。
-    无块返回 {}。值两端反引号/空白剥掉。"""
+    """Parse the `## Signature` block's key:value lines into a dict (keys
+    symptom/error_type/where/trigger). Returns {} when no block. Backticks and
+    surrounding whitespace are stripped from values."""
     m = re.search(r"^##\s+Signature\s*$(.*?)(?=^##\s|\Z)", text, re.M | re.S)
     if not m:
         return {}
@@ -66,10 +69,11 @@ def parse_signature(text):
 
 
 def match_signature(deck, symptom, error_type=""):
-    """返回主指纹相同的 incident（含 status:obsolete——回归检测依赖）。
-    扫 incidents/ 及 archive/incidents/ 全部 .md（含嵌套 area，rglob）；
-    缺 ## Signature 的跳过（走 AI 模糊层）。
-    每条 {path(相对 deck), status, where}。"""
+    """Return incidents with the same primary fingerprint (including
+    status:obsolete — regression detection depends on it). Scans every .md under
+    incidents/ and archive/incidents/ (nested areas too, rglob); files without a
+    ## Signature block are skipped (they go through the AI fuzzy layer).
+    Each hit is {path (deck-relative), status, where}."""
     fp = signature_fingerprint(symptom, error_type)
     hits = []
     deck = Path(deck)
@@ -100,12 +104,12 @@ def match_signature(deck, symptom, error_type=""):
 
 DASH = "—"  # em dash — the INDEX row delimiter
 
-SUMMARY_KINDS = {"specs", "plans"}                       # workflow，summary 行
-KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}    # 自撰知识，auto-INDEX，knowledge 行
-IMPORTED_KINDS = {"references"}                          # 外部导入，手维护 INDEX，"imported" 汇总
-NESTABLE_KINDS = {"incidents", "checklists", "docs", "references"}  # 可按 area 嵌套（knowledge）
+SUMMARY_KINDS = {"specs", "plans"}                       # workflow, summary rows
+KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}    # self-authored knowledge, auto-INDEX, knowledge rows
+IMPORTED_KINDS = {"references"}                          # externally imported, hand-maintained INDEX, "imported" rollup
+NESTABLE_KINDS = {"incidents", "checklists", "docs", "references"}  # nestable by area (knowledge)
 
-# 主流命名后的 root-INDEX 顺序（设计读序，非字母序）。
+# root-INDEX order after canonical naming (design reading order, not alphabetical).
 FOLDER_ORDER = ["specs", "plans", "incidents", "checklists", "docs", "references"]
 
 
@@ -118,14 +122,14 @@ def format_row(kind, filename, fm):
     link = f"- [{filename}]({filename})"
     status = fm.get("status", "?")
     if kind in SUMMARY_KINDS:
-        row = f"{link} {DASH} {status} {DASH} {fm.get('summary', '⚠ summary 缺失')}"
+        row = f"{link} {DASH} {status} {DASH} {fm.get('summary', '⚠ summary missing')}"
         if fm.get("verify"):
-            row = "⚠未验证 " + row
+            row = "⚠ unverified " + row
         return row
     if kind in KNOWLEDGE_KINDS:
         row = (
             f"{link} {DASH} {status} {DASH} "
-            f"when_to_read: {fm.get('when_to_read', '⚠ 缺失')} {DASH} "
+            f"when_to_read: {fm.get('when_to_read', '⚠ missing')} {DASH} "
             f"applies_to: {fm.get('applies_to', '[]')}"
         )
         # incidents carry a recurrence counter; surface it in the catalog row when
@@ -138,9 +142,9 @@ def format_row(kind, filename, fm):
             if n > 1:
                 row += f" {DASH} recur: {n}"
         if fm.get("verify"):
-            row = "⚠未验证 " + row
+            row = "⚠ unverified " + row
         elif status == "stale":
-            row = "⚠待复核 " + row
+            row = "⚠ pending-review " + row
         return row
     raise ValueError(f"unknown folder kind: {kind}")
 
@@ -175,10 +179,10 @@ def replace_auto_block(text, new_block):
 
 
 def _area_row(area_dir):
-    """顶层 INDEX 里一个 area 的行：链接 + 用途 + last_updated（取 area/INDEX.md frontmatter）。"""
+    """One area row in a top-level INDEX: link + purpose + last_updated (from the area/INDEX.md frontmatter)."""
     idx = area_dir / "INDEX.md"
     fm = parse_frontmatter(idx.read_text(encoding="utf-8")) if idx.is_file() else {}
-    purpose = fm.get("purpose", "⚠ purpose 缺失")
+    purpose = fm.get("purpose", "⚠ purpose missing")
     updated = fm.get("last_updated", "—")
     return f"- [{area_dir.name}/]({area_dir.name}/INDEX.md) {DASH} {purpose} {DASH} last_updated: {updated}"
 
@@ -211,13 +215,13 @@ def regen_folder_index(folder):
         rows = [_area_row(d) for d in subdirs]
         row_kind = kind if kind in KNOWLEDGE_KINDS else "checklists"
         top_files = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
-        if kind in KNOWLEDGE_KINDS:   # obsolete 待排进 archive（archivable_obsolete），不进路由行；stale 进行但带 ⚠
+        if kind in KNOWLEDGE_KINDS:   # obsolete is bound for archive (archivable_obsolete), not the routing rows; stale stays but carries ⚠
             top_files = [n for n in top_files
                          if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
         rows += [format_row(row_kind, n, parse_frontmatter((folder / n).read_text(encoding="utf-8"))) for n in top_files]
         return f"<!-- AUTO:{kind} -->\n" + "\n".join(rows) + f"\n{AUTO_END}"
     names = sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md")
-    if kind in KNOWLEDGE_KINDS:   # obsolete 待排进 archive（archivable_obsolete），不进路由行；stale 进行但带 ⚠
+    if kind in KNOWLEDGE_KINDS:   # obsolete is bound for archive (archivable_obsolete), not the routing rows; stale stays but carries ⚠
         names = [n for n in names
                  if parse_frontmatter((folder / n).read_text(encoding="utf-8")).get("status") != "obsolete"]
     row_kind = kind if kind in (SUMMARY_KINDS | KNOWLEDGE_KINDS) else "checklists"
@@ -269,7 +273,7 @@ def regen_cockpit_inprogress(deck):
             fm = parse_frontmatter((folder / name).read_text(encoding="utf-8"))
             if fm.get("status") != "active":
                 continue
-            summary = _truncate_inprogress_summary(fm.get("summary", "⚠ summary 缺失"))
+            summary = _truncate_inprogress_summary(fm.get("summary", "⚠ summary missing"))
             row = f"- [{name}]({kind}/{name}) {DASH} {summary}"
             if fm.get("note"):
                 row += f" {DASH} [note: {fm['note']}]"
@@ -278,7 +282,7 @@ def regen_cockpit_inprogress(deck):
     return f"<!-- AUTO:inprogress -->\n{body}\n{AUTO_END}"
 
 
-# references/ 的 INDEX 手维护（外部导入）；只它的 root 行派生。
+# references/ keeps a hand-maintained INDEX (externally imported); only its root row is derived.
 REGEN_FOLDERS = [name for name in FOLDER_ORDER if name not in IMPORTED_KINDS]
 
 
@@ -290,14 +294,14 @@ def _fm_field(path, field):
 
 
 def _active_inbound_targets(deck):
-    """deck 内任何 status:active 工件经结构化边（implements:）指向的目标路径集。"""
+    """Set of target paths any status:active artifact in the deck points at via a structured edge (implements:)."""
     deck = Path(deck)
     targets = set()
     for kind in ("specs", "plans") + tuple(sorted(KNOWLEDGE_KINDS)):
         folder = deck / kind
         if not folder.is_dir():
             continue
-        for p in folder.rglob("*.md"):       # rglob：覆盖嵌套 area
+        for p in folder.rglob("*.md"):       # rglob: covers nested areas
             if p.name == "INDEX.md":
                 continue
             fm = parse_frontmatter(p.read_text(encoding="utf-8"))
@@ -311,7 +315,7 @@ def _active_inbound_targets(deck):
 
 
 def archivable_done(deck):
-    """无 active 入边指向的 done workflow 工件（specs/plans）——可安全归档，确定性、可复现。"""
+    """Done workflow artifacts (specs/plans) with no active inbound edge pointing at them — safe to archive, deterministic and reproducible."""
     deck = Path(deck)
     blocked = _active_inbound_targets(deck)
     result = []
@@ -332,9 +336,10 @@ def archivable_done(deck):
 
 
 def archivable_obsolete(deck):
-    """status:obsolete 的 knowledge 工件（incidents/checklists/docs）——已死·待归档，
-    与 archivable_done 对称：obsolete 是 knowledge 版 done 排水态，无钉扣概念
-    （superseded_by 已退役），扫到即可排进 archive/。确定性、可复现。"""
+    """status:obsolete knowledge artifacts (incidents/checklists/docs) — dead and
+    awaiting archival. Symmetric to archivable_done: obsolete is the knowledge-side
+    drained state of done, with no pinning concept (superseded_by is retired), so a
+    match can go straight into archive/. Deterministic and reproducible."""
     deck = Path(deck)
     result = []
     for kind in sorted(KNOWLEDGE_KINDS):
@@ -383,7 +388,7 @@ def spec_advance_candidates(deck):
 
 
 def last_anchor_ref(deck):
-    """最近一个带 Flightdeck-Sync trailer 的 commit SHA（上次退出仪式锚点），无则 None。"""
+    """The most recent commit SHA carrying a Flightdeck-Sync trailer (the last exit-ritual anchor), or None."""
     try:
         out = subprocess.run(
             ["git", "-C", str(deck), "log", "-1", "--grep=Flightdeck-Sync", "--format=%H"],
@@ -395,8 +400,9 @@ def last_anchor_ref(deck):
 
 
 def changed_since_anchor(deck):
-    """自锚点以来变动的路径（committed + 工作树未提交），相对 repo 根。
-    无锚点 → 退化成工作树改动（首跑/无历史仍给信号）。"""
+    """Paths changed since the anchor (committed + uncommitted working tree),
+    relative to the repo root. No anchor → degrade to working-tree changes
+    (first run / no history still yields a signal)."""
     anchor = last_anchor_ref(deck)
     paths = set()
     try:
@@ -417,7 +423,7 @@ def changed_since_anchor(deck):
 
 def verify_pending(deck):
     """(path, verify-note) for every artifact carrying a `verify` field,
-    across the active tree AND archive/ — the 待验证 source of truth.
+    across the active tree AND archive/ — the pending-verification source of truth.
     Path is deck-relative, POSIX-slashed; sorted by path."""
     deck = Path(deck)
     out = []
@@ -551,16 +557,17 @@ def prune_consumers(master_root):
 
 
 def sync_status(deck):
-    """共享知识漂移只读扫描：对每个带 `synced: true` 的工件，用其**自身 relpath**
-    去母库找同路径源、比 `last_updated`，返回 (state, relpath)。写任何文件都不。
+    """Read-only shared-knowledge drift scan: for every artifact carrying
+    `synced: true`, use its **own relpath** to find the same-path source under the
+    master deck and compare `last_updated`, returning (state, relpath). Writes nothing.
 
-    母库根解析见 `_resolve_master_root`（固定 `~/.flightdeck`）。状态：
-      upstream-changed  母库更新（母库 last_updated 更大）→ /flightdeck:sync 可拉
-      in-sync           相等
-      locally-ahead     项目更新 → /flightdeck:sync push 可回流母库
-      dangling          母库根在、但同 relpath 源不是可读文件（缺失/类型错配）
-      master-missing    母库根 ~/.flightdeck 不存在 → 整 deck 优雅跳过
-    路径相对 deck、POSIX 斜杠；按 relpath 排序。排除 archive/。"""
+    Master root resolution is in `_resolve_master_root` (fixed `~/.flightdeck`). States:
+      upstream-changed  master is newer (master last_updated greater) → /flightdeck:sync can pull
+      in-sync           equal
+      locally-ahead     project is newer → /flightdeck:sync push can flow back to master
+      dangling          master root exists, but the same-relpath source is not a readable file (missing/type mismatch)
+      master-missing    master root ~/.flightdeck does not exist → whole deck skipped gracefully
+    Paths are deck-relative, POSIX-slashed; sorted by relpath. archive/ excluded."""
     deck = Path(deck)
     master_root = _resolve_master_root()
     master_ok = master_root is not None
@@ -584,7 +591,7 @@ def sync_status(deck):
             continue
         proj_lu = fm.get("last_updated", "")
         mast_lu = parse_frontmatter(master_file.read_text(encoding="utf-8")).get("last_updated", "")
-        if mast_lu > proj_lu:          # ISO 日期字符串比较 == 时序比较
+        if mast_lu > proj_lu:          # ISO date string comparison == chronological comparison
             state = "upstream-changed"
         elif mast_lu < proj_lu:
             state = "locally-ahead"
@@ -749,7 +756,7 @@ def main(argv=None):
             current = path.read_text(encoding="utf-8")
             cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
         except (OSError, ValueError):
-            # 缺 INDEX.md 或无 AUTO 块：算 drift；非 --check 时新建一个最小 INDEX
+            # missing INDEX.md or no AUTO block: counts as drift; when not --check, create a minimal INDEX
             drift.append(label)
             if not args.check:
                 path.parent.mkdir(parents=True, exist_ok=True)

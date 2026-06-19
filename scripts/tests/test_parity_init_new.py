@@ -38,7 +38,7 @@ class InitParity(unittest.TestCase):
     def test_seed(self):
         py_t = Path(tempfile.mkdtemp())
         js_t = Path(tempfile.mkdtemp())
-        common = ["--name", "p", "--user", "月离", "--date", "2026-06-03", "--focus", "f", "--next", "n"]
+        common = ["--name", "p", "--user", "yueli", "--date", "2026-06-03", "--focus", "f", "--next", "n"]
         _run("flightdeck_init", [sys.executable], [str(py_t), *common])
         _run("flightdeck_init", ["node"], [str(js_t), *common])
         self.assertEqual(_tree(py_t / "flightdeck"), _tree(js_t / "flightdeck"))

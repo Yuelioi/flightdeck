@@ -203,8 +203,8 @@ class IncidentSignatureScaffoldTest(unittest.TestCase):
             path = new(deck, "incident", slug="x", title="X",
                        when_to_read="w", applies_to=["a"], regen=False)
             text = path.read_text(encoding="utf-8")
-            self.assertIn("resolved_by:", text)        # frontmatter 字段（空）
-            self.assertIn("## Signature", text)         # 正文 scaffold
+            self.assertIn("resolved_by:", text)        # frontmatter field (empty)
+            self.assertIn("## Signature", text)         # body scaffold
             self.assertIn("- symptom:", text)
             self.assertIn("## Cases", text)
 

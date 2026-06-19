@@ -113,7 +113,7 @@ class FormatRowTest(unittest.TestCase):
             format_row("debriefs", "foo.md", {"status": "active"})
 
     def test_summary_kind_missing_summary_does_not_raise(self):
-        # 缺 summary 的 workflow 文件不应让 regen 崩；用可见哨兵占位。
+        # a workflow file missing summary must not crash regen; use a visible sentinel placeholder.
         row = format_row("specs", "foo.md", {"status": "active"})
         self.assertIn("foo.md", row)
         self.assertIn("⚠", row)
@@ -254,12 +254,12 @@ class CockpitInprogressTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             deck, specs, plans = self._deck(d)
             (specs / "2026-06-01-s.md").write_text(
-                "---\nstatus: active\nsummary: spec work\nnote: 等迁移定稿\n---\n",
+                "---\nstatus: active\nsummary: spec work\nnote: awaiting migration sign-off\n---\n",
                 encoding="utf-8",
             )
             expected = (
                 "<!-- AUTO:inprogress -->\n"
-                f"- [2026-06-01-s.md](specs/2026-06-01-s.md) {DASH} spec work {DASH} [note: 等迁移定稿]\n"
+                f"- [2026-06-01-s.md](specs/2026-06-01-s.md) {DASH} spec work {DASH} [note: awaiting migration sign-off]\n"
                 "<!-- /AUTO -->"
             )
             self.assertEqual(regen_cockpit_inprogress(deck), expected)
@@ -415,7 +415,7 @@ class NestedIndexTest(unittest.TestCase):
             docs = Path(d) / "docs"
             (docs / "runtime").mkdir(parents=True)
             (docs / "runtime" / "INDEX.md").write_text(
-                "---\npurpose: 运行时子系统\nlast_updated: 2026-06-05\n---\n"
+                "---\npurpose: runtime subsystem\nlast_updated: 2026-06-05\n---\n"
                 "# docs/runtime\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8"
             )
             (docs / "runtime" / "loop.md").write_text(
@@ -425,7 +425,7 @@ class NestedIndexTest(unittest.TestCase):
             (docs / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
             top = flightdeck_index.regen_folder_index(docs)
             self.assertIn("[runtime/](runtime/INDEX.md)", top)
-            self.assertIn("运行时子系统", top)
+            self.assertIn("runtime subsystem", top)
             self.assertIn("2026-06-05", top)
             area = flightdeck_index.regen_folder_index(docs / "runtime")
             self.assertIn("loop.md", area)
@@ -453,7 +453,7 @@ class MainMissingAreaIndexTest(unittest.TestCase):
             (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
             area = deck / "docs" / "runtime"
             area.mkdir(parents=True)
-            # area 有 .md 但**没有** INDEX.md
+            # area has .md files but **no** INDEX.md
             (area / "loop.md").write_text(
                 "---\nstatus: active\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-05\nsummary: s\n---\n",
                 encoding="utf-8",
@@ -461,8 +461,8 @@ class MainMissingAreaIndexTest(unittest.TestCase):
             (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = main([str(deck)])          # 默认 regen，不应崩
-            # 缺失的 area INDEX 被新建，且含 AUTO 块与该文件行
+                rc = main([str(deck)])          # default regen, must not crash
+            # the missing area INDEX is created, carrying the AUTO block and that file's row
             self.assertTrue((area / "INDEX.md").is_file())
             self.assertIn("loop.md", (area / "INDEX.md").read_text(encoding="utf-8"))
             self.assertEqual(rc, 0)
@@ -482,9 +482,9 @@ class MainMissingAreaIndexTest(unittest.TestCase):
             (deck / "docs" / "INDEX.md").write_text("# docs\n<!-- AUTO:docs -->\n\n<!-- /AUTO -->\n", encoding="utf-8")
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = main([str(deck), "--check"])   # 只读，不应崩
-            self.assertEqual(rc, 1)                  # 有 drift
-            self.assertFalse((area / "INDEX.md").is_file())  # --check 不写
+                rc = main([str(deck), "--check"])   # read-only, must not crash
+            self.assertEqual(rc, 1)                  # has drift
+            self.assertFalse((area / "INDEX.md").is_file())  # --check writes nothing
 
 
 class CockpitProjectionRobustnessTest(unittest.TestCase):
@@ -499,9 +499,9 @@ class CockpitProjectionRobustnessTest(unittest.TestCase):
                 "---\nstatus: active\nlast_updated: 2026-06-05\n---\n# No summary\n",
                 encoding="utf-8",
             )
-            block = regen_cockpit_inprogress(deck)   # 不应抛 KeyError
+            block = regen_cockpit_inprogress(deck)   # must not raise KeyError
             self.assertIn("2026-06-05-no-summary.md", block)
-            self.assertIn("summary 缺失", block)
+            self.assertIn("summary missing", block)
 
 
 class SignatureNormalizeTest(unittest.TestCase):
@@ -514,7 +514,7 @@ class SignatureNormalizeTest(unittest.TestCase):
 
     def test_volatile_tokens_collapsed(self):
         from flightdeck_index import normalize_symptom
-        # hex / uuid / 路径 / 行号 / 时间戳 / 长整数 归一后应相等
+        # hex / uuid / path / line number / timestamp / long int should be equal after normalize
         a = normalize_symptom("boom at 0x7f3a2b1c /home/alice/p/foo.py line 42 id=123456")
         b = normalize_symptom("boom at 0x99887766 /home/bob/q/foo.py line 99 id=999999")
         self.assertEqual(a, b)
@@ -536,7 +536,7 @@ class SignatureFingerprintTest(unittest.TestCase):
         )
 
     def test_where_not_in_fingerprint(self):
-        # spec：where 不进主指纹（重构换 where 不应换指纹）
+        # spec: where is not part of the primary fingerprint (a refactor that changes where must not change the fingerprint)
         from flightdeck_index import signature_fingerprint
         import inspect
         self.assertNotIn("where", inspect.signature(signature_fingerprint).parameters)
@@ -549,21 +549,21 @@ class ParseSignatureTest(unittest.TestCase):
         "- symptom: `KeyError: 'summary'`\n"
         "- error_type: KeyError\n"
         "- where: regen_cockpit_inprogress\n"
-        "- trigger: active 工件缺 summary\n\n"
-        "## 根因\n...\n"
+        "- trigger: active artifact missing summary\n\n"
+        "## Root cause\n...\n"
     )
 
     def test_parses_four_keys(self):
         from flightdeck_index import parse_signature
         sig = parse_signature(self.SIG)
-        self.assertEqual(sig["symptom"], "KeyError: 'summary'")   # 反引号被剥
+        self.assertEqual(sig["symptom"], "KeyError: 'summary'")   # backticks stripped
         self.assertEqual(sig["error_type"], "KeyError")
         self.assertEqual(sig["where"], "regen_cockpit_inprogress")
-        self.assertEqual(sig["trigger"], "active 工件缺 summary")
+        self.assertEqual(sig["trigger"], "active artifact missing summary")
 
     def test_no_block_returns_empty(self):
         from flightdeck_index import parse_signature
-        self.assertEqual(parse_signature("---\nstatus: active\n---\n# t\n## 根因\nx\n"), {})
+        self.assertEqual(parse_signature("---\nstatus: active\n---\n# t\n## Root cause\nx\n"), {})
 
 
 class MatchSignatureTest(unittest.TestCase):
@@ -590,7 +590,7 @@ class MatchSignatureTest(unittest.TestCase):
             self.assertTrue(hits[0]["path"].endswith("2026-06-05-a.md"))
 
     def test_obsolete_still_matched(self):
-        # 回归检测依赖：obsolete 不被过滤
+        # regression detection depends on this: obsolete is not filtered out
         from flightdeck_index import match_signature
         with tempfile.TemporaryDirectory() as d:
             deck = self._deck(d)
@@ -603,7 +603,7 @@ class MatchSignatureTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             deck = self._deck(d)
             (deck / "incidents" / "old.md").write_text(
-                "---\nstatus: active\nwhen_to_read: w\napplies_to: [a]\nlast_updated: 2026-06-05\n---\n# t\n## 根因\nx\n",
+                "---\nstatus: active\nwhen_to_read: w\napplies_to: [a]\nlast_updated: 2026-06-05\n---\n# t\n## Root cause\nx\n",
                 encoding="utf-8")
             self.assertEqual(match_signature(deck, "KeyError: 'summary'", "KeyError"), [])
 
@@ -655,24 +655,24 @@ class ObsoleteRoutingExcludeTest(unittest.TestCase):
                 encoding="utf-8")
             block = regen_folder_index(folder)
             self.assertIn("live.md", block)
-            self.assertNotIn("dead.md", block)   # obsolete 不进路由
+            self.assertNotIn("dead.md", block)   # obsolete not in routing
 
 
 class FormatRowVerifyMarkerTest(unittest.TestCase):
     def test_format_row_verify_vs_stale_markers(self):
-        # 知识件：stale + verify → ⚠未验证
+        # knowledge artifact: stale + verify → ⚠ unverified
         r1 = flightdeck_index.format_row("checklists", "a.md",
-            {"status": "stale", "when_to_read": "x", "applies_to": "[a]", "verify": "跑一遍"})
-        self.assertTrue(r1.startswith("⚠未验证 "))
-        # 知识件：stale 单独（过期）→ ⚠待复核
+            {"status": "stale", "when_to_read": "x", "applies_to": "[a]", "verify": "run it once"})
+        self.assertTrue(r1.startswith("⚠ unverified "))
+        # knowledge artifact: stale alone (gone stale) → ⚠ pending-review
         r2 = flightdeck_index.format_row("checklists", "b.md",
             {"status": "stale", "when_to_read": "x", "applies_to": "[a]"})
-        self.assertTrue(r2.startswith("⚠待复核 "))
-        # 工作流件：done + verify → ⚠未验证
+        self.assertTrue(r2.startswith("⚠ pending-review "))
+        # workflow artifact: done + verify → ⚠ unverified
         r3 = flightdeck_index.format_row("specs", "c.md",
-            {"status": "done", "summary": "s", "verify": "相位4 实证"})
-        self.assertTrue(r3.startswith("⚠未验证 "))
-        # 工作流件：done 干净 → 无标记
+            {"status": "done", "summary": "s", "verify": "phase-4 live check"})
+        self.assertTrue(r3.startswith("⚠ unverified "))
+        # workflow artifact: done clean → no marker
         r4 = flightdeck_index.format_row("specs", "d.md", {"status": "done", "summary": "s"})
         self.assertFalse(r4.startswith("⚠"))
 
@@ -792,11 +792,11 @@ class VerifyPendingTest(unittest.TestCase):
             (deck / "checklists").mkdir(parents=True)
             (deck / "archive" / "specs").mkdir(parents=True)
             (deck / "checklists" / "foo.md").write_text(
-                "---\nstatus: stale\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-08\nverify: 跑一遍 foo 流程\n---\n# foo\n",
+                "---\nstatus: stale\nwhen_to_read: x\napplies_to: [a]\nlast_updated: 2026-06-08\nverify: run the foo flow once\n---\n# foo\n",
                 encoding="utf-8",
             )
             (deck / "archive" / "specs" / "bar.md").write_text(
-                "---\nstatus: done\nsummary: bar\nverify: 相位4 各家 live 实证\n---\n# bar\n",
+                "---\nstatus: done\nsummary: bar\nverify: phase-4 live check across hosts\n---\n# bar\n",
                 encoding="utf-8",
             )
             (deck / "checklists" / "clean.md").write_text(
@@ -806,15 +806,15 @@ class VerifyPendingTest(unittest.TestCase):
             # Defence-in-depth: an INDEX.md carrying a verify: field must be
             # excluded by the `if p.name == "INDEX.md": continue` guard.
             (deck / "checklists" / "INDEX.md").write_text(
-                "---\nverify: 这是 INDEX 不应出现在结果里\n---\n# checklists INDEX\n",
+                "---\nverify: this is INDEX and must not appear in results\n---\n# checklists INDEX\n",
                 encoding="utf-8",
             )
             rows = flightdeck_index.verify_pending(str(deck))
             self.assertEqual(
                 rows,
                 [
-                    ("archive/specs/bar.md", "相位4 各家 live 实证"),
-                    ("checklists/foo.md", "跑一遍 foo 流程"),
+                    ("archive/specs/bar.md", "phase-4 live check across hosts"),
+                    ("checklists/foo.md", "run the foo flow once"),
                 ],
             )
             # The INDEX.md must not appear in the result at all.
@@ -848,7 +848,7 @@ class VerifyPendingUtf8CliTest(unittest.TestCase):
 
 
 class SyncStatusTest(unittest.TestCase):
-    """flightdeck_index.sync_status — 共享知识漂移只读扫描（v2：固定母库 + synced 标记）。"""
+    """flightdeck_index.sync_status — read-only shared-knowledge drift scan (v2: fixed master + synced marker)."""
 
     def _master_file(self, master, relpath, last_updated):
         p = master / relpath
@@ -875,7 +875,7 @@ class SyncStatusTest(unittest.TestCase):
         )
 
     def _home(self, fake_home):
-        # 母库恒为 ~/.flightdeck —— 测试里把 Path.home() 指到 fake_home，母库 = fake_home/.flightdeck
+        # master is always ~/.flightdeck — in tests point Path.home() at fake_home, so master = fake_home/.flightdeck
         return mock.patch.object(flightdeck_index.Path, "home", return_value=fake_home)
 
     def test_states_and_ignores_unsynced(self):
@@ -885,8 +885,8 @@ class SyncStatusTest(unittest.TestCase):
             master = root / ".flightdeck"
             self._master_file(master, "checklists/commits.md", "2026-06-20")
             deck = self._consumer(root)
-            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # 母库更新 → upstream-changed
-            self._vendored(deck, "checklists/ahead.md", "2026-06-25")     # 母库无源 → dangling（源不存在）
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # master newer → upstream-changed
+            self._vendored(deck, "checklists/ahead.md", "2026-06-25")     # no master source → dangling (source absent)
             (deck / "checklists" / "local.md").write_text(
                 "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-18\n---\n# local\n",
                 encoding="utf-8",
@@ -905,8 +905,8 @@ class SyncStatusTest(unittest.TestCase):
             self._master_file(master, "checklists/commits.md", "2026-06-18")
             self._master_file(master, "checklists/comments.md", "2026-06-10")
             deck = self._consumer(root)
-            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # 相等 → in-sync
-            self._vendored(deck, "checklists/comments.md", "2026-06-25")  # 项目更新 → locally-ahead
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # equal → in-sync
+            self._vendored(deck, "checklists/comments.md", "2026-06-25")  # project newer → locally-ahead
             with self._home(root):
                 states = {rel: st for st, rel in sync_status(deck)}
             self.assertEqual(states["checklists/commits.md"], "in-sync")
@@ -915,7 +915,7 @@ class SyncStatusTest(unittest.TestCase):
     def test_master_missing_when_no_flightdeck_home(self):
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
-            root = Path(d)                 # root 下不建 .flightdeck → 母库缺席
+            root = Path(d)                 # no .flightdeck under root → master absent
             deck = self._consumer(root)
             self._vendored(deck, "checklists/commits.md", "2026-06-18")
             with self._home(root):
@@ -937,7 +937,7 @@ class SyncStatusTest(unittest.TestCase):
 
 
 class ConsumersRegistryTest(unittest.TestCase):
-    """consumers 注册表：register / list / prune（对母库 frontmatter 读改写）。"""
+    """consumers registry: register / list / prune (read/modify the master's frontmatter)."""
 
     def _mfile(self, master, relpath, consumers=None):
         p = master / relpath
@@ -958,7 +958,7 @@ class ConsumersRegistryTest(unittest.TestCase):
             deckdir = Path(d) / "projA" / "flightdeck"
             deckdir.mkdir(parents=True)
             register_consumer(master, "checklists/commits.md", str(deckdir))
-            # 再注册同 deck（带尾斜杠变体）→ 不重复增长
+            # register the same deck again (trailing-slash variant) → no duplicate growth
             register_consumer(master, "checklists/commits.md", str(deckdir) + os.sep)
             fm = flightdeck_index.parse_frontmatter(
                 (master / "checklists/commits.md").read_text(encoding="utf-8"))
@@ -972,9 +972,9 @@ class ConsumersRegistryTest(unittest.TestCase):
             deckdir = Path(d) / "projA"
             deckdir.mkdir()
             with self.assertRaises(ValueError):
-                register_consumer(master, "checklists/", str(deckdir))      # 目录非文件
+                register_consumer(master, "checklists/", str(deckdir))      # directory, not a file
             with self.assertRaises(ValueError):
-                register_consumer(master, "checklists/missing.md", str(deckdir))  # 不存在
+                register_consumer(master, "checklists/missing.md", str(deckdir))  # does not exist
 
     def test_list_consumers_union_dedup_reachable_only(self):
         from flightdeck_index import list_consumers
@@ -982,22 +982,22 @@ class ConsumersRegistryTest(unittest.TestCase):
             master = Path(d) / ".flightdeck"
             a = Path(d) / "projA" / "flightdeck"; a.mkdir(parents=True)
             b = Path(d) / "projB" / "flightdeck"; b.mkdir(parents=True)
-            gone = (Path(d) / "projGONE" / "flightdeck").resolve().as_posix()  # 不存在目录
+            gone = (Path(d) / "projGONE" / "flightdeck").resolve().as_posix()  # nonexistent directory
             self._mfile(master, "checklists/commits.md",
                         consumers=[a.resolve().as_posix(), gone])
             self._mfile(master, "checklists/comments.md",
                         consumers=[a.resolve().as_posix(), b.resolve().as_posix()])
             got = list_consumers(master)
             self.assertEqual(got, sorted([a.resolve().as_posix(), b.resolve().as_posix()]))
-            self.assertNotIn(gone, got)        # 不可达目录被跳过
-            # 纯读：母库文件未被改写
+            self.assertNotIn(gone, got)        # unreachable directory is skipped
+            # pure read: the master file is not rewritten
             self.assertIn(gone, flightdeck_index._read_consumers(
                 flightdeck_index.parse_frontmatter(
                     (master / "checklists/commits.md").read_text(encoding="utf-8"))))
 
     def test_list_consumers_skips_non_utf8_file(self):
-        # 非 UTF-8 的 .md（如 GBK/BOM/误命名二进制）应被跳过，不让整个扫描崩
-        # （UnicodeDecodeError 是 ValueError，不是 OSError）。
+        # a non-UTF-8 .md (e.g. GBK/BOM/mis-named binary) should be skipped, not crash the whole scan
+        # (UnicodeDecodeError is a ValueError, not an OSError).
         from flightdeck_index import list_consumers
         with tempfile.TemporaryDirectory() as d:
             master = Path(d) / ".flightdeck"
@@ -1012,10 +1012,10 @@ class ConsumersRegistryTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             master = Path(d) / ".flightdeck"
             alive = Path(d) / "projA" / "flightdeck"; alive.mkdir(parents=True)
-            # gone：父目录 projGONE 存在、deck 本身不存在 → 应剔除
+            # gone: parent dir projGONE exists, the deck itself does not → should be pruned
             gone_parent = Path(d) / "projGONE"; gone_parent.mkdir()
             gone = (gone_parent / "flightdeck").resolve().as_posix()
-            # unreachable：父目录都不存在（整盘离线模拟）→ 不剔除
+            # unreachable: parent dir does not exist either (whole-drive-offline simulation) → not pruned
             unreachable = (Path(d) / "noSuchDrive" / "x" / "flightdeck").resolve().as_posix()
             self._mfile(master, "checklists/commits.md",
                         consumers=[alive.resolve().as_posix(), gone, unreachable])
@@ -1024,7 +1024,7 @@ class ConsumersRegistryTest(unittest.TestCase):
             kept = _read_consumers(flightdeck_index.parse_frontmatter(
                 (master / "checklists/commits.md").read_text(encoding="utf-8")))
             self.assertIn(alive.resolve().as_posix(), kept)
-            self.assertIn(unreachable, kept)       # 父不可达 → 保守保留
+            self.assertIn(unreachable, kept)       # parent unreachable → conservatively kept
             self.assertNotIn(gone, kept)
 
 

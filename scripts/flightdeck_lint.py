@@ -58,7 +58,8 @@ KNOWLEDGE_FOLDERS = tuple(sorted(KNOWLEDGE_KINDS))  # sorted = deterministic fin
 KNOWN_FOLDERS = {"specs", "plans"} | KNOWLEDGE_KINDS | IMPORTED_KINDS | {"archive"}
 KNOWN_ROOT_FILES = {"cockpit.md", "INDEX.md", "rules.md"}
 
-# when_to_update 泛词黑名单（形式地板；语义层交作者自律）
+# when_to_update vague-token blocklist (form floor; semantic judgment left to the author).
+# Keeps the CJK tokens so a Chinese-language deck's vague when_to_update is still caught.
 VAGUE_TOKENS = ("任何", "所有", "any change", "all changes", "anything", "everything")
 
 # structural-edit guard — required structural blocks per known file (label, regex).
@@ -298,8 +299,9 @@ def audit_required_structure(deck):
 
 
 def audit_when_to_update(deck):
-    """形式地板：when_to_update 若存在，须非空 + 含 ≥1 具体名词/路径 + 不含泛词。
-    '够不够具体'是语义判断，不在此（靠 templates 示例 + 作者自律）。"""
+    """Form floor: when_to_update, if present, must be non-empty + contain ≥1
+    concrete noun/path + carry no vague token. 'Concrete enough?' is a semantic
+    judgment left out of here (driven by the template examples + author discipline)."""
     deck = Path(deck)
     findings = []
     for name in KNOWLEDGE_FOLDERS:
@@ -309,7 +311,7 @@ def audit_when_to_update(deck):
         for f in _artifact_files(folder):
             wtu = parse_frontmatter(f.read_text(encoding="utf-8")).get("when_to_update")
             if wtu is None:
-                continue  # 可选字段
+                continue  # optional field
             s = str(wtu).strip()
             low = s.lower()
             vague = (not s) or any(t in low or t in s for t in VAGUE_TOKENS)
@@ -317,7 +319,7 @@ def audit_when_to_update(deck):
             if vague or not concrete:
                 findings.append(_finding(
                     "when_to_update", "WARNING", f,
-                    f"{name}/{f.name} 的 when_to_update 过泛/空：写成具体改动事件（改了X/新增Y/动了Z文件）",
+                    f"{name}/{f.name} when_to_update too vague/empty: write a concrete change event (changed X / added Y / touched file Z)",
                 ))
     return findings
 

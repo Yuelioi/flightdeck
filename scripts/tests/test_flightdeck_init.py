@@ -9,19 +9,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from flightdeck_init import init, main
 
-# 全量文件夹列表（含 3.0 新结构：references 替代 charts，docs 正式加入）
+# full folder list (3.0 structure: references replaces charts, docs is now a first-class folder)
 FOLDERS = ["specs", "plans", "incidents", "checklists", "docs", "references"]
 
 
 class InitTest(unittest.TestCase):
     def test_creates_full_deck_and_substitutes_cockpit(self):
         with tempfile.TemporaryDirectory() as d:
-            init(d, name="myproj", user="月离", date="2026-06-03",
+            init(d, name="myproj", user="yueli", date="2026-06-03",
                  focus="just exploring", next_item="decide what to build")
             deck = Path(d) / "flightdeck"
             cockpit = (deck / "cockpit.md").read_text(encoding="utf-8")
             self.assertIn("# Cockpit — myproj", cockpit)
-            self.assertIn("2026-06-03 · 月离 · Stage: deck initialized", cockpit)
+            self.assertIn("2026-06-03 · yueli · Stage: deck initialized", cockpit)
             self.assertIn("Focus: just exploring", cockpit)
             self.assertIn("decide what to build", cockpit)
             self.assertNotIn("<FOCUS", cockpit)
@@ -47,7 +47,7 @@ class InitTest(unittest.TestCase):
             self.assertNotIn("disabled_folders", rules)  # removed in the autonomy-convergence pass
 
     def test_references_folder_exists(self):
-        """scaffold charts→references 完成后 references/INDEX.md 应存在。"""
+        """after the scaffold charts→references rename, references/INDEX.md must exist."""
         with tempfile.TemporaryDirectory() as d:
             init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
             deck = Path(d) / "flightdeck"
@@ -55,7 +55,7 @@ class InitTest(unittest.TestCase):
             self.assertFalse((deck / "charts").exists(), "charts/ should be gone")
 
     def test_docs_folder_exists(self):
-        """scaffold 已含 docs/INDEX.md，新建 deck 应直接携带。"""
+        """the scaffold already carries docs/INDEX.md, so a new deck should ship it directly."""
         with tempfile.TemporaryDirectory() as d:
             init(d, name="p", user="u", date="2026-06-03", focus="f", next_item="n")
             deck = Path(d) / "flightdeck"
