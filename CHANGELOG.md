@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-alpha.3] — 2026-06-19
+
+cockpit 再设计（纯恢复载荷）+ skills 全英文。设计沉淀 `docs/cockpit-design.md`。**Breaking**：cockpit 字段重命名（`Active focus→Focus`、`Last updated→Updated`、加 `Pointers`），存量 deck 与依赖旧字段名的工具/emit 需同步。
+
+### Added
+- **cockpit 字段重设计**（`docs/cockpit-design.md`）— 纯恢复载荷原则（pointer-vs-record）：`Updated` 纯戳（无 changelog）、`Focus` 一行标签+链接（无目标/判据）、新 `Pointers` 薄导航行、`Next` 单步+进度移 plan `## Progress`；`In Progress` AUTO 渲染 summary 截断头部（≤80 字，`flightdeck_index.py` `_truncate_inprogress_summary`）。landing Length check 加「角色越界」判据；walkaround **Audit 16** 浮出 cockpit 字段结构/角色 conformance。
+- **Key Context 中转暂存生命周期** — Key Context 不再永久驻留：referent 死即 drain（近确定性、自动 + 可 undo）、耐用条目 graduate 到 home-by-kind（`rules.md` / `docs/` / agent 指令文件）。`Pending Review` 加 aged-prompt：跨 ≥1 landing 未签收 → landing 逐条逼问（sign off / keep / drop），签收仍显式。
+- **发布面英文硬门** — `checklists/version-bump.md` 加 pre-release gate：`rg -lP '\p{Han}' skills scaffolds` 必须为空，CI 式挡住中文漂回 ship 面。
+
+### Changed
+- **skills/ + scaffolds/ 全英文** — 翻译 10 个 skill 文件（散文 / heading / anchor / 示例）；中文约定名改 `## Review notes`、`## Project-specific`、`## Design tradeoffs` 等；中文 heading `验证非阻塞` 改名 `Non-blocking verification` + 全锚点同步（零断链）。`CLAUDE.md` 强化「对话中文 / 发布面英文」对比，点名漂移根因。
+- **多 agent 中立** — override 权威序与「常驻 meta 家」去 CLAUDE.md 写死，统一为「项目的 agent 指令文件（`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`，按运行的 agent）」（protocol + templates 三处）。
+
+### Breaking
+- **cockpit 字段重命名**：`Active focus→Focus`、`Last updated→Updated`、新增 `Pointers` 行。`emit-agents-md` 改读 `Focus:`（非 `**Active focus**:`）；存量 deck 的旧字段名 + 依赖旧名的脚本/测试需同步（alpha 期允许破坏；3.1 再就地迁移）。
+
 ## [3.0.0-alpha.2] — 2026-06-19
 
 cockpit 模型升级（alpha 反馈驱动）。**Breaking**：cockpit 段名全英文化，存量中文-header deck 过不了新 lint——alpha 期可破坏，本仓 dogfood 已同步；其它 deck 用 `/flightdeck:launch` 新建后搬运，或等 3.1 就地迁移。
