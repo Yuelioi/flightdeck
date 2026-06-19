@@ -127,6 +127,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:new` | Author a deck artifact (spec/plan/incident/checklist/reference/doc) — stamps frontmatter + naming, regenerates INDEX/cockpit. Use instead of hand-writing. |
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
 | `/flightdeck:walkaround` | Integrity audit — protocol-drift detection. |
+| `/flightdeck:conform` | Format an old deck to the current canonical shape — script prunes non-schema frontmatter + stamps rules + adds missing sections, then the AI reshapes `cockpit.md`/`rules.md` and fills semantic fields. Dry-run first (`--check`). |
 | `/flightdeck:emit-agents-md` | Regenerate `AGENTS.md` from `cockpit.md`. |
 | `/flightdeck:sync` | Refresh this deck's vendored shared-knowledge files against their master deck — newest wins (`last_updated`), preserves the project-specific section. `push <path>` promotes a local file up to the master; `--fanout` pushes a master edit to every consumer. |
 
