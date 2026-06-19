@@ -89,7 +89,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 - **value** = a one-line **how-to-verify** note (e.g. `verify: 相位4 各家 live 实证`) — so the debt's *content* survives any cockpit edit/regen and the deterministic scan can re-surface it;
 - **absent** = verified, or no verification needed.
 
-Binary present/absent only — there is **no `verify: failed` value** (a failed verification revives the artifact and **keeps** `verify`; see [验证非阻塞](#验证非阻塞-non-blocking-verification)). Optional; applies to a knowledge `stale` artifact (written-but-unverified) and a workflow `done` artifact (substantively-done-but-unverified). **It is not a 4th workflow status** — the status value sets are unchanged (workflow `idea/active/done`, knowledge `active/stale/obsolete`); `verify` only modifies how a given status reads. Every preflight/landing/walkaround re-surfaces the debt via a deterministic scan of the `verify` field across the active tree + `archive/` (`flightdeck_index.py --verify-pending`).
+Binary present/absent only — there is **no `verify: failed` value** (a failed verification revives the artifact and **keeps** `verify`; see [验证非阻塞](#non-blocking-verification)). Optional; applies to a knowledge `stale` artifact (written-but-unverified) and a workflow `done` artifact (substantively-done-but-unverified). **It is not a 4th workflow status** — the status value sets are unchanged (workflow `idea/active/done`, knowledge `active/stale/obsolete`); `verify` only modifies how a given status reads. Every preflight/landing/walkaround re-surfaces the debt via a deterministic scan of the `verify` field across the active tree + `archive/` (`flightdeck_index.py --verify-pending`).
 
 ## Status ⟂ location (two orthogonal axes)
 
@@ -150,7 +150,7 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 |---|---|---|---|
 | Recent changed paths intersect doc's `applies_to` | `active→stale` (or no-op if already `stale`) | exit-ritual (landing/soft-landing) | **auto** (landing; idempotent) |
 | User confirms doc is now current | `stale→active` | user-asserted only | **never auto** |
-| Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [验证非阻塞](#验证非阻塞-non-blocking-verification)) |
+| Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [验证非阻塞](#non-blocking-verification)) |
 | User confirms doc is dead / obsolete | `→obsolete` | user-asserted only | **never auto** |
 | Ritual detects `obsolete` knowledge artifact | drain to `archive/` (location change, not a new status) | landing | **auto** (same drain logic as `done`) |
 
@@ -159,7 +159,7 @@ Iron rules:
 - `idea` carries **no date prefix**; `idea→active` is the **only** rename point and is **idempotent** (skip if the name already has a `^\d{4}-\d{2}-\d{2}-` prefix).
 - **Rejecting** a workflow artifact **deletes the file** — only on explicit user instruction (the AI never abandons work unilaterally). git log preserves the history; record a one-line reason in the commit body. There is no `scrapped` status value, no tombstone, no `### 已否决` group.
 - `done`'s trigger source (no-verify task) = **the user's asserted approval / sign-off** (an asserted fact). The AI does **not** self-assess completion or judge it from a smoke-check. **Unchanged.**
-- **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [验证非阻塞](#验证非阻塞-non-blocking-verification).
+- **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [验证非阻塞](#non-blocking-verification).
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
 Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: the exit ritual (landing/soft-landing) intersects this turn's changed paths with each knowledge artifact's `applies_to` paths and auto-flips `status: stale` on a hit (idempotent — already-stale is a no-op); preflight neither detects nor flips stale (纯读零写) — stale visibility rides the folder INDEX rows (`⚠`) it already loads. The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; landing drains it to `archive/`.
@@ -179,7 +179,7 @@ The optional `note:` field carries the "why it hasn't moved" diagnostic (blocker
 
 Status is just a label — the user edits it freely; at landing the AI **applies** the next typical status by judgment (per the recommended flow) and **reports it in the banner** — reversible, so no confirm gate (the user can undo; see [Act-report-close loop](#act-report-close-loop)). walkaround flags odd values as INFO/warning, never blocks.
 
-### 验证非阻塞 (non-blocking verification)
+### Non-blocking verification
 
 Verification is a **non-blocking marker, not a blocking gate**. The old "needs-verify → AI may NOT self-assert `done`" gate is **removed**: the AI **may** self-assert `done` (workflow) or write `stale` (knowledge) carrying a [`verify`](#verify--the-verification-marker) note. Safety comes from **visibility** — every preflight re-surfaces the verify debt via a deterministic scan — **plus reversibility**, NOT from blocking. Premise: preflight is the standard, 必经 entry — flightdeck's existing "single explicit entry point" design.
 
@@ -253,7 +253,7 @@ Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase (
 
 **Idempotency:** `stale` detection is idempotent — already-`stale` docs are a no-op.
 
-**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the **no-verify** `→done` rule. The AI does not self-certify either direction — except via the verify-pass path (see [验证非阻塞](#验证非阻塞-non-blocking-verification)), where the SKILL flips `stale→active` on a user-performed verification that passes.
+**User-asserted exits only:** `stale→active` (after updating the doc to current truth) and `→obsolete` (confirming the doc is dead) are **both user-asserted**, consistent with the **no-verify** `→done` rule. The AI does not self-certify either direction — except via the verify-pass path (see [验证非阻塞](#non-blocking-verification)), where the SKILL flips `stale→active` on a user-performed verification that passes.
 
 ### Proactive incident resurfacing
 

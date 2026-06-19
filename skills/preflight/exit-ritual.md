@@ -263,7 +263,7 @@ This forces a structured decision in seconds. The "skip the write" option is cri
 
 ## Self-asserting `done` — non-blocking, carry `verify`
 
-The AI **may** self-assert `done` on **any** task — including needs-verify work — but a needs-verify `done` **must carry a `verify: <一行怎么验>` marker** (the verification debt, not a refusal to mark it done). The old needs-verify *block* (which forbade self-asserting `done` on such work) is **removed**: verification is now a [non-blocking marker, not a gate](protocol.md#验证非阻塞-non-blocking-verification). The boundary is still **rule-first, examples-second** (avoid the "list = exhaustive" trap):
+The AI **may** self-assert `done` on **any** task — including needs-verify work — but a needs-verify `done` **must carry a `verify: <一行怎么验>` marker** (the verification debt, not a refusal to mark it done). The old needs-verify *block* (which forbade self-asserting `done` on such work) is **removed**: verification is now a [non-blocking marker, not a gate](protocol.md#non-blocking-verification). The boundary is still **rule-first, examples-second** (avoid the "list = exhaustive" trap):
 
 - **Rule:** anything that will be **mechanically executed by AI or scripts, where a misjudgment is not easily noticed**, is **needs-verify** — self-assert `done` **and** stamp `verify:` so the debt survives. Everything else is no-verify (`done`, no `verify`).
 - **Examples (non-exhaustive, needs-verify):** any external-system change (open PR, deploy, write DB, send email…); governance / data-model edits (`protocol.md`, `rules.md`, `AGENTS.md`, frontmatter fields, script contracts).
@@ -276,7 +276,7 @@ The AI **may** self-assert `done` on **any** task — including needs-verify wor
 
 ### Resolving a `verify` debt — per-kind pass/fail
 
-When the user performs the verification, act per the artifact's kind. The canonical pass/fail table lives in [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification) — the operational steps here defer to it. **First identify the kind** (knowledge vs workflow — by folder), then:
+When the user performs the verification, act per the artifact's kind. The canonical pass/fail table lives in [protocol § 验证非阻塞](protocol.md#non-blocking-verification) — the operational steps here defer to it. **First identify the kind** (knowledge vs workflow — by folder), then:
 
 - **Verify passes:**
   - **workflow** (`done` + `verify`): **drop the `verify` field**; it stays `done` and now enters the `--archivable` set (no inbound `active` edge → lands on the next sweep).
