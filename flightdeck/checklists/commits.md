@@ -4,7 +4,6 @@ synced: true
 last_updated: 2026-05-29
 when_to_read: before writing a commit message / staging files / preparing a PR
 applies_to: [commit, git, staging, message, push, pr]
-portable: true   # §通用 部分项目无关; §项目覆盖 是本仓库专属, 移植时整段替换
 ---
 # Commits Playbook
 
