@@ -4,7 +4,6 @@ synced: true
 last_updated: 2026-05-29
 when_to_read: before writing or editing any source-code comment
 applies_to: [comments, code-style, documentation]
-portable: true   # 项目无关, 可直接拷到其它仓库复用
 ---
 
 # Comments Playbook
