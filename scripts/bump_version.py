@@ -24,11 +24,31 @@ MANIFESTS = [
     "gemini-extension.json",
 ]
 
+# Both READMEs hardcode the version (no dynamic badge) and drift silently when only the
+# manifests get bumped — so the bumper owns them too. Each carries the version at anchored
+# sites only; bare semvers in prose (e.g. "the final 3.0.0") must stay put.
+READMES = ["README.md", "README.zh.md"]
+
 # Only quoted semver (optional pre-release, e.g. 3.0.0-alpha.1) — never an
 # unquoted integer schema version.
 _SEMVER = r"\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?"
 VERSION_RE = re.compile(r'("version"\s*:\s*")(' + _SEMVER + r')(")')
 CHANGELOG_RE = re.compile(r"^##\s*\[(" + _SEMVER + r")\]", re.MULTILINE)
+
+# README version sites, each (prefix, version, suffix). Anchored tight so prose semvers
+# never match. The shields badge URL escapes a literal '-' as '--', so its version token
+# is captured loosely (between `version-` and `-orange`) and round-tripped via _dash/_undash.
+_BADGE_URL_RE = re.compile(r"(/badge/version-)(.+?)(-orange)")
+_BADGE_ALT_RE = re.compile(r"(\[!\[Version:\s*)(" + _SEMVER + r")(\])")
+_BANNER_RE = re.compile(r"(>\s*\*\*`)(" + _SEMVER + r")(`)")
+
+
+def _dash(v):
+    return v.replace("-", "--")  # semver -> shields URL escaping
+
+
+def _undash(v):
+    return v.replace("--", "-")  # shields URL escaping -> semver
 
 
 def read_versions(root):
@@ -48,6 +68,37 @@ def set_version(root, new):
             lambda m: m.group(1) + new + m.group(3), p.read_text(encoding="utf-8")
         )
         p.write_text(text, encoding="utf-8")
+    set_readme_version(root, new)
+
+
+def set_readme_version(root, new):
+    root = Path(root)
+    for rel in READMES:
+        p = root / rel
+        if not p.exists():  # READMEs are optional in test fixtures
+            continue
+        text = p.read_text(encoding="utf-8")
+        text = _BADGE_URL_RE.sub(lambda m: m.group(1) + _dash(new) + m.group(3), text)
+        text = _BADGE_ALT_RE.sub(lambda m: m.group(1) + new + m.group(3), text)
+        text = _BANNER_RE.sub(lambda m: m.group(1) + new + m.group(3), text)
+        p.write_text(text, encoding="utf-8")
+
+
+def read_readme_versions(root):
+    root = Path(root)
+    out = {}
+    for rel in READMES:
+        p = root / rel
+        if not p.exists():
+            continue
+        text = p.read_text(encoding="utf-8")
+        m = _BADGE_URL_RE.search(text)
+        if m:
+            out[f"{rel}#badge"] = _undash(m.group(2))
+        m = _BANNER_RE.search(text)
+        if m:
+            out[f"{rel}#banner"] = m.group(2)
+    return out
 
 
 def changelog_version(root):
@@ -61,13 +112,15 @@ def check(root):
     for rel, v in versions.items():
         if v is None:
             problems.append(f"{rel}: no quoted semver version field found")
-    present = {v for v in versions.values() if v}
+    sites = {rel: v for rel, v in versions.items()}
+    sites.update(read_readme_versions(root))  # READMEs drift too — verify them
+    present = {v for v in sites.values() if v}
     if len(present) > 1:
-        detail = ", ".join(f"{rel}={v}" for rel, v in versions.items())
-        problems.append(f"manifests disagree: {detail}")
+        detail = ", ".join(f"{rel}={v}" for rel, v in sites.items())
+        problems.append(f"version sites disagree: {detail}")
     cl = changelog_version(root)
     if present and cl and cl not in present:
-        problems.append(f"CHANGELOG top [{cl}] != manifests {sorted(present)}")
+        problems.append(f"CHANGELOG top [{cl}] != version sites {sorted(present)}")
     return problems
 
 

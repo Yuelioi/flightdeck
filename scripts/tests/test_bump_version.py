@@ -38,6 +38,75 @@ def make_repo(root, version="2.3.0", changelog="2.3.0"):
     return root
 
 
+def make_readme(root, version):
+    """Minimal README.md + README.zh.md carrying the 3 version sites + a bare-semver trap.
+
+    The trap (`final 3.0.0` / `正式 3.0.0`) is an un-anchored semver in prose that must
+    never be rewritten — only the badge + banner-leading version token may move.
+    """
+    root = Path(root)
+    dashed = version.replace("-", "--")  # shields escapes a literal '-' as '--'
+    (root / "README.md").write_text(
+        "# flightdeck\n\n"
+        f"[![Version: {version}](https://img.shields.io/badge/version-{dashed}-orange?style=flat-square)](CHANGELOG.md)\n"
+        "[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)\n\n"
+        f"> **`{version}` — pre-release for early testers.** Format may change before the final 3.0.0.\n",
+        encoding="utf-8",
+    )
+    (root / "README.zh.md").write_text(
+        "# flightdeck\n\n"
+        f"[![Version: {version}](https://img.shields.io/badge/version-{dashed}-orange?style=flat-square)](CHANGELOG.md)\n\n"
+        f"> **`{version}` —— 面向早期试用者的预发布版。** 正式 3.0.0 之前格式仍可能再变。\n",
+        encoding="utf-8",
+    )
+    return root
+
+
+class ReadmeVersionTest(unittest.TestCase):
+    def test_set_rewrites_badge_and_banner_in_both_readmes(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="3.0.0-alpha.2", changelog="3.0.0-alpha.4")
+            make_readme(root, "3.0.0-alpha.2")
+            set_version(root, "3.0.0-alpha.4")
+            for rel in ("README.md", "README.zh.md"):
+                text = (Path(root) / rel).read_text(encoding="utf-8")
+                self.assertIn("[![Version: 3.0.0-alpha.4]", text)
+                self.assertIn("/badge/version-3.0.0--alpha.4-orange", text)
+                self.assertIn("**`3.0.0-alpha.4`", text)
+                self.assertNotIn("alpha.2", text)
+
+    def test_set_preserves_bare_semver_in_readme_prose(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="3.0.0-alpha.2", changelog="3.0.0-alpha.4")
+            make_readme(root, "3.0.0-alpha.2")
+            set_version(root, "3.0.0-alpha.4")
+            self.assertIn(
+                "final 3.0.0", (Path(root) / "README.md").read_text(encoding="utf-8")
+            )
+            self.assertIn(
+                "正式 3.0.0", (Path(root) / "README.zh.md").read_text(encoding="utf-8")
+            )
+
+    def test_check_flags_readme_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="3.0.0-alpha.4", changelog="3.0.0-alpha.4")
+            make_readme(root, "3.0.0-alpha.2")  # README behind the manifests
+            problems = check(root)
+            self.assertTrue(any("README" in p for p in problems))
+
+    def test_check_passes_when_readme_matches(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="3.0.0-alpha.4", changelog="3.0.0-alpha.4")
+            make_readme(root, "3.0.0-alpha.4")
+            self.assertEqual(check(root), [])
+
+    def test_set_tolerates_missing_readmes(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_repo(d, version="2.3.0")  # no README files written
+            set_version(root, "2.4.0")  # must not raise
+            self.assertEqual(set(read_versions(root).values()), {"2.4.0"})
+
+
 class CheckTest(unittest.TestCase):
     def test_passes_when_all_consistent(self):
         with tempfile.TemporaryDirectory() as d:
