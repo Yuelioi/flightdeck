@@ -29,13 +29,15 @@ General project conventions (code style, "branch before committing") belong in t
 
 ### Authoring notes
 
-- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version` — the **only** structured field. Behavior resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (deck `### Rules` → environment inference → built-in default / skill judgment).
+- **Mandatory file** — part of the minimal contract (`rules.md` + `cockpit.md`). Must exist and carry `version`. Recorded-config fields also live in frontmatter: `runtime` (`uv|python|node`, stamped by launch) and `agents_md` (`auto|off`). Behavior resolves via [protocol § Rule resolution order](protocol.md#rule-resolution-order) (frontmatter field → deck `### Rules` → built-in default / skill judgment).
 - **`version` is deck identity, not a toggle.** Records the flightdeck release this deck conforms to — a static stamp written by `launch`, the future (3.0→3.1) migration anchor. **No ritual reads or bumps it at runtime.**
-- **`### Rules` is AI-authored, not a toggle catalog (3.0).** There is no magic-string vocabulary. When you state a persistent preference, the AI appends a free-prose rule here (with source/date) and honors it above the default. What used to be toggles are now inference / default / skill-judgment, each overridable by a deck rule:
-  - `git` → inferred: git-backed iff an ancestor `.git` exists **and** the deck is not gitignored; a deck rule (e.g. "this deck doesn't use git") overrides.
+- **`### Rules` is AI-authored, not a toggle catalog (3.0).** There is no magic-string vocabulary. When you state a persistent preference, the AI appends a free-prose rule here (with source/date) and honors it above the default. Settings not covered by frontmatter fields resolve via deck rules or built-in defaults:
+  - `git` → **install precondition** (launch refuses without it); not configurable via `### Rules`.
+  - `runtime` / `agents_md` → **recorded frontmatter fields** (stamped by launch / set at deck creation); not `### Rules` prose.
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates (the only bootstrap path from a no-`AGENTS.md` start).
-  - `commit` → **local commit auto, push asks** (local reversible; push outward). A deck rule can ask-before-commit or disable auto-commit; under no-git there is no commit regardless.
-  - ritual self-invocation → **all five rituals always self-invoke**; archiving is **landing's judgment** (not a toggle); `scripts` inferred from runtime; no `disabled_folders`.
+  - `commit` → **local commit auto, push asks** (local reversible; push outward). A deck rule can ask-before-commit or disable auto-commit.
+  - ritual self-invocation → **all five rituals always self-invoke**; archiving is **landing's judgment** (not a toggle); no `disabled_folders`.
+- **Frontmatter settings outrank conflicting `### Rules` prose** for the keys they cover. A field (`runtime: node`) wins over a prose line that contradicts it ("always use python"); prose only governs preferences with **no** corresponding field.
 - **Authority**: **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`) > deck `### Rules` > defaults.** General project conventions belong in that agent file, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
