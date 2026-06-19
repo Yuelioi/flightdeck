@@ -171,14 +171,15 @@ version: <release>       # 唯一的结构化字段
 
 ## 跨项目共享知识
 
-有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用同一份权威副本。flightdeck 用**下发式共享知识（vendored shared-knowledge）**来处理：一份 checklist 或 doc 存在**母库（master deck）**里，被拷贝进各消费 deck，按需保持同步。
+有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用同一份权威副本。flightdeck 用**下发式共享知识（vendored shared-knowledge）**来处理：一份 checklist 或 doc 存在**母库（master deck）**里，被拷贝进各消费 deck，进项目时自动刷新（也可按需手动）。
 
 - **母库** —— 固定在 `~/.flightdeck`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
 - **下发副本** —— frontmatter 标 `synced: true`，且镜像母库的相对路径。`<!-- flightdeck:project-specific -->` 锚把文件切两段：锚以上是 **shared 段**（母库所有），锚以下是你 deck 的**项目段**（你的，永不被碰）。
 - **单写者** —— 母库是 shared 段唯一写者，consumer 从不改它。判过期靠 shared 段内容指纹，所以同步是纯脚本文本 splice —— AI 一字不读、零 token。
-- **`/flightdeck:sync`** —— 把过期文件的 shared 段从母库拉下来，逐字保留你的项目段和 frontmatter。
+- **进场自动刷新** —— `/flightdeck:preflight` 在读 deck 前先跑同一个机械 pull，项目下次开工就自愈到最新共享知识，基本不用手动 sync。
+- **`/flightdeck:sync`** —— 显式按需跑：把过期文件的 shared 段从母库拉下来，逐字保留你的项目段和 frontmatter。
 - **`/flightdeck:sync promote <path>`** —— 把**本地新写**的文件上提到母库（唯一的 consumer→母库 路径；shared 段无 back-flow），并把本 deck 注册为消费者。
-- **`/flightdeck:sync --fanout`** —— 改完母库文件后，一次性把改动推给每个消费 deck。母库记录自己的消费者，因此一处共享改动无需逐个项目手动同步即可传播。
+- **`/flightdeck:sync --fanout`** —— 可选：改完母库文件后，立刻推给每个已注册 consumer，而不必等各自下次进场刷新。
 
 只有 `checklists/` 和 `docs/` 参与共享。没有下发文件的 deck 从不碰母库，可独立工作。
 

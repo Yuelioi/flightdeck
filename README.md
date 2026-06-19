@@ -172,14 +172,15 @@ To change a behavior, **just tell the AI a persistent preference in plain langua
 
 ## Shared knowledge across projects
 
-Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one canonical copy across every deck you run. flightdeck handles this with **vendored shared-knowledge**: a checklist or doc lives in a **master deck** and is copied into each consuming deck, kept in sync on demand.
+Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one canonical copy across every deck you run. flightdeck handles this with **vendored shared-knowledge**: a checklist or doc lives in a **master deck** and is copied into each consuming deck, refreshed automatically on session entry (or on demand).
 
 - **Master deck** — fixed at `~/.flightdeck`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
 - **Vendored copy** — carries `synced: true` in its frontmatter and mirrors the master's relative path. A `<!-- flightdeck:project-specific -->` marker splits the file: everything above is the **shared region** (master-owned), everything below is your deck's **project section** (yours, never touched).
 - **Single writer** — the master is the sole writer of the shared region; a consumer never edits it. Staleness is a content fingerprint over that region, so a sync is a mechanical text splice — the AI reads nothing and spends no tokens.
-- **`/flightdeck:sync`** — pulls any stale file's shared region from the master, keeping your project section and frontmatter verbatim.
+- **Auto-refresh on entry** — `/flightdeck:preflight` runs that same mechanical pull before it reads the deck, so a project self-heals to the latest shared knowledge on its next session. You rarely sync by hand.
+- **`/flightdeck:sync`** — the explicit on-demand run: pulls any stale file's shared region from the master, keeping your project section and frontmatter verbatim.
 - **`/flightdeck:sync promote <path>`** — lifts a *new* locally-authored file up to the master (the only consumer→master path; there is no shared-region back-flow), registering this deck as a consumer.
-- **`/flightdeck:sync --fanout`** — after you edit a master file, pushes the change to every consuming deck in one pass. The master tracks its consumers, so a shared edit propagates without visiting each project by hand.
+- **`/flightdeck:sync --fanout`** — optional: after editing a master file, push it to every registered consumer at once instead of letting each pick it up on its next entry.
 
 Only `checklists/` and `docs/` participate. A deck with no vendored files never touches the master and works standalone.
 
