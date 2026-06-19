@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context, sync drift (vendored shared-knowledge upstream-changed / dangling), cockpit field-structure conformance (Audit 16). Triggered by `/flightdeck:walkaround`.
+description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context, sync drift (vendored shared-knowledge stale / dangling), cockpit field-structure conformance (Audit 16). Triggered by `/flightdeck:walkaround`.
 ---
 
 # Flightdeck Walkaround
@@ -51,8 +51,7 @@ Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 15** — Check vendored files carrying `synced: true`. Sync state uses the read-only `flightdeck_index <deck> --sync-status` (emits `state<TAB>relpath`; the master store is fixed at `~/.flightdeck`):
 - Validate the relpath invariant: no source file at the same relpath in the master store → `dangling`, report **WARNING**;
-- `upstream-changed` (master source is newer) → report **INFO** "N shared files updated upstream — run `/flightdeck:sync`";
-- `locally-ahead` (the consumer copy is newer) → report **INFO** (this project's copy is newer, consider pushing it back);
+- `stale` (the shared-region fingerprint differs from the master's) → report **INFO** "N shared files stale — run `/flightdeck:sync`";
 - `master-missing` (`~/.flightdeck` absent) → **do not report** (no master store on this machine, not drift).
 
 Also check (reading frontmatter directly, not `--sync-status` output): a consumer-side `synced: true` file that carries a `consumers` field → report **WARNING** (`consumers` is a master-store-only field, must be stripped when vendoring; its presence in a consumer copy is illegal).
