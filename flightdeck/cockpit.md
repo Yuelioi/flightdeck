@@ -9,7 +9,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 ## In Progress
 
 <!-- AUTO:inprogress -->
-
+- [2026-06-20-sync-mechanical-pull.md](specs/2026-06-20-sync-mechanical-pull.md) — 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，<!-- flightde…
 <!-- /AUTO -->
 
 ## Next
