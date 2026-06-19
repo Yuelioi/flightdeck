@@ -1,17 +1,20 @@
 # Cockpit — [project name]
 
-**Last updated**: YYYY-MM-DD by [who] (one-line state)
-**Active focus**: <ACTIVE_FOCUS — filled by preflight first-time-setup>
+Updated: YYYY-MM-DD · [who] · Stage: <lifecycle stage>
+
+Focus: <FOCUS — one coarse thread label + spec/plan link, filled by preflight first-time-setup>
+
+Pointers: config → rules.md · artifacts → folder INDEXes · history → archive/
+
+## Next
+
+<FIRST_NEXT_ITEM — single concrete action + plan link, filled by preflight first-time-setup>
 
 ## In Progress
 
 <!-- AUTO:inprogress -->
 
 <!-- /AUTO -->
-
-## Next
-
-<FIRST_NEXT_ITEM — filled by preflight first-time-setup>
 
 ## Key Context
 
