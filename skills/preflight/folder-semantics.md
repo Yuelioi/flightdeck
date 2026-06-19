@@ -82,7 +82,7 @@ Read first by every entry skill. As of 3.0 it carries just `version` + free-pros
 
 ### No separate landing log
 
-flightdeck keeps **no history-log file** under any git mode. The durable landing record is the moved files in `archive/` (+ `git log` on git-backed decks) — `preflight` reads files, not a journal. A no-git deck (e.g. a gitignored `flightdeck/`) loses nothing: the archived artifacts themselves are the history.
+flightdeck keeps **no history-log file**. The durable landing record is the moved files in `archive/` (+ `git log`) — `preflight` reads files, not a journal.
 
 ## INDEX.md (per-folder)
 
