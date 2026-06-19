@@ -71,7 +71,7 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `synced` | checklists/docs（仅 vendored） | optional（布尔标记，无路径） | `/flightdeck:sync` + walkaround sync-drift（`flightdeck_index.py --sync-status`） | `sync`（首发下发 / `push` promote 时戳） | sync-drift audit：校验 relpath 不变量（母库无同 relpath 源 → `dangling`）；缺失**绝不**报警 |
 | `consumers` | checklists/docs（仅母库文件） | 母库专属（消费副本剔除） | `/flightdeck:sync --fanout`（扇出至所有已注册消费 deck） | `--register-consumer` 写入；`--prune-consumers` 清理 | 消费端出现此键 → WARNING（非法） |
 
-`cockpit.md` board fields (`Last updated` / `Active focus` / `## In Progress` / `## Next` / `## Hanging Tasks`) are not YAML frontmatter. `## In Progress` is an AUTO region derived from `status: active` spec/plan; `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
+`cockpit.md` board fields (`Updated` / `Focus` / `Pointers` / `## Next` / `## In Progress` / `## Key Context` / `## Pending Review` / `## Hanging Tasks`) are not YAML frontmatter. **Pointer-vs-record boundary:** cockpit materializes only irreducible judgment plus one cheap projection (`## In Progress`); records live in their homes — history → `git log`, progress → plan `## Progress`, goal/criteria/method → spec body, durable invariants → `rules.md`, knowledge → folder INDEXes — and cockpit only links to them. `## In Progress` is an AUTO region derived from `status: active` spec/plan (rendering a truncated summary head); `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
 
 ### Supersession model
 
@@ -305,7 +305,7 @@ A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just 
 
 Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus the **unified soft-landing banner** — see [Act-report-close loop](#act-report-close-loop) — no commit/archive); default-on, downgradable via a deck `### Rules` entry. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
 
-A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Active focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
+A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
@@ -374,7 +374,7 @@ Work may stop at any stage and be interrupted; the banner `[Stage]` + the board 
 
 | Stage | Recovery anchor |
 | --- | --- |
-| brainstorming | no artifact yet; cockpit Active focus / Next records "brainstorming X, asked up to …"; decided points incrementally soft-land into a spec |
+| brainstorming | no artifact yet; cockpit Focus / Next records "brainstorming X, asked up to …"; decided points incrementally soft-land into a spec |
 | spec written | spec(active) in In Progress; Next = review → write plan |
 | plan written | plan(active) in In Progress; Next = execute plan step N |
 | plan partially done | Next = continue from the next unfinished step (plan `## Progress`); finished parts not redone |
@@ -382,7 +382,7 @@ Work may stop at any stage and be interrupted; the banner `[Stage]` + the board 
 | review passed | trigger landing: flip done, archive, commit |
 | ad-hoc (no spec/plan) | cockpit Next states "doing X, up to …"; reversible done + reported per the banner |
 
-**Stage derivation (deterministic):** `[Stage]` = **plan status > spec status > cockpit Active focus prose** (no-artifact brainstorm / ad-hoc stages fall to prose). With both a spec and a plan present, the plan's stage wins.
+**Stage derivation (deterministic):** `[Stage]` = **plan status > spec status > cockpit Focus prose** (no-artifact brainstorm / ad-hoc stages fall to prose). With both a spec and a plan present, the plan's stage wins.
 
 **Two recovery contexts (no conflict):** *preflight recovery* reads only cockpit + INDEX (the recovery payload) — no git, no conversation (keeps preflight read-only). *Undo* is a separate user-invoked action that may read git log + the board. "Recovery only reads the board" refers to the former.
 
