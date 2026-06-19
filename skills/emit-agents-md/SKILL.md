@@ -15,9 +15,9 @@ AGENTS.md is the cross-tool standard for project-level AI instructions, stewarde
 
 ## Run this checklist
 
-### Step 0: Apply `flightdeck/rules.md` toggles
+### Step 0: Read `flightdeck/rules.md`
 
-This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` (the bootstrap path; the "auto-regen only if `AGENTS.md` already exists" rule applies to *landing*'s call, not to this command). A deck `### Rules` entry that opts out of auto-regen only suppresses the *automatic* landing-time regen — never this explicit command.
+This is the **explicit** emitter — it **always** creates/regenerates `AGENTS.md` regardless of the `agents_md` field value (it is the bootstrap path from a no-`AGENTS.md` start). The `agents_md` field (`auto|off`) gates *landing*'s **automatic** regen (`auto` regens / `off` skips — see landing step 9), **never** this explicit command. After writing the file, this command **records the intent** by flipping `agents_md` to `auto` (Step 4a) — so the file-vs-field question never arises again.
 
 ### Step 1: Read `flightdeck/cockpit.md`
 
@@ -86,6 +86,10 @@ Use Write to save.
 - File had markers: pre-marker content + new flightdeck block + post-marker content
 - File had no markers: flightdeck block + blank line + entire existing content (no footer comment — the existing content already occupies the hand-authored space)
 
+### Step 4a: Record the intent — flip `agents_md` to `auto`
+
+After `AGENTS.md` is written, set `agents_md: auto` in `flightdeck/rules.md` frontmatter — the atomic bootstrap-intent record (spec §5: regenerate the file **and** flip the field, no ordering dependency). **Idempotent**: already `auto` → no-op; field missing → add it (alongside `version` / `runtime`). This is a direct frontmatter edit (no script). Note this makes the emitter a `rules.md` writer — the one deliberate deck write it performs beyond `AGENTS.md` itself; everything outside the `agents_md` field stays untouched.
+
 ### Step 5: Verify determinism (do NOT write again)
 
 The transform must be deterministic — a hypothetical re-run would produce a byte-identical block. Don't actually re-run Steps 1–4 or re-write the file; instead self-check the block you just wrote against this checklist:
@@ -109,6 +113,7 @@ Report concisely:
   In Progress (active artifacts): <N>
   Next: <one-line, or none>
   Hanging tasks: <N>
+  agents_md: <off → auto / auto (unchanged)>
   Hand-authored content preserved: <yes / no / n/a (file missing before)>
 ```
 

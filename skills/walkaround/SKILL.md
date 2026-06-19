@@ -37,7 +37,7 @@ Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 8** — Check `.md` under `flightdeck/` that belong to no known folder / known root entry and are linked by no known entry point → flag orphan files (WARNING); a `<area>/` sub-folder under a knowledge folder is not stray; a `status: idea` spec is not an orphan; a sub-folder inside `specs/plans/` is a WARNING; a non-`.md` file not covered by folder semantics (WARNING).
 
-**Audit 9** — If repo-root `AGENTS.md` carries a flightdeck marker block → compare field-by-field against `cockpit.md` (Focus / `## In Progress` / `## Next` / hanging tasks) vs the block content → flag any field divergence (WARNING; name the diverging field).
+**Audit 9** — If repo-root `AGENTS.md` carries a flightdeck marker block → compare field-by-field against `cockpit.md` (Focus / `## In Progress` / `## Next` / hanging tasks) vs the block content → flag any field divergence (WARNING; name the diverging field). Also read `rules.md`'s `agents_md` intent vs reality (both **INFO**, never a hard finding — walkaround never fixes): `agents_md: auto` + `AGENTS.md` **absent** → "`agents_md: auto` but no AGENTS.md (next landing will create it)"; `agents_md: off` + `AGENTS.md` **present** → "AGENTS.md present but `agents_md: off` (landing won't refresh it; run `/flightdeck:emit-agents-md` or accept staleness)".
 
 **Audit 10** — Check each file in `specs/plans/` (non-archive) → aggregate those missing `summary` / `last_updated` → emit **one** aggregated INFO each (not per-file, to avoid flooding).
 

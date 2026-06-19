@@ -29,8 +29,9 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **Frontmatter field** — a recorded-config field in `rules.md` frontmatter (`runtime`, `agents_md`) read directly; no inference needed. **Frontmatter fields outrank conflicting `### Rules` prose** for the keys they cover (see [templates.md § rules.md](templates.md#rulesmd)).
 2. **Deck rule** — a matching free-prose rule in `rules.md` `### Rules` (the AI reads and honors it; it overrides the default).
-3. **Environment inference** — `emit_agents_md`: does deck root already have `AGENTS.md`? (Note: `git` is an install precondition enforced by launch — not a resolved item here.)
-4. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
+3. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
+
+There is **no environment-inference step** (3.0): `runtime` and `agents_md` are recorded frontmatter fields read at step 1 — never re-probed; `git` is a launch-enforced install precondition (launch refuses without it, then it holds at runtime), not a resolved item.
 
 **deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
 
