@@ -21,8 +21,13 @@ test_flightdeck_conform.py — changing a set is an intentional, reviewed edit.
 # dependencies = []
 # ///
 
+import re
 import sys
 from pathlib import Path
+
+# A frontmatter field line: a key at column 0 followed by a colon. Indented
+# continuations, blank lines, and comments do not match and are kept verbatim.
+_FIELD_RE = re.compile(r"^([A-Za-z_][\w-]*):")
 
 # kind → full set of legal frontmatter fields (required + every optional).
 # A field not in a file's kind set is deleted by the formatter.
@@ -81,6 +86,64 @@ def kind_of(deck, path):
     if len(parts) == 1:
         return "rules" if parts[0] == "rules.md" else None
     return FOLDER_KIND.get(parts[0])
+
+
+def prune_frontmatter(text, kind):
+    """Drop frontmatter fields not in ``LEGAL_FIELDS[kind]``.
+
+    Returns ``(new_text, removed)``. Field order is preserved, non-field lines
+    (comments, blanks) are kept verbatim, and everything after the closing
+    ``---`` is byte-for-byte unchanged. Text without a leading ``---`` block is
+    returned untouched with an empty removal list.
+    """
+    legal = LEGAL_FIELDS[kind]
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].rstrip("\n") != "---":
+        return text, []
+    out = [lines[0]]
+    removed = []
+    close = None
+    for idx in range(1, len(lines)):
+        if lines[idx].rstrip("\n") == "---":
+            close = idx
+            break
+        m = _FIELD_RE.match(lines[idx])
+        if m and m.group(1) not in legal:
+            removed.append(m.group(1))
+            continue
+        out.append(lines[idx])
+    if close is None:
+        # No closing fence — not a real frontmatter block; leave untouched.
+        return text, []
+    out.append(lines[close])
+    out.extend(lines[close + 1:])
+    return "".join(out), removed
+
+
+class Changes:
+    """Per-file conform result, accumulated as later passes are added."""
+
+    def __init__(self, path, removed=None, stamped=None,
+                 added_sections=None, missing_required=None):
+        self.path = path
+        self.removed = removed or []
+        self.stamped = stamped or []
+        self.added_sections = added_sections or []
+        self.missing_required = missing_required or []
+
+    @property
+    def changed(self):
+        return bool(self.removed or self.stamped or self.added_sections)
+
+
+def conform_file(path, kind, apply):
+    """Prune one in-scope, kind-bearing file. Writes only when ``apply``."""
+    path = Path(path)
+    text = path.read_text(encoding="utf-8")
+    new_text, removed = prune_frontmatter(text, kind)
+    if apply and new_text != text:
+        path.write_text(new_text, encoding="utf-8")
+    return Changes(path, removed=removed)
 
 
 def main(argv=None):
