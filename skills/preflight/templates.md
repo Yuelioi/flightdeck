@@ -39,8 +39,8 @@ General project conventions (code style, "branch before committing") belong in t
 - **Authority**: **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`) > deck `### Rules` > defaults.** General project conventions belong in that agent file, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
-- **`synced: true`（vendored 文件标记）** — 仅出现在从母库同步下来的 checklists/docs 文件。布尔标记，无路径；母库固定 `~/.flightdeck`，源文件 relpath 恒等于消费端自身 relpath，故不需存路径。由 `/flightdeck:sync` 写入；`flightdeck_index.py --sync-status` 消费。母库文件本体**不携带**此字段（母库文件是源头，不是消费副本）。
-- **`consumers`（母库专属注册表）** — 仅出现在母库文件（`~/.flightdeck` 下）的 frontmatter，单行 JSON 数组，记录已注册的消费 deck 路径列表。`--register-consumer` 写入、`--prune-consumers` 清理、`--list-consumers` 只读。`/flightdeck:sync --fanout` 据此扇出到所有下游。消费副本**禁止**携带此字段（walkaround Audit 15 检测非法实例）。
+- **`synced: true` (vendored-file marker)** — appears only on checklists/docs files synced down from the master store. A boolean marker, no path; the master store is fixed at `~/.flightdeck` and the source file's relpath is always identical to the consumer's own relpath, so no path is stored. Written by `/flightdeck:sync`; consumed by `flightdeck_index.py --sync-status`. The master-store file itself **does not carry** this field (a master-store file is the source, not a consumer copy).
+- **`consumers` (master-store-only registry)** — appears only in the frontmatter of master-store files (under `~/.flightdeck`); a single-line JSON array recording the list of registered consumer-deck paths. Written by `--register-consumer`, cleaned by `--prune-consumers`, read-only via `--list-consumers`. `/flightdeck:sync --fanout` fans out to all downstream consumers based on it. A consumer copy **must not** carry this field (walkaround Audit 15 detects illegal instances).
 
 ---
 
@@ -55,8 +55,9 @@ note: <one-line diagnostic>  # optional; "why it hasn't moved" (blocker / pendin
 supersedes: <path>           # optional; forward edge to the workflow artifact this replaces (path relative to flightdeck root)
 related: [<path>, ...]       # optional; weak links — shared premise / blast-radius, NOT supersedes or implements
 # optional: graduate: true
-#   — 结构性设计稿完工后本体变身常驻 docs；命中"约束后续开发/大概率反复参考"判据时
-#     由 /flightdeck:new 或 plan 执行中提示打标；landing 负责将 done 的 graduate 本体改写搬入 docs/
+#   — a structural design doc, once complete, transforms into a resident docs entry; when it hits the
+#     "constrains future development / likely referenced repeatedly" criteria, /flightdeck:new or plan
+#     execution prompts to flag it; landing rewrites the done graduate body and moves it into docs/
 # optional: verify: <one-line how-to-verify>  — field present = owes verification (an add-on marker on done/stale; preflight surfaces it); delete the field once verified
 ---
 ```
