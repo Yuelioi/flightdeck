@@ -33,7 +33,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 **deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
 
-**Override authority** (which config wins): **CLAUDE.md (project) > deck rules (`rules.md` `### Rules`) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own deck rules. Internal conflicts among deck rules are the user's responsibility — flightdeck never auto-resolves contradictory rules (it may passively flag one, never silently pick).
+**Override authority** (which config wins): **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`, per the running agent) > deck rules (`rules.md` `### Rules`) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own deck rules. Internal conflicts among deck rules are the user's responsibility — flightdeck never auto-resolves contradictory rules (it may passively flag one, never silently pick).
 
 A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `run scripts` toggle (inferred from runtime), and no `disabled_folders` (empty folders are simply not flagged).
 ## Data model (folder = kind, frontmatter = status)

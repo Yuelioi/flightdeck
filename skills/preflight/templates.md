@@ -18,7 +18,7 @@ version: 3.0             # REQUIRED — static identity stamp written by launch 
 ### Project conventions
 
 Deck-local flightdeck conventions only (e.g. "specs written in Chinese", "do not use references/").
-General project conventions (code style, "branch before committing") belong in CLAUDE.md / AGENTS.md, NOT here.
+General project conventions (code style, "branch before committing") belong in the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`, per the running agent), NOT here.
 
 ### Rules
 
@@ -36,7 +36,7 @@ General project conventions (code style, "branch before committing") belong in C
   - `emit_agents_md` → `landing` auto-regen **only if** deck root already has `AGENTS.md`; explicit `/flightdeck:emit-agents-md` **always** creates (the only bootstrap path from a no-`AGENTS.md` start).
   - `commit` → **local commit auto, push asks** (local reversible; push outward). A deck rule can ask-before-commit or disable auto-commit; under no-git there is no commit regardless.
   - ritual self-invocation → **all five rituals always self-invoke**; archiving is **landing's judgment** (not a toggle); `scripts` inferred from runtime; no `disabled_folders`.
-- **Authority**: **CLAUDE.md > deck `### Rules` > defaults.** General project conventions belong in CLAUDE.md, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
+- **Authority**: **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`) > deck `### Rules` > defaults.** General project conventions belong in that agent file, not here. Conflicts among deck rules are the user's responsibility (no auto-resolution).
 - **Malformed YAML or unparseable frontmatter** → warn and fall back to all defaults; never hard-fail.
 - **Read first**: every entry skill reads `rules.md` before acting and resolves behavior per Rule resolution order.
 - **`synced: true`（vendored 文件标记）** — 仅出现在从母库同步下来的 checklists/docs 文件。布尔标记，无路径；母库固定 `~/.flightdeck`，源文件 relpath 恒等于消费端自身 relpath，故不需存路径。由 `/flightdeck:sync` 写入；`flightdeck_index.py --sync-status` 消费。母库文件本体**不携带**此字段（母库文件是源头，不是消费副本）。
