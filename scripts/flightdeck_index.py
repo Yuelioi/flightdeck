@@ -742,6 +742,13 @@ def main(argv=None):
         "comparing last_updated against the same-relpath source under ~/.flightdeck (read-only)",
     )
     ap.add_argument(
+        "--sync-pull",
+        action="store_true",
+        help="apply mechanical shared-knowledge pull: replace each stale "
+        "synced:true file's shared region with its master's (keeps frontmatter + "
+        "project section). With --check: report only (would-pull<TAB>relpath), exit 1 if any stale.",
+    )
+    ap.add_argument(
         "--register-consumer", nargs=2, metavar=("DECK", "RELPATH"), default=None,
         help="register consumer DECK as a consumer of master file RELPATH (idempotent); "
         "DECK path is resolve()-normalized; RELPATH must be an existing master file",
@@ -806,6 +813,25 @@ def main(argv=None):
         for rel, c in prune_consumers(args.deck):
             print(f"pruned\t{rel}\t{c}")
         return 0
+
+    if args.sync_pull:
+        master_root = _resolve_master_root()
+        if master_root is None:
+            return 0                       # master-missing → graceful no-op
+        pending = False
+        for state, rel in sync_status(args.deck):
+            if state != "stale":
+                continue
+            pending = True
+            if args.check:
+                print(f"would-pull\t{rel}")
+                continue
+            cpath = Path(args.deck) / rel
+            new = pull_shared(cpath.read_text(encoding="utf-8"),
+                              (master_root / rel).read_text(encoding="utf-8"))
+            cpath.write_text(new, encoding="utf-8")
+            print(f"pulled\t{rel}")
+        return 1 if (args.check and pending) else 0
 
     drift = []
     for label, path, new_block in _index_targets(args.deck):

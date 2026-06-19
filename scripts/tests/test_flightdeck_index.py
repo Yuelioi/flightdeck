@@ -1144,5 +1144,43 @@ class SyncStatusFingerprintTest(unittest.TestCase):
                                  [("dangling", "checklists/x.md")])
 
 
+class SyncPullCliTest(unittest.TestCase):
+    def test_apply_and_check_is_dryrun(self):
+        m = flightdeck_index.PROJECT_MARKER
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "deck"
+            master = Path(d) / "master"
+            _mk(master / "checklists" / "commits.md", "---\n---\n# T\n\nFRESH\n")
+            cpath = deck / "checklists" / "commits.md"
+            _mk(cpath, f"---\nsynced: true\n---\n# T\n\nOLD\n\n{m}\nlocal\n")
+            with mock.patch.object(flightdeck_index, "_resolve_master_root",
+                                   return_value=master):
+                # --check: writes nothing, exit 1 (one file stale)
+                rc = flightdeck_index.main([str(deck), "--sync-pull", "--check"])
+                self.assertEqual(rc, 1)
+                self.assertIn("OLD", cpath.read_text(encoding="utf-8"))
+                # apply: shared region replaced, project section kept, exit 0
+                rc = flightdeck_index.main([str(deck), "--sync-pull"])
+                body = cpath.read_text(encoding="utf-8")
+                self.assertEqual(rc, 0)
+                self.assertIn("FRESH", body)
+                self.assertNotIn("OLD", body)
+                self.assertIn("local", body)
+                # second apply is a no-op now in-sync: exit 0, content stable
+                self.assertEqual(flightdeck_index.main([str(deck), "--sync-pull"]), 0)
+                self.assertEqual(body, cpath.read_text(encoding="utf-8"))
+
+    def test_master_missing_is_graceful_noop(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "deck"
+            _mk(deck / "checklists" / "commits.md",
+                "---\nsynced: true\n---\n# T\n\nbody\n")
+            with mock.patch.object(flightdeck_index, "_resolve_master_root",
+                                   return_value=None):
+                self.assertEqual(flightdeck_index.main([str(deck), "--sync-pull"]), 0)
+                self.assertEqual(
+                    flightdeck_index.main([str(deck), "--sync-pull", "--check"]), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
