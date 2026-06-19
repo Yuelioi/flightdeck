@@ -42,6 +42,14 @@ from flightdeck_index import (
 WORKFLOW_STATUSES = {"idea", "active", "done"}
 KNOWLEDGE_STATUSES = {"active", "stale", "obsolete"}
 
+# Legal values for the recorded-config frontmatter fields (spec §2).
+# Fields are optional in Phase 1 (launch stamps `runtime` in Phase 2); only
+# *present* values are validated here.
+LEGAL_SETTINGS = {
+    "runtime": {"uv", "python", "node"},
+    "agents_md": {"auto", "off"},
+}
+
 WORKFLOW_FOLDERS = ("specs", "plans")
 # KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}  — from flightdeck_index
 # IMPORTED_KINDS  = {"references"}                       — from flightdeck_index
@@ -311,6 +319,29 @@ def audit_when_to_update(deck):
                     "when_to_update", "WARNING", f,
                     f"{name}/{f.name} 的 when_to_update 过泛/空：写成具体改动事件（改了X/新增Y/动了Z文件）",
                 ))
+    return findings
+
+
+def audit_settings(deck):
+    """Settings schema — rules.md frontmatter `runtime`/`agents_md`, if present,
+    must carry a legal value (spec §2). Absent = OK (optional in Phase 1)."""
+    deck = Path(deck)
+    rules = deck / "rules.md"
+    if not rules.is_file():
+        return []
+    fm = parse_frontmatter(rules.read_text(encoding="utf-8"))
+    findings = []
+    for key, legal in LEGAL_SETTINGS.items():
+        val = fm.get(key)
+        if val is not None and val not in legal:
+            findings.append(
+                _finding(
+                    "settings",
+                    "WARNING",
+                    rules,
+                    f"rules.md `{key}: {val}` is illegal (legal: {sorted(legal)})",
+                )
+            )
     return findings
 
 

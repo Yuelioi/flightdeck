@@ -14,6 +14,7 @@ from flightdeck_lint import (
     audit_dangling_refs,
     audit_stray,
     audit_required_structure,
+    audit_settings,
     lint,
     main,
 )
@@ -452,6 +453,39 @@ class AuditWhenToUpdateTest(unittest.TestCase):
             self._doc(deck, "")
             from flightdeck_lint import audit_when_to_update
             self.assertEqual(audit_when_to_update(deck), [])
+
+
+class AuditSettingsTest(unittest.TestCase):
+    def _deck_with_rules(self, frontmatter_body):
+        d = tempfile.mkdtemp()
+        deck = Path(d)
+        (deck / "rules.md").write_text(
+            f"---\n{frontmatter_body}\n---\n\n### Rules\n", encoding="utf-8"
+        )
+        return deck
+
+    def test_legal_values_pass(self):
+        deck = self._deck_with_rules("version: 3.0\nruntime: uv\nagents_md: off")
+        self.assertEqual(audit_settings(deck), [])
+
+    def test_illegal_runtime_is_warning(self):
+        deck = self._deck_with_rules("version: 3.0\nruntime: deno")
+        findings = _by_audit(audit_settings(deck), "settings")
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0]["severity"], "WARNING")
+
+    def test_illegal_agents_md_is_warning(self):
+        deck = self._deck_with_rules("version: 3.0\nagents_md: maybe")
+        findings = _by_audit(audit_settings(deck), "settings")
+        self.assertEqual(len(findings), 1)
+
+    def test_absent_fields_pass(self):
+        deck = self._deck_with_rules("version: 3.0")
+        self.assertEqual(audit_settings(deck), [])
+
+    def test_missing_rules_file_is_noop(self):
+        deck = Path(tempfile.mkdtemp())
+        self.assertEqual(audit_settings(deck), [])
 
 
 class LintAndMainTest(unittest.TestCase):
