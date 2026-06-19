@@ -5,7 +5,7 @@
 
 ## Current focus
 
-（无活跃 spec/plan）conform ship + flightdeck_new date-parity 修复（错题已退役）；候选见 Next
+（无活跃 spec/plan）conform ship + date-parity 修复 + commits/comments.md 退役 portable（deck conform-clean）；候选见 Next
 
 ## In Progress
 
@@ -13,7 +13,6 @@ None.
 
 ## Next
 
-- （小）`checklists/comments.md` 仍带退役 `portable`（同 commits 处理：本仓+母库各删一行）。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 

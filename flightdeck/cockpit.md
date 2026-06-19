@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-20 · 月离 · Stage: conform ship + flightdeck_new date-parity 修复（错题已退役）；commits.md 退役 portable（本仓+母库）；alpha.4 仍未 push / 未 tag
+Updated: 2026-06-20 · 月离 · Stage: conform ship + flightdeck_new date-parity 修复（错题已退役）；commits/comments.md 退役 portable（本仓+母库，deck conform-clean）；alpha.4 仍未 push / 未 tag
 
 Focus: （无活跃 spec/plan）候选见 ## Next
 
@@ -14,7 +14,6 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- （小）`checklists/comments.md` 仍带退役 `portable`（同 commits 处理：本仓+母库各删一行；conform `--check` 已点名）。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
