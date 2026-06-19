@@ -50,17 +50,28 @@ class ParityBase(unittest.TestCase):
         js = SCRIPTS / f"{self.stem}.js"
         if not js.is_file():
             self.skipTest(f"{js.name} not ported yet")
-        py_deck = _copy_deck()
-        js_deck = _copy_deck()
-        rc_py, out_py, _ = _run([sys.executable], f"{self.stem}.py", py_deck, extra)
-        rc_js, out_js, _ = _run(["node"], f"{self.stem}.js", js_deck, extra)
-        self.assertEqual(out_py, out_js, f"stdout diff for {self.stem} {extra}")
-        self.assertEqual(rc_py, rc_js, f"exit-code diff for {self.stem} {extra}")
         if mutates:
+            # each run mutates, so isolate; stdout uses deck-relative paths/labels
+            # only, and the mutated files carry relative links — comparable across
+            # the two temp roots.
+            py_deck = _copy_deck()
+            js_deck = _copy_deck()
+            rc_py, out_py, _ = _run([sys.executable], f"{self.stem}.py", py_deck, extra)
+            rc_js, out_js, _ = _run(["node"], f"{self.stem}.js", js_deck, extra)
+            self.assertEqual(out_py, out_js, f"stdout diff for {self.stem} {extra}")
+            self.assertEqual(rc_py, rc_js, f"exit-code diff for {self.stem} {extra}")
             self.assertEqual(
                 _tree_snapshot(py_deck), _tree_snapshot(js_deck),
                 f"mutated-tree diff for {self.stem} {extra}",
             )
+        else:
+            # read-only: share ONE deck copy so any absolute paths in stdout
+            # (lint findings) are identical between interpreters.
+            deck = _copy_deck()
+            rc_py, out_py, _ = _run([sys.executable], f"{self.stem}.py", deck, extra)
+            rc_js, out_js, _ = _run(["node"], f"{self.stem}.js", deck, extra)
+            self.assertEqual(out_py, out_js, f"stdout diff for {self.stem} {extra}")
+            self.assertEqual(rc_py, rc_js, f"exit-code diff for {self.stem} {extra}")
 
 
 class IndexParity(ParityBase):

@@ -54,7 +54,7 @@ WORKFLOW_FOLDERS = ("specs", "plans")
 # KNOWLEDGE_KINDS = {"checklists", "incidents", "docs"}  — from flightdeck_index
 # IMPORTED_KINDS  = {"references"}                       — from flightdeck_index
 # NESTABLE_KINDS  = {"incidents", "checklists", "docs", "references"} — from flightdeck_index
-KNOWLEDGE_FOLDERS = tuple(KNOWLEDGE_KINDS)
+KNOWLEDGE_FOLDERS = tuple(sorted(KNOWLEDGE_KINDS))  # sorted = deterministic findings order (PYTHONHASHSEED-proof) + Node-port parity
 KNOWN_FOLDERS = {"specs", "plans"} | KNOWLEDGE_KINDS | IMPORTED_KINDS | {"archive"}
 KNOWN_ROOT_FILES = {"cockpit.md", "INDEX.md", "rules.md"}
 
@@ -355,7 +355,10 @@ def _collect_md(deck, repo_root):
     files = [p for p in deck.rglob("*.md") if "archive" not in p.relative_to(deck).parts]
     if repo_root is not None:
         files += list(Path(repo_root).glob("*.md"))
-    return files
+    # Deterministic order so the findings JSON is stable + Node-port byte-parity
+    # holds (rglob/readdir order is otherwise OS-dependent). Sorted by the native
+    # path string (codepoint); the constant temp-root prefix never reorders.
+    return sorted(files, key=str)
 
 
 def lint(deck, repo_root=None):
@@ -375,6 +378,12 @@ def lint(deck, repo_root=None):
 
 
 def main(argv=None):
+    # Force UTF-8 stdout (mirrors flightdeck_index.main): with ensure_ascii=False
+    # the em-dash + CJK messages must go out as UTF-8, but a captured/piped stdout
+    # on a non-UTF-8 Windows locale (e.g. cp936/gbk) would otherwise mojibake them.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     ap = argparse.ArgumentParser(
         description="Lint a flightdeck deck; emit the mechanical-audit findings as JSON."
     )
