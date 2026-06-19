@@ -11,7 +11,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const L = require('./flightdeck_lib');
 
-const { DASH, sortCp, parseFrontmatter, pyJsonArray, signatureFingerprint } = L;
+const { DASH, sortCp, parseFrontmatter, pyJsonArray, signatureFingerprint, fingerprint } = L;
 
 // ── fs + path helpers (Python read_text universal-newlines; write LF) ─────────
 function readText(p) {
@@ -424,6 +424,81 @@ function pruneConsumers(masterRoot) {
   }
   return removed;
 }
+// ── shared-knowledge section-single-writer (Python parity) ───────────────────
+// A boundary marker splits a vendored file into a master-owned shared region
+// (above) and a consumer-owned project section (below). Staleness is a content
+// fingerprint over the normalized shared region; the pull is a text splice.
+const PROJECT_MARKER = '<!-- flightdeck:project-specific -->';
+
+// Python str.splitlines(keepends=True) for \r\n | \r | \n terminators.
+function splitKeepends(text) {
+  const out = [];
+  const re = /\r\n|\r|\n/g;
+  let last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    out.push(text.slice(last, re.lastIndex));
+    last = re.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+// Body after a leading ---fenced frontmatter block (whole text when none).
+function stripFrontmatter(text) {
+  const lines = splitKeepends(text);
+  if (!lines.length || lines[0].trim() !== '---') return text;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') return lines.slice(i + 1).join('');
+  }
+  return text;
+}
+
+// Return [frontmatterInclFencesOr'', body].
+function splitFrontmatter(text) {
+  const lines = splitKeepends(text);
+  if (lines.length && lines[0].trim() === '---') {
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === '---') {
+        return [lines.slice(0, i + 1).join(''), lines.slice(i + 1).join('')];
+      }
+    }
+  }
+  return ['', text];
+}
+
+// Master-owned region: frontmatter-stripped body up to PROJECT_MARKER; the whole
+// body when the marker is absent (pure-shared file).
+function sharedRegion(text) {
+  const body = stripFrontmatter(text);
+  const idx = body.indexOf(PROJECT_MARKER);
+  return idx === -1 ? body : body.slice(0, idx);
+}
+
+// Canonicalize for fingerprint compare: NFC, LF, strip per-line trailing
+// whitespace, drop trailing blank lines.
+function normalizeShared(s) {
+  s = s.normalize('NFC').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  s = s.split('\n').map((line) => line.replace(/\s+$/, '')).join('\n');
+  return s.replace(/\n+$/, '');
+}
+
+// 12-hex sha1 of the normalized shared region (signatureFingerprint regime).
+function sharedFingerprint(text) {
+  return fingerprint(normalizeShared(sharedRegion(text)));
+}
+
+// Mechanical splice: keep consumer frontmatter + PROJECT_MARKER + project
+// section, replace the shared region with the master's body.
+function pullShared(consumerText, masterText) {
+  const [fm, body] = splitFrontmatter(consumerText);
+  const masterBody = stripFrontmatter(masterText);
+  const idx = body.indexOf(PROJECT_MARKER);
+  if (idx === -1) return fm + masterBody;
+  const tail = body.slice(idx);                 // marker + project section
+  const shared = masterBody.replace(/\n+$/, '') + '\n\n';
+  return fm + shared + tail;
+}
+
 function syncStatus(deck) {
   const masterRoot = resolveMasterRoot();
   const masterOk = masterRoot !== null;
@@ -431,18 +506,15 @@ function syncStatus(deck) {
   for (const p of walkMd(deck)) {
     const rel = relPosix(deck, p);
     if (path.basename(p) === 'INDEX.md' || rel.split('/').includes('archive')) continue;
-    let fm;
-    try { fm = parseFrontmatter(readText(p)); } catch { continue; }
+    let text;
+    try { text = readText(p); } catch { continue; }
+    const fm = parseFrontmatter(text);
     if (String(fm.synced || '').trim().toLowerCase() !== 'true') continue;
     if (!masterOk) { out.push(['master-missing', rel]); continue; }
     const masterFile = path.join(masterRoot, rel);
     if (!isFile(masterFile)) { out.push(['dangling', rel]); continue; }
-    const projLu = fm.last_updated || '';
-    const mastLu = parseFrontmatter(readText(masterFile)).last_updated || '';
-    let state;
-    if (mastLu > projLu) state = 'upstream-changed';
-    else if (mastLu < projLu) state = 'locally-ahead';
-    else state = 'in-sync';
+    const masterText = readText(masterFile);
+    const state = sharedFingerprint(text) === sharedFingerprint(masterText) ? 'in-sync' : 'stale';
     out.push([state, rel]);
   }
   return out.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
@@ -489,7 +561,7 @@ function parseArgs(argv) {
   const a = {
     deck: null, check: false, archivable: false, advanceCandidates: false,
     matchSignature: null, sigErrorType: '', changedSinceAnchor: false,
-    verifyPending: false, syncStatus: false, registerConsumer: null,
+    verifyPending: false, syncStatus: false, syncPull: false, registerConsumer: null,
     listConsumers: false, pruneConsumers: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -502,6 +574,7 @@ function parseArgs(argv) {
     else if (t === '--changed-since-anchor') a.changedSinceAnchor = true;
     else if (t === '--verify-pending') a.verifyPending = true;
     else if (t === '--sync-status') a.syncStatus = true;
+    else if (t === '--sync-pull') a.syncPull = true;
     else if (t === '--register-consumer') a.registerConsumer = [argv[++i], argv[++i]];
     else if (t === '--list-consumers') a.listConsumers = true;
     else if (t === '--prune-consumers') a.pruneConsumers = true;
@@ -568,6 +641,22 @@ function main(argv) {
     process.stdout.write(out.length ? out.join('\n') + '\n' : '');
     return 0;
   }
+  if (args.syncPull) {
+    const masterRoot = resolveMasterRoot();
+    if (masterRoot === null) return 0;            // master-missing → graceful no-op
+    let pending = false;
+    for (const [state, rel] of syncStatus(deck)) {
+      if (state !== 'stale') continue;
+      pending = true;
+      if (args.check) { out.push(`would-pull\t${rel}`); continue; }
+      const cpath = path.join(deck, rel);
+      const next = pullShared(readText(cpath), readText(path.join(masterRoot, rel)));
+      writeText(cpath, next);
+      out.push(`pulled\t${rel}`);
+    }
+    process.stdout.write(out.length ? out.join('\n') + '\n' : '');
+    return (args.check && pending) ? 1 : 0;
+  }
 
   const drift = [];
   for (const [label, p, newBlock] of indexTargets(deck)) {
@@ -606,6 +695,7 @@ module.exports = {
   parseFrontmatter, formatRow, regenFolderIndex, regenCockpitInprogress,
   indexDrift, indexTargets, matchSignature, archivableDone, archivableObsolete,
   specAdvanceCandidates, verifyPending, syncStatus, listConsumers, pruneConsumers,
+  PROJECT_MARKER, sharedRegion, sharedFingerprint, pullShared,
   KNOWLEDGE_KINDS, IMPORTED_KINDS, NESTABLE_KINDS, SUMMARY_KINDS,
   readText, writeText, relPosix, isDir, isFile, mdNames, walkMd, subDirs, sortPaths,
 };

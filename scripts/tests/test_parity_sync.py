@@ -49,7 +49,8 @@ class SyncParity(unittest.TestCase):
 
     def test_sync_status(self):
         home, master = self._master_home()
-        # master has references/imported.md NEWER than the deck (upstream-changed)
+        # master references/imported.md: empty shared body → differs from the
+        # fixture deck's body → stale (fingerprint-keyed; last_updated no longer matters)
         (master / "references" / "imported.md").write_text(
             "---\nsynced: true\nlast_updated: 2026-01-09\n---\n", encoding="utf-8"
         )
@@ -63,6 +64,25 @@ class SyncParity(unittest.TestCase):
         )
         (py, jsr) = _both(deck, ["--sync-status"], self._env(home))
         self.assertEqual(py, jsr)
+
+    def test_sync_pull_check(self):
+        # Dry-run mechanical pull: one synced file whose shared region differs
+        # from its master twin → exactly one would-pull line, exit 1, py==js.
+        home, master = self._master_home()
+        (master / "checklists").mkdir(parents=True)
+        (master / "checklists" / "commits.md").write_text(
+            "---\n---\n# Commits\n\nMASTER shared body\n", encoding="utf-8"
+        )
+        deck = Path(tempfile.mkdtemp()) / "flightdeck"
+        (deck / "checklists").mkdir(parents=True)
+        (deck / "checklists" / "commits.md").write_text(
+            "---\nsynced: true\nlast_updated: 2026-01-01\n---\n# Commits\n\nDECK drifted body\n",
+            encoding="utf-8",
+        )
+        (py, jsr) = _both(deck, ["--sync-pull", "--check"], self._env(home))
+        self.assertEqual(py, jsr)
+        self.assertEqual(py[0], 1)                                    # one stale → exit 1
+        self.assertEqual(py[1], b"would-pull\tchecklists/commits.md\n")
 
     def test_list_consumers(self):
         home, master = self._master_home()
