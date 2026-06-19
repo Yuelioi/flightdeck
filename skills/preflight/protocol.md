@@ -73,10 +73,20 @@ This table is the **single source of truth** for every frontmatter / config fiel
 | `graduate` | specs | optional | landing (graduate seam trigger) | author / AI (front-loads at creation or during active life) | — |
 | `superseded_by` | knowledge | **retired in 3.0** — old `status: superseded` redirect field; no longer written; kept here as a tombstone so walkaround can flag live instances | — | — | flag if present on a non-archive file |
 | `version` | `rules.md` (root) | **required** (rules.md is mandatory) | — (static identity stamp; future 3.0→3.1 migration anchor) | **launch only** (init) | — |
-| `synced` | checklists/docs (vendored only) | optional (boolean marker, no path) | `/flightdeck:sync` + walkaround sync-drift (`flightdeck_index.py --sync-status`) | `sync` (stamped on initial vendoring / on `push` promote) | sync-drift audit: validate the relpath invariant (no source at the same relpath in the master store → `dangling`); absence **never** warns |
+| `synced` | checklists/docs (vendored only) | optional (boolean marker, no path) | `/flightdeck:sync` + preflight Step 1.5 + walkaround sync-drift (`flightdeck_index.py --sync-status`, fingerprint-keyed) | `sync` (stamped on initial vendoring / on `promote`) | sync-drift audit: validate the relpath invariant (no source at the same relpath in the master store → `dangling`); a shared-region fingerprint mismatch → `stale`; absence **never** warns |
 | `consumers` | checklists/docs (master-store files only) | master-store-only (stripped from consumer copies) | `/flightdeck:sync --fanout` (fan out to every registered consumer deck) | written by `--register-consumer`; cleaned by `--prune-consumers` | presence in a consumer copy → WARNING (illegal) |
 
 `cockpit.md` board fields (`Updated` / `Focus` / `Pointers` / `## Next` / `## In Progress` / `## Key Context` / `## Pending Review` / `## Hanging Tasks`) are not YAML frontmatter. **Pointer-vs-record boundary:** cockpit materializes only irreducible judgment plus one cheap projection (`## In Progress`); records live in their homes — history → `git log`, progress → plan `## Progress`, goal/criteria/method → spec body, durable invariants → `rules.md`, knowledge → folder INDEXes — and cockpit only links to them. `## In Progress` is an AUTO region derived from `status: active` spec/plan (rendering a truncated summary head); `## Next` is AI-maintained — see [templates.md § cockpit.md](templates.md#cockpitmd).
+
+### Vendored shared knowledge — the boundary marker
+
+A vendored file (`synced: true`) is split by the literal marker line `<!-- flightdeck:project-specific -->`:
+- **shared region** — the frontmatter-stripped body **above** the marker, owned by the master; replaced wholesale by every mechanical pull.
+- **project section** — the marker and everything **below** it, owned by the consumer; never pulled and never pushed.
+- **frontmatter** (routing `when_to_read` / `applies_to` + `synced: true`) is consumer-local; never overwritten.
+- **no marker** → the whole body is the shared region (a pure-shared file); the master's own files carry no marker.
+
+Staleness is keyed to a **fingerprint** over the normalized shared region (NFC, LF, per-line trailing whitespace and trailing blank lines ignored) — not a timestamp. `flightdeck_index.py --sync-status` reports `in-sync` / `stale` / `dangling` / `master-missing`; `--sync-pull` applies the mechanical splice (a text splice, zero AI). `/flightdeck:sync` owns the ritual; preflight's [Step 1.5](SKILL.md) runs the same splice mechanically on entry.
 
 ### Supersession model
 
@@ -399,13 +409,15 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 
 | Ritual | Role | Writes? | Cockpit 80-line trim | INDEX | Deep per-file audit |
 | --- | --- | --- | --- | --- | --- |
-| `preflight` | read-only takeover at session start | **no (zero writes)** — deckless redirects to /flightdeck:launch | reads only — passive note on git state | reads folder INDEX as catalog | no — audits belong to walkaround |
+| `preflight` | read-only takeover at session start | **no judgment writes** — the sole write is the mechanical shared-knowledge refresh (deterministic splice into vendored shared regions, before the read; git-deck auto / non-git asks); deckless redirects to /flightdeck:launch | reads only — passive note on git state | reads folder INDEX as catalog | no — audits belong to walkaround |
 | `landing` | write the session's outcome (full mode); board-sync only (checkpoint mode at task boundaries) | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
 | `walkaround` | integrity audit on demand | **no — audit-only, never fix** (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
 
 The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
 
-Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's cockpit board-sync step and writes nothing else (no INDEX, no archive, no commit). `preflight` stays read-only; checkpoint never runs at entry.
+Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's cockpit board-sync step and writes nothing else (no INDEX, no archive, no commit). `preflight` performs no judgment writes; checkpoint never runs at entry.
+
+**The shared-knowledge refresh is a distinct mechanical layer**, not a checklist step — the same category as the turn-end INDEX hook (`## In Progress` + `INDEX.md` AUTO regions). It is deterministic (`--sync-pull`, a text splice with zero AI), runs **before** preflight's read, and touches only the master-owned shared region of vendored files. Like the turn-end hook, the protocol does not depend on it and it never writes judgment fields; unlike that hook (which fires automatically), preflight invokes it explicitly because flightdeck has no guaranteed entry hook. On a non-git deck it degrades to detect-only (`--check`) and asks before writing — see [SKILL § Step 1.5](SKILL.md).
 
 ## Write gate
 
