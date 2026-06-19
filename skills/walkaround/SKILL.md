@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context, sync drift (vendored shared-knowledge upstream-changed / dangling). Triggered by `/flightdeck:walkaround`.
+description: Use when explicitly invoking the flightdeck integrity audit — checks cockpit.md / rules.md / specs / plans / incidents / checklists / docs / references for status validity, INDEX↔folder consistency (incl. nested knowledge areas), cockpit `## In Progress` AUTO-region consistency, orphan plans, dangling references, stray files, AGENTS.md drift, and (INFO) done-but-unlanded + missing workflow summary/last_updated + dangling supersedes/related edges + oversized Key Context, sync drift (vendored shared-knowledge upstream-changed / dangling), cockpit field-structure conformance (Audit 16). Triggered by `/flightdeck:walkaround`.
 ---
 
 # Flightdeck Walkaround
@@ -19,7 +19,7 @@ User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drif
 
 ## Audits
 
-Run all 15 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
+Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
 
 **Audit 1** — 查各非-archive `.md` 的 `status` 字段 → flag 缺失（CRITICAL）、非法值（WARNING；`specs/plans` 合法: `idea/active/done`；knowledge 合法: `active/stale/obsolete`；已退役旧值 `pending/awaiting-review/blocked/superseded` 均为 WARNING）。
 
@@ -58,6 +58,8 @@ Run all 15 in order. First read `flightdeck/rules.md` if present; resolve behavi
 另查（直读 frontmatter，非 `--sync-status` 输出）：消费端 `synced: true` 文件出现 `consumers` 字段 → 报 **WARNING**（`consumers` 是母库专属字段，vendor 时应剔除，消费副本非法）。
 
 无带 `synced: true` 文件 → N/A。
+
+**Audit 16** — cockpit field-structure / role conformance. Check `cockpit.md` against the canonical field set (`Updated` / `Focus` / `Pointers` / `## Next` / `## In Progress` / `## Key Context` / `## Pending Review` / `## Hanging Tasks`, per [templates § cockpit.md](../preflight/templates.md#cockpitmd)) → flag (all **INFO**, non-blocking — surface only, never modify, per the walkaround invariant): a non-standard hand-added section; a missing standard section; or field **role-creep** — `Updated` carrying a changelog (belongs in `git log`), `Focus` grown into a paragraph (goal/criteria/method that belongs in the spec body), or `## Next` carrying a progress checklist / rationale list / milestone links (belong in the plan's `## Progress`). Deck **content language** is never a finding (decks follow the user's language).
 
 ## Output format
 
