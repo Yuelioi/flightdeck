@@ -2,14 +2,15 @@
 
 Updated: 2026-06-19 · 月离 · Stage: v3.0.0-alpha.4 已切（5 manifest + CHANGELOG，未 push / 未 tag）；launch-recorded-config 全 spec 相 1/2/3 done + land，spec graduate → docs/
 
-Focus: 无活跃 spec — launch-recorded-config 已发版+graduate → docs/launch-recorded-config.md；下一步在两个 parked 复核项之间
+Focus: deck-format-conform（strict formatter 设计）→ specs/2026-06-19-deck-format-conform.md
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
 ## In Progress
 
 <!-- AUTO:inprogress -->
-
+- [2026-06-19-deck-format-conform.md](specs/2026-06-19-deck-format-conform.md) — A strict deck formatter that conforms every active file to its canonical schema/…
+- [2026-06-19-deck-format-conform.md](plans/2026-06-19-deck-format-conform.md) — Implement the deck format conformer: new flightdeck_conform.py/.js (py/js byte-p…
 <!-- /AUTO -->
 
 ## Next
