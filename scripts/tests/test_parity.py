@@ -103,5 +103,16 @@ class LintParity(ParityBase):
         self.assert_parity([])
 
 
+class ConformParity(ParityBase):
+    stem = "flightdeck_conform"
+
+    def test_apply(self):
+        # runtime pinned so the rules-stamp is deterministic across machines
+        self.assert_parity(["--runtime", "uv"], mutates=True)
+
+    def test_check(self):
+        self.assert_parity(["--check", "--runtime", "uv"])
+
+
 if __name__ == "__main__":
     unittest.main()
