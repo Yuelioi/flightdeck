@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-06-11
+last_updated: 2026-06-19
 when_to_read: before cutting a new flightdeck release / bumping the version number
 applies_to: [.claude-plugin, .codex-plugin, .cursor-plugin, gemini-extension.json, CHANGELOG.md, MIGRATION.md, scripts/bump_version.py]
 ---
@@ -19,6 +19,10 @@ The mechanical parts — bumping all five manifests and verifying they agree —
 - **`bump_version.py --check`** — verify the five agree and match the `CHANGELOG.md` top heading; exit non-zero on drift.
 
 It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate two-part *layout* version, not the release semver) or write the CHANGELOG. Everything in Steps 1, 3–6 that needs judgment stays manual.
+
+## Pre-release gates (block the release if any fails)
+
+- **Publishing surface is English-only.** `skills/`, `scaffolds/`, `templates`, README, banners, field labels ship to every user — prose, headings, anchors, and examples must all be English (see `rules.md` `### Project conventions`). A prose rule alone has repeatedly failed to hold, so this is a hard release gate: `rg -lP '\p{Han}' skills scaffolds` must return **nothing**. Any hit → translate before cutting the release (mind Chinese-named headings that other files anchor-link to, and Chinese-named section conventions like `## 评审纪要`).
 
 ## Steps
 
@@ -44,6 +48,7 @@ It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate t
 - All five manifests agree + match the CHANGELOG: `uv run scripts/bump_version.py --check` (or `grep -rn '"version"' .claude-plugin .codex-plugin .cursor-plugin gemini-extension.json` for one value).
 - `CHANGELOG.md` top entry matches that value and carries today's date.
 - `git tag --points-at HEAD` shows `vX.Y.Z`.
+- **Publishing surface English-only**: `rg -lP '\p{Han}' skills scaffolds` returns nothing.
 - `git status` clean and `main` not ahead of `origin/main` after push.
 
 ## Common pitfalls
