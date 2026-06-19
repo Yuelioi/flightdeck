@@ -1,6 +1,6 @@
 # Cockpit — [project name]
 
-Updated: YYYY-MM-DD · [who] · Stage: <lifecycle stage>
+Updated: YYYY-MM-DD · [who] · Stage: `<lifecycle stage>`
 
 Focus: <FOCUS — one coarse thread label + spec/plan link, filled by preflight first-time-setup>
 

@@ -37,7 +37,7 @@ def init(target, name, user, date, focus, next_item):
     text = cockpit.read_text(encoding="utf-8")
     text = text.replace("[project name]", name)
     text = text.replace(
-        "YYYY-MM-DD · [who] · Stage: <lifecycle stage>",
+        "YYYY-MM-DD · [who] · Stage: `<lifecycle stage>`",
         f"{date} · {user} · Stage: deck initialized",
     )
     text = text.replace(_ACTIVE, focus)

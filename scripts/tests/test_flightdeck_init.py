@@ -43,7 +43,7 @@ class InitTest(unittest.TestCase):
             self.assertFalse((deck / "landed").exists(), "landed/ should not exist")
             # rules.md copied verbatim (a scaffold token survives — not re-authored)
             rules = (deck / "rules.md").read_text(encoding="utf-8")
-            self.assertIn("no magic-string syntax to memorize", rules)  # scaffold-only ### Rules note
+            self.assertIn("no magic-string syntax", rules)  # scaffold-only ### Rules note
             self.assertNotIn("disabled_folders", rules)  # removed in the autonomy-convergence pass
 
     def test_references_folder_exists(self):
