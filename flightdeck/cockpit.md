@@ -1,8 +1,8 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-19 · 月离 · Stage: cockpit 重设计执行中（field-redesign rollout）
+Updated: 2026-06-19 · 月离 · Stage: cockpit 重设计 2/3 完成，i18n 整顿待执行
 
-Focus: cockpit 重设计三 spec 执行 → specs/2026-06-19-cockpit-field-redesign.md
+Focus: skills/ 纯英文整顿（今日第 3 个 spec）→ specs/2026-06-19-skills-english-remediation.md
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
@@ -18,8 +18,8 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **接着执行 cockpit 重设计**：field-redesign rollout 收尾 → accumulator spec 写 plan + 执行 → i18n spec 翻译整顿 → `plans/2026-06-19-cockpit-field-redesign-rollout.md`
-- （**parked**）发版 `v3.0.0-alpha.2`（README 待过目 → `checklists/version-bump.md`，注意英文发版门已挡，待 i18n 整顿后才转绿）；复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
+- **执行 ③ i18n 整顿**：`specs/2026-06-19-skills-english-remediation.md` 写 plan + 翻译 10 个 skill 文件到纯英文（field-redesign/accumulator 已完成并 committed）。
+- （**parked**）发版 `v3.0.0-alpha.2`（i18n 整顿后英文发版门才转绿 → README 过目 → version-bump）；复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
 ## Key Context
 
