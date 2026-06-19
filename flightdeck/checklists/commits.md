@@ -82,6 +82,8 @@ BREAKING CHANGE: /login 响应去掉 token 字段, 改 accessToken + refreshToke
 
 `git mv` 重命名文件后再编辑内容，`git status --short` 会显示 `RM`（index 已暂存重命名、工作区内容未暂存）；`R100` = 内容改动**未暂存**（只提交了纯重命名）。**提交前扫一遍 `RM`/`MM` 行，对命中的文件再 `git add <file>` 暂存内容**，直到 `git status --short` 干净（或只剩预期的未跟踪文件）再 commit。
 
+<!-- flightdeck:project-specific -->
+
 ---
 
 ## 项目覆盖 (本仓库专属)
