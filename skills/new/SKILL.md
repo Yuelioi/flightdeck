@@ -8,8 +8,8 @@ description: Create a new flightdeck deck artifact (spec / plan / incident / che
 The **authoring entry**. When you (or an external authoring skill like brainstorming /
 writing-plans) need to produce a deck artifact, use this instead of hand-deriving the
 location, frontmatter, naming, and INDEX/cockpit regen. It is the single authority for
-**how a deck artifact is shaped** — the fast path stamps it via a script; the fallback
-below is the same contract for hand-authoring.
+**how a deck artifact is shaped** — it stamps the artifact via a script; the contract
+below documents what that stamp produces.
 
 ## DO NOT pre-read to "match style" — the script is the authority
 
@@ -28,7 +28,9 @@ This skill stamps frontmatter, naming, and location; you supply only the body. P
 **Shell-first handoff:** create the shell here first, then write the body into the
 returned path. Don't write content elsewhere and move it afterward.
 
-## Fast path (a Python runtime is reachable)
+## Stamp the artifact (the script)
+
+Invoke the `new` script — call form per the recorded `runtime` ([protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)); e.g. with `runtime: uv`:
 
 ```
 uv run <flightdeck-pkg>/scripts/flightdeck_new.py <deck> <kind> \
@@ -39,7 +41,7 @@ uv run <flightdeck-pkg>/scripts/flightdeck_new.py <deck> <kind> \
 
 It prints the created path. Then write the artifact body into that file.
 
-## Authoring contract (also the no-runtime fallback — do this by hand)
+## Authoring contract (what the script stamps)
 
 **kind → folder**
 
@@ -69,12 +71,12 @@ a title: drop non-ascii, spaces → `-`, lowercase, keep `a-z0-9-`.
 - **Dedup before you create.** An incident is an error-library entry — before authoring one, **first check it isn't already recorded**: grep the error text into `incidents/` and/or run `flightdeck_index.py <deck> --match-signature "<symptom>" [--sig-error-type <TYPE>]`. A fingerprint hit → **append a `## [Case N]` to the existing file instead of creating a new one** (see [protocol § Hit path](../preflight/protocol.md#hit-path--check-the-error-library-before-writing-a-new-incident)). Only create when there is no match.
 - **Fill the `## Signature` block after creating.** The incident scaffold ships a `## Signature` block — fill its **four keys and only those four** (`symptom` / `error_type` / `where` / `trigger`); this is a **hard boundary** (no severity / owner / component / … — adding a key needs its own spec). `symptom` is the human-readable / grep anchor (the real error string, may be multi-line); `error_type: —` is a first-class case for non-exception problems (UI / perf / data). The fingerprint is computed from it — the author never hand-writes a fingerprint.
 
-**After writing:** run `uv run <flightdeck-pkg>/scripts/flightdeck_index.py <deck>` to
-regenerate INDEX + cockpit. An `active` workflow artifact projects into cockpit `## In Progress`;
-an `idea` does not.
+**After writing:** the script regenerates INDEX + cockpit (`flightdeck_index <deck>`, call
+form per the recorded `runtime`). An `active` workflow artifact projects into cockpit
+`## In Progress`; an `idea` does not.
 
-**If the target file already exists:** the script refuses; by hand, pick a different slug
-or remove/rename the existing file first.
+**If the target file already exists:** the script refuses — pick a different slug or
+remove/rename the existing file, then re-run.
 
 **Graduate question (spec only — ask proactively):** immediately after creating a `spec`,
 judge whether it meets **either** of these criteria (lenient; the user's yes/no is the gate,

@@ -5,9 +5,9 @@ description: Use when explicitly invoking the flightdeck integrity audit — che
 
 # Flightdeck Walkaround
 
-User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drift loudly so the author can fix it. The markdown checklist below is always the source of truth; mechanical audits (Audits 1/4/5/7/8) MAY use `flightdeck_lint.py` (JSON findings) or `flightdeck_index.py --check` as optional fast paths.
+User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drift loudly so the author can fix it. The markdown checklist below is the source of truth for *what* to check; the mechanical audits (Audits 1/4/5/7/8) are computed by `flightdeck_lint` (JSON findings) and `flightdeck_index --check` (call form per the recorded `runtime` — [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)), and the model reads their output to narrate and judge.
 
-**Audit-only, never fix (walkaround invariant):** walkaround **MUST NOT modify any file** — it only surfaces drift. The fix path is `flightdeck_index.py <deck>` or `/flightdeck:landing`.
+**Audit-only, never fix (walkaround invariant):** walkaround **MUST NOT modify any file** — it only surfaces drift. The fix path is `flightdeck_index <deck>` or `/flightdeck:landing`.
 
 **Field authority**: [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical) is the source of truth; these audits check against it.
 
@@ -29,7 +29,7 @@ Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 4** — Check each file in `plans/` (non-archive) → flag those with no `implements:` field (INFO; consider linking a spec or confirm it is standalone).
 
-**Audit 5** — Check each artifact folder's `INDEX.md` → flag a missing INDEX (WARNING), a file with no matching row (WARNING), a row whose file does not exist (WARNING), a row whose status disagrees with the actual frontmatter (WARNING); also check nested knowledge-area sub-folder INDEXes and their parent-INDEX reference rows. Fast path: `flightdeck_index.py --check <deck>`.
+**Audit 5** — Check each artifact folder's `INDEX.md` → flag a missing INDEX (WARNING), a file with no matching row (WARNING), a row whose file does not exist (WARNING), a row whose status disagrees with the actual frontmatter (WARNING); also check nested knowledge-area sub-folder INDEXes and their parent-INDEX reference rows. Computed by `flightdeck_index --check <deck>`.
 
 **Audit 6** — Check each `status`-carrying `.md` under `archive/` → flag a workflow file not `done` (WARNING), a knowledge file not `obsolete` (WARNING).
 
@@ -43,13 +43,13 @@ Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavi
 
 **Audit 11** — Check the `supersedes:`/`related:` field values of non-archive workflow files → flag targets that exist in neither the active tree nor `archive/` (INFO; an edge pointing into archive is normal, not flagged).
 
-**Audit 12** — Check `cockpit.md`'s `<!-- AUTO:inprogress -->` block → compute the expected set (every non-archive `status: active` spec/plan) → flag an active file with no matching row (WARNING), a row whose file is not active (WARNING), summary/note text differences (INFO; self-heals on next regen); a fully missing block is WARNING. Fast path: the `cockpit` drift tag of `flightdeck_index.py --check <deck>`.
+**Audit 12** — Check `cockpit.md`'s `<!-- AUTO:inprogress -->` block → compute the expected set (every non-archive `status: active` spec/plan) → flag an active file with no matching row (WARNING), a row whose file is not active (WARNING), summary/note text differences (INFO; self-heals on next regen); a fully missing block is WARNING. Computed by the `cockpit` drift tag of `flightdeck_index --check <deck>`.
 
-**Audit 13** — Check `status: done` files in `specs/plans/` (non-archive) → flag those with an active inbound edge (`implements:` pointing at them) as "blocked done" (INFO; report the blocker), those with no active inbound edge as "landable done" (INFO; run `/flightdeck:landing`). Fast path: `flightdeck_index.py <deck> --archivable`.
+**Audit 13** — Check `status: done` files in `specs/plans/` (non-archive) → flag those with an active inbound edge (`implements:` pointing at them) as "blocked done" (INFO; report the blocker), those with no active inbound edge as "landable done" (INFO; run `/flightdeck:landing`). Computed by `flightdeck_index <deck> --archivable`.
 
 **Audit 14** — Check `cockpit.md`'s `## Key Context` accumulation hygiene (non-blocking) → flag an entry that looks stale (points at an archived/graduated target), an entry grown into prose rather than a literal pointer, or an obviously oversized section (INFO; suggest a per-entry drain/shrink at the next `/flightdeck:landing`, see [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)). walkaround only surfaces, never drains.
 
-**Audit 15** — Check vendored files carrying `synced: true`. Sync state uses the read-only fast path `flightdeck_index.py <deck> --sync-status` (emits `state<TAB>relpath`; the master store is fixed at `~/.flightdeck`):
+**Audit 15** — Check vendored files carrying `synced: true`. Sync state uses the read-only `flightdeck_index <deck> --sync-status` (emits `state<TAB>relpath`; the master store is fixed at `~/.flightdeck`):
 - Validate the relpath invariant: no source file at the same relpath in the master store → `dangling`, report **WARNING**;
 - `upstream-changed` (master source is newer) → report **INFO** "N shared files updated upstream — run `/flightdeck:sync`";
 - `locally-ahead` (the consumer copy is newer) → report **INFO** (this project's copy is newer, consider pushing it back);

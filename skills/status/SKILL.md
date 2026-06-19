@@ -47,18 +47,15 @@ Every auto-flip needs to know **which** artifact. Resolve by priority:
 
 ## Step 5 — sync the INDEX
 
-After flipping frontmatter, reuse landing's single-folder regeneration (see [exit-ritual.md § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules)). **Fast path**: when a script runtime is available (inferred — `uv`/`python` reachable), `flightdeck_index.py <deck>` regenerates deterministically (see [exit-ritual § Script fast path](../preflight/exit-ritual.md#script-fast-path-optional-accelerator)); the manual steps below are the always-valid fallback:
+After flipping frontmatter, regenerate the affected folder's INDEX via the index script — `flightdeck_index <deck>` (call form per the recorded `runtime` — [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)) rewrites that folder's `<!-- AUTO -->` region in full, deterministically from frontmatter, following the shared [Row format](../preflight/exit-ritual.md#index-regeneration--scope-rules) rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` (not status alone). For `specs/INDEX`, the AUTO region groups by status (`Backlog (idea)` / `Active · Done`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs). Touch no other folder.
 
-Regenerate the affected folder's `INDEX.md` `<!-- AUTO -->` region in full (folders hold few files — cheap and deterministic; avoids fragile in-place +1/−1 count math). Build each row per the shared **Row format** rule — a workflow row's summary segment is the file's `summary` frontmatter, so `status` reads `summary` from the start (not status alone). For `specs/INDEX`, the AUTO region groups by status (`Backlog (idea)` / `Active · Done`) — see [folder-semantics § specs/](../preflight/folder-semantics.md#specs--designs). Touch no other folder.
-
-(The script fast path regenerates the folder INDEX **and** the cockpit `## In Progress` block in one run — `flightdeck_index.py <deck>` covers Step 5a too.)
+(One run covers Step 5a too — `flightdeck_index <deck>` regenerates the folder INDEX **and** the cockpit `## In Progress` block together.)
 
 ## Step 5a — regen cockpit `## In Progress` (only on a flip that changes the active set)
 
 A `status: active` spec/plan is **visible in cockpit iff it is active** — cockpit `## In Progress` is the AUTO-derived projection of the active set ([protocol § cockpit](../preflight/protocol.md#data-model-folder--kind-frontmatter--status)). So whenever this skill's flip changes the active set — an `idea → active` start (an artifact **enters** `## In Progress`) or an `active → done` flip (it **leaves**) — regenerate the cockpit `<!-- AUTO:inprogress -->` region from every current `status: active` spec/plan:
 
-- **Fast path**: `flightdeck_index.py <deck>` emits the `<!-- AUTO:inprogress -->` block (exact marker string) alongside the INDEXes — one run does Steps 5 + 5a.
-- **Fallback (always valid)**: rewrite the `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` block by hand — one row per `status: active` spec/plan, same Row format as INDEX, appending `[note: …]` when the file carries `note:`. Because the block is re-derived from current files, the `idea → active` rename is picked up automatically (do the rename **before** the regen so the new filename/link lands in the row).
+`flightdeck_index <deck>` emits the `<!-- AUTO:inprogress -->` block (exact marker string) alongside the INDEXes — one row per `status: active` spec/plan, same Row format as INDEX, appending `[note: …]` when the file carries `note:`; one run does Steps 5 + 5a. Because the block is re-derived from current files, the `idea → active` rename is picked up automatically — do the rename **before** the regen so the new filename/link lands in the row.
 
 A create→`idea` write does **not** change the active set → no `## In Progress` regen. This is the only cockpit region `status` touches; `Focus` / `## Next` / `Hanging Tasks` stay landing's / the user's.
 

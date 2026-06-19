@@ -93,14 +93,14 @@ Step 3c: Stale detection + pending-verify surfacing (landing/soft-landing = sing
          - Idempotent: already-`stale` = no-op.
          - Surface a one-line `pending-review: <file>` note in cockpit `## Pending Review`
            (the standing awaiting-review home — no longer an optional subsection).
-         Fallback (no Python runtime or no anchor yet): compare this session's changed
-         paths against each doc's `applies_to` paths by hand,
-         anchored to this session's changes only.
+         When no `Flightdeck-Sync:` anchor exists yet (first landing on a fresh
+         deck), the scan has no prior commit to diff against and falls back to this
+         session's worktree changes only — same intersection, narrower change set.
 
          Pending-verify (the verify-debt list) rides the SAME surfacing channel, but is
          NOT hand-written — it is **derived by scanning every `verify`-carrying
-         artifact across the active tree + archive/** (fast path:
-         `flightdeck_index.py <deck> --verify-pending`, which prints `path<TAB>note`
+         artifact across the active tree + archive/** (via
+         `flightdeck_index <deck> --verify-pending`, which prints `path<TAB>note`
          for each; semantically a full scan — the implementation may index/cache).
          The two debts are distinguished by the `verify` field on the same pending-review
          channel: `⚠ unverified: <file> — <how>` (verify present) vs the plain
@@ -310,18 +310,14 @@ Every `<!-- AUTO -->` row is generated **from the file's frontmatter only — ne
 - **Knowledge folders** (`incidents/` `checklists/` `docs/` `references/`): `- [<file>](<file>) — <status> — when_to_read: <…> — applies_to: <…>`. (`references/` rows show project/file count, not per-file status; `docs/` rows read `<status> — when_to_read: <…> — applies_to: <…>` like the other authored knowledge folders.)
 - **`|` escaping (fallback):** the `summary` constraint already forbids `|` `[` `]` and newlines, but defensively escape any literal `|` pulled from frontmatter as `\|` so a stray pipe can never corrupt the generated line.
 
-### Script fast path (optional accelerator)
+### Script path (the mechanical engine)
 
-INDEX regeneration and the INDEX↔folder consistency check are fully mechanical — they read frontmatter and emit the rows above. flightdeck bundles `scripts/flightdeck_index.py` (pure Python, stdlib-only) that implements **exactly the Row format rule above**: `flightdeck_index.py <deck>` regenerates every folder + root `<!-- AUTO -->` block from frontmatter; `flightdeck_index.py <deck> --check` reports drift and exits non-zero (used by walkaround). `status`, `landing`, and `walkaround` MAY use it as a fast path.
+INDEX regeneration and the INDEX↔folder consistency check are fully mechanical — they read frontmatter and emit the rows above. flightdeck ships these as scripts and a **script runtime is mandatory** (recorded in `rules.md` frontmatter `runtime: uv|python|node`, stamped by `launch`); the call form is selected per [protocol § Rule resolution order](protocol.md#rule-resolution-order) (`uv run …/flightdeck_index.py` / `python …/flightdeck_index.py` / `node …/flightdeck_index.js` — the `.py` and `.js` are byte-parity twins). `status`, `landing`, and `walkaround` invoke it directly; there is **no hand-rebuild path** — a recorded runtime that cannot be found is a hard failure ([protocol § Rule resolution order](protocol.md#rule-resolution-order)), never a silent fall-through to manual markdown.
 
-A second script, `scripts/flightdeck_lint.py` (pure stdlib), covers the **mechanical subset of the walkaround audit** — status legality (Audit 1), orphan plans (Audit 4), INDEX↔folder drift (Audit 5, reusing `flightdeck_index`), dangling references (Audit 7), and the unambiguous stray-file cases (Audit 8). `flightdeck_lint.py <deck>` emits a JSON `{"findings": [...]}` list (each with `audit` / `severity` / `path` / `message`) and exits non-zero when any CRITICAL/WARNING is present. The dangling-ref scan already covers repo-root `*.md` by default (the deck's parent); `--repo-root <path>` just points that part of the scan at a different root. `walkaround` MAY use it as a fast path for those audits — the model still reads the JSON and narrates/judges. **It computes facts only; the judgment-bearing audits (knowledge classification, migration decisions, AGENTS.md semantic drift, full stray-file reachability) stay in the markdown checklist.**
+- `flightdeck_index <deck>` implements **exactly the Row format rule above** — it regenerates every folder + root `<!-- AUTO -->` block from frontmatter; `flightdeck_index <deck> --check` reports drift and exits non-zero (used by walkaround). It runs in a subprocess, so its file reads never enter context (a token saving on top of determinism).
+- `flightdeck_lint <deck>` covers the **mechanical subset of the walkaround audit** — status legality (Audit 1), orphan plans (Audit 4), INDEX↔folder drift (Audit 5, reusing `flightdeck_index`), dangling references (Audit 7), and the unambiguous stray-file cases (Audit 8). It emits a JSON `{"findings": [...]}` list (each with `audit` / `severity` / `path` / `message`) and exits non-zero when any CRITICAL/WARNING is present. The dangling-ref scan covers repo-root `*.md` by default (the deck's parent); `--repo-root <path>` points that part of the scan at a different root. `walkaround` uses it for those audits — the model still reads the JSON and narrates/judges.
 
-This is a **dual track**, not a dependency:
-
-- **Enabled** whenever a Python runtime (`uv`/`python`) + the bundled script are reachable — script use is **inferred**, not a toggle (see [protocol § Rule resolution order](protocol.md#rule-resolution-order)). No runtime → fall back to the manual markdown path.
-- **Fallback is always valid**: regenerate by hand from frontmatter exactly as described above. The markdown path is the source of truth; the script only saves tokens (it runs in a subprocess — its file reads never enter context) and adds determinism. A tool that cannot run it loses nothing but speed — which is what keeps flightdeck tool-agnostic.
-
-Never let the script make judgments (classification, status decisions, routing) — it only generates/checks the deterministic INDEX rows.
+The script **computes facts only**; the judgment-bearing audits (knowledge classification, migration decisions, AGENTS.md semantic drift, full stray-file reachability) stay in the markdown checklist. Never let the script make judgments (classification, status decisions, routing) — it only generates/checks the deterministic INDEX rows.
 
 ## Cockpit update — what changes
 
@@ -422,7 +418,7 @@ The single source of truth for landing artifacts. Both `landing` (Step 3a above)
 
 Landing operates on a **land set**: the one-or-more `done` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
-0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` inbound edge (the only pinning edge — `superseded_by:` is retired in 3.0, and `supersedes:` is traceability-only, NOT a pinning edge). Fast path: read the deterministic set from `flightdeck_index.py <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts — **and** any `obsolete` knowledge artifacts still in the active area). Fallback (no Python runtime): compute the same set by hand — scan every `active` artifact's `implements:` values, collect their targets, and any `done`-in-place artifact **not** in that target set is archivable; **additionally include every `obsolete`-in-place knowledge artifact** (they have no pinning edges — `obsolete` is knowledge's drain state, the analog of workflow `done`). Either way the judgment is the **edge graph** (for workflow) or **status** (for knowledge), never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` workflow items and `obsolete` knowledge items land.)
+0. **Compute the land set deterministically — don't read bodies to decide.** Which `done` artifacts are archivable is a **deterministic fact**: a `done` artifact is archivable iff **no `active` artifact points at it** via an `implements:` inbound edge (the only pinning edge — `superseded_by:` is retired in 3.0, and `supersedes:` is traceability-only, NOT a pinning edge). Read the deterministic set from `flightdeck_index <deck> --archivable` (it scans active artifacts' relation edges and emits the no-inbound-edge `done` artifacts — **and** any `obsolete` knowledge artifacts still in the active area). The judgment is the **edge graph** (for workflow) or **status** (for knowledge), never an AI reading of prose references. (`scrapped` artifacts are never archived — they stay in `specs/`; only `done` workflow items and `obsolete` knowledge items land.)
 
    **Drain, don't accumulate.** Every landing rescans **all** `done`-in-place artifacts **and `obsolete` knowledge artifacts** across the deck — **not just this session's freshly-produced ones**. `done` workflow items whose inbound edge has since cleared are swept in; `obsolete` knowledge items are swept in unconditionally (no blocking edges apply). The active area drains automatically; neither `done`-but-unlanded nor `obsolete`-not-yet-drained lingers as residue.
 
