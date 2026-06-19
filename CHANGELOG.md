@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-alpha.4] — 2026-06-19
+
+launch-recorded-config spec 落地（相 1/2/3）：把「运行时推断 / 处处兜底」换成「launch 一次性记录 / 强制的单条线」。**Breaking**：删 no-git 分支、删手写 markdown 兜底（强制 runtime）、`agents_md` 改读字段不再探文件。
+
+### Added
+- **记录式配置进 `rules.md` frontmatter** — `runtime`（`uv|python|node`）+ `agents_md`（`auto|off`）与 `version` 同级，runtime 直读不再每会话探测；晋升判据单一可证伪（当且仅当否则需「每会话探测某个外部事实」才升结构化字段），其余偏好（commits / start / nudge…）留 `### Rules` 自由散文。稳态优先级：frontmatter 字段对其管辖 key 永久高于散文。
+- **4 个用户可见脚本 Node 移植** — `flightdeck_index` / `flightdeck_init` / `flightdeck_lint` / `flightdeck_new` 各加 `.js`（内置模块对等、**零 npm 依赖**）支持 node-only 用户；`bump_version` 仅保留 Python（用户 skill 从不调用）。
+- **Parity 字节对拍防线（spec 级约束）** — `scripts/tests/parity/` 金标 fixture + `test_parity*.py`（24 parity 测试），Python/Node 双实现逐字 diff 必须为空；钉死归一规则（Unicode 码点序、LF、UTF-8 NFC、固定日期格式、稳定 JSON 键序）堵隐性漂移。harness 顺带浮出并修了 Python 参考 3 个真 bug（lint stdout 未强制 UTF-8、`KNOWLEDGE_FOLDERS` 集合序非确定、`_collect_md` 未排序）。
+
+### Changed
+- **runtime 强制 → 机械路塌成单条线** — 删各 ritual「无 runtime → 手写 markdown 兜底」双写（exit-ritual / status / landing / new / launch / walkaround）；INDEX/cockpit regen、artifact stamp、机械审计只剩脚本一条线，skill 按 frontmatter `runtime` 拼调用形（`uv run` / `python` / `node`）。
+- **launch 收窄探测 + 拒绝路径** — 探测面收窄为「仅 git 存在性 + runtime 检测」（优先级 `uv` > `python` > `node`），零提示写 `runtime:` / `agents_md:`，建完打印非阻塞 pick-list。
+- **protocol `Rule resolution order`** 加 Runtime dispatch 段；`templates.md` 改「`version` 是唯一结构化字段」断言为多字段。
+
+### Breaking
+- **删 no-git 支持** — 贯穿各 skill 的 no-git 分支全删（preflight / landing / status / emit-agents-md / exit-ritual / folder-semantics / protocol / scaffold）；flightdeck 现要求 git，缺 git → launch 直接拒绝提示 `git init`。CI 自动化 / gitignore deck / 临时目录等用例为有意取舍。
+- **`agents_md` 改读字段** — `landing` 读 `agents_md` 字段决定是否重生 AGENTS.md，**不再探文件是否存在**；`/flightdeck:emit-agents-md` 变原子动作（建文件 **并**翻 `off→auto`）。语义从「看文件现实」变「看记录意图」——手删 AGENTS.md 但字段仍 `auto` → 下次 landing 重生（有意 UX 锐边，改字段即对齐）。
+- **记录 runtime 失效硬失败** — 记录的 runtime 不存在（卸载 / 换机）时，任何需脚本的步骤硬失败中止并报 `⚠ recorded runtime '<x>' not found`，不静默回落每会话重探；preflight 只读仍报板 + 附一行 `⚠ recorded runtime broken`。
+
 ## [3.0.0-alpha.3] — 2026-06-19
 
 cockpit 再设计（纯恢复载荷）+ skills 全英文。设计沉淀 `docs/cockpit-design.md`。**Breaking**：cockpit 字段重命名（`Active focus→Focus`、`Last updated→Updated`、加 `Pointers`），存量 deck 与依赖旧字段名的工具/emit 需同步。

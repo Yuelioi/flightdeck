@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: Phase 1 of launch-recorded-config: declare the rules.md frontmatter settings schema (runtime/agents_md, version no longer the only structured field, steady-state Settings>Rules precedence), add a lint audit validating the new fields, and force git by deleting every no-git branch across the skills + protocol + folder-semantics + scaffold. No field stamping/reading yet (phases 2-3).
 last_updated: 2026-06-19
 implements: specs/2026-06-19-launch-recorded-config.md

@@ -5,18 +5,16 @@
 
 ## Current focus
 
-launch-recorded-config 全 spec → flightdeck/specs/2026-06-19-launch-recorded-config.md
+无活跃 spec — launch-recorded-config 已发版+graduate → docs/launch-recorded-config.md；下一步在两个 parked 复核项之间
 
 ## In Progress
 
-- [2026-06-19-launch-recorded-config.md](flightdeck/specs/2026-06-19-launch-recorded-config.md) — Shift flightdeck from inference/fallback to recorded settings + required runtime…
-- [2026-06-19-launch-recorded-config-1-config-git.md](flightdeck/plans/2026-06-19-launch-recorded-config-1-config-git.md) — Phase 1 of launch-recorded-config: declare the rules.md frontmatter settings sch…
-- [2026-06-19-launch-recorded-config-2-runtime-node.md](flightdeck/plans/2026-06-19-launch-recorded-config-2-runtime-node.md) — Phase 2 of launch-recorded-config: force a script runtime by deleting every hand…
-- [2026-06-19-launch-recorded-config-3-field-semantics.md](flightdeck/plans/2026-06-19-launch-recorded-config-3-field-semantics.md) — Phase 3 of launch-recorded-config: wire the recorded rules.md frontmatter fields…
+None.
 
 ## Next
 
-- **相 4（spec 收尾）**：plan + 实现——走 `checklists/version-bump.md` 到 `3.0.0-alpha.4` + CHANGELOG。**用户定：做版本号+CHANGELOG，不 push、不打 tag。** 做完即可 flip 整个 spec + 相 1/2/3 plan 全 done + land（spec `graduate: true` → graduate 到 `docs/`）。
+- （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
+- （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
 ## Hanging Tasks
 

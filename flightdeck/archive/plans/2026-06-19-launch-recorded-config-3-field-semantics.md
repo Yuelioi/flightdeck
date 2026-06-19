@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: Phase 3 of launch-recorded-config: wire the recorded rules.md frontmatter fields as direct reads — agents_md (auto|off) replaces landing's AGENTS.md file-existence probe (a deliberate compat break: emit-agents-md becomes one atomic action that regenerates the file AND flips the field to auto), and the runtime broken->hard-fail path is confirmed across the rituals; plus the one-time dogfood rules.md field stamp. Prose + one config edit, no Node/parity work.
 last_updated: 2026-06-19
 implements: specs/2026-06-19-launch-recorded-config.md

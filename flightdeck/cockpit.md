@@ -1,33 +1,25 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-19 · 月离 · Stage: v3.0.0-alpha.3 已发布；launch-recorded-config 相 1 ✅ / 相 2 ✅ / 相 3 ✅（字段化语义落），相 4（发版）待续
+Updated: 2026-06-19 · 月离 · Stage: v3.0.0-alpha.4 已切（5 manifest + CHANGELOG，未 push / 未 tag）；launch-recorded-config 全 spec 相 1/2/3 done + land，spec graduate → docs/
 
-Focus: launch-recorded-config 全 spec → specs/2026-06-19-launch-recorded-config.md
+Focus: 无活跃 spec — launch-recorded-config 已发版+graduate → docs/launch-recorded-config.md；下一步在两个 parked 复核项之间
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
 ## In Progress
 
 <!-- AUTO:inprogress -->
-- [2026-06-19-launch-recorded-config.md](specs/2026-06-19-launch-recorded-config.md) — Shift flightdeck from inference/fallback to recorded settings + required runtime…
-- [2026-06-19-launch-recorded-config-1-config-git.md](plans/2026-06-19-launch-recorded-config-1-config-git.md) — Phase 1 of launch-recorded-config: declare the rules.md frontmatter settings sch…
-- [2026-06-19-launch-recorded-config-2-runtime-node.md](plans/2026-06-19-launch-recorded-config-2-runtime-node.md) — Phase 2 of launch-recorded-config: force a script runtime by deleting every hand…
-- [2026-06-19-launch-recorded-config-3-field-semantics.md](plans/2026-06-19-launch-recorded-config-3-field-semantics.md) — Phase 3 of launch-recorded-config: wire the recorded rules.md frontmatter fields…
+
 <!-- /AUTO -->
 
 ## Next
 
-- **相 4（spec 收尾）**：plan + 实现——走 `checklists/version-bump.md` 到 `3.0.0-alpha.4` + CHANGELOG。**用户定：做版本号+CHANGELOG，不 push、不打 tag。** 做完即可 flip 整个 spec + 相 1/2/3 plan 全 done + land（spec `graduate: true` → graduate 到 `docs/`）。
-- （**parked**）跨项目本地验 alpha.3 → `checklists/local-plugin-testing.md`。
+- （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
 ## Key Context
 
-- **launch-recorded-config 相 2 Node 移植已落（本会话）**：`scripts/flightdeck_lib.js` + `flightdeck_index/lint/init/new.js`（零 npm 依赖），byte-parity 锚定——`scripts/tests/parity/` 金标 fixture + `test_parity*.py`（24 parity 测试），全 200 测试绿。harness 暴露并修了 Python 参考 3 个真 bug：lint stdout 未强制 UTF-8（cp936 下 em-dash/CJK mojibake）、`KNOWLEDGE_FOLDERS` 集合序非确定（PYTHONHASHSEED）、`_collect_md` 未排序。parity 契约/落点详见 `plans/2026-06-19-launch-recorded-config-2-runtime-node.md`。
-- 相 1（已提交）带病提交过一个坏测试（Task 3 改 scaffold 注释但 init 测试断言没跟），本会话 commit `e31c9b8` 修掉。
-- **相 2（commit `b3bdbf0`+`c8d4c26`）**：runtime 现为 3.0 强制——删各 ritual「无 runtime→手写 markdown」双写；exit-ritual §Script fast path→§Script path（the mechanical engine）；protocol § Rule resolution order 加 **Runtime dispatch** 段；launch 收窄到 git+runtime 双拒绝、init 后 launch 直接写 `runtime:`。
-- **相 3（commit `e215a49`）**：`agents_md` 从「探 AGENTS.md 文件存在」改「读字段」（兼容性破坏）——landing step 9 gate on `agents_md: auto`；`emit-agents-md` 变原子动作（写文件 + Step 4a 翻 `off→auto`、改 report）；protocol 删 Environment-inference step（renumber 3 项）；templates `emit_agents_md` 条目改写；preflight verify-pending 改 runtime dispatch + broken→`⚠ recorded runtime broken`；walkaround Audit 9 加 agents_md 意图 INFO；**dogfood `rules.md` 已加 `runtime: uv` + `agents_md: auto`**。验证全绿（200 测试、双 runtime --check clean、lint 188 全 pre-existing `references/`）。
-- 相 1/2/3 plan 仍 `active`（待相 4 spec 收尾时一并 flip done + land；spec `graduate: true`）。lint 188 条 dangling-ref 全在 vendored `references/`，pre-existing、与改动无关。
+- **launch-recorded-config 已发版 `3.0.0-alpha.4`（本会话）**：spec graduate → `docs/launch-recorded-config.md`（设计现状真相源），相 1/2/3 plan 归档 `archive/plans/`。版本号（5 manifest）+ CHANGELOG 已落，`MIGRATION.md current` 仍 `3.0`（format baseline）；**未 push / 未 tag**（用户定）。
 
 ## Pending Review
 

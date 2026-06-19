@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: Phase 2 of launch-recorded-config: force a script runtime by deleting every hand-written markdown fallback across the skills, add a Node port of the 4 user-facing scripts (flightdeck_index/lint/init/new) gated by a byte-parity golden-output harness (codepoint sort, LF, Python json.dumps spacing), narrow launch detection to git+runtime with refusal paths. bump_version stays Python-only.
 last_updated: 2026-06-19
 implements: specs/2026-06-19-launch-recorded-config.md
