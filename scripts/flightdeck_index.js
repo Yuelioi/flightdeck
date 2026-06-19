@@ -602,6 +602,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  main,
   parseFrontmatter, formatRow, regenFolderIndex, regenCockpitInprogress,
   indexDrift, indexTargets, matchSignature, archivableDone, archivableObsolete,
   specAdvanceCandidates, verifyPending, syncStatus, listConsumers, pruneConsumers,
