@@ -120,6 +120,54 @@ def prune_frontmatter(text, kind):
     return "".join(out), removed
 
 
+# Canonical rules.md recorded-config: ordered (key, default) — runtime's default
+# is filled from the detected/passed runtime at call time.
+_RULES_STAMP = ("version", "runtime", "agents_md")
+_RULES_DEFAULTS = {"version": "3.0", "agents_md": "off"}
+
+
+def detect_runtime():
+    """Recorded-config runtime probe: uv > python > node (launch's order)."""
+    import shutil
+
+    for name in ("uv", "python", "node"):
+        if shutil.which(name):
+            return name
+    return "python"
+
+
+def stamp_rules(text, runtime):
+    """Add any missing recorded-config field to rules.md frontmatter.
+
+    Inserts ``version``/``runtime``/``agents_md`` (in that canonical order) only
+    when absent, appending them just before the closing fence so existing keys
+    and their order are undisturbed. A file with no frontmatter block gains one.
+    """
+    defaults = dict(_RULES_DEFAULTS, runtime=runtime)
+    lines = text.splitlines(keepends=True)
+    has_fm = bool(lines) and lines[0].rstrip("\n") == "---"
+    if not has_fm:
+        block = "---\n" + "".join(
+            "%s: %s\n" % (k, defaults[k]) for k in _RULES_STAMP
+        ) + "---\n"
+        return block + text
+    close = None
+    present = set()
+    for idx in range(1, len(lines)):
+        if lines[idx].rstrip("\n") == "---":
+            close = idx
+            break
+        m = _FIELD_RE.match(lines[idx])
+        if m:
+            present.add(m.group(1))
+    if close is None:
+        return text
+    additions = [
+        "%s: %s\n" % (k, defaults[k]) for k in _RULES_STAMP if k not in present
+    ]
+    return "".join(lines[:close] + additions + lines[close:])
+
+
 class Changes:
     """Per-file conform result, accumulated as later passes are added."""
 

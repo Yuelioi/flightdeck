@@ -10,6 +10,7 @@ from flightdeck_conform import (
     kind_of,
     prune_frontmatter,
     conform_file,
+    stamp_rules,
 )
 
 
@@ -115,6 +116,37 @@ class ConformFileTest(unittest.TestCase):
             ch = conform_file(p, "checklist", apply=False)
             self.assertEqual(ch.removed, ["portable"])
             self.assertEqual(p.read_text(encoding="utf-8"), original)
+
+
+class StampRulesTest(unittest.TestCase):
+    def test_adds_all_three_when_missing(self):
+        text = "---\n---\n## House rules\n"
+        out = stamp_rules(text, "uv")
+        self.assertIn("version: 3.0", out)
+        self.assertIn("runtime: uv", out)
+        self.assertIn("agents_md: off", out)
+        self.assertIn("## House rules", out)
+
+    def test_leaves_existing_untouched(self):
+        text = "---\nversion: 3.0\nagents_md: auto\n---\nbody\n"
+        out = stamp_rules(text, "python")
+        self.assertIn("agents_md: auto", out)
+        self.assertNotIn("agents_md: off", out)
+        # version not duplicated
+        self.assertEqual(out.count("version:"), 1)
+        # runtime is the one missing field added
+        self.assertIn("runtime: python", out)
+
+    def test_canonical_order_when_all_added(self):
+        out = stamp_rules("---\n---\n", "node")
+        self.assertEqual(
+            out, "---\nversion: 3.0\nruntime: node\nagents_md: off\n---\n"
+        )
+
+    def test_no_frontmatter_gets_a_block(self):
+        out = stamp_rules("## House rules\nbody\n", "uv")
+        self.assertTrue(out.startswith("---\nversion: 3.0\nruntime: uv\nagents_md: off\n---\n"))
+        self.assertIn("## House rules", out)
 
 
 if __name__ == "__main__":
