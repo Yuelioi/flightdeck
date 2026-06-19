@@ -327,14 +327,15 @@ Never let the script make judgments (classification, status decisions, routing) 
 ## Cockpit update — what changes
 
 ```
-Last updated:     ONLY in these cases (otherwise leave alone):
+Updated:          stamp only — `Updated: <date> · <who> · Stage: <stage>`; NO changelog. Bump on:
                   (a) Next content changes
-                  (b) Active focus shifts (main thread moved)
+                  (b) Focus shifts (main thread moved)
                   (c) A major task / phase completes (user-perceivable progress)
                   (d) An artifact lands or a blocker resolves
-Active focus:      update if main thread shifted (otherwise leave) — coarse session main thread
-## In Progress:    AUTO — regen from every status:active spec/plan (do NOT hand-write)
-## Next:           auto-written — the next concrete single action (start an idea / advance an active)
+Focus:             one coarse thread label + current spec/plan link; ≤~100 chars. NO goal/criteria/method (→ spec body; invariants → rules.md)
+Pointers:          thin nav anchors (config/conventions/INDEXes/archive), hand-maintained; never content
+## Next:           auto-written — next concrete single action + plan link; progress checklists → plan ## Progress
+## In Progress:    AUTO — regen from every status:active spec/plan (do NOT hand-write); renders truncated summary head
 ## Key Context:    agent-judged — load-bearing literals a next session needs to resume; drain/shrink entries that no longer carry (or - (none))
 ## Pending Review: agent-judged — AI work awaiting your sign-off + surfaced stale 待复核 notes; drains when reviewed (or - (none))
 Hanging Tasks:     hand-maintained list — add new blocking items, clear resolved ones
@@ -344,7 +345,9 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 **`## Next` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
 
-**`Active focus` vs `## Next` — different granularity, no overlap.** `Active focus` = the current session main thread, one coarse line. `## Next` = the next concrete executable single step. The user adjusts either by directing the AI, not by hand-editing.
+**`Focus` vs `## Next` — different granularity, no overlap.** `Focus` = the current session main thread, one coarse label + a link to the spec/plan it names; goal / criteria / method live in that spec, not in cockpit. `## Next` = the next concrete executable single step + its plan link. The user adjusts either by directing the AI, not by hand-editing.
+
+**`Pointers` is thin navigation, hand-maintained (not AUTO).** A single line of jump anchors — config → `rules.md` · conventions → file · artifacts → folder INDEXes · history → `archive/` — anchors only, never content; the content lives at the target. Omit the line when a deck has nothing worth pinning.
 
 **`## Key Context` is the recovery slot.** At a checkpoint / soft-land / landing, refresh it with the **load-bearing literals a next session needs to resume**: the file under edit, a failing test name, an error string, a key value. Literals, not prose; nothing to carry → `- (none)`. Same agent-maintained model as `## Next` (not AUTO). It is cockpit's *transient resume hint* — distinct from a durable knowledge artifact's body (see § 写工件 body 的质量 above): both stress load-bearing literals, but one is the dashboard, the other is the record.
 
@@ -352,11 +355,11 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 **Accumulator-drain discipline.** `## Key Context` and `## Pending Review` are the two non-AUTO sections that *accumulate*; each MUST drain or it rots into a junk drawer. Draining is a judgment step → it runs at **landing** (which already rewrites cockpit by judgment), not at the mechanical checkpoint. `Key Context`: **clear** an entry when its literal no longer needs carrying (target archived / graduated into `docs/` / next session won't need it); **shrink** a long entry to a one-line pointer, merge same-source entries. `Pending Review`: drain on sign-off. The 80-line cap is the ceiling, not the discipline — prune per-entry first. (`walkaround` only flags a suspected-stale / oversized `Key Context` as a non-blocking INFO; it never drains.)
 
-**`Last updated` is not a session-activity log.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. **When it does bump, keep the parenthetical a terse one-line phrase** (what shifted + the next pointer) — **not a multi-sentence changelog of everything done this session.** A blow-by-blow narrative here is the same "session-log" smell in a different field: it bloats cockpit, costs tokens every landing, and duplicates what the spec/plan body and the commit message already hold. Aim ≤ ~200 chars; detail goes to the artifact, not the dashboard.
+**`Updated` is a freshness stamp, not a session-activity log.** It carries `<date> · <who> · Stage` and nothing more — **no parenthetical changelog of what the session did.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. The record of *what changed* lives in `git log` + the commit message + the spec/plan body — never as a narrative in cockpit.
 
 **When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## Next` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 
-**Length check before exit — two criteria, both gated.** (1) **Line count:** `cockpit.md` > 80 lines → trim immediately (drop finished items; move design detail to a `specs/` entry). (2) **Per-field density** — catches the 「行少字密」 (few lines, dense prose) bloat the line count misses: scan each hand-maintained field against its soft cap — `Active focus` ≤ one coarse line / ~200 chars · `Last updated` parenthetical ≤ ~200 chars · each `## Key Context` / `## Pending Review` entry ≤ a one-line literal pointer (and no entry whose target already archived/graduated — that case is the accumulator-drain above). Any field over cap → **propose a trim (gated)**: move still-live design detail to the matching `specs/` entry, then cut the cockpit prose; ≤ cap → no-op (idempotent). The trim is **gated** because *which detail is still live and where it goes* is live judgment, never an auto-delete. `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal — **> ~5 active threads → emit a non-blocking nudge** 「N active threads — consider parking/closing some」 (remind only, never delete; the root cause is too many open threads, fixed by behavior not by cockpit). History is `git log` + the `archive/` folder, never cockpit.
+**Length check before exit — gated criteria.** (1) **Line count:** `cockpit.md` > 80 lines → trim immediately (drop finished items; move design detail to a `specs/` entry). (2) **Per-field density** — catches the few-lines-but-dense-prose bloat the line count misses: scan each hand-maintained field against its soft cap — `Focus` ≤ one coarse line / ~100 chars · each `## Key Context` / `## Pending Review` entry ≤ a one-line literal pointer (and no entry whose target already archived/graduated — that case is the accumulator-drain above). (3) **Role-creep** — a field holding content that belongs in another home: `Updated` carrying a changelog (→ git log + commit) · `Focus` carrying goal/criteria/method (→ spec body) · `## Next` carrying a progress checklist / rationale list / milestone links (→ plan `## Progress`). Any (2)/(3) hit → **propose a gated trim**: route the off-home content back to its home (git / spec / plan), then cut the cockpit prose; ≤ cap and in-role → no-op (idempotent). The trim is **gated** because *which detail is still live and where it goes* is live judgment, never an auto-delete. `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal — **> ~5 active threads → emit a non-blocking nudge** "N active threads — consider parking/closing some" (remind only, never delete; the root cause is too many open threads, fixed by behavior not by cockpit). History is `git log` + the `archive/` folder, never cockpit.
 
 ### Soft-landing banner — the visible safe-to-close signal
 
