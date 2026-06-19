@@ -7,19 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.0-alpha.4] — 2026-06-19
+## [3.0.0-alpha.4] — 2026-06-20
 
-launch-recorded-config spec 落地（相 1/2/3）：把「运行时推断 / 处处兜底」换成「launch 一次性记录 / 强制的单条线」。**Breaking**：删 no-git 分支、删手写 markdown 兜底（强制 runtime）、`agents_md` 改读字段不再探文件。
+launch-recorded-config spec 落地（相 1/2/3）：把「运行时推断 / 处处兜底」换成「launch 一次性记录 / 强制的单条线」。**Breaking**：删 no-git 分支、删手写 markdown 兜底（强制 runtime）、`agents_md` 改读字段不再探文件。本版另并入两件独立工作（未发布前不另起版本）：`/flightdeck:conform`（deck 格式归一器）与 `/flightdeck:sync` 机械化重写（section-single-writer 懒拉）。
 
 ### Added
 - **记录式配置进 `rules.md` frontmatter** — `runtime`（`uv|python|node`）+ `agents_md`（`auto|off`）与 `version` 同级，runtime 直读不再每会话探测；晋升判据单一可证伪（当且仅当否则需「每会话探测某个外部事实」才升结构化字段），其余偏好（commits / start / nudge…）留 `### Rules` 自由散文。稳态优先级：frontmatter 字段对其管辖 key 永久高于散文。
 - **4 个用户可见脚本 Node 移植** — `flightdeck_index` / `flightdeck_init` / `flightdeck_lint` / `flightdeck_new` 各加 `.js`（内置模块对等、**零 npm 依赖**）支持 node-only 用户；`bump_version` 仅保留 Python（用户 skill 从不调用）。
 - **Parity 字节对拍防线（spec 级约束）** — `scripts/tests/parity/` 金标 fixture + `test_parity*.py`（24 parity 测试），Python/Node 双实现逐字 diff 必须为空；钉死归一规则（Unicode 码点序、LF、UTF-8 NFC、固定日期格式、稳定 JSON 键序）堵隐性漂移。harness 顺带浮出并修了 Python 参考 3 个真 bug（lint stdout 未强制 UTF-8、`KNOWLEDGE_FOLDERS` 集合序非确定、`_collect_md` 未排序）。
+- **`/flightdeck:conform` — deck 格式归一器**（设计 `docs/deck-format-conform.md`）— `scripts/flightdeck_conform.py`/`.js`（byte-parity，`ConformParity` 对拍）走查 deck，按 per-kind 合法字段集 check/apply 收敛 frontmatter（schema-delete 多余键）+ 补 cockpit/rules 缺失段 + stamp `rules.md` 的 `version`/`runtime`/`agents_md`；walkaround **Audit 16** 把 cockpit 字段结构漂移指向 `/flightdeck:conform`；`references/` 作 `IMPORTED_KIND` 排除出走查。
+- **`/flightdeck:sync` 机械化（section-single-writer 懒拉）**（设计 `docs/shared-knowledge-sync.md`；`specs`/`plans` `2026-06-20-sync-mechanical-pull`）— 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，`<!-- flightdeck:shared … -->` 边界锚 + shared-region 指纹定位；`flightdeck_index.py`/`.js` 加 `--sync-pull`（apply + `--check`）、node 端 byte-parity；sync skill 按机械模型重写。
 
 ### Changed
 - **runtime 强制 → 机械路塌成单条线** — 删各 ritual「无 runtime → 手写 markdown 兜底」双写（exit-ritual / status / landing / new / launch / walkaround）；INDEX/cockpit regen、artifact stamp、机械审计只剩脚本一条线，skill 按 frontmatter `runtime` 拼调用形（`uv run` / `python` / `node`）。
 - **launch doctor 体检 + git-init offer** — 探测面收窄为「仅 git 存在性 + runtime 检测」（优先级 `uv` > `python` > `node`），打 `🩺 flightdeck doctor` 体检表逐项正面/负面汇报；缺 repo 时问一句 `git init now? [y/N]`（`y` 帮建、`N` 停），git 没装 / 无 runtime 硬停提示安装；写 `runtime:` / `agents_md:` 并在建完回显记下的设置。（相对原 spec「零提示」有意回调一处 git 提示。）
 - **protocol `Rule resolution order`** 加 Runtime dispatch 段；`templates.md` 改「`version` 是唯一结构化字段」断言为多字段。
+- **发布面 i18n 收口** — `scripts/` 残留中文译为英文（发布面英文硬门 `rg -lP '\p{Han}' skills scaffolds`）。
+- **`commits.md` / `comments.md` 退役 `portable`** — 改由 synced 母库分发（`/flightdeck:sync` vendoring，不再各项目重新播种）；`commits.md` `§通用` 补 shell 传参 + RM/MM 暂存扫描两条。
+- **`bump_version.py` 接管 README 版本** — `set`/`--check` 现同步并校验中英 README 的版本徽标 + 警示 banner（只改锚定位点，prose 里的裸 semver 如「the final 3.0.0」不动），堵住「只升 manifest、README 徽标漂移」（本版前 README 徽标停在 `alpha.2` 直到 `alpha.4`）。
+
+### Fixed
+- **Node 默认日期 parity** — `.js` 脚本默认日期改用本地时间，与 Python 参考一致（原 UTC 破 byte-parity）。
 
 ### Breaking
 - **删 no-git 支持** — 贯穿各 skill 的 no-git 分支全删（preflight / landing / status / emit-agents-md / exit-ritual / folder-semantics / protocol / scaffold）；flightdeck 现要求 git，缺 git → launch 直接拒绝提示 `git init`。CI 自动化 / gitignore deck / 临时目录等用例为有意取舍。
