@@ -1049,5 +1049,29 @@ class InProgressTruncateTest(unittest.TestCase):
             self.assertIn("(specs/2026-06-19-x.md)", row)    # link survives
 
 
+class SharedRegionTest(unittest.TestCase):
+    def test_shared_region_splits_at_marker(self):
+        m = flightdeck_index.PROJECT_MARKER
+        text = ("---\nstatus: active\n---\n# Title\n\nshared body\n\n"
+                f"{m}\n## Project-specific\nlocal\n")
+        self.assertEqual(flightdeck_index.shared_region(text), "# Title\n\nshared body\n\n")
+
+    def test_shared_region_no_marker_is_whole_body(self):
+        self.assertEqual(
+            flightdeck_index.shared_region("---\nx: 1\n---\nonly shared\n"), "only shared\n")
+
+    def test_fingerprint_ignores_frontmatter_project_and_trailing_ws(self):
+        m = flightdeck_index.PROJECT_MARKER
+        a = f"---\nwhen_to_read: A\n---\n# T\n\nbody\n\n{m}\nproj A\n"
+        b = f"---\nwhen_to_read: B-localized\n---\n# T\n\nbody  \n\n\n{m}\nproj B different\n"
+        self.assertEqual(flightdeck_index.shared_fingerprint(a),
+                         flightdeck_index.shared_fingerprint(b))
+
+    def test_fingerprint_changes_with_shared_content(self):
+        self.assertNotEqual(
+            flightdeck_index.shared_fingerprint("---\n---\nbody one\n"),
+            flightdeck_index.shared_fingerprint("---\n---\nbody two\n"))
+
+
 if __name__ == "__main__":
     unittest.main()

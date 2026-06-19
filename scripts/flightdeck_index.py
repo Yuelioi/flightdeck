@@ -18,6 +18,7 @@ import json
 import os
 import re
 import subprocess
+import unicodedata
 import sys
 from collections import Counter
 from pathlib import Path
@@ -51,6 +52,42 @@ def signature_fingerprint(symptom, error_type=""):
     secondary/tiebreak the caller uses to disambiguate multiple hits)."""
     key = f"{(error_type or '').strip()}\n{normalize_symptom(symptom)}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+
+
+PROJECT_MARKER = "<!-- flightdeck:project-specific -->"
+
+
+def _strip_frontmatter(text):
+    """Body after a leading ---fenced frontmatter block (whole text when none)."""
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return text
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            return "".join(lines[i + 1:])
+    return text
+
+
+def shared_region(text):
+    """Master-owned region: frontmatter-stripped body up to PROJECT_MARKER; the
+    whole body when the marker is absent (pure-shared file)."""
+    body = _strip_frontmatter(text)
+    idx = body.find(PROJECT_MARKER)
+    return body if idx == -1 else body[:idx]
+
+
+def _normalize_shared(s):
+    """Canonicalize for fingerprint compare: NFC, LF, strip per-line trailing
+    whitespace, drop trailing blank lines."""
+    s = unicodedata.normalize("NFC", s).replace("\r\n", "\n").replace("\r", "\n")
+    s = "\n".join(line.rstrip() for line in s.split("\n"))
+    return s.rstrip("\n")
+
+
+def shared_fingerprint(text):
+    """12-hex sha1 of the normalized shared region (signature_fingerprint regime)."""
+    norm = _normalize_shared(shared_region(text))
+    return hashlib.sha1(norm.encode("utf-8")).hexdigest()[:12]
 
 
 def parse_signature(text):
