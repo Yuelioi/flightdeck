@@ -5,7 +5,7 @@
 
 ## Current focus
 
-（无活跃 spec/plan）deck-format-conform 已收尾（`flightdeck_conform.py/.js` + `/flightdeck:conform` ship）；候选见 Next（含新发现的 flightdeck_new date-parity bug）
+（无活跃 spec/plan）conform ship + flightdeck_new date-parity 修复（错题已退役）；候选见 Next
 
 ## In Progress
 
@@ -13,7 +13,7 @@ None.
 
 ## Next
 
-- 修 `flightdeck_new` 默认日期 parity：`.js` 用 UTC（`toISOString`）、`.py` 用 local（`date.today`），跨午夜窗 `test_parity_init_new` 红 → `incidents/new-default-date-local-vs-utc.md`。
+- （小）`checklists/comments.md` 仍带退役 `portable`（同 commits 处理：本仓+母库各删一行）。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 

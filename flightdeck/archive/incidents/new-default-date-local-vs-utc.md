@@ -1,10 +1,10 @@
 ---
-status: active
+status: obsolete
 summary: flightdeck_new.py defaults date to local (datetime.date.today) but the .js twin uses UTC (Date.toISOString) — parity breaks across the local/UTC midnight window
 when_to_read: before changing flightdeck_new/_init default date handling, or when test_parity_init_new fails with a 1-day date diff
 applies_to: [scripts/flightdeck_new.py, scripts/flightdeck_new.js, scripts/tests/test_parity_init_new.py]
 last_updated: 2026-06-20
-resolved_by:
+resolved_by: 9da21d2
 ---
 
 # flightdeck_new default date: py local vs js UTC breaks parity
@@ -39,12 +39,13 @@ no wall-clock date at all.)
 
 ## Fix
 
-Not yet fixed (found 2026-06-20 while landing deck-format-conform). Candidate: make the `.js`
-default match Python's local date — derive `YYYY-MM-DD` from local components, e.g.
-`` `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` ``
-instead of `toISOString()`. Verify by re-running `test_parity_init_new.py` inside the offset
-window (or with the system clock faked to it). Same audit applies to any other `.js` port that
-defaults a date via `toISOString()`.
+Fixed 2026-06-20 (`9da21d2`). Both `.js` ports now derive the default date from **local**
+components (`getFullYear` / `getMonth` / `getDate`, zero-padded) via a `todayIso()` helper,
+matching Python's `datetime.date.today().isoformat()`. Both `flightdeck_new.js` and the other
+offender found in the audit, `flightdeck_init.js`, were switched off `toISOString()`. Guard:
+`test_parity_init_new.py::NewParity::test_stamp_plan_and_index` (new default path, already
+present) + a new `InitParity::test_seed_default_date` (init default path) — both compare the
+py/js trees with no `--date`, so a future UTC regression goes red.
 
 ## Cases
 - 2026-06-20 first seen — surfaced as a red `test_stamp_plan_and_index` during the
