@@ -121,7 +121,6 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - default        → generate the message + `git commit` locally, no prompt
         - deck rule (ask-before-commit) → ask "Commit now? (Y/n)" before the local commit
         - deck rule (don't auto-commit) → do NOT commit; leave the changes for you / CI
-        - no-git overrides all → no commit (the land move is on disk; `archive/` is the record — no separate log)
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
         - **`Flightdeck-Sync:` trailer (REQUIRED on every landing/soft-land commit):**
@@ -130,7 +129,6 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
           the anchor that `--changed-since-anchor` keys on for the next landing's
           stale-detection pass (single on-exit ritual). Without it, the anchor is absent and
           the next landing must fall back to a full worktree diff.
-          Under no-git: skip (no commit → no anchor trailer; preflight falls back).
 ```
 
 ### Step 5a — Recurrence sweep + promotion gate (wrap-up)
@@ -431,7 +429,7 @@ Landing operates on a **land set**: the one-or-more `done` artifacts archived in
    **Drain destination for `obsolete` knowledge:** mirror the source structure — `incidents/foo.md → archive/incidents/foo.md`, `docs/foo.md → archive/docs/foo.md`, etc. Specifically, `archive/incidents/` is the required destination for retired incidents so `--match-signature` can scan them for regression detection (it now also scans `archive/incidents/`). Freeze the file's status as `obsolete` — the archive entry is the cold record.
 
 1. **Build the remap, before moving anything.** For every artifact in the land set, record `M[<folder>/<file>] = archive/<folder>/<file>` (mirrors source structure, e.g. `specs/foo.md → archive/specs/foo.md`). Taking this snapshot *before* any move is what lets intra-set edges survive: it captures both ends of a mutual reference while they still sit at their old paths.
-2. **Move (plain filesystem rename — never `git mv`).** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent. Use a plain `mv` / rename, **not `git mv`**: `git mv` assumes the deck is tracked and aborts with `fatal: not under version control` on a gitignored deck (the common case — projects routinely keep `flightdeck/` out of their code history), forcing fragile improvisation. A plain move works identically whether the deck is git-backed (the later commit step records the rename) or no-git.
+2. **Move (plain filesystem rename — never `git mv`).** For each entry in `M`, move `<folder>/<file>` → `archive/<folder>/<file>`, creating `archive/<folder>/` if absent. Use a plain `mv` / rename, **not `git mv`**: a plain move is sufficient because the later commit step records the rename in git; `git mv` adds no benefit here and introduces unnecessary coupling to git's working-tree tracking.
 3. **Rewrite relation edges against `M`.** Scan `implements:` / `supersedes:` / `related:` frontmatter values in **both** the active tree **and** the just-moved files; rewrite any value equal to a key in `M` to `M[value]`. Because `M` covers the entire set, this fixes all three edge classes a path change can dangle: (a) an *external* active artifact pointing at a landed one, (b) an *intra-set* mutual reference (both ends in `M`), and (c) a landed file's *own outbound* edge to a sibling in the same set. Touch **frontmatter values only** — prose `[text](path)` links are out of scope here (walkaround Audit 7 covers those). List the rewrites in the landing summary.
 4. **INDEX.** Remove each landed file's row from its `<folder>/INDEX.md` `<!-- AUTO -->` region. No unaffected folder is touched.
 
@@ -446,7 +444,7 @@ The land record is the moved files in `archive/` (+ `git log` on git-backed deck
 Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2 (each queues a full landing at end-of-turn). **signal 3** is separate — it triggers a *soft-landing* (knowledge + state persist only, no commit/archive), not a full landing:
 
 - **signal 1** — this `status` invocation just flipped an artifact to `done`.
-- **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
+- **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/`.
 - **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## In Progress` / `## Next` / `Focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
 
 Mechanics:

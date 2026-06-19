@@ -23,7 +23,7 @@ Canonical definitions, signal-3 trigger, stateless dedup: [exit-ritual § Land-r
 
 ## Run this checklist
 
-0. **Config + git.** Read `flightdeck/rules.md`; resolve everything per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order) (git inference incl. the gitignored-deck = no-git rule, commit defaults, House-Rule overrides). No-git → skip Step 11 and use a plain `mv` for land moves; the moved files in `archive/` are the record — no separate landing log.
+0. **Config + git.** Read `flightdeck/rules.md`; resolve everything per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order) (commit defaults, House-Rule overrides).
 1. **Hanging tasks.** Open `## Hanging Tasks` items block clean exit — resolve, or list and pause for the user. [exit-ritual § Hanging tasks](../preflight/exit-ritual.md#hanging-tasks--block-session-exit)
 2. **Classify new knowledge** — heuristics (a)–(h), first-match wins; **no new knowledge is a valid outcome**; capture abandoned paths, not just shipped fixes; external review feedback folds into the reviewed spec's `## Review notes` (raw text stays in project-root `tmp/`); a **persistent behavior request** ("from now on…") → append a free-prose rule to `rules.md` `### Rules` (source + date). [exit-ritual § Classification heuristics](../preflight/exit-ritual.md#classification-heuristics)
 3. **Regenerate INDEX for changed folders only.** Fast path: `flightdeck_index.py <deck>` regenerates every folder INDEX **and** the cockpit `## In Progress` block in one run; hand fallback per [exit-ritual § INDEX regeneration](../preflight/exit-ritual.md#index-regeneration--scope-rules).
@@ -69,7 +69,7 @@ Workspace smoke-check: clean / [stray/orphan/missing-status]  (walkaround for fu
 ```
 ─── 🛬 landing ───
 [Stage]   <lifecycle stage>
-[Saved]   committed locally <SHA> (Flightdeck-Sync: <ref>); landed <N> file(s).   (push: asked first / n/a; skipped under no-git or a commit deck rule)
+[Saved]   committed locally <SHA> (Flightdeck-Sync: <ref>); landed <N> file(s).   (push: asked first / n/a; skipped under a commit deck rule)
 [Pending] ⚠ <N> item(s) await verification → cockpit Pending Review.   (omit when empty)
 You can close / switch the conversation anytime — next preflight resumes from the board.
 ```

@@ -318,7 +318,7 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**). landing regenerates the INDEX of any folders changed this session.
 
 ## Act-report-close loop
 
