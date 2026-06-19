@@ -7,7 +7,7 @@ description: Use when explicitly invoking the flightdeck integrity audit — che
 
 User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drift loudly so the author can fix it. The markdown checklist below is always the source of truth; mechanical audits (Audits 1/4/5/7/8) MAY use `flightdeck_lint.py` (JSON findings) or `flightdeck_index.py --check` as optional fast paths.
 
-**只审不修（walkaround invariant）：** walkaround **MUST NOT modify any file** —— 只浮出漂移。修复路径 = `flightdeck_index.py <deck>` 或 `/flightdeck:landing`。
+**Audit-only, never fix (walkaround invariant):** walkaround **MUST NOT modify any file** — it only surfaces drift. The fix path is `flightdeck_index.py <deck>` or `/flightdeck:landing`.
 
 **Field authority**: [protocol.md § Frontmatter field reference](../preflight/protocol.md#frontmatter-field-reference-canonical) is the source of truth; these audits check against it.
 
@@ -21,43 +21,43 @@ User-triggered integrity audit of a flightdeck for protocol drift. Surfaces drif
 
 Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavior per [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order). Empty/unused folders are not findings. Report each finding with its severity tag.
 
-**Audit 1** — 查各非-archive `.md` 的 `status` 字段 → flag 缺失（CRITICAL）、非法值（WARNING；`specs/plans` 合法: `idea/active/done`；knowledge 合法: `active/stale/obsolete`；已退役旧值 `pending/awaiting-review/blocked/superseded` 均为 WARNING）。
+**Audit 1** — Check the `status` field of every non-archive `.md` → flag missing (CRITICAL), illegal value (WARNING; legal for `specs/plans`: `idea/active/done`; for knowledge: `active/stale/obsolete`; retired old values `pending/awaiting-review/blocked/superseded` are all WARNING).
 
-**Audit 2** — 查非-archive knowledge 文件（`incidents/checklists/docs/references/` 顶层作者 `.md`）的路由字段 → flag 缺失 `when_to_read`/`applies_to`/`last_updated`（WARNING）；`incidents/` 的 `recurrences` 计数与叙事段不符（INFO）。
+**Audit 2** — Check the routing fields of non-archive knowledge files (top-level authored `.md` in `incidents/checklists/docs/references/`) → flag missing `when_to_read`/`applies_to`/`last_updated` (WARNING); an `incidents/` `recurrences` count that disagrees with its narrative section (INFO).
 
-**Audit 3** — 查非-archive knowledge 文件的退役-3.0 字段 → flag 仍存在 `superseded_by` 字段（WARNING；应删字段，新件加 `supersedes:`）或 `status: superseded`（WARNING；按 Audit 1 迁移）。
+**Audit 3** — Check non-archive knowledge files for retired-in-3.0 fields → flag a still-present `superseded_by` field (WARNING; remove the field, the newer artifact carries `supersedes:`) or `status: superseded` (WARNING; migrate per Audit 1).
 
-**Audit 4** — 查 `plans/`（非 archive）各文件 → flag 无 `implements:` 字段者（INFO；考虑链接 spec 或确认独立）。
+**Audit 4** — Check each file in `plans/` (non-archive) → flag those with no `implements:` field (INFO; consider linking a spec or confirm it is standalone).
 
-**Audit 5** — 查各 artifact 文件夹的 `INDEX.md` → flag 缺 INDEX（WARNING）、文件无对应行（WARNING）、行对应文件不存在（WARNING）、行 status 与实际 frontmatter 不符（WARNING）；检查嵌套 knowledge area 子目录的 INDEX 及父 INDEX 引用行。快速路径：`flightdeck_index.py --check <deck>`。
+**Audit 5** — Check each artifact folder's `INDEX.md` → flag a missing INDEX (WARNING), a file with no matching row (WARNING), a row whose file does not exist (WARNING), a row whose status disagrees with the actual frontmatter (WARNING); also check nested knowledge-area sub-folder INDEXes and their parent-INDEX reference rows. Fast path: `flightdeck_index.py --check <deck>`.
 
-**Audit 6** — 查 `archive/` 下各带 `status` 的 `.md` → flag workflow 文件非 `done`（WARNING）、knowledge 文件非 `obsolete`（WARNING）。
+**Audit 6** — Check each `status`-carrying `.md` under `archive/` → flag a workflow file not `done` (WARNING), a knowledge file not `obsolete` (WARNING).
 
-**Audit 7** — 查 `flightdeck/` 及 repo 根 `*.md` 内所有非 HTTP、非纯锚点的 markdown 链接 → flag 目标文件不存在者（CRITICAL；报 source file:line + 断链路径）。
+**Audit 7** — Check every non-HTTP, non-pure-anchor markdown link in `flightdeck/` and repo-root `*.md` → flag those whose target file does not exist (CRITICAL; report source file:line + the broken path).
 
-**Audit 8** — 查 `flightdeck/` 下不属于已知文件夹/已知根条目且不被任何已知入口链接的 `.md` → flag 孤立文件（WARNING）；知识文件夹下的 `<area>/` 子目录不算 stray；`status: idea` spec 不算 orphan；`specs/plans/` 内的子目录算 WARNING；未被文件夹语义覆盖的非 `.md` 文件（WARNING）。
+**Audit 8** — Check `.md` under `flightdeck/` that belong to no known folder / known root entry and are linked by no known entry point → flag orphan files (WARNING); a `<area>/` sub-folder under a knowledge folder is not stray; a `status: idea` spec is not an orphan; a sub-folder inside `specs/plans/` is a WARNING; a non-`.md` file not covered by folder semantics (WARNING).
 
-**Audit 9** — 若 repo 根 `AGENTS.md` 带 flightdeck 标记块 → 逐字段比对 `cockpit.md`（active focus / `## In Progress` / `## Next` / hanging tasks）与块内内容 → flag 任何字段偏差（WARNING；说明偏差字段）。
+**Audit 9** — If repo-root `AGENTS.md` carries a flightdeck marker block → compare field-by-field against `cockpit.md` (Focus / `## In Progress` / `## Next` / hanging tasks) vs the block content → flag any field divergence (WARNING; name the diverging field).
 
-**Audit 10** — 查 `specs/plans/`（非 archive）各文件 → 汇总缺 `summary` / `last_updated` 的文件 → 各输出**一条** aggregated INFO（不逐文件报，避免淹没）。
+**Audit 10** — Check each file in `specs/plans/` (non-archive) → aggregate those missing `summary` / `last_updated` → emit **one** aggregated INFO each (not per-file, to avoid flooding).
 
-**Audit 11** — 查非-archive workflow 文件的 `supersedes:`/`related:` 字段值 → flag 目标在 active 树和 `archive/` 均不存在者（INFO；指向 archive 的边正常，不 flag）。
+**Audit 11** — Check the `supersedes:`/`related:` field values of non-archive workflow files → flag targets that exist in neither the active tree nor `archive/` (INFO; an edge pointing into archive is normal, not flagged).
 
-**Audit 12** — 查 `cockpit.md` 的 `<!-- AUTO:inprogress -->` 块 → 计算期望集（所有非 archive `status: active` spec/plan）→ flag active 文件无对应行（WARNING）、行对应文件非 active（WARNING）、摘要/note 文字差异（INFO；下次 regen 自愈）；块完全缺失为 WARNING。快速路径：`flightdeck_index.py --check <deck>` 的 `cockpit` drift 标签。
+**Audit 12** — Check `cockpit.md`'s `<!-- AUTO:inprogress -->` block → compute the expected set (every non-archive `status: active` spec/plan) → flag an active file with no matching row (WARNING), a row whose file is not active (WARNING), summary/note text differences (INFO; self-heals on next regen); a fully missing block is WARNING. Fast path: the `cockpit` drift tag of `flightdeck_index.py --check <deck>`.
 
-**Audit 13** — 查 `specs/plans/`（非 archive）中 `status: done` 文件 → flag 有 active 入边（`implements:` 指向它）者为 "blocked done"（INFO；报 blocker）、无 active 入边者为 "landable done 可 land"（INFO；运行 `/flightdeck:landing`）。快速路径：`flightdeck_index.py <deck> --archivable`。
+**Audit 13** — Check `status: done` files in `specs/plans/` (non-archive) → flag those with an active inbound edge (`implements:` pointing at them) as "blocked done" (INFO; report the blocker), those with no active inbound edge as "landable done" (INFO; run `/flightdeck:landing`). Fast path: `flightdeck_index.py <deck> --archivable`.
 
-**Audit 14** — 查 `cockpit.md` 的 `## Key Context` 累积卫生（非阻塞）→ flag 条目疑似 stale（指向已 archive/已 graduate 的目标）或单条已长成散文而非 literal 指针、或整段明显超长（INFO；提示在下次 `/flightdeck:landing` 做逐条 drain/收缩，见 [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)）。walkaround 只浮出、不 drain。
+**Audit 14** — Check `cockpit.md`'s `## Key Context` accumulation hygiene (non-blocking) → flag an entry that looks stale (points at an archived/graduated target), an entry grown into prose rather than a literal pointer, or an obviously oversized section (INFO; suggest a per-entry drain/shrink at the next `/flightdeck:landing`, see [exit-ritual § Accumulator-drain](../preflight/exit-ritual.md#cockpit-update--what-changes)). walkaround only surfaces, never drains.
 
-**Audit 15** — 查带 `synced: true` 的 vendored 文件。同步态走只读快速路径 `flightdeck_index.py <deck> --sync-status`（输出 `state<TAB>relpath`，母库固定 `~/.flightdeck`）：
-- 校验 relpath 不变量：母库无同 relpath 源文件 → `dangling`，报 **WARNING**；
-- `upstream-changed`（母库源较新）→ 报 **INFO**「N 个共享文件母库已更新——跑 `/flightdeck:sync`」；
-- `locally-ahead`（消费端较新）→ 报 **INFO**（项目这份较新，可考虑回流）；
-- `master-missing`（`~/.flightdeck` 不存在）→ **不报**（本机未建母库，非漂移）。
+**Audit 15** — Check vendored files carrying `synced: true`. Sync state uses the read-only fast path `flightdeck_index.py <deck> --sync-status` (emits `state<TAB>relpath`; the master store is fixed at `~/.flightdeck`):
+- Validate the relpath invariant: no source file at the same relpath in the master store → `dangling`, report **WARNING**;
+- `upstream-changed` (master source is newer) → report **INFO** "N shared files updated upstream — run `/flightdeck:sync`";
+- `locally-ahead` (the consumer copy is newer) → report **INFO** (this project's copy is newer, consider pushing it back);
+- `master-missing` (`~/.flightdeck` absent) → **do not report** (no master store on this machine, not drift).
 
-另查（直读 frontmatter，非 `--sync-status` 输出）：消费端 `synced: true` 文件出现 `consumers` 字段 → 报 **WARNING**（`consumers` 是母库专属字段，vendor 时应剔除，消费副本非法）。
+Also check (reading frontmatter directly, not `--sync-status` output): a consumer-side `synced: true` file that carries a `consumers` field → report **WARNING** (`consumers` is a master-store-only field, must be stripped when vendoring; its presence in a consumer copy is illegal).
 
-无带 `synced: true` 文件 → N/A。
+No `synced: true` files → N/A.
 
 **Audit 16** — cockpit field-structure / role conformance. Check `cockpit.md` against the canonical field set (`Updated` / `Focus` / `Pointers` / `## Next` / `## In Progress` / `## Key Context` / `## Pending Review` / `## Hanging Tasks`, per [templates § cockpit.md](../preflight/templates.md#cockpitmd)) → flag (all **INFO**, non-blocking — surface only, never modify, per the walkaround invariant): a non-standard hand-added section; a missing standard section; or field **role-creep** — `Updated` carrying a changelog (belongs in `git log`), `Focus` grown into a paragraph (goal/criteria/method that belongs in the spec body), or `## Next` carrying a progress checklist / rationale list / milestone links (belong in the plan's `## Progress`). Deck **content language** is never a finding (decks follow the user's language).
 
@@ -80,11 +80,11 @@ INFO findings (N):
 Total: N findings (X CRITICAL, Y WARNING, Z INFO)
 ```
 
-若无任何发现则输出 `✅ Clean.`。忽略 count=0 的 severity 行。某 audit 对应文件夹不存在 → N/A，不算 finding。
+If there are no findings at all, output `✅ Clean.`. Omit any severity row with count=0. An audit whose target folder does not exist → N/A, not a finding.
 
 ## Don't do
 
-- **walkaround MUST NOT modify any file. NEVER auto-fix** —— 只浮出，作者决策。`rules.md` version 是 `launch` 写入的静态戳，walkaround 不读、不写、不 bump。
-- Don't run against other repos / foreign `flightdeck/` — 误报。
-- Don't include archive 文件于大多数 audit（Audit 6 除外）。
-- Don't flag empty-but-present folders / INDEX — 空是正常初始态；missing known folder 才是 INFO。
+- **walkaround MUST NOT modify any file. NEVER auto-fix** — it only surfaces; the author decides. The `rules.md` version is a static stamp written by `launch`; walkaround neither reads, writes, nor bumps it.
+- Don't run against other repos / foreign `flightdeck/` — false positives.
+- Don't include archive files in most audits (Audit 6 excepted).
+- Don't flag empty-but-present folders / INDEX — empty is a normal initial state; only a missing known folder is INFO.
