@@ -21,10 +21,10 @@ class InitTest(unittest.TestCase):
             deck = Path(d) / "flightdeck"
             cockpit = (deck / "cockpit.md").read_text(encoding="utf-8")
             self.assertIn("# Cockpit — myproj", cockpit)
-            self.assertIn("2026-06-03 by 月离 (deck initialized)", cockpit)
-            self.assertIn("**Active focus**: just exploring", cockpit)
+            self.assertIn("2026-06-03 · 月离 · Stage: deck initialized", cockpit)
+            self.assertIn("Focus: just exploring", cockpit)
             self.assertIn("decide what to build", cockpit)
-            self.assertNotIn("<ACTIVE_FOCUS", cockpit)
+            self.assertNotIn("<FOCUS", cockpit)
             self.assertNotIn("<FIRST_NEXT_ITEM", cockpit)
             # full layout + 2-file contract present (cockpit.md + rules.md; no root INDEX ships)
             for f in FOLDERS:

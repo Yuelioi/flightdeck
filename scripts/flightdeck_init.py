@@ -22,8 +22,8 @@ from pathlib import Path
 
 SCAFFOLD = Path(__file__).resolve().parent.parent / "scaffolds" / "full" / "flightdeck"
 
-_ACTIVE = "<ACTIVE_FOCUS — filled by preflight first-time-setup>"
-_NEXT = "<FIRST_NEXT_ITEM — filled by preflight first-time-setup>"
+_ACTIVE = "<FOCUS — one coarse thread label + spec/plan link, filled by preflight first-time-setup>"
+_NEXT = "<FIRST_NEXT_ITEM — single concrete action + plan link, filled by preflight first-time-setup>"
 
 
 def init(target, name, user, date, focus, next_item):
@@ -37,7 +37,8 @@ def init(target, name, user, date, focus, next_item):
     text = cockpit.read_text(encoding="utf-8")
     text = text.replace("[project name]", name)
     text = text.replace(
-        "YYYY-MM-DD by [who] (one-line state)", f"{date} by {user} (deck initialized)"
+        "YYYY-MM-DD · [who] · Stage: <lifecycle stage>",
+        f"{date} · {user} · Stage: deck initialized",
     )
     text = text.replace(_ACTIVE, focus)
     text = text.replace(_NEXT, next_item)
