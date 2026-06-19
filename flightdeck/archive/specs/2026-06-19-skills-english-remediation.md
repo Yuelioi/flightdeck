@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 实测 skills/ 有 184 处中文漂移（10 文件），违反 rules.md 发布面英文红线。已止血：CLAUDE.md 强化对比 + version-bump 硬发版门。本 spec = 一次性翻译整顿：把 10 个 skill 文件翻成纯英文。scope 只管 ship 面（skills/scaffolds/templates/README/banner/字段标签），项目内 CLAUDE.md / flightdeck dogfood deck / 用户 deck 全不管。结构坑：中文 heading 被别处锚链（改名连带改链）、中文约定名 ## 评审纪要 多处引用（统一英文名+更新全部引用）。翻译只动语言不动语义。
 last_updated: 2026-06-19
 ---

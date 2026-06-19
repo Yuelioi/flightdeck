@@ -5,7 +5,7 @@
 
 ## Current focus
 
-flightdeck 3.0 alpha 打磨——发版 `v3.0.0-alpha.2` 准备中（README shared-knowledge 节已加待过目 → 接 version-bump）；`shared-knowledge-sync` v2 待跨项目 `--fanout` live 实证。
+发版 `v3.0.0-alpha.3`（当前已发 alpha.2；门已绿）→ checklists/version-bump.md
 
 ## In Progress
 
@@ -13,8 +13,9 @@ None.
 
 ## Next
 
-- **发版 `v3.0.0-alpha.2`**（用户拍板）：① `README.md` + `README.zh.md` 已加「shared-knowledge / 母库」节（`~/.flightdeck` + `synced` vendoring + `consumers`/`--fanout`，待用户过目，**未 commit**）。② 用户确认 README → 走 `checklists/version-bump.md` bump 到 `3.0.0-alpha.2`（含 README badge 第 7 行、各 manifest、CHANGELOG）。
-- **复核 `shared-knowledge-sync` v2**（审分支 diff `feat/shared-knowledge-sync-v2`，未并 main；真 vendor 第二个项目跑 `/flightdeck:sync --fanout` 做跨项目 live 实证）。
+- **并 main**：`feat/cockpit-redesign`（今日全部工作）合并入 main（合并本地可做；push 需用户显式批准）。
+- **发版 `v3.0.0-alpha.3`**（门已绿）：走 `checklists/version-bump.md`——5 manifest bump `3.0.0-alpha.2`→`3.0.0-alpha.3`、CHANGELOG `[Unreleased]`→`[3.0.0-alpha.3]`（cockpit 重设计 + skills i18n）、annotated tag、push（需批准）。
+- （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
 ## Hanging Tasks
 

@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 实现 cockpit-field-redesign：新字段结构（Updated 纯戳 / Focus 一行 / Pointers 行 / Next 单步+进度移plan / In Progress summary 截断 / Key Context / Pending / Hanging）落 templates+exit-ritual+protocol，scaffold 出新形状，flightdeck_index.py In Progress 截断渲染（TDD），walkaround 加 Audit 16，dogfood cockpit 重构验证。新写内容一律英文（蹭 i18n）。
 last_updated: 2026-06-19
 implements: specs/2026-06-19-cockpit-field-redesign.md

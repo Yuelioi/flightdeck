@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 实现 accumulator-convergence：Key Context 重述为中转暂存（B1 referent 死即排空 / B2 耐用毕业上迁到 home-by-kind）+ Pending Review 老条目 landing 逼问（A）+ 去 CLAUDE.md 写死（protocol/templates 三处改 agent 中立）+ home-by-kind 表（rules/docs/agent根文件）。落 exit-ritual+protocol+templates+landing，dogfood cockpit 真瘦身。新写英文。
 last_updated: 2026-06-19
 implements: specs/2026-06-19-cockpit-accumulator-convergence.md

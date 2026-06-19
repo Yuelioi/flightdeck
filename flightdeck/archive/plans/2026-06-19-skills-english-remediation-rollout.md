@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 翻译 10 个 skill 文件到纯英文：先拆结构坑（中文 heading→英文+全锚点同步改；## 评审纪要→## Review notes 改定义+全引用），再逐文件翻译（语义不动）；每文件翻完 rg 自验零 Han，全部完成后 rg -lP Han skills scaffolds 为空（version-bump 英文门转绿）+ walkaround Audit 7 零断链。
 last_updated: 2026-06-19
 implements: specs/2026-06-19-skills-english-remediation.md
