@@ -14,7 +14,33 @@ from flightdeck_conform import (
     add_missing_sections,
     COCKPIT_SECTIONS,
     RULES_SECTIONS,
+    main,
 )
+import io
+import contextlib
+import tempfile
+
+
+def _build_deck(d):
+    """A minimal deck: cockpit (missing sections), un-stamped rules, a checklist
+    with a non-schema field + missing required, and an archived file."""
+    deck = Path(d) / "flightdeck"
+    (deck / "checklists").mkdir(parents=True)
+    (deck / "archive" / "specs").mkdir(parents=True)
+    (deck / "cockpit.md").write_text(
+        "# Cockpit\n\nUpdated: 2026-06-19\n\n## Next\n\n- x\n", encoding="utf-8"
+    )
+    (deck / "rules.md").write_text("---\n---\n## House rules\n", encoding="utf-8")
+    (deck / "checklists" / "c.md").write_text(
+        "---\nstatus: active\napplies_to: [a]\nlast_updated: 2026-06-19\n"
+        "portable: true\n---\nbody\n",
+        encoding="utf-8",
+    )
+    arch = (
+        "---\nstatus: done\nportable: true\n---\nfrozen\n"
+    )
+    (deck / "archive" / "specs" / "old.md").write_text(arch, encoding="utf-8")
+    return deck, arch
 
 
 class FieldSetTest(unittest.TestCase):
@@ -183,6 +209,59 @@ class AddSectionsTest(unittest.TestCase):
         self.assertEqual(added, RULES_SECTIONS)
         for s in RULES_SECTIONS:
             self.assertIn(s, out)
+
+
+class MainTest(unittest.TestCase):
+    def test_apply_conforms_and_prints_worklist(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck, arch = _build_deck(d)
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = main([str(deck), "--runtime", "uv"])
+            self.assertEqual(rc, 0)
+            checklist = (deck / "checklists" / "c.md").read_text(encoding="utf-8")
+            self.assertNotIn("portable", checklist)
+            rules = (deck / "rules.md").read_text(encoding="utf-8")
+            self.assertIn("runtime: uv", rules)
+            self.assertIn("version: 3.0", rules)
+            cockpit = (deck / "cockpit.md").read_text(encoding="utf-8")
+            self.assertIn("## Key Context", cockpit)
+            # archived file is frozen
+            self.assertEqual(
+                (deck / "archive" / "specs" / "old.md").read_text(encoding="utf-8"),
+                arch,
+            )
+            # worklist names the missing required field on the checklist
+            self.assertIn("checklists/c.md\twhen_to_read", buf.getvalue())
+
+    def test_references_folder_is_left_untouched(self):
+        # references/ is an IMPORTED_KIND: decks vendor whole upstream repos
+        # there; the formatter must not prune their frontmatter.
+        with tempfile.TemporaryDirectory() as d:
+            deck, _ = _build_deck(d)
+            (deck / "references").mkdir()
+            vendored = "---\njupytext: x\nkernelspec: y\n---\nupstream\n"
+            (deck / "references" / "vendor.md").write_text(vendored, encoding="utf-8")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                main([str(deck), "--runtime", "uv"])
+            self.assertEqual(
+                (deck / "references" / "vendor.md").read_text(encoding="utf-8"),
+                vendored,
+            )
+            self.assertNotIn("references/", buf.getvalue())
+
+    def test_check_writes_nothing_and_exits_1(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck, _ = _build_deck(d)
+            before = (deck / "checklists" / "c.md").read_text(encoding="utf-8")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = main([str(deck), "--check", "--runtime", "uv"])
+            self.assertEqual(rc, 1)
+            self.assertEqual(
+                (deck / "checklists" / "c.md").read_text(encoding="utf-8"), before
+            )
 
 
 if __name__ == "__main__":

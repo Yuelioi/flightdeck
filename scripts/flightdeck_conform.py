@@ -21,9 +21,12 @@ test_flightdeck_conform.py — changing a set is an intentional, reviewed edit.
 # dependencies = []
 # ///
 
+import argparse
 import re
 import sys
 from pathlib import Path
+
+from flightdeck_index import IMPORTED_KINDS, parse_frontmatter
 
 # A frontmatter field line: a key at column 0 followed by a colon. Indented
 # continuations, blank lines, and comments do not match and are kept verbatim.
@@ -59,11 +62,17 @@ REQUIRED_FIELDS = {
     "rules": {"version"},
 }
 
-# in-scope folder name → kind
+# folder name → kind (for kind_of routing / the legal-field lookup).
 FOLDER_KIND = {
     "specs": "spec", "plans": "plan", "incidents": "incident",
     "checklists": "checklist", "references": "reference", "docs": "doc",
 }
+
+# Folders the mechanical pass actually walks. `references/` is excluded: it is an
+# IMPORTED_KIND (externally imported, hand-maintained — same reason
+# flightdeck_index never regenerates its INDEX), and decks vendor whole upstream
+# repos there whose frontmatter (jupytext/kernelspec/name/…) is not ours to prune.
+WALK_FOLDERS = [f for f in FOLDER_KIND if f not in IMPORTED_KINDS]
 
 
 def kind_of(deck, path):
@@ -227,19 +236,143 @@ class Changes:
 
 
 def conform_file(path, kind, apply):
-    """Prune one in-scope, kind-bearing file. Writes only when ``apply``."""
+    """Prune one in-scope, kind-bearing file + report any missing required field.
+
+    Writes only when ``apply`` and the pruned text differs. ``missing_required``
+    is computed against the post-prune frontmatter (pruning never removes a
+    legal required field, but a file may simply lack one) for the AI worklist.
+    """
     path = Path(path)
     text = path.read_text(encoding="utf-8")
     new_text, removed = prune_frontmatter(text, kind)
+    present = set(parse_frontmatter(new_text))
+    missing = sorted(REQUIRED_FIELDS.get(kind, set()) - present)
     if apply and new_text != text:
         path.write_text(new_text, encoding="utf-8")
-    return Changes(path, removed=removed)
+    return Changes(path, removed=removed, missing_required=missing)
+
+
+def _scope_files(deck):
+    """Yield ``(path, kind)`` for every in-scope, kind-bearing file.
+
+    Walks the standard folders (incl. nested areas), skips ``INDEX.md`` and
+    anything ``kind_of`` rejects (``archive/``, stray folders). Sorted by
+    codepoint for deterministic, parity-safe output.
+    """
+    deck = Path(deck)
+    for folder in WALK_FOLDERS:
+        d = deck / folder
+        if not d.is_dir():
+            continue
+        for p in sorted(d.rglob("*.md"), key=lambda q: str(q).replace("\\", "/")):
+            if p.name == "INDEX.md":
+                continue
+            kind = kind_of(deck, p)
+            if kind is not None:
+                yield p, kind
+
+
+def _relpath(deck, path):
+    return Path(path).relative_to(deck).as_posix()
+
+
+def run_conform(deck, apply, runtime):
+    """Apply (or, when ``apply`` is False, plan) the mechanical pass.
+
+    Returns ``(results, worklist)`` where ``results`` is a list of ``Changes``
+    (cockpit, rules, then every kind file, sorted by relpath) and ``worklist``
+    is a sorted list of ``(relpath, missing-required-field)`` for the AI pass.
+    """
+    deck = Path(deck)
+    results = []
+
+    cockpit = deck / "cockpit.md"
+    if cockpit.is_file():
+        text = cockpit.read_text(encoding="utf-8")
+        new_text, added = add_missing_sections(text, "cockpit")
+        if apply and new_text != text:
+            cockpit.write_text(new_text, encoding="utf-8")
+        results.append(Changes(cockpit, added_sections=added))
+
+    rules = deck / "rules.md"
+    if rules.is_file():
+        text = rules.read_text(encoding="utf-8")
+        pruned, removed = prune_frontmatter(text, "rules")
+        present = set(parse_frontmatter(pruned))
+        stamped = [k for k in _RULES_STAMP if k not in present]
+        stamped_text = stamp_rules(pruned, runtime)
+        new_text, added = add_missing_sections(stamped_text, "rules")
+        if apply and new_text != text:
+            rules.write_text(new_text, encoding="utf-8")
+        results.append(
+            Changes(rules, removed=removed, stamped=stamped, added_sections=added)
+        )
+
+    worklist = []
+    for path, kind in _scope_files(deck):
+        ch = conform_file(path, kind, apply)
+        results.append(ch)
+        rel = _relpath(deck, path)
+        for field in ch.missing_required:
+            worklist.append((rel, field))
+
+    results.sort(key=lambda c: _relpath(deck, c.path))
+    worklist.sort()
+    return results, worklist
+
+
+def _change_segments(ch):
+    segs = []
+    if ch.removed:
+        segs.append("drop " + ",".join(ch.removed))
+    if ch.stamped:
+        segs.append("stamp " + ",".join(ch.stamped))
+    if ch.added_sections:
+        segs.append("add " + ",".join(ch.added_sections))
+    return "; ".join(segs)
 
 
 def main(argv=None):
+    # Force UTF-8 stdout (Windows locale codepage would mojibake CJK worklist
+    # notes when piped/captured); mirrors flightdeck_index.
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    # CLI wired in a later task.
+
+    ap = argparse.ArgumentParser(
+        description="Conform a flightdeck deck to its canonical schema "
+        "(mechanical pass: prune non-schema frontmatter, stamp rules "
+        "recorded-config, append missing cockpit/rules sections)."
+    )
+    ap.add_argument("deck", help="path to the flightdeck/ deck root")
+    ap.add_argument(
+        "--check",
+        action="store_true",
+        help="dry-run: print the planned changes + AI worklist, write nothing, "
+        "exit 1 if the deck is not fully conformant",
+    )
+    ap.add_argument(
+        "--runtime",
+        default=None,
+        help="recorded runtime to stamp into rules.md (default: probe uv>python>node)",
+    )
+    args = ap.parse_args(argv)
+
+    runtime = args.runtime or detect_runtime()
+    deck = Path(args.deck)
+    apply = not args.check
+    results, worklist = run_conform(deck, apply, runtime)
+
+    if args.check:
+        for ch in results:
+            if ch.changed:
+                print("%s\t%s" % (_relpath(deck, ch.path), _change_segments(ch)))
+        for rel, field in worklist:
+            print("%s\t(missing) %s" % (rel, field))
+        pending = any(ch.changed for ch in results) or bool(worklist)
+        return 1 if pending else 0
+
+    for rel, field in worklist:
+        print("%s\t%s" % (rel, field))
     return 0
 
 
