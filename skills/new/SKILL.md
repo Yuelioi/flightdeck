@@ -80,9 +80,9 @@ or remove/rename the existing file first.
 judge whether it meets **either** of these criteria (lenient; the user's yes/no is the gate,
 not a mechanical check):
 
-- **约束后续开发** — defines a rule / contract / interface that future code must obey
+- **Constrains future development** — defines a rule / contract / interface that future code must obey
   (error-code table, i18n-key convention, plugin protocol, design tokens, …).
-- **大概率被反复参考** — will be opened for repeated look-up rather than read once and forgotten.
+- **Likely referenced repeatedly** — will be opened for repeated look-up rather than read once and forgotten.
 
 Negative examples — these look like design specs but **do NOT qualify** unless they also
 set a durable rule the codebase must obey:
@@ -91,9 +91,8 @@ set a durable rule the codebase must obey:
 - A throwaway experiment / probe design
 - A specific feature's implementation plan (no lasting contract)
 
-If the spec plausibly hits either criterion, **ask the user: "这份 spec 要标记为 graduate？"**
-(English: "Mark this spec `graduate: true`?"). On yes, write `graduate: true` into the
-spec's frontmatter.
+If the spec plausibly hits either criterion, **ask the user: "Mark this spec `graduate: true`?"**
+On yes, write `graduate: true` into the spec's frontmatter.
 
 **Flag window:** `graduate: true` can be set at creation time (here) **or at any point
 during the spec's active life** — mid-plan-execution is fine. The gate is the user's
@@ -110,14 +109,14 @@ the doc out of stale detection immediately, defeating the point).
 
 ## Report
 
-壳建好、正文写入后，按统一 banner（[protocol § Act-report-close loop](../preflight/protocol.md#act-report-close-loop)）末尾报告：
+After the shell is created and the body is written, report at the end per the unified banner ([protocol § Act-report-close loop](../preflight/protocol.md#act-report-close-loop)):
 
 ```
 ─── ✍️ new ───
 [Saved] <kind>: <path>
 ```
 
-这枚 banner **就是** new 的用户可见报告——不要再复述脚本的 `created … at …` 原始 stdout。standalone 调用出此 banner；作为更大 flow 的子步时并入外层 banner。
+This banner **is** new's user-visible report — do not also restate the script's raw `created … at …` stdout. A standalone call emits this banner; as a sub-step of a larger flow it merges into the outer banner.
 
 ## Relationship to landing
 
