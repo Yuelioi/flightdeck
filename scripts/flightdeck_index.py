@@ -619,14 +619,16 @@ def prune_consumers(master_root):
 def sync_status(deck):
     """Read-only shared-knowledge drift scan: for every artifact carrying
     `synced: true`, use its **own relpath** to find the same-path source under the
-    master deck and compare `last_updated`, returning (state, relpath). Writes nothing.
+    master deck and compare the shared-region fingerprint, returning (state,
+    relpath). Writes nothing.
 
-    Master root resolution is in `_resolve_master_root` (fixed `~/.flightdeck`). States:
-      upstream-changed  master is newer (master last_updated greater) → /flightdeck:sync can pull
-      in-sync           equal
-      locally-ahead     project is newer → /flightdeck:sync push can flow back to master
-      dangling          master root exists, but the same-relpath source is not a readable file (missing/type mismatch)
-      master-missing    master root ~/.flightdeck does not exist → whole deck skipped gracefully
+    Master root resolution is in `_resolve_master_root` (fixed `~/.flightdeck`).
+    The shared region is master-authoritative, so any fingerprint difference is
+    `stale` (no timestamp-based direction split). States:
+      in-sync         shared-region fingerprint equals the master's
+      stale           shared regions differ → /flightdeck:sync can mechanically pull
+      dangling        master root exists, but the same-relpath source is not a readable file (missing/type mismatch)
+      master-missing  master root ~/.flightdeck does not exist → whole deck skipped gracefully
     Paths are deck-relative, POSIX-slashed; sorted by relpath. archive/ excluded."""
     deck = Path(deck)
     master_root = _resolve_master_root()
@@ -636,9 +638,10 @@ def sync_status(deck):
         if p.name == "INDEX.md" or "archive" in p.relative_to(deck).parts:
             continue
         try:
-            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+            text = p.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             continue
+        fm = parse_frontmatter(text)
         if str(fm.get("synced", "")).strip().lower() != "true":
             continue
         rel = str(p.relative_to(deck)).replace("\\", "/")
@@ -649,14 +652,8 @@ def sync_status(deck):
         if not master_file.is_file():
             out.append(("dangling", rel))
             continue
-        proj_lu = fm.get("last_updated", "")
-        mast_lu = parse_frontmatter(master_file.read_text(encoding="utf-8")).get("last_updated", "")
-        if mast_lu > proj_lu:          # ISO date string comparison == chronological comparison
-            state = "upstream-changed"
-        elif mast_lu < proj_lu:
-            state = "locally-ahead"
-        else:
-            state = "in-sync"
+        master_text = master_file.read_text(encoding="utf-8")
+        state = "in-sync" if shared_fingerprint(text) == shared_fingerprint(master_text) else "stale"
         out.append((state, rel))
     return sorted(out, key=lambda t: t[1])
 

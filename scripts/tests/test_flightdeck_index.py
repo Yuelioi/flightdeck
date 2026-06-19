@@ -850,12 +850,13 @@ class VerifyPendingUtf8CliTest(unittest.TestCase):
 class SyncStatusTest(unittest.TestCase):
     """flightdeck_index.sync_status — read-only shared-knowledge drift scan (v2: fixed master + synced marker)."""
 
-    def _master_file(self, master, relpath, last_updated):
+    def _master_file(self, master, relpath, last_updated, body=None):
         p = master / relpath
         p.parent.mkdir(parents=True, exist_ok=True)
+        body = body if body is not None else f"# {p.stem}\n"
         p.write_text(
             f"---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\n"
-            f"last_updated: {last_updated}\n---\n# {p.stem}\n",
+            f"last_updated: {last_updated}\n---\n{body}",
             encoding="utf-8",
         )
 
@@ -865,12 +866,13 @@ class SyncStatusTest(unittest.TestCase):
         (deck / "rules.md").write_text("---\nversion: 3.0\n---\n", encoding="utf-8")
         return deck
 
-    def _vendored(self, deck, relpath, last_updated):
+    def _vendored(self, deck, relpath, last_updated, body=None):
         p = deck / relpath
         p.parent.mkdir(parents=True, exist_ok=True)
+        body = body if body is not None else f"# {p.stem}\n"
         p.write_text(
             f"---\nstatus: active\nsynced: true\n"
-            f"when_to_read: x\napplies_to: [y]\nlast_updated: {last_updated}\n---\n# {p.stem}\n",
+            f"when_to_read: x\napplies_to: [y]\nlast_updated: {last_updated}\n---\n{body}",
             encoding="utf-8",
         )
 
@@ -883,9 +885,9 @@ class SyncStatusTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             master = root / ".flightdeck"
-            self._master_file(master, "checklists/commits.md", "2026-06-20")
+            self._master_file(master, "checklists/commits.md", "2026-06-20", body="# T\n\nMASTER body\n")
             deck = self._consumer(root)
-            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # master newer → upstream-changed
+            self._vendored(deck, "checklists/commits.md", "2026-06-18", body="# T\n\nDRIFTED body\n")  # shared differs → stale
             self._vendored(deck, "checklists/ahead.md", "2026-06-25")     # no master source → dangling (source absent)
             (deck / "checklists" / "local.md").write_text(
                 "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-18\n---\n# local\n",
@@ -893,11 +895,13 @@ class SyncStatusTest(unittest.TestCase):
             )
             with self._home(root):
                 states = {rel: st for st, rel in sync_status(deck)}
-            self.assertEqual(states["checklists/commits.md"], "upstream-changed")
+            self.assertEqual(states["checklists/commits.md"], "stale")
             self.assertEqual(states["checklists/ahead.md"], "dangling")
             self.assertNotIn("checklists/local.md", states)
 
-    def test_locally_ahead_and_in_sync(self):
+    def test_in_sync_ignores_last_updated_difference(self):
+        # Re-keyed to the shared-region fingerprint: identical shared body with a
+        # different last_updated is in-sync (the timestamp-based direction split is gone).
         from flightdeck_index import sync_status
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -905,12 +909,12 @@ class SyncStatusTest(unittest.TestCase):
             self._master_file(master, "checklists/commits.md", "2026-06-18")
             self._master_file(master, "checklists/comments.md", "2026-06-10")
             deck = self._consumer(root)
-            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # equal → in-sync
-            self._vendored(deck, "checklists/comments.md", "2026-06-25")  # project newer → locally-ahead
+            self._vendored(deck, "checklists/commits.md", "2026-06-18")   # equal body → in-sync
+            self._vendored(deck, "checklists/comments.md", "2026-06-25")  # newer date, same body → still in-sync
             with self._home(root):
                 states = {rel: st for st, rel in sync_status(deck)}
             self.assertEqual(states["checklists/commits.md"], "in-sync")
-            self.assertEqual(states["checklists/comments.md"], "locally-ahead")
+            self.assertEqual(states["checklists/comments.md"], "in-sync")
 
     def test_master_missing_when_no_flightdeck_home(self):
         from flightdeck_index import sync_status
@@ -1102,6 +1106,42 @@ class PullSharedTest(unittest.TestCase):
         self.assertIn("new whole body", out)
         self.assertNotIn("old whole body", out)
         self.assertTrue(out.startswith("---\nsynced: true\n---\n"))
+
+
+def _mk(p, text):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+class SyncStatusFingerprintTest(unittest.TestCase):
+    def test_stale_vs_insync(self):
+        m = flightdeck_index.PROJECT_MARKER
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "deck"
+            master = Path(d) / "master"
+            _mk(master / "checklists" / "commits.md", "---\n---\n# T\n\nSHARED v2\n")
+            _mk(master / "checklists" / "comments.md", "---\n---\n# T\n\nSHARED new\n")
+            _mk(deck / "checklists" / "commits.md",
+                f"---\nsynced: true\n---\n# T\n\nSHARED v2\n\n{m}\nlocal\n")
+            _mk(deck / "checklists" / "comments.md",
+                "---\nsynced: true\n---\n# T\n\nSHARED old\n")
+            with mock.patch.object(flightdeck_index, "_resolve_master_root",
+                                   return_value=master):
+                self.assertEqual(
+                    flightdeck_index.sync_status(deck),
+                    [("stale", "checklists/comments.md"),    # sorted by relpath: comments < commits
+                     ("in-sync", "checklists/commits.md")])
+
+    def test_dangling_when_master_lacks_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "deck"
+            master = Path(d) / "master"
+            master.mkdir()
+            _mk(deck / "checklists" / "x.md", "---\nsynced: true\n---\nbody\n")
+            with mock.patch.object(flightdeck_index, "_resolve_master_root",
+                                   return_value=master):
+                self.assertEqual(flightdeck_index.sync_status(deck),
+                                 [("dangling", "checklists/x.md")])
 
 
 if __name__ == "__main__":
