@@ -5,17 +5,18 @@
 
 ## Current focus
 
-发版 `v3.0.0-alpha.3`（当前已发 alpha.2；门已绿）→ checklists/version-bump.md
+launch-recorded-config 全 spec → flightdeck/specs/2026-06-19-launch-recorded-config.md
 
 ## In Progress
 
-None.
+- [2026-06-19-launch-recorded-config.md](flightdeck/specs/2026-06-19-launch-recorded-config.md) — Shift flightdeck from inference/fallback to recorded settings + required runtime…
+- [2026-06-19-launch-recorded-config-1-config-git.md](flightdeck/plans/2026-06-19-launch-recorded-config-1-config-git.md) — Phase 1 of launch-recorded-config: declare the rules.md frontmatter settings sch…
+- [2026-06-19-launch-recorded-config-2-runtime-node.md](flightdeck/plans/2026-06-19-launch-recorded-config-2-runtime-node.md) — Phase 2 of launch-recorded-config: force a script runtime by deleting every hand…
+- [2026-06-19-launch-recorded-config-3-field-semantics.md](flightdeck/plans/2026-06-19-launch-recorded-config-3-field-semantics.md) — Phase 3 of launch-recorded-config: wire the recorded rules.md frontmatter fields…
 
 ## Next
 
-- **并 main**：`feat/cockpit-redesign`（今日全部工作）合并入 main（合并本地可做；push 需用户显式批准）。
-- **发版 `v3.0.0-alpha.3`**（门已绿）：走 `checklists/version-bump.md`——5 manifest bump `3.0.0-alpha.2`→`3.0.0-alpha.3`、CHANGELOG `[Unreleased]`→`[3.0.0-alpha.3]`（cockpit 重设计 + skills i18n）、annotated tag、push（需批准）。
-- （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
+- **相 4（spec 收尾）**：plan + 实现——走 `checklists/version-bump.md` 到 `3.0.0-alpha.4` + CHANGELOG。**用户定：做版本号+CHANGELOG，不 push、不打 tag。** 做完即可 flip 整个 spec + 相 1/2/3 plan 全 done + land（spec `graduate: true` → graduate 到 `docs/`）。
 
 ## Hanging Tasks
 
