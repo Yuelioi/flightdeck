@@ -5,7 +5,7 @@
 
 ## Current focus
 
-无活跃 spec — launch-recorded-config 已发版+graduate → docs/launch-recorded-config.md；下一步在两个 parked 复核项之间
+（无活跃 spec/plan）deck-format-conform 已收尾（`flightdeck_conform.py/.js` + `/flightdeck:conform` ship）；候选见 Next（含新发现的 flightdeck_new date-parity bug）
 
 ## In Progress
 
@@ -13,6 +13,7 @@ None.
 
 ## Next
 
+- 修 `flightdeck_new` 默认日期 parity：`.js` 用 UTC（`toISOString`）、`.py` 用 local（`date.today`），跨午夜窗 `test_parity_init_new` 红 → `incidents/new-default-date-local-vs-utc.md`。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 

@@ -1,26 +1,27 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-19 · 月离 · Stage: v3.0.0-alpha.4 已切（5 manifest + CHANGELOG，未 push / 未 tag）；launch-recorded-config 全 spec 相 1/2/3 done + land，spec graduate → docs/
+Updated: 2026-06-20 · 月离 · Stage: deck-format-conform done + graduate（`flightdeck_conform.py/.js` + `/flightdeck:conform` ship）；alpha.4 仍未 push / 未 tag
 
-Focus: deck-format-conform（strict formatter 设计）→ specs/2026-06-19-deck-format-conform.md
+Focus: （无活跃 spec/plan）conform 已收尾；候选见 ## Next（含新发现的 flightdeck_new date-parity bug）
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
 ## In Progress
 
 <!-- AUTO:inprogress -->
-- [2026-06-19-deck-format-conform.md](specs/2026-06-19-deck-format-conform.md) — A strict deck formatter that conforms every active file to its canonical schema/…
-- [2026-06-19-deck-format-conform.md](plans/2026-06-19-deck-format-conform.md) — Implement the deck format conformer: new flightdeck_conform.py/.js (py/js byte-p…
+
 <!-- /AUTO -->
 
 ## Next
 
+- 修 `flightdeck_new` 默认日期 parity：`.js` 用 UTC（`toISOString`）、`.py` 用 local（`date.today`），跨午夜窗 `test_parity_init_new` 红 → `incidents/new-default-date-local-vs-utc.md`（候选改 `.js` 用 local 组件）。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
 ## Key Context
 
-- **launch-recorded-config 已发版 `3.0.0-alpha.4`（本会话）**：spec graduate → `docs/launch-recorded-config.md`（设计现状真相源），相 1/2/3 plan 归档 `archive/plans/`。版本号（5 manifest）+ CHANGELOG 已落，`MIGRATION.md current` 仍 `3.0`（format baseline）；**未 push / 未 tag**（用户定）。
+- alpha.4 已切但**未 push / 未 tag**（用户定）；conform 等新工作并入当前 alpha（未发布前不另起版本）。
+- deck-format-conform 落地：设计真相源 `docs/deck-format-conform.md`；脚本 `scripts/flightdeck_conform.py/.js`（byte-parity，`ConformParity`）、skill `skills/conform/SKILL.md`、walkaround Audit 16 → 指向 `/flightdeck:conform`。`references/` 排除出 walk（IMPORTED_KIND）。
 
 ## Pending Review
 
