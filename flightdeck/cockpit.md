@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-20 · 月离 · Stage: conform ship + flightdeck_new date-parity 修复（错题已退役）；commits/comments.md 退役 portable（本仓+母库，deck conform-clean）；alpha.4 仍未 push / 未 tag
+Updated: 2026-06-20 · 月离 · Stage: v3.0.0-alpha.4 已发布（main FF + annotated tag + push origin）；bump_version 接管中英 README 版本同步
 
 Focus: （无活跃 spec/plan）候选见 ## Next
 
@@ -20,7 +20,6 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Key Context
 
-- alpha.4 已切但**未 push / 未 tag**（用户定）；conform 等新工作并入当前 alpha（未发布前不另起版本）。
 - deck-format-conform 落地：设计真相源 `docs/deck-format-conform.md`；脚本 `scripts/flightdeck_conform.py/.js`（byte-parity，`ConformParity`）、skill `skills/conform/SKILL.md`、walkaround Audit 16 → 指向 `/flightdeck:conform`。`references/` 排除出 walk（IMPORTED_KIND）。
 
 ## Pending Review
