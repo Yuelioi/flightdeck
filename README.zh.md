@@ -32,7 +32,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch`，一步建好一个 deck —— 零提问。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch`，先做个 doctor 体检（git + 运行时）再建好一个 deck —— 没 repo 时问一句 `git init`。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
@@ -114,7 +114,7 @@ flightdeck/
 2. 瞥一眼 `git status`（分支 / 版本）—— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
 3. 报告下一项 —— 说 "go" 执行。
 
-全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：一步确定性复制脚手架 —— **零提问**（不问 git / 访谈 / `AGENTS.md`）。开始干活时再填 `cockpit.md` 的 `Active focus` / `## Next`；`git init` 和 `/flightdeck:emit-agents-md` 随时可选做。
+全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：先做个 **doctor 体检**（git 仓库 + 脚本运行时）再复制脚手架 —— 缺 repo 时问一句 `git init? [y/N]`，无访谈、不问 `AGENTS.md`。开始干活时再填 `cockpit.md` 的 `Active focus` / `## Next`；`/flightdeck:emit-agents-md` 随时可选做。
 
 **会话结束** —— 一轮产出了真实增量时，flightdeck 在轮末自己着陆。纯状态推进 → 静默 **checkpoint**（看板保持真实）；新知识 → **软着陆**，分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）并打出「已保存」标记 —— 看到它才表示可以放心关窗口；一项工作完成 → **full landing**（刷新 `cockpit.md`、归档、本地 commit）。很小的一轮（没有增量）不会触发任何 landing。想显式收尾就运行 `/flightdeck:landing`。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
@@ -122,7 +122,7 @@ flightdeck/
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:launch` | **首次建 deck** —— 复制脚手架、播种 `cockpit.md`（零提问）。deck 已存在则拒绝。 |
+| `/flightdeck:launch` | **首次建 deck** —— 先 doctor 体检 git + 运行时（没 repo 问一句 `git init`），再复制脚手架、播种 `cockpit.md`。deck 已存在则拒绝。 |
 | `/flightdeck:preflight` | **会话入口接管** —— 读 `cockpit.md`、瞥一眼 git、报告下一项。无 deck → 指向 `/flightdeck:launch`。 |
 | `/flightdeck:new` | 撰写 deck 工件（spec/plan/incident/checklist/reference/doc）—— 盖 frontmatter + 命名、重生 INDEX/cockpit。代替手搓。 |
 | `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |

@@ -42,14 +42,19 @@ agents_md: off     # auto | off — landing 读它，从不探 AGENTS.md 文件
 
 双实现必漂——以钉死非确定性的 fixture 做**字节对拍**验证：`scripts/tests/parity/` 金标 fixture + `test_parity*.py`，Python/Node 逐字 diff 必须为空。归一规则堵隐性漂移：排序按 **Unicode 码点**（规避 Node `sort()` 默认 UTF-16 与 Python 码点序在非 BMP 的差异）、换行恒 LF、文本 UTF-8 NFC、固定日期格式、稳定 JSON 键序。
 
-## launch 行为（仍零提示）
+## launch 行为（doctor 体检 + 极简提示）
 
-维持「运行一次=同意创建、零提问」内核，只多两件确定性动作：
+「运行一次=同意创建」内核不变；2 问 interview 与 AGENTS.md opt-in 仍砍掉。**唯一提示**是 git——这是相对原 spec「零提示」的一处有意回调（缺 repo 时与其硬拒不如直接帮你 init，更省事，且 launch 本就是建 deck 的同意）。
 
-1. 探测面收窄为**仅 git 存在性 + runtime 检测**（优先级 `uv` > `python` > `node`——Python 是参考实现）。规则从「You MUST NOT inspect the repo」改「仅允许 git 与 runtime 这类纯环境探测，项目内容一概不碰」。
-2. **任一缺失 → 拒绝并提示**（与 deck-already-exists 同类硬拒）：无 git → `⚠ flightdeck requires git — run git init, then re-run launch.`；无 runtime → `⚠ flightdeck needs a script runtime — install uv (recommended), python, or node, then re-run launch.`
-3. 零提示写 `runtime: <detected>` + `agents_md: off`（新 deck definitionally 无 AGENTS.md——平默认、非探测）。
-4. 建完打印**非阻塞 pick-list**（纯打印、零回应、不阻塞，文案对副作用透明）。
+1. **doctor 体检**：探测面只「git 存在性 + runtime 检测」（优先级 `uv` > `python` > `node`），打 `🩺 flightdeck doctor` 体检表，**每项一行正面/负面汇报**。规则仍是「仅允许 git 与 runtime 这类纯环境探测，项目内容一概不碰」。
+2. **按结果分支**：
+   - 全绿 → 直接建。
+   - **有 git 但无 repo** → 问一句 `Run \`git init\` now and continue? [y/N]`；`y` 帮你 init 再建，`N`/其它 → 停（`Skipped — flightdeck requires git ...`），不建 deck。
+   - **git 没装** → 停，提示装 git（不能替你 init）。
+   - **无 runtime** → 停，提示装 uv/python/node（不能替你装；非交互）。
+   - 两者都缺 → 体检表两行都列后停（runtime 没法自动修，git offer 不弹）。
+3. 写 `runtime: <detected>` + `agents_md: off`（新 deck definitionally 无 AGENTS.md——平默认、非探测）。
+4. 建完汇报 deck-created + **回显记下的设置**（`runtime: <x>` · `agents_md: off`，告知可改），让用户看见到底记了什么。
 
 ## 字段化语义（runtime 直读处）
 

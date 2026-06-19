@@ -18,7 +18,7 @@ launch-recorded-config spec 落地（相 1/2/3）：把「运行时推断 / 处�
 
 ### Changed
 - **runtime 强制 → 机械路塌成单条线** — 删各 ritual「无 runtime → 手写 markdown 兜底」双写（exit-ritual / status / landing / new / launch / walkaround）；INDEX/cockpit regen、artifact stamp、机械审计只剩脚本一条线，skill 按 frontmatter `runtime` 拼调用形（`uv run` / `python` / `node`）。
-- **launch 收窄探测 + 拒绝路径** — 探测面收窄为「仅 git 存在性 + runtime 检测」（优先级 `uv` > `python` > `node`），零提示写 `runtime:` / `agents_md:`，建完打印非阻塞 pick-list。
+- **launch doctor 体检 + git-init offer** — 探测面收窄为「仅 git 存在性 + runtime 检测」（优先级 `uv` > `python` > `node`），打 `🩺 flightdeck doctor` 体检表逐项正面/负面汇报；缺 repo 时问一句 `git init now? [y/N]`（`y` 帮建、`N` 停），git 没装 / 无 runtime 硬停提示安装；写 `runtime:` / `agents_md:` 并在建完回显记下的设置。（相对原 spec「零提示」有意回调一处 git 提示。）
 - **protocol `Rule resolution order`** 加 Runtime dispatch 段；`templates.md` 改「`version` 是唯一结构化字段」断言为多字段。
 
 ### Breaking

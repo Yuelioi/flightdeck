@@ -32,7 +32,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which bootstraps a deck in one step — zero prompts. Nothing loads on its own; you invoke it.
+Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which bootstraps a deck after a quick doctor check (one `git init` prompt if there's no repo). Nothing loads on its own; you invoke it.
 
 ## What it is
 
@@ -114,7 +114,7 @@ You don't scaffold the deck by hand — run `/flightdeck:launch` once and it cre
 2. Glances at `git status` (branch / version) — a passive one-line note only when something looks off, never a blocking prompt.
 3. Reports the next item — say "go" to execute.
 
-On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which copies the scaffold in one deterministic step — **zero prompts** (no git / interview / `AGENTS.md` questions). Fill `Active focus` / `## Next` in `cockpit.md` when you start; `git init` and `/flightdeck:emit-agents-md` are optional, anytime.
+On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which runs a quick **doctor check** (git repo + a script runtime) then copies the scaffold — a missing repo gets a single `git init? [y/N]` offer; no interview, no `AGENTS.md` questions. Fill `Active focus` / `## Next` in `cockpit.md` when you start; `/flightdeck:emit-agents-md` is optional, anytime.
 
 **Session end** — when a turn produced a real increment, flightdeck lands it at end-of-turn on its own. State-only progress → a silent **checkpoint** (board stays true); new knowledge → a **soft-landing** that classifies it (bug → `incidents/`, procedure → `checklists/`, one-off → discard) and prints 「已保存」 — the visible signal it's safe to close; a finished item → a **full landing** (refresh `cockpit.md`, archive, local commit). A small turn with no increment lands nothing. Run `/flightdeck:landing` to force the full wrap-up explicitly. The next session — even a different AI or developer — picks up exactly here.
 
@@ -122,7 +122,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 
 | Command | Purpose |
 | --- | --- |
-| `/flightdeck:launch` | **First-time deck creation** — copies the scaffold, seeds `cockpit.md` (zero prompts). Refuses if a deck already exists. |
+| `/flightdeck:launch` | **First-time deck creation** — doctor-checks git + a runtime (one `git init` prompt if no repo), then copies the scaffold and seeds `cockpit.md`. Refuses if a deck already exists. |
 | `/flightdeck:preflight` | **Session-entry takeover** — reads `cockpit.md`, glances at git, reports the next item. Deckless → points to `/flightdeck:launch`. |
 | `/flightdeck:new` | Author a deck artifact (spec/plan/incident/checklist/reference/doc) — stamps frontmatter + naming, regenerates INDEX/cockpit. Use instead of hand-writing. |
 | `/flightdeck:landing` | Session wrap — classify new knowledge, update cockpit, commit. |
