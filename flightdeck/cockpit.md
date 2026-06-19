@@ -12,6 +12,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 - [2026-06-19-cockpit-accumulator-convergence.md](specs/2026-06-19-cockpit-accumulator-convergence.md) — cockpit 两个非-AUTO accumulator（Key Context / Pending Review）堆积陈年内容，现有 drain 纪律+密度门…
 - [2026-06-19-cockpit-field-redesign.md](specs/2026-06-19-cockpit-field-redesign.md) — 三个真实 3.0 cockpit 实测：叙述字段（Last updated 括号 / Active focus / Next）漏入工作记录（changelog…
 - [2026-06-19-skills-english-remediation.md](specs/2026-06-19-skills-english-remediation.md) — 实测 skills/ 有 184 处中文漂移（10 文件），违反 rules.md 发布面英文红线。已止血：CLAUDE.md 强化对比 + version-b…
+- [2026-06-19-cockpit-accumulator-convergence-rollout.md](plans/2026-06-19-cockpit-accumulator-convergence-rollout.md) — 实现 accumulator-convergence：Key Context 重述为中转暂存（B1 referent 死即排空 / B2 耐用毕业上迁到 hom…
 - [2026-06-19-cockpit-field-redesign-rollout.md](plans/2026-06-19-cockpit-field-redesign-rollout.md) — 实现 cockpit-field-redesign：新字段结构（Updated 纯戳 / Focus 一行 / Pointers 行 / Next 单步+进度移…
 <!-- /AUTO -->
 
@@ -22,11 +23,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Key Context
 
-- **de-scope 红线**：核心卖点「上下文不丢」零损失——只砍指令散文 + 向后兼容/校验机制，cockpit+INDEX 恢复载荷不动。
-- **de-scope 单一真相源**：`docs/descope-baseline.md`（职责边界·无向后兼容·校验只在 walkaround·preflight 纯读零写·热/冷预算；含两轮外评结论）。原 spec 已 graduate 至此、plan 归档。
-- **测试/度量**：`uv run pytest scripts/tests/`；`wc -m` 作 token 代理。记忆 `flightdeck-3.0-descope-v0`。本机 `test_hooks.py` 17 失败=WSL bash 遮蔽 Git Bash（环境噪音，见 incidents）。
-- **AI 化精简两支柱（已 land）**：运行契约真相源 = `protocol § Act-report-close loop`（banner/翻回/判据/恢复）+ `§ Rule resolution order`（deck `### Rules` > 推断 > 默认）。净字符 Spec 1 +8.8k（新契约）/ Spec 2 −3.1k（删开关）。
-- **`shared-knowledge-sync`（v2 已 land/graduate）**：当前真相 = `docs/shared-knowledge-sync.md`——母库固定 `~/.flightdeck`（symlink/junction 逃生口）、`synced: true` 标记 + relpath 不变量、`consumers` 注册表（register/list/prune，母库专属拷贝时剔除）、`/flightdeck:sync --fanout` 编排。事实=`--sync-status`（`state<TAB>relpath`）、walkaround Audit 15。
+- (none) — 本会话 drain/graduate 完毕（家均已存在，零信息丢失）：de-scope 红线 + 测试/度量 → `rules.md`；de-scope 基线 → `docs/descope-baseline.md`；AI 化精简两支柱 → `protocol § Act-report-close loop` / `§ Rule resolution order`；shared-knowledge-sync → `docs/shared-knowledge-sync.md`。
 
 ## Pending Review
 
