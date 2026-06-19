@@ -1073,5 +1073,36 @@ class SharedRegionTest(unittest.TestCase):
             flightdeck_index.shared_fingerprint("---\n---\nbody two\n"))
 
 
+class PullSharedTest(unittest.TestCase):
+    def test_replaces_shared_keeps_frontmatter_and_project(self):
+        m = flightdeck_index.PROJECT_MARKER
+        consumer = ("---\nsynced: true\nwhen_to_read: localized\n---\n# Old\n\nold shared\n\n"
+                    f"{m}\n## Project-specific\nMY local rule\n")
+        master = "---\nconsumers: [x]\n---\n# New\n\nnew shared\n"
+        out = flightdeck_index.pull_shared(consumer, master)
+        self.assertIn("when_to_read: localized", out)
+        self.assertNotIn("consumers", out)
+        self.assertIn("new shared", out)
+        self.assertNotIn("old shared", out)
+        self.assertIn("MY local rule", out)
+        self.assertEqual(out.count(m), 1)
+
+    def test_idempotent_under_fingerprint(self):
+        m = flightdeck_index.PROJECT_MARKER
+        consumer = f"---\nsynced: true\n---\nold\n\n{m}\nproj\n"
+        master = "---\n---\n# T\n\nfresh shared\n"
+        out = flightdeck_index.pull_shared(consumer, master)
+        self.assertEqual(flightdeck_index.shared_fingerprint(out),
+                         flightdeck_index.shared_fingerprint(master))
+
+    def test_no_marker_becomes_master_body(self):
+        consumer = "---\nsynced: true\n---\nold whole body\n"
+        master = "---\n---\nnew whole body\n"
+        out = flightdeck_index.pull_shared(consumer, master)
+        self.assertIn("new whole body", out)
+        self.assertNotIn("old whole body", out)
+        self.assertTrue(out.startswith("---\nsynced: true\n---\n"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -90,6 +90,29 @@ def shared_fingerprint(text):
     return hashlib.sha1(norm.encode("utf-8")).hexdigest()[:12]
 
 
+def _split_frontmatter(text):
+    """Return (frontmatter_incl_fences_or_'', body)."""
+    lines = text.splitlines(keepends=True)
+    if lines and lines[0].strip() == "---":
+        for i in range(1, len(lines)):
+            if lines[i].strip() == "---":
+                return "".join(lines[:i + 1]), "".join(lines[i + 1:])
+    return "", text
+
+
+def pull_shared(consumer_text, master_text):
+    """Mechanical splice: keep consumer frontmatter + PROJECT_MARKER + project
+    section, replace the shared region with the master's body."""
+    fm, body = _split_frontmatter(consumer_text)
+    master_body = _strip_frontmatter(master_text)
+    idx = body.find(PROJECT_MARKER)
+    if idx == -1:
+        return fm + master_body
+    tail = body[idx:]                       # marker + project section
+    shared = master_body.rstrip("\n") + "\n\n"
+    return fm + shared + tail
+
+
 def parse_signature(text):
     """Parse the `## Signature` block's key:value lines into a dict (keys
     symptom/error_type/where/trigger). Returns {} when no block. Backticks and
