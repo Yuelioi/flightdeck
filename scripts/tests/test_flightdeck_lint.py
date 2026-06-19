@@ -536,5 +536,16 @@ class LintAndMainTest(unittest.TestCase):
             self.assertEqual(payload["findings"], [])
 
 
+class LintWiringSettingsTest(unittest.TestCase):
+    def test_lint_runs_settings_audit(self):
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "rules.md").write_text(
+                "---\nversion: 3.0\nruntime: deno\n---\n\n### Rules\n", encoding="utf-8"
+            )
+            findings = lint(deck)
+            self.assertTrue(any(f["audit"] == "settings" for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -364,6 +364,7 @@ def lint(deck, repo_root=None):
     findings = []
     findings += audit_status(deck)
     findings += audit_when_to_update(deck)
+    findings += audit_settings(deck)
     findings += audit_required_structure(deck)
     findings += audit_orphan_plans(deck)
     if (deck / "INDEX.md").is_file():
