@@ -43,6 +43,16 @@ class InitParity(unittest.TestCase):
         _run("flightdeck_init", ["node"], [str(js_t), *common])
         self.assertEqual(_tree(py_t / "flightdeck"), _tree(js_t / "flightdeck"))
 
+    def test_seed_default_date(self):
+        # no --date: both ports must fall back to the SAME (local) date. Guards
+        # against a UTC/local split (incidents/new-default-date-local-vs-utc.md).
+        py_t = Path(tempfile.mkdtemp())
+        js_t = Path(tempfile.mkdtemp())
+        common = ["--name", "p", "--user", "yueli"]
+        _run("flightdeck_init", [sys.executable], [str(py_t), *common])
+        _run("flightdeck_init", ["node"], [str(js_t), *common])
+        self.assertEqual(_tree(py_t / "flightdeck"), _tree(js_t / "flightdeck"))
+
     def test_refuses(self):
         t = Path(tempfile.mkdtemp())
         _run("flightdeck_init", [sys.executable], [str(t), "--date", "2026-06-03"])

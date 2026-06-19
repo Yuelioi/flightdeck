@@ -40,6 +40,14 @@ const INCIDENT_BODY = (title) =>
 - YYYY-MM-DD first seen
 `;
 
+function todayIso() {
+  // LOCAL date — must match Python's datetime.date.today().isoformat() for
+  // py/js parity. toISOString() is UTC and diverges by a day across the
+  // local/UTC midnight window (see incidents/new-default-date-local-vs-utc.md).
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function frontmatter(kind, status, date, summary, implementsField, whenToRead, appliesTo) {
   const lines = ['---', `status: ${status}`];
   if (WORKFLOW.has(kind)) {
@@ -89,7 +97,7 @@ function newArtifact(deck, kind, slug, title, opts = {}) {
     throw vErr(`--implements is workflow-only; not valid for kind '${kind}'`);
   }
 
-  const theDate = date || new Date().toISOString().slice(0, 10);
+  const theDate = date || todayIso();
   const theStatus = status || DEFAULT_STATUS[kind];
 
   const folder = path.join(deck, KIND_FOLDER[kind]);

@@ -32,7 +32,11 @@ function init(target, name, user, date, focus, nextItem) {
 }
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  // LOCAL date — must match Python's datetime.date.today().isoformat() for
+  // py/js parity. toISOString() is UTC and diverges by a day across the
+  // local/UTC midnight window (see incidents/new-default-date-local-vs-utc.md).
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function main(argv) {
