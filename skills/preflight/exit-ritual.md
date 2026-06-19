@@ -17,7 +17,7 @@ Step 1: Are there pending hanging tasks?
 └─ no  → proceed to step 2
 
 Step 2: Did this session produce new knowledge / discover a bug / agree on a decision?
-├─ no  → only update cockpit.md if Active focus shifted, then proceed to Step 4
+├─ no  → only update cockpit.md if Focus shifted, then proceed to Step 4
 └─ yes → for each piece, apply classification heuristics in order, first match wins
          (full triggers + detail in "## Classification heuristics" below):
            (a) bug + root cause → incidents/ (status: active; existing topic → append [Case N])
@@ -111,9 +111,9 @@ Step 3c: Stale detection + 待验证 surfacing (landing/soft-landing = 退场单
          archive-semantics bug.
 
 Step 4: Update cockpit.md — full rules in "## Cockpit update — what changes"
-        below. Gist: bump Last updated only on the 4 sanctioned triggers;
+        below. Gist: bump Updated only on the 4 sanctioned triggers;
         regen the ## In Progress AUTO region from status:active; auto-write ## Next;
-        Active focus / Hanging Tasks as needed. Then run the Length check (§ below).
+        Focus / Hanging Tasks as needed. Then run the Length check (§ below).
 
 Step 5: Commit (local) + push (ask) — default: commit locally without asking
         (local commits are reversible); NEVER push without asking (push is outward).
@@ -396,7 +396,7 @@ A **checkpoint** is the cheapest possible status-write: it keeps the persisted b
 1. Refresh cockpit `## Next` to the next concrete single action (the next task).
 2. Advance the active plan's `## Progress` `current:` pointer to the next task.
 
-Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge · regen any INDEX · archive a `done` item · run the smoke-check · bump `Last updated` for a non-milestone task · **commit**.
+Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge · regen any INDEX · archive a `done` item · run the smoke-check · bump `Updated` for a non-milestone task · **commit**.
 
 **Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
 
@@ -433,7 +433,7 @@ Shared predicate, called by `status` (mid-session) and `preflight` (entry). **la
 
 - **signal 1** — this `status` invocation just flipped an artifact to `done`.
 - **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/` (disabled under no-git).
-- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## In Progress` / `## Next` / `Active focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
+- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## In Progress` / `## Next` / `Focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing.
 
 Mechanics:
 - signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
@@ -442,7 +442,7 @@ Mechanics:
 - Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + any deck rule).
 - **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion**. It is landing's no-`done` natural form + a visible banner. Timing is pinned: persist → emit the soft-landing banner → end the turn (never "reply then persist"). The banner format is in [§ Soft-landing banner](#soft-landing-banner--the-visible-safe-to-close-signal); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
 - **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
-- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Active focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
+- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
 - **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state.
 
 ## See also

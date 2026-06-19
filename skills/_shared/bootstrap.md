@@ -2,7 +2,7 @@
 This project uses **flightdeck** — a `flightdeck/` deck is present at the project root.
 
 **On entry (handoff):** before doing anything else, read `flightdeck/cockpit.md`
-(`Active focus`, `## In Progress`, `## Next`) and the folder `INDEX.md` files, then report the
+(`Focus`, `## In Progress`, `## Next`) and the folder `INDEX.md` files, then report the
 next step. You are already in handoff mode; the user does NOT need to type `/flightdeck:preflight`.
 
 **On exit (end-of-turn):** an **execution turn** (you ran a flow or did real work) ends with
@@ -18,7 +18,7 @@ rules → protocol § Act-report-close loop.
 
 **Board-sync:** the mechanical part (`## In Progress` + each `INDEX.md` AUTO region) is welded by the
 turn-end hook — the *judgment* parts (entry handoff, knowledge classification, `## Next` /
-`Active focus`) are always yours.
+`Focus`) are always yours.
 
 **Authoritative skills own their shape — DO NOT re-derive it.** When a skill declares itself the
 authority for a product shape or flow (`/flightdeck:new` for artifact shape, `landing` for the wrap

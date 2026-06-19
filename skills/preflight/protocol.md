@@ -317,7 +317,7 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 
 90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
 
-After classifying: update `cockpit.md` (`Last updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**; skipped entirely under no-git — no separate log is written, the moved `archive/` files are the record). landing regenerates the INDEX of any folders changed this session.
 
 ## Act-report-close loop
 
@@ -464,7 +464,7 @@ When an incident's root cause is permanently fixed (e.g. a guard test now preven
 | External review feedback saved as its own file | Raw feedback is transient → project-root `tmp/`; its disposition (adopt / reject / defer) folds into the reviewed spec's `## 评审纪要`. |
 | Brainstorming where every knowledge item belongs | Heuristics catch 90%. Default-brainstorm is the failure mode. |
 | Cockpit > 80 lines | Trim immediately — drop finished items, move design detail to the relevant `specs/` file; history is `git log` + the `archive/` folder, not cockpit. (Landing owns the trim — see [Ritual responsibilities](#ritual-responsibilities--who-owns-what).) |
-| Bumping `Last updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |
+| Bumping `Updated` on every commit / typo / grep | Signal pollution. Only bump on 4 triggers in exit-ritual.md `Cockpit update`. |
 | Incident / checklist without required frontmatter | STOP, report file path + missing fields. Add or delete before proceeding. |
 | Incident / checklist with `last_updated` > 1 year in a fast-moving project | Likely stale advice. Bump after re-verifying or flip to `status: obsolete`. |
 | "Save in case it's useful later" | No. Gate strictly. |

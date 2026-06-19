@@ -67,8 +67,9 @@ flightdeck/
 The 80-line ceiling is cognitive-load engineering for the human + AI reading cockpit at every session start — treat it as a load-bearing constraint, not a style preference.
 
 Contains:
-- `Last updated: YYYY-MM-DD by <who> (<one-line>)`
-- `Active focus: <current main thread>`
+- `Updated: YYYY-MM-DD · <who> · Stage: <stage>` (freshness stamp, no changelog)
+- `Focus: <one coarse thread label> → <current spec/plan link>`
+- `Pointers: <thin navigation anchors — config / conventions / INDEXes / archive>`
 - `## In Progress` — AUTO region derived from every `status: active` spec/plan (machine-maintained; not hand-written).
 - `## Next` — the next concrete single action (AI-maintained, auto-written at landing).
 - `## Hanging Tasks` — open items blocking a clean landing (hand-maintained; decoupled from INDEX auto-summaries).

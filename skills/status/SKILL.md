@@ -7,7 +7,7 @@ description: Keep a flightdeck artifact's lifecycle status fresh and its folder 
 
 The only **high-frequency, lightweight, model-invocable** flightdeck ritual. It keeps a single artifact's lifecycle `status:` honest mid-session, so state doesn't drift and the next `preflight` reads truth from the INDEX. It is complementary to `landing`, not a replacement: `landing` is the low-frequency batch wrap-up; `status` is the in-flight keep-fresh.
 
-It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md`. On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## In Progress` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it). Beyond regenerating `## In Progress`, it does **not** touch `cockpit.md` (`Active focus` / `## Next` / `Hanging Tasks`), does **not** archive (archiving is `landing`'s smart judgment), does **not** commit, does **not** run length / AGENTS.md regeneration.
+It edits one artifact's frontmatter `status:` (and, on every flip, that artifact's `last_updated:` — see Step 4) + that artifact's row in its folder `INDEX.md`. On an `idea → active` flip it **also** renames the file to add the `YYYY-MM-DD-` prefix and regenerates the cockpit `## In Progress` AUTO region (the only cockpit region `status` touches — see Step 5a; `landing` also regenerates it). Beyond regenerating `## In Progress`, it does **not** touch `cockpit.md` (`Focus` / `## Next` / `Hanging Tasks`), does **not** archive (archiving is `landing`'s smart judgment), does **not** commit, does **not** run length / AGENTS.md regeneration.
 
 ## Step 1 — read config
 
@@ -60,7 +60,7 @@ A `status: active` spec/plan is **visible in cockpit iff it is active** — cock
 - **Fast path**: `flightdeck_index.py <deck>` emits the `<!-- AUTO:inprogress -->` block (exact marker string) alongside the INDEXes — one run does Steps 5 + 5a.
 - **Fallback (always valid)**: rewrite the `<!-- AUTO:inprogress -->` … `<!-- /AUTO -->` block by hand — one row per `status: active` spec/plan, same Row format as INDEX, appending `[note: …]` when the file carries `note:`. Because the block is re-derived from current files, the `idea → active` rename is picked up automatically (do the rename **before** the regen so the new filename/link lands in the row).
 
-A create→`idea` write does **not** change the active set → no `## In Progress` regen. This is the only cockpit region `status` touches; `Active focus` / `## Next` / `Hanging Tasks` stay landing's / the user's.
+A create→`idea` write does **not** change the active set → no `## In Progress` regen. This is the only cockpit region `status` touches; `Focus` / `## Next` / `Hanging Tasks` stay landing's / the user's.
 
 ## Step 6 — set `done` on approval (status flips only; no archive)
 
@@ -90,7 +90,7 @@ Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
 
 ## Don't do
 
-- Don't touch `cockpit.md` **beyond** the `## In Progress` AUTO region on an active-set-changing flip (Step 5a) — no `Last updated` bump, no `Active focus` / `## Next` / `Hanging Tasks` edits. Those are landing's / the user's.
+- Don't touch `cockpit.md` **beyond** the `## In Progress` AUTO region on an active-set-changing flip (Step 5a) — no `Updated` bump, no `Focus` / `## Next` / `Hanging Tasks` edits. Those are landing's / the user's.
 - Don't commit, don't run length checks or AGENTS.md regeneration.
 - Don't downgrade a status; don't auto-set `done` outside user approval/sign-off. **Never delete a workflow artifact without explicit user instruction.**
 - Don't archive — moving a `done` artifact into `archive/` is `/flightdeck:landing`'s judgment, not status's.

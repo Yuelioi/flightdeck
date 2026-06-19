@@ -7,9 +7,9 @@ description: Use when explicitly invoking the flightdeck entry ritual — reads 
 
 0. **Deck existence.** If `flightdeck/cockpit.md` absent → print "No flightdeck deck here — run `/flightdeck:launch` to create one." and **STOP**.
 1. **Read `flightdeck/rules.md`.** Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order). Infer git per that order (ancestor `.git` + deck not gitignored; a deck `### Rules` no-git entry → skip step 4).
-2. **Read `flightdeck/cockpit.md`** (full) — note `Last updated`, `Active focus`, `## In Progress`, `## Next`, `## Key Context`. Do **not** rewrite anything.
+2. **Read `flightdeck/cockpit.md`** (full) — note `Updated`, `Focus`, `## In Progress`, `## Next`, `## Key Context`. Do **not** rewrite anything.
 3. **Catalog warm-up (READ ≠ DISPLAY).** Read `flightdeck/checklists/INDEX.md`, `flightdeck/incidents/INDEX.md` fully, and `flightdeck/docs/INDEX.md` top-level only — all fully into context (routing intact); display counts only; do NOT drill sub-folders or individual files. **待验证 scan:** run `flightdeck_index.py <deck> --verify-pending` (fallback: grep `verify:` across deck + `archive/`); render each as `⚠未验证: <file> — <怎么验>`. See [protocol § 验证非阻塞](protocol.md#验证非阻塞-non-blocking-verification).
-4. **Passive git note (skip when no-git).** Run `git branch --show-current` + `git status --short`. Emit one non-blocking line only if: branch token clearly mismatches `Active focus` → `⚠ git state looks off (branch ≠ Active focus) — review before continuing`; or detached HEAD → same pattern. All other git state: say nothing.
+4. **Passive git note (skip when no-git).** Run `git branch --show-current` + `git status --short`. Emit one non-blocking line only if: branch token clearly mismatches `Focus` → `⚠ git state looks off (branch ≠ Focus) — review before continuing`; or detached HEAD → same pattern. All other git state: say nothing.
 5. **Report item #1, then STOP.** State `## Next` in one sentence, then emit the standardized **`─── 🛫 preflight ───` banner** (see Output format) carrying `[Stage]` + `[Next]` item #1 + the read-only / "say go" line. You MUST NOT load task files or start execution. In-banner final line (skip under no-git): if ≥ 5 changed files under `flightdeck/` → `⚠ N unlanded changes since last land — consider /flightdeck:landing`. Also non-blocking (any git mode): if `## In Progress` lists > ~5 active threads → add `⚠ N active threads — consider parking/closing some` (focus-loss signal, never a block).
 
 ## Fallback when `## Next` is empty
@@ -21,7 +21,7 @@ Don't auto-start. Search in order and present candidates: (1) `plans/INDEX.md` �
 **Prose first** — cockpit + catalog + any debt:
 
 ```
-Cockpit (Last updated: …; Active focus: …)
+Cockpit (Updated: …; Focus: …)
 Routing catalog (loaded into context; audit → /flightdeck:walkaround): docs N · checklist N · incident N
   ← omit zero-count kinds; if all folder INDEXes absent: "Routing catalog: (empty)"
 Verify pending: ⚠ <file> — <how>   ← omit when scan empty
@@ -40,7 +40,7 @@ Read-only — say "go" to execute item #1.   (⚠ N unlanded changes — conside
 
 - Don't create a deck; don't audit (status legality, INDEX↔folder, migration) — that's `/flightdeck:walkaround`.
 - Don't prompt "Resolve which?" for git divergence — passive one-liner only.
-- Don't auto-pick a fallback; don't bump `Last updated`; don't grep codebase for tasks.
+- Don't auto-pick a fallback; don't bump `Updated`; don't grep codebase for tasks.
 - **preflight MUST NOT write anything (零写入)** — all writes belong to landing/walkaround; NEVER create or edit deck files here.
 
 ## Protocol knowledge (load on demand)
