@@ -27,11 +27,8 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Pending Review
 
-- [AI 化精简两 spec 实现] Spec 1 `act-report-close-loop` + Spec 2 `ai-authored-config` 均已 land（多个 per-task commit、160 测试绿、spec/plan 归档）。复核：审 diff 或跑 app（看 banner / `### Rules`）；**不满意就说「翻回」**撤最近着陆单元。已 commit，验证通过无需额外动作。
 - [shared-knowledge-sync **v2** 实现] 9 任务 land（169 测试绿、子代理两段评审 + opus 终审 ready；spec graduate→`docs/shared-knowledge-sync.md`、plan 归档）；母库已**物理移到** `~/.flightdeck`、本仓两 vendored 文件 `synced_from`→`synced` 迁移 + 补注册（`--list-consumers` 命中本仓、`in-sync`）。**跨项目 `--fanout` live 实证待做**（需第二个消费 deck）。审分支 diff `feat/shared-knowledge-sync-v2`；**不满意说「翻回」**。分支**未并入 main**（本仓只本地、不 push）。
 - ⚠待复核 `docs/script-layer.md`：本会话 v2 又加 `--register/list/prune-consumers` + 改 `sync_status`（继上次 `--sync-status` 之后），脚本层文档仍未补；下次补齐这批 flag。
-- [cockpit-bloat-control v2 实现] spec 重订（A 并入 accumulator-drain、C.1 因 Pending Review 转正作废，剔除）→ 只实现 B（landing 出场逐字段密度门控 trim）+ C.2（active>5 非阻塞提示），落 `exit-ritual.md`/`landing`/`preflight` SKILL；spec 已归档、169 测试绿。复核：审三处措辞 diff；**不满意说「翻回」**。
-- ⚠待复核 `docs/descope-baseline.md`（触 stale）：改了 preflight/landing SKILL 散文（加密度检查 + active 计数），该 doc 对 preflight/landing 职责的枚举可能要补这两项——我读后判断仍成立（line 39 已钉「软上限=警戒线非截断」），人确认即可消 stale。
 
 ## Hanging Tasks
 

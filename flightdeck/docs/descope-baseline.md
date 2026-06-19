@@ -1,5 +1,5 @@
 ---
-status: stale
+status: active
 when_to_read: 改 preflight/landing/walkaround 的职责边界、考虑给 deck 加向后兼容/迁移/校验机制、或往热路径加散文之前
 applies_to: [skills/preflight/SKILL.md, skills/landing/SKILL.md, skills/walkaround/SKILL.md, skills/preflight/protocol.md, skills/_shared/bootstrap.md, scripts/flightdeck_index.py, scaffolds/full]
 when_to_update: 3.0→3.1 真正引入格式变更/迁移时、校验归宿从 walkaround 迁移时、或热/冷路径预算政策调整时
