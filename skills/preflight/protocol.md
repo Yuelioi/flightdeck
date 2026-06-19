@@ -16,26 +16,27 @@ Consequence: the two metaphor folder names became mainstream — `charts/ → re
 
 `flightdeck/rules.md` is a **mandatory** project-config file read **first** by every entry skill (`preflight`, `landing`, `walkaround`, `emit-agents-md`, `status`). It is part of the **minimal contract** (`rules.md` + `cockpit.md`) and must carry a `version` field — a static identity stamp written by `launch` at deck creation, deliberately kept as the 3.0→3.1 migration anchor; no ritual reads or bumps it at runtime.
 
-`rules.md` carries `version` (the **only** structured frontmatter field) plus free-prose house rules in two subsections:
+`rules.md` carries `version` plus recorded-config fields (`runtime`: `uv|python|node`, stamped by launch; `agents_md`: `auto|off`) and free-prose house rules in two subsections:
 
 - `### Project conventions` — deck-local conventions.
-- `### Rules` — behavioral rules **the AI maintains from your natural-language requests** (free prose, not a fixed vocabulary). There is **no human toggle catalog**: instead of editing magic-string syntax, you tell the AI a persistent preference ("ask before committing", "this deck doesn't use git") and the AI appends a free-prose rule here (noting source/date) and honors it. The AI is both author and reader, so the rule needs no canonical phrasing.
+- `### Rules` — behavioral rules **the AI maintains from your natural-language requests** (free prose, not a fixed vocabulary). There is **no human toggle catalog**: instead of editing magic-string syntax, you tell the AI a persistent preference ("ask before committing") and the AI appends a free-prose rule here (noting source/date) and honors it. The AI is both author and reader, so the rule needs no canonical phrasing.
 
-Everything else resolves from **environment inference** + **built-in defaults** (see Rule resolution order). Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
+Everything else resolves from **built-in defaults** (see Rule resolution order). Full schema + ready-to-paste template: [templates.md § rules.md](templates.md#rulesmd).
 
 ## Rule resolution order
 
 Every skill resolves each behavior in this order — **first hit wins**:
 
-1. **Deck rule** — a matching free-prose rule in `rules.md` `### Rules` (the AI reads and honors it; it overrides the default).
-2. **Environment inference** — `git`: is the **deck** under version control? — `deck root` has (or is under) a `.git` **and** the deck is **not gitignored** (`git -C <deck> check-ignore .` returns empty). A gitignored `flightdeck/` — common when a project deliberately keeps its deck out of code history — is **no-git for deck operations** even though the surrounding repo has git: landing skips the commit step and never invokes git on deck files (plain `mv` for the land move). `emit_agents_md`: does deck root already have `AGENTS.md`?
-3. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn); `scripts` = **inferred** (use `flightdeck_index.py` when a `uv`/`python` runtime is reachable, else by hand). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
+1. **Frontmatter field** — a recorded-config field in `rules.md` frontmatter (`runtime`, `agents_md`) read directly; no inference needed. **Frontmatter fields outrank conflicting `### Rules` prose** for the keys they cover (see [templates.md § rules.md](templates.md#rulesmd)).
+2. **Deck rule** — a matching free-prose rule in `rules.md` `### Rules` (the AI reads and honors it; it overrides the default).
+3. **Environment inference** — `emit_agents_md`: does deck root already have `AGENTS.md`? (Note: `git` is an install precondition enforced by launch — not a resolved item here.)
+4. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
 
 **deck root** = the directory containing `rules.md` (the parent of `flightdeck/`); if none is found, fall back to cwd **with a warning** (never silent — else a misconfigured run looks like it found a deck when it didn't).
 
 **Override authority** (which config wins): **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`, per the running agent) > deck rules (`rules.md` `### Rules`) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own deck rules. Internal conflicts among deck rules are the user's responsibility — flightdeck never auto-resolves contradictory rules (it may passively flag one, never silently pick).
 
-A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `run scripts` toggle (inferred from runtime), and no `disabled_folders` (empty folders are simply not flagged).
+A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `runtime` toggle in `### Rules` (`runtime` is a required frontmatter field stamped by launch — not a free-prose setting), and no `disabled_folders` (empty folders are simply not flagged).
 ## Data model (folder = kind, frontmatter = status)
 
 flightdeck has exactly two axes:
