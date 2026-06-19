@@ -1028,5 +1028,26 @@ class ConsumersRegistryTest(unittest.TestCase):
             self.assertNotIn(gone, kept)
 
 
+class InProgressTruncateTest(unittest.TestCase):
+    def test_inprogress_truncates_long_summary(self):
+        from flightdeck_index import regen_cockpit_inprogress
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d)
+            (deck / "specs").mkdir()
+            (deck / "cockpit.md").write_text(
+                "# Cockpit\n## In Progress\n<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n",
+                encoding="utf-8")
+            long_summary = "A" * 200  # well past the 80-char cap
+            (deck / "specs" / "2026-06-19-x.md").write_text(
+                f"---\nstatus: active\nsummary: {long_summary}\n"
+                f"last_updated: 2026-06-19\n---\n# X\n",
+                encoding="utf-8")
+            block = regen_cockpit_inprogress(deck)
+            row = [l for l in block.splitlines() if l.startswith("- [")][0]
+            self.assertIn("…", row)                          # truncation ellipsis
+            self.assertLess(len(row), 140)                   # actually shortened
+            self.assertIn("(specs/2026-06-19-x.md)", row)    # link survives
+
+
 if __name__ == "__main__":
     unittest.main()

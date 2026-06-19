@@ -238,6 +238,17 @@ def _specs_grouped_body(folder, names):
     return "\n\n".join(groups)
 
 
+INPROGRESS_SUMMARY_MAX = 80  # In Progress rows render only a truncated summary head; full text stays in the spec frontmatter
+
+
+def _truncate_inprogress_summary(summary):
+    """In Progress row render: take the first line, truncate + ellipsis past the cap (deterministic, no judgment)."""
+    head = (summary or "").splitlines()[0] if summary else ""
+    if len(head) > INPROGRESS_SUMMARY_MAX:
+        head = head[:INPROGRESS_SUMMARY_MAX].rstrip() + "…"
+    return head
+
+
 def regen_cockpit_inprogress(deck):
     """Regenerate the cockpit `<!-- AUTO:inprogress -->` block (model-v4 §2).
 
@@ -258,7 +269,8 @@ def regen_cockpit_inprogress(deck):
             fm = parse_frontmatter((folder / name).read_text(encoding="utf-8"))
             if fm.get("status") != "active":
                 continue
-            row = f"- [{name}]({kind}/{name}) {DASH} {fm.get('summary', '⚠ summary 缺失')}"
+            summary = _truncate_inprogress_summary(fm.get("summary", "⚠ summary 缺失"))
+            row = f"- [{name}]({kind}/{name}) {DASH} {summary}"
             if fm.get("note"):
                 row += f" {DASH} [note: {fm['note']}]"
             rows.append(row)
