@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-20 · 月离 · Stage: v3.0.0-alpha.4 已发布（main FF + annotated tag + push origin）；bump_version 接管中英 README 版本同步
+Updated: 2026-06-20 · 月离 · Stage: v3.0.0-alpha.4 已发布；sync 文档已对齐机械指纹模型（doc/README/help text），sync-mechanical-pull spec/plan 已 graduate + 归档
 
 Focus: （无活跃 spec/plan）候选见 ## Next
 
@@ -9,8 +9,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 ## In Progress
 
 <!-- AUTO:inprogress -->
-- [2026-06-20-sync-mechanical-pull.md](specs/2026-06-20-sync-mechanical-pull.md) — 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，<!-- flightde…
-- [2026-06-20-sync-mechanical-pull.md](plans/2026-06-20-sync-mechanical-pull.md) — 实现机械 section-single-writer sync：flightdeck_index.py/.js 加边界锚 + shared-region 指纹…
+
 <!-- /AUTO -->
 
 ## Next

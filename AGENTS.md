@@ -9,8 +9,7 @@
 
 ## In Progress
 
-- [2026-06-20-sync-mechanical-pull.md](flightdeck/specs/2026-06-20-sync-mechanical-pull.md) — 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，<!-- flightde…
-- [2026-06-20-sync-mechanical-pull.md](flightdeck/plans/2026-06-20-sync-mechanical-pull.md) — 实现机械 section-single-writer sync：flightdeck_index.py/.js 加边界锚 + shared-region 指纹…
+None.
 
 ## Next
 

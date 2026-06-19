@@ -10,6 +10,6 @@
 - [model-architecture.md](model-architecture.md) — active — when_to_read: 改 flightdeck 数据模型 / 文件夹分类 / 状态语义前 — applies_to: [skills/preflight/protocol.md, skills/preflight/folder-semantics.md, scripts/flightdeck_index.py]
 ⚠ pending-review - [script-layer.md](script-layer.md) — stale — when_to_read: 改 flightdeck_index.py 或脚本层行为前 — applies_to: [scripts/flightdeck_index.py, scripts/flightdeck_lint.py]
 - [session-flow.md](session-flow.md) — active — when_to_read: 想理解一次工作会话从 preflight 进入、执行、到 landing 收尾或中途关停/遇重大决策的各种走向时 — applies_to: [preflight, landing, walkaround, checkpoint, status, session, hanging-tasks]
-- [shared-knowledge-sync.md](shared-knowledge-sync.md) — active — when_to_read: 规划或改动 flightdeck 跨项目共享知识 vendoring（母库解析 / synced 标记 / consumers 注册表 / fanout）前 — applies_to: [scripts/flightdeck_index.py, skills/sync/SKILL.md, skills/preflight/protocol.md, skills/preflight/templates.md, skills/walkaround/SKILL.md, scaffolds/full/flightdeck/rules.md]
+- [shared-knowledge-sync.md](shared-knowledge-sync.md) — active — when_to_read: 规划或改动 flightdeck 跨项目共享知识 vendoring（母库解析 / synced 标记 / 边界锚 / 指纹判过期 / consumers 注册表 / fanout）前 — applies_to: [scripts/flightdeck_index.py, scripts/flightdeck_index.js, skills/sync/SKILL.md, skills/preflight/protocol.md, skills/preflight/templates.md, skills/walkaround/SKILL.md, scaffolds/full/flightdeck/rules.md]
 - [spec-lifecycle.md](spec-lifecycle.md) — active — when_to_read: 想理解一个 spec 从 idea 到归档+知识沉淀的完整生命周期/流向时 — applies_to: [specs, plans, lifecycle, archive, status, graduation]
 <!-- /AUTO -->

@@ -1,8 +1,8 @@
 ---
-status: active
-graduate: true
-summary: 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，<!-- flightdeck:project-specific --> 锚切分 shared/项目段，脚本现算现比内容指纹判过期，进项目时纯脚本懒拉替换 shared 段；日常 sync AI 零参与（成本按活跃项目而非总项目数增长）；删 back-flow，promote 仍 AI 判断
+status: done
+summary: 把带时间戳的 AI-merge sync 降级为纯机械模型：母库是 shared 内容唯一写者、consumer 不改 shared，flightdeck:project-specific 锚切分 shared/项目段，脚本现算现比内容指纹判过期，进项目时纯脚本懒拉替换 shared 段；日常 sync AI 零参与（成本按活跃项目而非总项目数增长）；删 back-flow，promote 仍 AI 判断
 last_updated: 2026-06-20
+note: 机械 sync 模型契约已 graduate 进 docs/shared-knowledge-sync.md（就地更新现有 doc，非新建同名 doc）；本 spec 留档备查完整设计 rationale
 ---
 
 # Sync: mechanical section-single-writer pull
