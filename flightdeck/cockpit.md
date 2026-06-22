@@ -10,11 +10,12 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
+- [2026-06-22-stage-land-staged-view-script.md](plans/2026-06-22-stage-land-staged-view-script.md) — Script foundation for stage/land: named-marker multi-AUTO-region support + regen…
 <!-- /AUTO -->
 
 ## Next
 
-- 写 **plan 1（数据模型 + 脚本地基）** for stage/land：`## Staged` 派生视图脚本 + Land Routine 触发点（取消 signal-1 自动 archive）+ commit 移 stage 侧（先读 `scripts/flightdeck_index.py` 现状）。implements `specs/2026-06-22-stage-land-lifecycle.md`。后续 plan 2（散文重写）/ plan 3（signal 体系 + walkaround 翻转）。
+- 执行 **plan 1** → `plans/2026-06-22-stage-land-staged-view-script.md`：从 Task 1（AUTO 定位改命名 marker）起，4 个 TDD task。后续 plan 2（散文重写）/ plan 3（signal 体系 + walkaround 翻转）。
 - （**parked**）跨项目本地验 alpha.4 → `checklists/local-plugin-testing.md`。
 - （**parked**）复核 `shared-knowledge-sync` v2（`feat/shared-knowledge-sync-v2`，未并 main）。
 
