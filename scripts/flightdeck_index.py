@@ -231,10 +231,27 @@ def parse_frontmatter(text):
 AUTO_END = "<!-- /AUTO -->"
 
 
+def _marker_of(block):
+    """The opening `<!-- AUTO:<name> -->` tag of an AUTO block — lets a file with
+    multiple AUTO regions (cockpit's inprogress + staged) update only the match."""
+    i = block.index("<!-- AUTO:")
+    return block[i : block.index(" -->", i) + len(" -->")]
+
+
+def extract_auto_block(text, marker):
+    """The current `<marker>…<!-- /AUTO -->` slice of text (for drift comparison)."""
+    start = text.index(marker)
+    end = text.index(AUTO_END, start) + len(AUTO_END)
+    return text[start:end]
+
+
 def replace_auto_block(text, new_block):
-    """Swap the single `<!-- AUTO:* -->…<!-- /AUTO -->` region, keeping the rest."""
-    start = text.index("<!-- AUTO:")
-    end = text.index(AUTO_END) + len(AUTO_END)
+    """Swap the **named** `<!-- AUTO:<name> -->…<!-- /AUTO -->` region, keeping the
+    rest. The marker name is read from new_block, so a multi-region file updates
+    only the matching region."""
+    marker = _marker_of(new_block)
+    start = text.index(marker)
+    end = text.index(AUTO_END, start) + len(AUTO_END)
     return text[:start] + new_block + text[end:]
 
 
@@ -686,7 +703,7 @@ def index_drift(deck):
     for label, path, new_block in _index_targets(deck):
         try:
             current = path.read_text(encoding="utf-8")
-            cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
+            cur_block = extract_auto_block(current, _marker_of(new_block))
         except (OSError, ValueError):
             labels.append(label)
             continue
@@ -838,7 +855,7 @@ def main(argv=None):
     for label, path, new_block in _index_targets(args.deck):
         try:
             current = path.read_text(encoding="utf-8")
-            cur_block = current[current.index("<!-- AUTO:") : current.index(AUTO_END) + len(AUTO_END)]
+            cur_block = extract_auto_block(current, _marker_of(new_block))
         except (OSError, ValueError):
             # missing INDEX.md or no AUTO block: counts as drift; when not --check, create a minimal INDEX
             drift.append(label)

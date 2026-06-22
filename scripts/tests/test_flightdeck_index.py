@@ -1182,5 +1182,33 @@ class SyncPullCliTest(unittest.TestCase):
                     flightdeck_index.main([str(deck), "--sync-pull", "--check"]), 0)
 
 
+class NamedAutoRegionTest(unittest.TestCase):
+    TWO = (
+        "head\n"
+        "<!-- AUTO:inprogress -->\nOLD-IP\n<!-- /AUTO -->\n"
+        "mid\n"
+        "<!-- AUTO:staged -->\nOLD-ST\n<!-- /AUTO -->\n"
+        "tail\n"
+    )
+
+    def test_replace_targets_named_region_only(self):
+        new = "<!-- AUTO:staged -->\nNEW-ST\n<!-- /AUTO -->"
+        out = flightdeck_index.replace_auto_block(self.TWO, new)
+        self.assertIn("OLD-IP", out)        # inprogress 区不动
+        self.assertIn("NEW-ST", out)        # staged 区被替换
+        self.assertNotIn("OLD-ST", out)
+
+    def test_replace_inprogress_leaves_staged(self):
+        new = "<!-- AUTO:inprogress -->\nNEW-IP\n<!-- /AUTO -->"
+        out = flightdeck_index.replace_auto_block(self.TWO, new)
+        self.assertIn("NEW-IP", out)
+        self.assertIn("OLD-ST", out)
+        self.assertNotIn("OLD-IP", out)
+
+    def test_extract_named_region(self):
+        blk = flightdeck_index.extract_auto_block(self.TWO, "<!-- AUTO:staged -->")
+        self.assertEqual(blk, "<!-- AUTO:staged -->\nOLD-ST\n<!-- /AUTO -->")
+
+
 if __name__ == "__main__":
     unittest.main()
