@@ -16,6 +16,12 @@ Pointers: config → rules.md · artifacts → folder INDEXes · history → arc
 
 <!-- /AUTO -->
 
+## Staged (awaiting land)
+
+<!-- AUTO:staged -->
+
+<!-- /AUTO -->
+
 ## Key Context
 
 - (none)

@@ -71,7 +71,7 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 推荐：cockpit 增设一个 **AUTO 派生视图**（类比 `## In Progress` 是 active 投影），名暂定 `## Staged (awaiting land)`，从三类**派生**（非新真相源）：
 - `done`-not-archived 的 workflow artifact；
 - `stale`-with-`verify` 的知识 artifact（待复核 / 待翻牌）；
-- 待 sign-off 项（原 Pending Review 并入）。
+- （**不并入**）Pending Review 是手写 sign-off 队列、不可 frontmatter 派生，保持独立 section。
 
 派生 = 不增真相源、由脚本 regen。**land 不「清空视图」**——它改的是真相源（archive `done` 文件、把 `stale` 知识翻成 `active`，即 user-reviewed 翻牌），下次 regen 时这些项自然从 `## Staged` 落出，与现在 archive 一个 spec 后它从 `## In Progress` 消失**完全同构**（无任何对视图的写操作）。所以「断了再进来」看到的是一个**整理过的暂存清单**而非散乱 board。
 

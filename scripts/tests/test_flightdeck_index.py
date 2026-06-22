@@ -1242,5 +1242,25 @@ class RegenStagedTest(unittest.TestCase):
         self.assertEqual(blk, "<!-- AUTO:staged -->\n\n<!-- /AUTO -->")
 
 
+class StagedEndToEndTest(unittest.TestCase):
+    def test_main_regen_writes_both_regions_independently(self):
+        d = Path(tempfile.mkdtemp())
+        (d / "specs").mkdir()
+        (d / "specs" / "a.md").write_text("---\nstatus: done\nsummary: did A\n---\n#x\n", encoding="utf-8")
+        (d / "specs" / "b.md").write_text("---\nstatus: active\nsummary: doing B\n---\n#x\n", encoding="utf-8")
+        (d / "cockpit.md").write_text(
+            "# Cockpit\n\n## In Progress\n\n<!-- AUTO:inprogress -->\n\n<!-- /AUTO -->\n\n"
+            "## Staged (awaiting land)\n\n<!-- AUTO:staged -->\n\n<!-- /AUTO -->\n",
+            encoding="utf-8")
+        flightdeck_index.main([str(d)])
+        out = (d / "cockpit.md").read_text(encoding="utf-8")
+        ip = flightdeck_index.extract_auto_block(out, "<!-- AUTO:inprogress -->")
+        st = flightdeck_index.extract_auto_block(out, "<!-- AUTO:staged -->")
+        self.assertIn("b.md", ip)         # active → inprogress
+        self.assertNotIn("a.md", ip)
+        self.assertIn("a.md", st)         # done → staged
+        self.assertNotIn("b.md", st)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -730,8 +730,12 @@ def _index_targets(deck):
                     if (area / "INDEX.md").is_file() or any(area.glob("*.md")):
                         yield f"{name}/{area.name}", area / "INDEX.md", regen_folder_index(area)
     cockpit = deck / "cockpit.md"
-    if cockpit.is_file() and "<!-- AUTO:inprogress -->" in cockpit.read_text(encoding="utf-8"):
-        yield "cockpit", cockpit, regen_cockpit_inprogress(deck)
+    if cockpit.is_file():
+        ctext = cockpit.read_text(encoding="utf-8")
+        if "<!-- AUTO:inprogress -->" in ctext:
+            yield "cockpit", cockpit, regen_cockpit_inprogress(deck)
+        if "<!-- AUTO:staged -->" in ctext:
+            yield "cockpit:staged", cockpit, regen_cockpit_staged(deck)
 
 
 def index_drift(deck):

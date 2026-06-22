@@ -13,6 +13,12 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 - [2026-06-22-stage-land-staged-view-script.md](plans/2026-06-22-stage-land-staged-view-script.md) — Script foundation for stage/land: named-marker multi-AUTO-region support + regen…
 <!-- /AUTO -->
 
+## Staged (awaiting land)
+
+<!-- AUTO:staged -->
+
+<!-- /AUTO -->
+
 ## Next
 
 - 执行 **plan 1** → `plans/2026-06-22-stage-land-staged-view-script.md`：从 Task 1（AUTO 定位改命名 marker）起，4 个 TDD task。后续 plan 2（散文重写）/ plan 3（signal 体系 + walkaround 翻转）。
