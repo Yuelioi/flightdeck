@@ -23,17 +23,19 @@ graduate: true
 
 取消 `checkpoint` / `soft-landing` / `full-landing` 三层，换成**暂存 vs 提交**两段：
 
-### ① stage（自动，每次对话结束，无条件、无阈值、无判断）
+### ① stage（自动，每次对话结束；无 soft/full 强度判断、无阈值）
 
 对话一结束，把这次产生的**一切**冲到同一个暂存口（the staging area）：
 
-- **知识** → 总结落盘，进「**待翻牌**」（pending review，未经用户确认生效）。
+- **知识** → 总结落盘为 `status: staged`（待翻牌，未经用户确认生效；新增的知识 status 值，见关键决策表）。
 - **完成的 plan / task** → 标 `status: done`，但**不下沉 archive**，停在原地（`done` 是「已 stage、囤在阀门前」的**正常常态**，不是待清理的残留）。
 - **board 收敛** → Key Context drain、Pending Review 整理一并在此做（不再独属 land）。
 - **commit（local）** → 自动发生，带 `Flightdeck-Sync:` trailer（stale-detection 锚）。理由：历史靠 git 追踪、local commit 默认本就自动、撤回无风险、噪音不痛。
 - **不做**：archive、push。
 
-「所有东西只能流到这个暂存口，到此为止。」stage 没有「轻/重」之分——它是对话结束的**固定动作**，消除「我该 soft 还是 full」的判断。
+「所有东西只能流到这个暂存口，到此为止。」
+
+**执行主体分两半**（沿用现有 checkpoint 的机械/判断分工）：turn-end hook 只焊机械 AUTO 区（`## In Progress`、各 INDEX、新增 `## Staged`）；**知识分类、Key Context drain、commit 这些 judgment 步由 AI 在 stage 动作里做**。所以 stage 去掉的只是「soft 还是 full」这个**强度判断**——**不是「无判断」**：它仍含知识分类与 drain 的判断（与旧 soft-landing 同等、同风险——AI 回合被截断则这半不执行，但这是既有现实，非新模型引入）。
 
 ### ② land（手动，阀门 = `/flightdeck:landing`）
 
@@ -60,7 +62,7 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 | push 归属 | 仍手动 ask | rules.md 红线不变 |
 | archive 归属 | **land 侧（阀门）** | archive 是「真正从活跃区移走」，要用户确认 |
 | `done` flip | **不再自动 archive**（取消 signal 1 自动 landing） | done 是 staged 常态，囤在阀门前 |
-| 知识落盘 | stage 时即落盘，进 pending review | 不丢；翻牌（生效确认）留给 land |
+| 知识落盘 | stage 时即落盘为 `status: staged` | 新增知识 status 值；land 翻牌 → `active`。脚本据此派生 `## Staged` 视图、翻牌有文件级落点 |
 
 ## staging area 在 cockpit 的呈现（推荐设计）
 
@@ -68,10 +70,10 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 
 推荐：cockpit 增设一个 **AUTO 派生视图**（类比 `## In Progress` 是 active 投影），名暂定 `## Staged (awaiting land)`，从三类**派生**（非新真相源）：
 - `done`-not-archived 的 workflow artifact；
-- pending-review 的知识 artifact；
+- `staged` 的知识 artifact；
 - 待 sign-off 项（原 Pending Review 并入）。
 
-派生 = 不增真相源、可由脚本 regen、可随 land 自动清空。这样 cockpit 行数不因囤积无限涨（land 一次清一次），且「断了再进来」看到的是一个**整理过的暂存清单**而非散乱 board。
+派生 = 不增真相源、由脚本 regen。**land 不「清空视图」**——它改的是真相源（archive `done` 文件、把 `staged` 知识翻成 `active`），下次 regen 时这些项自然从 `## Staged` 落出，与现在 archive 一个 spec 后它从 `## In Progress` 消失**完全同构**（无任何对视图的写操作）。所以「断了再进来」看到的是一个**整理过的暂存清单**而非散乱 board。
 
 ## 受影响的协议面（清单，逐行改法留给 plan）
 
@@ -96,12 +98,32 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 
 - **为何 stage/land 优于 soft/full**：soft/full 是「同一动作的两个强度」，强迫每回合选强度；stage/land 是「两个不同性质的阶段」（暂存 vs 提交），对话结束**永远** stage、提交**永远**手动 land——判断负担归零。
 - **代价：commit 变多**。每回合自动 commit → git 历史更碎。用户已明确接受（撤回无风险、不痛、要 git 追踪）。`Flightdeck-Sync` trailer 仍只认最新，stale-detection 不受影响。
-- **代价：active 区会囤 done**。done 不自动归档 → 活跃文件夹累积 done 项。由 `## Staged` 视图聚合可见 + land 一次清空兜住；walkaround 不再视为债。
+- **代价 + 诚实局限：active 区会囤 done，且积压是「集中 + 可见」而非「消除」**。done 不自动归档 → 活跃文件夹累积 done 项；释放（land）频率交给用户，**若用户长期不 land，`## Staged` 仍会增长**——只是从「散在 Pending Review / Key Context / 各 INDEX 的隐性堆积」变成「一个可见的囤积口」。这是**知情接受的取舍**：用户痛点是 soft/full 判断负担 + board 散乱看不住，新模型对前者归零、对后者用统一可见口替代散漏；它**不承诺**强制收敛（用户已否决自动触发 / 阈值）。代价是 land 成低频大操作 → 必须保证 `## Staged` 始终可见 + land 低摩擦，否则积压只是换个地方继续。
 - **保留的旧机制**：Land Routine（搬档 + edge 重写）原样复用，只是触发点从「signal 1 自动 / 显式 landing」收窄为「仅显式 land」。knowledge 分类启发式（incidents/docs/...）不变。
 
 ## Open questions（plan 阶段敲定的实现细节）
 
-1. `## Staged` 到底是新 AUTO section，还是复用/重命名现有 `## Pending Review` + 让 done 项靠 INDEX 自然显示？（倾向新 AUTO 派生 section，但需确认不撞 80 行 cap。）
-2. 「待翻牌」是否需要知识 artifact 的新 `status` 值（如 `pending`），还是纯靠 cockpit staging 视图 + 现有 `active` 表达？（倾向后者，零新 status。）
-3. signal 2 / signal 3 在新模型下保留还是删除？（stage 无条件每回合跑 → signal 3 的「知识增量才 soft-land」判断可能整个消失；signal 2 入口提示是否还需要。）
-4. 自动每回合 commit 与现有 turn-end hook（只焊 AUTO 区）的关系——commit 该由 AI 在 stage 动作里做，还是也welded 进 hook？（commit 是 judgment-adjacent，倾向 AI 做。）
+1. `## Staged` 到底是新 AUTO section，还是复用/重命名现有 `## Pending Review` + 让 done 项靠 INDEX 自然显示？（倾向新 AUTO 派生 section，但需确认不撞 80 行 cap——见 Review notes「积压集中后可能成新 cap 压力点」。）
+2. ~~待翻牌是否需新 `status`~~ **已决：引入知识 status `staged`**（见关键决策表）。留给 plan：在 `protocol.md` 的 status 合法值表 + transition authority 表登记 `staged`（stage 写入 / land：`staged → active` / 与 `active`·`done`·`stale` 的关系）；walkaround status 合法性审计纳入；并定义「`staged` 知识能否被检索 / 路由」——落盘已 commit 但「未生效」的可读边界。
+3. **signal 体系整体重设计（强依赖，需一起敲定，不是逐条删）**：stage 无条件每回合化 → signal 3「知识增量才 soft-land」的判断**整个消失**；signal 1（done 自动 landing）取消；signal 2 需重新定位（从「入口催 land」→「入口报 staged 量，供用户决定是否开阀门」）。必须给出**替代的 readiness 概念**：land 纯手动后，readiness 退化为「staged 量的被动展示」，而非主动 nudge。
+4. 每回合自动 commit 的执行 + 失败路径：commit 由 AI 在 stage 动作里做（judgment-adjacent，hook 只焊 AUTO）。**失败路径已被现有 fallback 兜底**——commit 没做成则知识仍在盘上（preflight 读文件不读 git，不丢）、`Flightdeck-Sync` 锚缺失则 stale-detection 回退 worktree diff（协议已有）；plan 阶段确认这条 fallback 在新模型下仍成立即可。
+5. walkaround「异常」的可操作判定（plan）：`staged` 知识与已 archive 的比对键、staging 派生与真相源不一致的具体触发条件（脚本 bug / 手改 INDEX 未 regen），需给出判定规则，否则审计实现不了。
+
+## Review notes
+
+三方外部 AI（ds / claude / gpt，2026-06-22）审了本 spec。他们**不了解项目现状**，仅供参考；raw 文本留 `tmp/{ds,claude,gpt}.txt`，disposition 如下。
+
+**采纳（已改本 spec）：**
+- **待翻牌缺文件级落盘表示**（三方共咬）→ 推翻原 Open Q2「零新 status」倾向，改为引入 `status: staged`（决策表 + Open Q2）。
+- **「无条件、无判断」措辞过度** → stage section 精确化为「无 soft/full 强度判断」，写明执行主体（hook 焊 AUTO、AI 做分类 / drain / commit）。
+- **积压是转移而非消除**（gpt 核心论点）→ Design tradeoffs 补「集中 + 可见、非消除」的诚实局限条。
+- **signal 2/3 强依赖、需替代 readiness 模型**（claude / gpt）→ Open Q3 升级为「signal 体系整体重设计」。
+
+**澄清（措辞问题，非缺陷）：**
+- `## Staged` 派生 vs「清空」写语义矛盾（ds）→ 已澄清：land 改真相源、视图随之自然收缩，与 `## In Progress` 同构，无对视图的写。
+- commit 失败 / 迁移 done 二义（ds）→ 失败有 fallback 兜底（Open Q4）；迁移时旧 `done`-not-archived 统一当 staged、首次 land 清一次即可，无需区分历史语义。
+
+**驳回（源于不了解现状）：**
+- 「turn-end 边界不存在」（gpt / claude）→ 现状有 turn-end hook（Claude `Stop` / Codex / Gemini `AfterAgent`）；旧方案否的是 **mid-session** 计数器需 cross-call state，不是 turn-end 不存在。
+- 「`## Staged` 与 INDEX done 重复暴露、会不同步」（ds）→ 与现有 `## In Progress`↔INDEX 同构，脚本同源 regen，无两个真相源。
+- 「land 语义断裂」（ds）→ 显式 `/flightdeck:landing` 一向是「正式落地」（旧 full-landing），语义连续；新模型只去掉 soft-landing 这个**自动**变体。
