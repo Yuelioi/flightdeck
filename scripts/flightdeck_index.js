@@ -159,9 +159,19 @@ function formatRow(kind, filename, fm) {
   throw new Error(`unknown folder kind: ${kind}`);
 }
 
+function markerOf(block) {
+  const i = block.indexOf('<!-- AUTO:');
+  return block.slice(i, block.indexOf(' -->', i) + ' -->'.length);
+}
+function extractAutoBlock(text, marker) {
+  const start = text.indexOf(marker);
+  const end = text.indexOf(AUTO_END, start) + AUTO_END.length;
+  return text.slice(start, end);
+}
 function replaceAutoBlock(text, newBlock) {
-  const start = text.indexOf('<!-- AUTO:');
-  const end = text.indexOf(AUTO_END) + AUTO_END.length;
+  const marker = markerOf(newBlock);
+  const start = text.indexOf(marker);
+  const end = text.indexOf(AUTO_END, start) + AUTO_END.length;
   return text.slice(0, start) + newBlock + text.slice(end);
 }
 
@@ -242,6 +252,39 @@ function regenCockpitInprogress(deck) {
     }
   }
   return `<!-- AUTO:inprogress -->\n${rows.join('\n')}\n${AUTO_END}`;
+}
+
+function regenCockpitStaged(deck) {
+  const doneRows = [];
+  const knowledgeRows = [];
+  for (const kind of ['specs', 'plans']) {
+    const folder = path.join(deck, kind);
+    if (!isDir(folder)) continue;
+    for (const name of sortCp(mdNames(folder).filter((n) => n !== 'INDEX.md'))) {
+      const fm = fmOf(path.join(folder, name));
+      if (fm.status === 'done') {
+        const summary = truncateInprogressSummary(fm.summary !== undefined ? fm.summary : '⚠ summary missing');
+        doneRows.push(`- [${name}](${kind}/${name}) ${DASH} ${summary}`);
+      }
+    }
+  }
+  for (const kind of sortCp([...KNOWLEDGE_KINDS])) {
+    const folder = path.join(deck, kind);
+    if (!isDir(folder)) continue;
+    for (const p of sortPaths(walkMd(folder))) {
+      if (path.basename(p) === 'INDEX.md') continue;
+      const fm = fmOf(p);
+      if (fm.status === 'stale' && fm.verify) {
+        const rel = relPosix(deck, p);
+        knowledgeRows.push(`- [${path.basename(p)}](${rel}) ${DASH} verify: ${fm.verify}`);
+      }
+    }
+  }
+  const groups = [];
+  if (doneRows.length) groups.push('### Done (awaiting land)\n' + doneRows.join('\n'));
+  if (knowledgeRows.length) groups.push('### Knowledge (pending review)\n' + knowledgeRows.join('\n'));
+  const body = groups.join('\n\n');
+  return `<!-- AUTO:staged -->\n${body}\n${AUTO_END}`;
 }
 
 // ── archivable / advance / verify ────────────────────────────────────────────
@@ -536,8 +579,14 @@ function* indexTargets(deck) {
     }
   }
   const cockpit = path.join(deck, 'cockpit.md');
-  if (isFile(cockpit) && readText(cockpit).includes('<!-- AUTO:inprogress -->')) {
-    yield ['cockpit', cockpit, regenCockpitInprogress(deck)];
+  if (isFile(cockpit)) {
+    const ctext = readText(cockpit);
+    if (ctext.includes('<!-- AUTO:inprogress -->')) {
+      yield ['cockpit', cockpit, regenCockpitInprogress(deck)];
+    }
+    if (ctext.includes('<!-- AUTO:staged -->')) {
+      yield ['cockpit:staged', cockpit, regenCockpitStaged(deck)];
+    }
   }
 }
 function indexDrift(deck) {
@@ -546,10 +595,7 @@ function indexDrift(deck) {
     let curBlock;
     try {
       const current = readText(p);
-      const s = current.indexOf('<!-- AUTO:');
-      const e = current.indexOf(AUTO_END);
-      if (s === -1 || e === -1) throw new Error('no auto');
-      curBlock = current.slice(s, e + AUTO_END.length);
+      curBlock = extractAutoBlock(current, markerOf(newBlock));
     } catch { labels.push(label); continue; }
     if (curBlock !== newBlock) labels.push(label);
   }
@@ -664,10 +710,7 @@ function main(argv) {
     let curBlock = null;
     try {
       current = readText(p);
-      const s = current.indexOf('<!-- AUTO:');
-      const e = current.indexOf(AUTO_END);
-      if (s === -1 || e === -1) throw new Error('no auto');
-      curBlock = current.slice(s, e + AUTO_END.length);
+      curBlock = extractAutoBlock(current, markerOf(newBlock));
     } catch {
       drift.push(label);
       if (!args.check) writeText(p, `# ${label} — INDEX\n\n${newBlock}\n`);
@@ -692,7 +735,8 @@ if (require.main === module) {
 
 module.exports = {
   main,
-  parseFrontmatter, formatRow, regenFolderIndex, regenCockpitInprogress,
+  parseFrontmatter, formatRow, regenFolderIndex, regenCockpitInprogress, regenCockpitStaged,
+  markerOf, extractAutoBlock, replaceAutoBlock,
   indexDrift, indexTargets, matchSignature, archivableDone, archivableObsolete,
   specAdvanceCandidates, verifyPending, syncStatus, listConsumers, pruneConsumers,
   PROJECT_MARKER, sharedRegion, sharedFingerprint, pullShared,
