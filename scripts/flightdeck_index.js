@@ -165,7 +165,10 @@ function markerOf(block) {
 }
 function extractAutoBlock(text, marker) {
   const start = text.indexOf(marker);
-  const end = text.indexOf(AUTO_END, start) + AUTO_END.length;
+  if (start === -1) throw new Error(`marker not found: ${marker}`);
+  const autoEndIdx = text.indexOf(AUTO_END, start);
+  if (autoEndIdx === -1) throw new Error(`AUTO_END not found after marker: ${marker}`);
+  const end = autoEndIdx + AUTO_END.length;
   return text.slice(start, end);
 }
 function replaceAutoBlock(text, newBlock) {
