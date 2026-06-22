@@ -359,6 +359,49 @@ def regen_cockpit_inprogress(deck):
     return f"<!-- AUTO:inprogress -->\n{body}\n{AUTO_END}"
 
 
+def regen_cockpit_staged(deck):
+    """Regenerate the cockpit `<!-- AUTO:staged -->` block — the stage/land
+    "awaiting land" view (specs/2026-06-22-stage-land-lifecycle.md).
+
+    Derived (never hand-written) from two frontmatter-decidable classes:
+      - done-not-archived workflow: specs/plans with status:done still in the
+        source folder (archive/ is never scanned by these globs);
+      - stale-with-verify knowledge: incidents/checklists/docs with status:stale
+        AND a `verify` field (the "newly produced, pending review" sense).
+    Pending Review stays a separate hand-maintained section (sign-off is human
+    judgment, not derivable). Empty body when nothing is staged.
+    """
+    deck = Path(deck)
+    done_rows, knowledge_rows = [], []
+    for kind in ("specs", "plans"):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        for name in sorted(p.name for p in folder.glob("*.md") if p.name != "INDEX.md"):
+            fm = parse_frontmatter((folder / name).read_text(encoding="utf-8"))
+            if fm.get("status") == "done":
+                summary = _truncate_inprogress_summary(fm.get("summary", "⚠ summary missing"))
+                done_rows.append(f"- [{name}]({kind}/{name}) {DASH} {summary}")
+    for kind in sorted(KNOWLEDGE_KINDS):
+        folder = deck / kind
+        if not folder.is_dir():
+            continue
+        for p in sorted(folder.rglob("*.md")):
+            if p.name == "INDEX.md":
+                continue
+            fm = parse_frontmatter(p.read_text(encoding="utf-8"))
+            if fm.get("status") == "stale" and fm.get("verify"):
+                rel = str(p.relative_to(deck)).replace("\\", "/")
+                knowledge_rows.append(f"- [{p.name}]({rel}) {DASH} verify: {fm['verify']}")
+    groups = []
+    if done_rows:
+        groups.append("### Done (awaiting land)\n" + "\n".join(done_rows))
+    if knowledge_rows:
+        groups.append("### Knowledge (pending review)\n" + "\n".join(knowledge_rows))
+    body = "\n\n".join(groups)
+    return f"<!-- AUTO:staged -->\n{body}\n{AUTO_END}"
+
+
 # references/ keeps a hand-maintained INDEX (externally imported); only its root row is derived.
 REGEN_FOLDERS = [name for name in FOLDER_ORDER if name not in IMPORTED_KINDS]
 

@@ -1210,5 +1210,37 @@ class NamedAutoRegionTest(unittest.TestCase):
         self.assertEqual(blk, "<!-- AUTO:staged -->\nOLD-ST\n<!-- /AUTO -->")
 
 
+class RegenStagedTest(unittest.TestCase):
+    def _deck(self, files):
+        d = Path(tempfile.mkdtemp())
+        for rel, fm in files.items():
+            p = d / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            front = "".join(f"{k}: {v}\n" for k, v in fm.items())
+            p.write_text(f"---\n{front}---\n# x\n", encoding="utf-8")
+        return d
+
+    def test_done_workflow_and_stale_verify_knowledge(self):
+        d = self._deck({
+            "specs/a.md": {"status": "done", "summary": "did A"},
+            "specs/b.md": {"status": "active", "summary": "doing B"},
+            "incidents/c.md": {"status": "stale", "verify": "run repro X"},
+            "incidents/e.md": {"status": "stale"},
+            "incidents/f.md": {"status": "active"},
+        })
+        blk = flightdeck_index.regen_cockpit_staged(d)
+        self.assertIn("[a.md](specs/a.md)", blk)       # done workflow 入
+        self.assertNotIn("b.md", blk)                   # active workflow 不入
+        self.assertIn("[c.md](incidents/c.md)", blk)    # stale+verify 知识入
+        self.assertIn("verify: run repro X", blk)
+        self.assertNotIn("e.md", blk)                   # stale 无 verify 不入
+        self.assertNotIn("f.md", blk)                   # active 知识不入
+
+    def test_empty_when_nothing_staged(self):
+        d = self._deck({"specs/b.md": {"status": "active", "summary": "x"}})
+        blk = flightdeck_index.regen_cockpit_staged(d)
+        self.assertEqual(blk, "<!-- AUTO:staged -->\n\n<!-- /AUTO -->")
+
+
 if __name__ == "__main__":
     unittest.main()
