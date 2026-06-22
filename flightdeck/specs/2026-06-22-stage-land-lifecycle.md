@@ -27,7 +27,7 @@ graduate: true
 
 对话一结束，把这次产生的**一切**冲到同一个暂存口（the staging area）：
 
-- **知识** → 总结落盘为 `status: staged`（待翻牌，未经用户确认生效；新增的知识 status 值，见关键决策表）。
+- **知识** → 总结落盘：**待复核**的标 `status: stale` + `verify:`（复用现状「新产生但未验证」分支），**确信**的直接 `active`（「知识即时可用」哲学不变）。待翻牌不是所有知识的默认态——是否待复核由 AI 在 stage 动作里判定。
 - **完成的 plan / task** → 标 `status: done`，但**不下沉 archive**，停在原地（`done` 是「已 stage、囤在阀门前」的**正常常态**，不是待清理的残留）。
 - **board 收敛** → Key Context drain、Pending Review 整理一并在此做（不再独属 land）。
 - **commit（local）** → 自动发生，带 `Flightdeck-Sync:` trailer（stale-detection 锚）。理由：历史靠 git 追踪、local commit 默认本就自动、撤回无风险、噪音不痛。
@@ -62,7 +62,7 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 | push 归属 | 仍手动 ask | rules.md 红线不变 |
 | archive 归属 | **land 侧（阀门）** | archive 是「真正从活跃区移走」，要用户确认 |
 | `done` flip | **不再自动 archive**（取消 signal 1 自动 landing） | done 是 staged 常态，囤在阀门前 |
-| 知识落盘 | stage 时即落盘为 `status: staged` | 新增知识 status 值；land 翻牌 → `active`。脚本据此派生 `## Staged` 视图、翻牌有文件级落点 |
+| 知识落盘 / 待翻牌 | **复用 `stale` + `verify`，不新增 status**：待复核的落 `stale`+`verify:`，确信的直接 `active` | 现状 `stale` 已含「新产生待复核」语义；land 翻牌 = 现有 `stale →(user-reviewed)→ active`；`verify` 即文件级落点 + 每 preflight 扫描 surface |
 
 ## staging area 在 cockpit 的呈现（推荐设计）
 
@@ -70,10 +70,10 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 
 推荐：cockpit 增设一个 **AUTO 派生视图**（类比 `## In Progress` 是 active 投影），名暂定 `## Staged (awaiting land)`，从三类**派生**（非新真相源）：
 - `done`-not-archived 的 workflow artifact；
-- `staged` 的知识 artifact；
+- `stale`-with-`verify` 的知识 artifact（待复核 / 待翻牌）；
 - 待 sign-off 项（原 Pending Review 并入）。
 
-派生 = 不增真相源、由脚本 regen。**land 不「清空视图」**——它改的是真相源（archive `done` 文件、把 `staged` 知识翻成 `active`），下次 regen 时这些项自然从 `## Staged` 落出，与现在 archive 一个 spec 后它从 `## In Progress` 消失**完全同构**（无任何对视图的写操作）。所以「断了再进来」看到的是一个**整理过的暂存清单**而非散乱 board。
+派生 = 不增真相源、由脚本 regen。**land 不「清空视图」**——它改的是真相源（archive `done` 文件、把 `stale` 知识翻成 `active`，即 user-reviewed 翻牌），下次 regen 时这些项自然从 `## Staged` 落出，与现在 archive 一个 spec 后它从 `## In Progress` 消失**完全同构**（无任何对视图的写操作）。所以「断了再进来」看到的是一个**整理过的暂存清单**而非散乱 board。
 
 ## 受影响的协议面（清单，逐行改法留给 plan）
 
@@ -104,7 +104,7 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 ## Open questions（plan 阶段敲定的实现细节）
 
 1. `## Staged` 到底是新 AUTO section，还是复用/重命名现有 `## Pending Review` + 让 done 项靠 INDEX 自然显示？（倾向新 AUTO 派生 section，但需确认不撞 80 行 cap——见 Review notes「积压集中后可能成新 cap 压力点」。）
-2. ~~待翻牌是否需新 `status`~~ **已决：引入知识 status `staged`**（见关键决策表）。留给 plan：在 `protocol.md` 的 status 合法值表 + transition authority 表登记 `staged`（stage 写入 / land：`staged → active` / 与 `active`·`done`·`stale` 的关系）；walkaround status 合法性审计纳入；并定义「`staged` 知识能否被检索 / 路由」——落盘已 commit 但「未生效」的可读边界。
+2. ~~待翻牌是否需新 `status`~~ **已决：复用现状 `stale` + `verify`，不新增 status**。stage 时待复核知识落 `stale`+`verify:`（「新产生但未验证」分支），land = 现有 `stale →(user-reviewed)→ active`。留给 plan：把 `stale`-with-`verify` 知识纳入 `## Staged` 视图聚合；明确「确信知识直接 `active` vs 待复核落 `stale`」由 AI 在 stage 动作里判定；确认现状 `verify`-pending 扫描与 `## Staged` 展示不重复 surface（择一或合流）。
 3. **signal 体系整体重设计（强依赖，需一起敲定，不是逐条删）**：stage 无条件每回合化 → signal 3「知识增量才 soft-land」的判断**整个消失**；signal 1（done 自动 landing）取消；signal 2 需重新定位（从「入口催 land」→「入口报 staged 量，供用户决定是否开阀门」）。必须给出**替代的 readiness 概念**：land 纯手动后，readiness 退化为「staged 量的被动展示」，而非主动 nudge。
 4. 每回合自动 commit 的执行 + 失败路径：commit 由 AI 在 stage 动作里做（judgment-adjacent，hook 只焊 AUTO）。**失败路径已被现有 fallback 兜底**——commit 没做成则知识仍在盘上（preflight 读文件不读 git，不丢）、`Flightdeck-Sync` 锚缺失则 stale-detection 回退 worktree diff（协议已有）；plan 阶段确认这条 fallback 在新模型下仍成立即可。
 5. walkaround「异常」的可操作判定（plan）：`staged` 知识与已 archive 的比对键、staging 派生与真相源不一致的具体触发条件（脚本 bug / 手改 INDEX 未 regen），需给出判定规则，否则审计实现不了。
@@ -114,7 +114,7 @@ land 保留 `/flightdeck:landing` 命令名，语义收窄为「真正落地归�
 三方外部 AI（ds / claude / gpt，2026-06-22）审了本 spec。他们**不了解项目现状**，仅供参考；raw 文本留 `tmp/{ds,claude,gpt}.txt`，disposition 如下。
 
 **采纳（已改本 spec）：**
-- **待翻牌缺文件级落盘表示**（三方共咬）→ 推翻原 Open Q2「零新 status」倾向，改为引入 `status: staged`（决策表 + Open Q2）。
+- **待翻牌缺文件级落盘表示**（三方共咬）→ 先拟新增 `status: staged`，写 plan 时摸现状发现**现状 `stale`+`verify` 已覆盖**「新产生待复核 →(user 翻牌)→ active」，改为**复用 `stale`+`verify`、不新增 status**（决策表 + Open Q2）。`verify` 即三方要的「文件级落点」，且每 preflight 扫描 surface。
 - **「无条件、无判断」措辞过度** → stage section 精确化为「无 soft/full 强度判断」，写明执行主体（hook 焊 AUTO、AI 做分类 / drain / commit）。
 - **积压是转移而非消除**（gpt 核心论点）→ Design tradeoffs 补「集中 + 可见、非消除」的诚实局限条。
 - **signal 2/3 强依赖、需替代 readiness 模型**（claude / gpt）→ Open Q3 升级为「signal 体系整体重设计」。
