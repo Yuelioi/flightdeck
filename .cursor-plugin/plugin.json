@@ -2,7 +2,7 @@
   "name": "flightdeck",
   "displayName": "Flightdeck",
   "description": "Operational protocol for AI-assisted engineering sessions",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "author": {
     "name": "月离",
     "email": "yuelioi1210@gmail.com"

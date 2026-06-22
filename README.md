@@ -4,7 +4,7 @@
 
 **An operational protocol for AI-assisted engineering sessions.**
 
-[![Version: 3.0.0-alpha.4](https://img.shields.io/badge/version-3.0.0--alpha.4-orange?style=flat-square)](CHANGELOG.md)
+[![Version: 3.0.0-alpha.5](https://img.shields.io/badge/version-3.0.0--alpha.5-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -16,7 +16,7 @@
 ---
 
 > [!WARNING]
-> **`3.0.0-alpha.4` — pre-release for early testers.** 3.0 is a **breaking** release and the new format baseline: decks created by 2.x are **not** auto-migrated — start fresh with `/flightdeck:launch` and hand-copy what's still relevant from your old `cockpit.md`. Format and behavior may still change before the final 3.0.0; don't rely on it for production projects yet. Feedback is the whole point — [issues](https://github.com/Yuelioi/flightdeck/issues) welcome.
+> **`3.0.0-alpha.5` — pre-release for early testers.** 3.0 is a **breaking** release and the new format baseline: decks created by 2.x are **not** auto-migrated — start fresh with `/flightdeck:launch` and hand-copy what's still relevant from your old `cockpit.md`. Format and behavior may still change before the final 3.0.0; don't rely on it for production projects yet. Feedback is the whole point — [issues](https://github.com/Yuelioi/flightdeck/issues) welcome.
 
 > Your AI assistant forgets everything between chats. **flightdeck** is a directory convention plus a skill that gives it operational continuity across sessions — so the next session knows what you were doing, why, and what to do next.
 

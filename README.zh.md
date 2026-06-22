@@ -4,7 +4,7 @@
 
 **面向 AI 辅助工程会话的操作协议。**
 
-[![Version: 3.0.0-alpha.4](https://img.shields.io/badge/version-3.0.0--alpha.4-orange?style=flat-square)](CHANGELOG.md)
+[![Version: 3.0.0-alpha.5](https://img.shields.io/badge/version-3.0.0--alpha.5-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
 [![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
@@ -16,7 +16,7 @@
 ---
 
 > [!WARNING]
-> **`3.0.0-alpha.4` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
+> **`3.0.0-alpha.5` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
 
 > 你的 AI 助手在两次对话之间会失忆。**flightdeck** 是一套目录约定加一个 skill，给它跨会话的操作连续性 —— 让下一次会话知道你在做什么、为什么、下一步做什么。
 

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-alpha.5] — 2026-06-23
+
+stage/land 生命周期落地第 1 步（plan 1/3）：cockpit 的 `## Staged` 派生视图打地基。设计见 `docs/`（stage/land lifecycle）；spec 采用 `status: staged` + 复用 `stale`/`verify` 而非新增状态。本版仅含派生视图脚本基础，散文重写（plan 2）与 signal 体系 + walkaround 翻转（plan 3）后续。
+
+### Added
+- **`## Staged` cockpit 派生视图** — `flightdeck_index` 加 `regen_cockpit_staged` 派生段，接入 regen + scaffold；`.js` twin 字节对拍同步（含命名 marker 改动）。
+
+### Changed
+- **AUTO 区按 marker 名定位** — index 不再用「首个匹配」找 AUTO region，改按命名 marker 定位，避免多 AUTO 段时错配。
+
+### Fixed
+- **`extractAutoBlock` 缺 marker 即抛** — `.js` 在 marker 缺失时抛错，与 `.py` 参考实现对齐（原先静默）。
+
 ## [3.0.0-alpha.4] — 2026-06-20
 
 launch-recorded-config spec 落地（相 1/2/3）：把「运行时推断 / 处处兜底」换成「launch 一次性记录 / 强制的单条线」。**Breaking**：删 no-git 分支、删手写 markdown 兜底（强制 runtime）、`agents_md` 改读字段不再探文件。本版另并入两件独立工作（未发布前不另起版本）：`/flightdeck:conform`（deck 格式归一器）与 `/flightdeck:sync` 机械化重写（section-single-writer 懒拉）。
