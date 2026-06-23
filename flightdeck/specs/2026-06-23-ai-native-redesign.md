@@ -141,8 +141,56 @@ last_updated: 2026-06-23
 - 语义路由比手写 `when_to_read` 略粗(赌:AI 看自描述文件名 + 走树足以判断)。
 - incident 去重/回归检测从机械(指纹/archive 扫描)→ AI 读了再写 + 判断 + 位置阶梯(母库↔项目)。
 
+## 变动指南(3.0 → 新形态映射表)
+
+### 表 1 · 命令(skill)
+| 原命令 | 去向 | 说明 |
+|---|---|---|
+| `preflight` | → **resume**(自动,无命令) | 进场读 `state.md` + 惰性走树 |
+| `stage`(turn-end) | → **persist**(自动,无命令) | 收尾重写 state + 就地写知识 + commit |
+| `landing` | **并入 persist** | 「做完」时 persist 把 work 挪母库;归档说人话,无独立阀 |
+| `status` | **砍** | 位置即状态,无 status 字段/转换 |
+| `walkaround` | **砍** | 无 schema/INDEX/status 可审;无派生副本=无一致性可查 |
+| `conform` | **砍** | 无 schema 可 conform |
+| `sync` | **砍** | `uses.md` 引用订阅替 vendoring;改全局下次读到新版 |
+| `new` | **砍** | 无 frontmatter 要 stamp;新知识=写带首行的 md |
+| `emit-agents-md` | **砍** | 协议正文 install 时入 `CLAUDE.md`/`AGENTS.md`;无 AUTO 区可 emit |
+
+**剩下命令数 = 0**(resume/persist 是自动行为,非 slash command)。
+
+### 表 2 · 文件 / 目录
+| 原 | 新 | 说明 |
+|---|---|---|
+| `cockpit.md` | `state.md` | now/仪表盘,每轮重写,小,只随活动量涨 |
+| `rules.md` · recorded-config | **删** | version/runtime/agents_md 全无 |
+| `rules.md` · Project conventions | `behave/` | 项目约定 |
+| `rules.md` · Rules(AI 维护偏好) | `behave/` 或 CLAUDE.md 微核心 | |
+| `specs/`(active) | `work/<effort>/design.md` | superpowers 产出原样放 |
+| `specs/`(idea 暂定) | 母库 `projects/<x>/ideas/` | idea 池,无日期前缀 |
+| `specs/`(done) | 母库 `projects/<x>/archive/` | |
+| `plans/` | `work/<effort>/plan.md` | `- [ ]` 归 executing-plans |
+| `checklists/` | `behave/` | 照办层(怎么做 X) |
+| `docs/` | `know/` | 查阅层(怎么运作/为何) |
+| `references/`(外部导入) | `know/` 或 `uses.md` 订阅全局 | |
+| `incidents/` | `know/<域>/`,首行 `⚠ trap:` | 按域共置,不建 silo |
+| `archive/` | 母库 `projects/<x>/archive/` | 冷的全搬母库 |
+| 各 `INDEX.md` | **删** | grep + 走树替 |
+| 所有 frontmatter | **删** | 零 schema;路由靠首行自述 |
+
+### 表 3 · 状态 / 位置 / 嵌套 / 过期 / 暂定
+| 原概念 | 新形态怎么表达 |
+|---|---|
+| `idea`(暂定/未启动) | 母库 `projects/<x>/ideas/`(冷,不占项目视野) |
+| `active`(在飞) | 项目里有就是活:`work/`、`know/`/`behave/`(活知识) |
+| `done`(完成) | 挪出 `work/` → 母库 `projects/<x>/archive/`。位置=完成,无字段 |
+| `stale`(过期) | 无字段;AI 看 mtime + body 自判「可能旧 → 验/改/删」 |
+| `obsolete`(知识死) | 删(git 留底)或挪母库冷存;无 tombstone |
+| 嵌套知识域 | `know/<域>/<子域>/…` 任意嵌套,文件夹树=层级=索引;`behave/` 同理 |
+| incident 复发计数 | 位置阶梯:first-seen→母库 `know/`;复发→检索母库;第三次→回项目 |
+| incident 退休/晋升 | 补救稳定 → 结晶进 `behave/`(旧 promotion 链,靠判断) |
+
 ## 还要锤(未定)
-- **从 3.0 deck 一次性迁到新形态**(讽刺但必要,但因零 schema 大大简化):specs/plans→work、各 knowledge 文件夹→behave/know(按域)+ 机械剥 frontmatter 合并出首行、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
+- **从 3.0 deck 一次性迁到新形态**:**映射表已出**(见上「变动指南」);剩**机械执行脚本**——批量 mv/删、剥 frontmatter 合并出首行、冷的搬母库。一次性,跑完即弃。
 - **派生目录**约定(首行自述格式已定;剩「何时触发」的阈值)。
 - **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
 - **极简协议正文 authoring**(形态已定=两层,见上「协议正文形态」)——把今天 ~169K 字符压成微核心(~1 页进 `CLAUDE.md`)+ 深层(`behave/flightdeck.md`)。**发布面 = 英文**。
