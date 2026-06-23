@@ -2,7 +2,7 @@
 
 Updated: 2026-06-23 · 月离 · Stage: marker 自带化 + `marker-missing` 安全网 landed；补 land 久挂的 plan 1（stage/land script 地基，4 task 早已 commit 却没翻 done）→ 归档，看板回真
 
-Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1【script 地基】done+归档；待起 plan 2 散文重写 / plan 3 signal+walkaround）
+Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1 done+归档；plan 2【独立散文面】已拆待执行；plan 3 signal 核心待起）
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
@@ -10,6 +10,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
+- [2026-06-23-stage-land-prose-independent.md](plans/2026-06-23-stage-land-prose-independent.md) — Adopt the decided stage/land model across the signal-independent prose surfaces:…
 <!-- /AUTO -->
 
 ## Staged (awaiting land)
@@ -20,7 +21,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **起 plan 2** — stage/land 三层散文 → stage/land 重写（spec `2026-06-22-stage-land-lifecycle.md` 已落，plan 1 script 地基 done+归档）。后续 plan 3 = signal 体系重设计 + walkaround 翻转。
+- **执行 plan 2** → `plans/2026-06-23-stage-land-prose-independent.md`：5 task（landing 阀门化 / status done-非债 / walkaround Audit 13 翻转 / templates drain→stage / 一致性扫）。signal 耦合面（exit-ritual·protocol·preflight）留 **plan 3**。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
 ## Key Context
