@@ -1,3 +1,0 @@
-# Parity fixtures + golden output must stay LF regardless of core.autocrlf —
-# the byte-parity harness compares content, and CRLF churn would corrupt it.
-* text eol=lf
