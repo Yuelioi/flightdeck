@@ -1,52 +1,33 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-24 · 月离 · Stage: 重设**非破坏部分全部推进完**——#1 协议 authoring + #3 derive-listing 约定 + #4 authoring 半（preflight/walkaround SKILL 草稿）落 `work/`；#2 迁移脚本 `scripts/flightdeck_migrate.py` **TDD 开发完**（30 测试,throwaway/py-only,已对 live 跑 `--check` 验证零写入,全套 282 绿）。**剩下全是会断当前会话 flightdeck 的破坏性 cutover/run**：#4 换 live skills、#2 真跑 live deck——待用户拍板「切」。plan 3 仍 staged 待 land
+Updated: 2026-06-24 · 月离
 
-Focus: AI-native 重设 brainstorm（少结构·多信任 AI）→ `specs/2026-06-23-ai-native-redesign.md`；stage/land plan 3 暂 parked（staged 待 land）
+Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
-Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
+## In flight (work/)
 
-## In Progress
-
-<!-- AUTO:inprogress -->
-- [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
-- [2026-06-23-ai-native-redesign.md](specs/2026-06-23-ai-native-redesign.md) — 少结构·多信任 AI 重设——砍流程/迁移/冗余三痛。两动词 preflight(手动进场)/persist(自动 turn-end),手动命令仅 prefli…
-<!-- /AUTO -->
-
-## Staged (awaiting land)
-
-<!-- AUTO:staged -->
-### Done (awaiting land)
-- [2026-06-23-stage-land-model-one-pass.md](plans/2026-06-23-stage-land-model-one-pass.md) — Rewrite the three-tier (checkpoint/soft-landing/full-landing) + signal 1/2/3 mod…
-- [2026-06-24-ai-native-protocol-authoring.md](plans/2026-06-24-ai-native-protocol-authoring.md) — Author the new preflight skill's two-layer protocol — a ≤3000-char always-loaded…
-<!-- /AUTO -->
+- **ai-native-redesign/** — 重设的全部草稿真相源:`micro-core.md`(协议微核心,已接进 live `skills/preflight/SKILL.md`)、`protocol.md`(深层协议,已接进 live `skills/preflight/protocol.md`)、`coverage-check.md`(3.0→新形态 33 类 disposition,零孤儿)、`skills-draft/`(preflight/walkaround 草稿,已接 live)。
+- **2026-06-23-ai-native-redesign.md** — 重设设计单一可信源(决策记录)。
+- **2026-06-22-stage-land-lifecycle.md** — 旧 stage/land 生命周期设计(active,其 plan 已 done 进冷 archive)。
 
 ## Next
 
-- **AI-native 重设 — 设计收敛完毕,进执行** — spec 已重写成单一线性决策记录(`specs/2026-06-23-ai-native-redesign.md`):**两目录** work/(在飞)+ knowledge/(持久,按域,类型靠标题行)· **两命令** preflight(进场)+ walkaround(审计)· **机械全砍**(零 YAML、无 INDEX、无 status;路由头 `SUMMARY`/`READ WHEN`/`RECHECK WHEN`,`---` 收尾)· **协议定死在插件**(微核心进场载 + 深层 `skills/preflight/protocol.md` 按需;不进 CLAUDE.md/不注入)· **冷内容**(未定/过期/通用)进 `~/.flightdeck`。位置即状态(active/done),细粒度状态走 cockpit。外审 3 份(`tmp/ds·claude·gpt`)已三拣,4 处澄清(load≠inject、冷层 mtime 无 git 兜底、细粒度状态、walkaround 表述)已折进 spec,无推翻设计。
-  - **✓ 子计划 #1/5「协议 authoring」已执行完毕**(plan `2026-06-24-ai-native-protocol-authoring.md` 标 done)。产出 3 草稿在 `work/ai-native-redesign/`:`micro-core.md`(2989 chars,**注**:spec 附录初稿 3253>3000 超预算,已逐字紧缩 ~264 字到 budget 内,4 不变量/双动词/depth 指针全保留——**#4 wiring 时从 `work/micro-core.md` 接,别从 spec 附录**)、`protocol.md`(五节,与 depth 指针 1:1)、`coverage-check.md`(33 类 3.0 规则→新形态 disposition,零孤儿)。commits `01ebfbf`/`e78e3b1`/`237fa0a`。
-  - **进度(非破坏部分全完)**:✓#1 协议 authoring · ✓#3 derive-listing(**约定/recipe**,进 protocol.md §Derived listing,`5fa1389`)· ✓#4 authoring 半(`preflight`/`walkaround` SKILL 草稿落 `work/skills-draft/`,`ddee052`+`229b0c4`)· ✓#2 迁移脚本 `scripts/flightdeck_migrate.py`(TDD 30 测试,throwaway/py-only,`352a8fb`;对 live 跑 `--check`=31 ops 零写入)。**全部产出零碰 live skills/deck。**
-  - **▶ 剩下全是破坏性、需用户拍板「切」**:**#4 cutover**=草稿换进 live `skills/preflight`+`skills/walkaround`、删旧 skill(landing/status/conform/sync/emit-agents-md/new)、改插件 manifest;**#2 真跑** `flightdeck_migrate.py`(不带 `--check`)on live deck(破坏性 mv/rm,先留 commit)。两者纠缠 + **会当场断本会话 3.0 flightdeck**,宜新分支/备份后专门一趟做。**#5 产品化** spec 标缓。① 人读全部草稿(= plan #1 verify 行)仍待你做。
-- （**parked**，focus 已切走）**review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
-- （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
+**cutover 收尾(剩余,按序)**:
+1. **知识路由头语义趟**:`knowledge/` 下 ~18 个文件迁移时被剥了 frontmatter,只剩 `# 标题`,缺 `SUMMARY`/`READ WHEN` 路由头 + 未按域归拢。逐个补路由头(`# title`/`# ⚠ title`/`# X checklist` + `SUMMARY:` + `READ WHEN:`,`RECHECK WHEN:`←旧 when_to_update)并按域归进 `knowledge/<域>/`。walkaround 第 4 审计(缺路由头)现在会全亮。
+2. **repo 清理(新形态零脚本/零 hook)**:删死脚本 `flightdeck_{index,conform,new,lint,init,lib}` + 其 tests(新 skill 零脚本依赖;留 `migrate`(throwaway 跑完可删)、`build_stamp`/`bump_version` 发版用);删 `hooks/`(新形态不注入、无机械 board-sync)+ `skills/_shared/bootstrap.md`;`skills/launch` 改成新形态(零脚本建 deck:cockpit/rules/uses/work/knowledge)或并入 preflight 的「无 deck」分支。
+3. **外环文档**:README/README.zh/CHANGELOG/MIGRATION/AGENTS.md/GEMINI.md/`docs/`/`scaffolds/full` 全是 3.0 描述,需改新形态(incident `outer-ring-docs-drift` 警的就是这条)。
+4. **plan #1 verify**(人读):micro-core/protocol/coverage-check + 两 SKILL 英文散文 tone+sense —— 你来读。
 
-## Key Context
+## Open questions / 悬而未决
 
-- **#4 wiring 接 `work/ai-native-redesign/micro-core.md`(2989 chars 紧缩版),非 spec 附录初稿(3253>3000 超 budget)** —— 微核心硬上限 3000 chars(`wc -m`),附录逐字版超标,已紧缩；附录是历史底稿,实体真相 = work/ 三草稿。
+- **迁移器 nested-folder 局限**(已手工绕过,未加固——脚本 throwaway):`flightdeck_migrate.py` 只 glob 源文件夹顶层 `*.md`,没递归;真 deck 的 `references/`(外部知识子树)+ `archive/`(嵌套 incidents/plans/specs)漏搬,本次手工归位:archive 子树→冷 store;references 是**自带 .git 的外部克隆**(3.0 里就未跟踪),挪进**冷 `~/.flightdeck/knowledge/references/`**(跨项目外部参考,不 vendor 进项目 git)。flat fixture 测试没覆盖嵌套——若日后还要用此脚本得加 `**/*.md` 递归 + 子树目的地决策 + 跳过 embedded git repo。
+- **发布面**:cutover 全在 feature 分支 `feat/launch-recorded-config`、**未发版**;3.0 仍是 marketplace 上已 ship 的,直到显式 bump+release(rules:push 需你批准)。
+- **冷 store** 已落 `~/.flightdeck/projects/flightdeck/`(archive=旧 done 的 specs/plans/incidents + 本会话 done 的 plan #1/plan3;不版本化,git 历史兜底)。
 
-## Pending Review
+## House pointers
 
-- ⚠待复核 **AI-native 协议 authoring 3 草稿**(子计划 #1/5,commits `01ebfbf`/`e78e3b1`/`237fa0a`,均**发布面英文散文**):`work/ai-native-redesign/micro-core.md`(≤3000-char 微核心)、`protocol.md`(深层五节)、`coverage-check.md`(3.0→新形态 disposition 表)。**复核英文措辞 + 微核心是否真装下全部 §形态 决定 + coverage 表 disposition 是否服人**;满意即可 land(graduate 时随设计走)。验证 = plan `verify:` 行。
-- ⚠待复核 **plan 3 stage/land 重写**（6 commits `89baf18`→`e85bd26`）：三层/signal 模型 → stage/land 两段，改了 6 个发布面英文散文（`exit-ritual` 模型源 + `protocol`/`landing`/`status`/`preflight`/`bootstrap` 引用）。**复核英文措辞 + 跨文件自洽**；满意即 land（graduate spec）。详 `plans/2026-06-23-stage-land-model-one-pass.md`。
-- ⚠待复核 `docs/script-layer.md`：脚本层文档未补 `--register/list/prune-consumers` + `sync_status` 这批 flag；doc 仍 `status: stale`，下次补齐。
-- [marker 自带化 英文散文]（已 commit `1348619` + 同步本地缓存）本会话翻 vendorable-master「自带 marker+stub」约定 + `marker-missing` 安全网,改了**发布面英文散文**:`skills/sync/SKILL.md`（boundary-marker 节 + mode-A 状态表 + mode-C re-stamp + 报告 banner）、`skills/walkaround/SKILL.md`（Audit 15 WARN 文案）、`skills/preflight/protocol.md` + `templates.md`（旧「母库无 marker」断言翻转）。canonical stub 措辞 = `## Project overrides` + 斜体注（用户已选 B）。**复核英文措辞是否合意**;设计真相 → `docs/shared-knowledge-sync.md`。
-
-## Hanging Tasks
-
-- (none)
+配置 → rules.md · 约定/偏好 → 项目根 CLAUDE.md · 知识 → knowledge/<域> · 冷/归档/idea → ~/.flightdeck
 
 ## Note on dogfooding
 
-This `flightdeck/` is the flightdeck project's own workbench. `incidents/` / `checklists/` here document **maintaining the flightdeck tool**, not using it on other projects. All `applies_to:` frontmatter must target flightdeck-project paths (`skills/`, `hooks/`, `scaffolds/`, etc.) — never `applies_to: general`.
-
-Users running flightdeck in their own projects see their own `flightdeck/`, not this one.
+This `flightdeck/` is the flightdeck project's own workbench — `knowledge/` here documents **maintaining the flightdeck tool**, not using it elsewhere. Users running flightdeck in their own projects see their own deck, not this one.
