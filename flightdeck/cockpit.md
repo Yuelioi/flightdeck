@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: 「AI-native 重设」已定档 + resume 触发修正（resume 手动轻触发、persist 自动 = 保护你的自动/打扰你的按需，命令面=1 非 0）— spec = 决策记录，剩 authoring/迁移执行；plan 3 仍 staged 待 land
+Updated: 2026-06-24 · 月离 · Stage: 「AI-native 重设」设计全锤定 + spec 已收敛成单一可信源（去轮次流水账，单篇线性决策记录）；外审 3 份已三拣、4 处澄清折入；子计划 #1/5（协议 authoring）plan 已出 → 进执行阶段。plan 3（旧 stage/land）仍 staged 待 land
 
 Focus: AI-native 重设 brainstorm（少结构·多信任 AI）→ `specs/2026-06-23-ai-native-redesign.md`；stage/land plan 3 暂 parked（staged 待 land）
 
@@ -10,7 +10,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
-- [2026-06-23-ai-native-redesign.md](specs/2026-06-23-ai-native-redesign.md) — 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendori…
+- [2026-06-23-ai-native-redesign.md](specs/2026-06-23-ai-native-redesign.md) — 少结构·多信任 AI 重设——砍流程/迁移/冗余三痛。两动词 preflight(手动进场)/persist(自动 turn-end),手动命令仅 prefli…
 <!-- /AUTO -->
 
 ## Staged (awaiting land)
@@ -22,7 +22,9 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **AI-native 重设 — 已定档** — 两轮锤定关掉所有设计开口 + 外审回应 + 头号风险入取舍 + §0–8 收敛成单一可信源。spec = 决策记录。**剩纯执行(非设计)**:① 深层 `behave/flightdeck.md` authoring + 微核心定稿(英文发布面);② 迁移脚本(形态已定,等新形态实体后写+跑);③ 产品化细节(缓)。下次起 `work/` 写协议正文即可。 → `specs/2026-06-23-ai-native-redesign.md`。
+- **AI-native 重设 — 设计收敛完毕,进执行** — spec 已重写成单一线性决策记录(`specs/2026-06-23-ai-native-redesign.md`):**两目录** work/(在飞)+ knowledge/(持久,按域,类型靠标题行)· **两命令** preflight(进场)+ walkaround(审计)· **机械全砍**(零 YAML、无 INDEX、无 status;路由头 `SUMMARY`/`READ WHEN`/`RECHECK WHEN`,`---` 收尾)· **协议定死在插件**(微核心进场载 + 深层 `skills/preflight/protocol.md` 按需;不进 CLAUDE.md/不注入)· **冷内容**(未定/过期/通用)进 `~/.flightdeck`。位置即状态(active/done),细粒度状态走 cockpit。外审 3 份(`tmp/ds·claude·gpt`)已三拣,4 处澄清(load≠inject、冷层 mtime 无 git 兜底、细粒度状态、walkaround 表述)已折进 spec,无推翻设计。
+  - **▶ 下一步 = 执行子计划 #1/5「协议 authoring」** → `plans/2026-06-24-ai-native-protocol-authoring.md`(3 tasks,**建议 inline**;用 superpowers:executing-plans)。Task1 提附录微核心成文件+验证、Task2 写深层 protocol.md 五节(write-gate 例/incident scope+结晶/uses shadow/vendoring/derive-listing)、Task3 对照 3.0 散文查漏。产出落 `work/ai-native-redesign/`(草稿区,不碰运行中的 3.0)。
+  - **其余 4 子计划(未排 plan)**:② 迁移脚本(3.0 deck→新形态,真代码 TDD,目标已定死,等新形态实体后跑)· ③ derive-listing 小工具 · ④ 杀旧 skill/重连插件(把草稿接成真 skill)· ⑤ 产品化(跨工具 preflight 等价入口,缓)。
 - （**parked**，focus 已切走）**review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
