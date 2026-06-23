@@ -16,7 +16,7 @@ description: Use when explicitly invoking the flightdeck entry ritual — mechan
 2. **Read `flightdeck/cockpit.md`** (full) — note `Updated`, `Focus`, `## In Progress`, `## Next`, `## Key Context`. Do **not** rewrite anything.
 3. **Catalog warm-up (READ ≠ DISPLAY).** Read `flightdeck/checklists/INDEX.md`, `flightdeck/incidents/INDEX.md` fully, and `flightdeck/docs/INDEX.md` top-level only — all fully into context (routing intact); display counts only; do NOT drill sub-folders or individual files. **pending-verify scan:** run the index script `<deck> --verify-pending` (call form per the recorded `runtime` — [protocol § Rule resolution order](protocol.md#rule-resolution-order)); render each as `⚠ unverified: <file> — <how to verify>`. If the recorded runtime is broken, append a non-blocking `⚠ recorded runtime broken` and continue read-only (skip the scan — preflight never repairs). See [protocol § Non-blocking verification](protocol.md#non-blocking-verification).
 4. **Passive git note.** Run `git branch --show-current` + `git status --short`. Emit one non-blocking line only if: branch token clearly mismatches `Focus` → `⚠ git state looks off (branch ≠ Focus) — review before continuing`; or detached HEAD → same pattern. All other git state: say nothing.
-5. **Report item #1, then STOP.** State `## Next` in one sentence, then emit the standardized **`─── 🛫 preflight ───` banner** (see Output format) carrying `[Stage]` + `[Next]` item #1 + the read-only / "say go" line. You MUST NOT load task files or start execution. In-banner final line: if ≥ 5 changed files under `flightdeck/` → `⚠ N unlanded changes since last land — consider /flightdeck:landing`. Also non-blocking (any git mode): if `## In Progress` lists > ~5 active threads → add `⚠ N active threads — consider parking/closing some` (focus-loss signal, never a block).
+5. **Report item #1, then STOP.** State `## Next` in one sentence, then emit the standardized **`─── 🛫 preflight ───` banner** (see Output format) carrying `[Stage]` + `[Next]` item #1 + the read-only / "say go" line. You MUST NOT load task files or start execution. In-banner final line: if cockpit `## Staged (awaiting land)` is non-empty → report `N staged (awaiting land)` (a neutral readiness display — opening the land valve is the user's call; **no `⚠`, no "consider"**). Also non-blocking (any git mode): if `## In Progress` lists > ~5 active threads → add `⚠ N active threads — consider parking/closing some` (focus-loss signal, never a block).
 
 ## Fallback when `## Next` is empty
 
@@ -40,7 +40,7 @@ Verify pending: ⚠ <file> — <how>   ← omit when scan empty
 ─── 🛫 preflight ───
 [Stage]   <lifecycle stage>
 [Next]    item #1: …   (Key Context: … — omit when none)
-Read-only — say "go" to execute item #1.   (⚠ N unlanded changes — consider /flightdeck:landing)
+Read-only — say "go" to execute item #1.   (N staged (awaiting land) — open the valve with /flightdeck:landing when ready)
 ```
 
 ## Don't do
@@ -55,4 +55,4 @@ Read-only — say "go" to execute item #1.   (⚠ N unlanded changes — conside
 - [protocol.md](protocol.md) — data model · status · INDEX · folder map · routing · authority order · write gate · lifecycle
 - [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout
 - [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
-- [exit-ritual.md](exit-ritual.md) — landing ritual + Land-readiness check _(first-time deck creation: `/flightdeck:launch`)_
+- [exit-ritual.md](exit-ritual.md) — stage/land ritual + staged-amount readiness _(first-time deck creation: `/flightdeck:launch`)_
