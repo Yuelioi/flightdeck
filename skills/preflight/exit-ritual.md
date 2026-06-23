@@ -76,8 +76,8 @@ Step 3b: Graduate finish (landing = primary path).
          (this step walks every `graduate: true` done spec still in `specs/`, not just
          this session's).
 
-Step 3c: Stale detection + pending-verify surfacing (landing/soft-landing = single on-exit ritual).
-         The stale flip happens ONLY in this on-exit step; preflight entry no longer flips stale.
+Step 3c: Stale detection + pending-verify surfacing (stage = the single on-exit ritual, every turn).
+         The stale flip happens ONLY in this on-exit stage; preflight entry no longer flips stale.
          The trigger is **mechanical path overlap**:
          Run: `flightdeck_index.py <deck> --changed-since-anchor`
          (emits paths changed since the last `Flightdeck-Sync:` trailer commit, plus
@@ -93,7 +93,7 @@ Step 3c: Stale detection + pending-verify surfacing (landing/soft-landing = sing
          - Idempotent: already-`stale` = no-op.
          - Surface a one-line `pending-review: <file>` note in cockpit `## Pending Review`
            (the standing awaiting-review home — no longer an optional subsection).
-         When no `Flightdeck-Sync:` anchor exists yet (first landing on a fresh
+         When no `Flightdeck-Sync:` anchor exists yet (first stage on a fresh
          deck), the scan has no prior commit to diff against and falls back to this
          session's worktree changes only — same intersection, narrower change set.
 
@@ -123,12 +123,12 @@ Step 5: Commit (local) + push (ask) — default: commit locally without asking
         - deck rule (don't auto-commit) → do NOT commit; leave the changes for you / CI
         - push → only when appropriate AND after asking; never automatic
         - Message: use checklists/commits.md if it exists; else terse imperative subject + reasoning in body
-        - **`Flightdeck-Sync:` trailer (REQUIRED on every landing/soft-land commit):**
+        - **`Flightdeck-Sync:` trailer (REQUIRED on every stage + land commit):**
           append `Flightdeck-Sync: <git-ref>` as a commit trailer (the ref is `HEAD`
           *after* the commit — i.e. the new SHA, or the current branch tip). This is
-          the anchor that `--changed-since-anchor` keys on for the next landing's
-          stale-detection pass (single on-exit ritual). Without it, the anchor is absent and
-          the next landing must fall back to a full worktree diff.
+          the anchor that `--changed-since-anchor` keys on for the next stage's
+          stale-detection pass (the single on-exit ritual). Without it, the anchor is absent and
+          the next stage must fall back to a full worktree diff.
 ```
 
 ### Step 5a — Recurrence sweep + promotion gate (wrap-up)
@@ -161,7 +161,7 @@ Set `status: active` in frontmatter.
 
 **Also fires on an abandoned path / wall, not just a shipped fix.** If this turn **tried an approach and dropped it** — or hit a wall that cost real time — record the **failure path + why it failed** (including why a plausible-looking option doesn't work), not only the final working fix. Negative knowledge ("X looks viable but fails because Y, so we chose Z") is exactly what stops the next session from re-walking the dead end. ✅ "Cursor `sessionStart` `additional_context` proved unreliable → switched to a `.cursor/rules/*.mdc` rule file"  ❌ silently keeping only "used a rule file" with the rejected option lost. The write gate still applies (a momentary typo you fixed in the same breath is not a wall).
 
-**Persist at the discovering turn — never defer to a batch landing.** A bug+root-cause *is* a knowledge increment (signal 3): write the incident in the **same soft-landing turn**, even mid-plan. Parking it only in the commit message / cockpit `## Pending Review` as a "write the incident later" TODO is the anti-pattern — the knowledge is then unrouted (no `when_to_read` / `applies_to`, invisible to retrieval) and orphaned if the session ends before the batch landing arrives. **Unverified is not a reason to defer:** write the incident now with `status: active` and stamp a `verify:` marker — the deterministic pending-verify scan re-surfaces it every preflight until you confirm. Verification is deferrable; persistence is not.
+**Persist at the discovering turn — never defer to a batch landing.** A bug+root-cause *is* a knowledge increment: write the incident in the **same stage — the turn that discovered it**, even mid-plan. Parking it only in the commit message / cockpit `## Pending Review` as a "write the incident later" TODO is the anti-pattern — the knowledge is then unrouted (no `when_to_read` / `applies_to`, invisible to retrieval) and orphaned if the session ends before the batch landing arrives. **Unverified is not a reason to defer:** write the incident now with `status: active` and stamp a `verify:` marker — the deterministic pending-verify scan re-surfaces it every preflight until you confirm. Verification is deferrable; persistence is not.
 
 ### (b) Repeated procedure → `checklists/`
 
@@ -273,7 +273,7 @@ The AI **may** self-assert `done` on **any** task — including needs-verify wor
   - no-verify → `[decision: <reason>; no verify needed; done]`
 - The `verify:` **value** is the one-line how-to-verify (e.g. `verify: phase-4 live validation on each host`) — its *content* survives any cockpit edit/regen and the deterministic scan re-surfaces it. Binary present/absent only — **no `verify: failed` value** (see [verify field](protocol.md#verify--the-verification-marker)).
 - **Boundary this does NOT loosen — ask before outward actions.** Loosening only touches the **self-assert-done marker**. Whether the AI may *execute* an outward action (open PR, deploy, send email) is a **separate, unchanged** concern governed by the commit/push default + the ask-before-outward-action rule — marking a deploy task `done + verify` is not permission to run the deploy.
-- Self-asserting `done` is a **state write only** — soft-landing still does **not** archive (archival stays full landing's). The safety that used to come from *blocking* now comes from **visibility** (the `verify` debt is re-surfaced every preflight via the deterministic scan) **plus reversibility** (`done` + `verify` are frontmatter fields the user can flip / clear; no commit/move was produced).
+- Self-asserting `done` is a **state write only** — stage still does **not** archive (archival stays land's valve). The safety that used to come from *blocking* now comes from **visibility** (the `verify` debt is re-surfaced every preflight via the deterministic scan) **plus reversibility** (`done` + `verify` are frontmatter fields the user can flip / clear; no archive/move was produced).
 
 ### Resolving a `verify` debt — per-kind pass/fail
 
@@ -340,7 +340,7 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 **`## In Progress` is AUTO-derived, not hand-written.** Regenerate its `<!-- AUTO:inprogress -->` region from every `status: active` spec/plan (same mechanism + row format as INDEX; a file's `note:` appends `[note: …]`). The `status` skill regenerates it on a status flip; landing regenerates it here. A hand edit is overwritten on the next regen. This is what makes cockpit a **status projection** of the active set — an artifact is in cockpit iff it is `active`, so orphans are structurally impossible.
 
-**`## Next` is auto-written by landing** (and on `idea→active` / a completed milestone / **a plan-task checkpoint** — see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
+**`## Next` is auto-written by stage** (and on `idea→active` / a completed milestone / **a plan-task boundary** — see [§ Stage](#stage--turn-end-persist--board-sync)). Its content is the next concrete **single** action — either (i) start an idea from the to-start pool, or (ii) advance an active artifact. `preflight` reads it but does not rewrite it (a stale entry is corrected at the next write point).
 
 **`Focus` vs `## Next` — different granularity, no overlap.** `Focus` = the current session main thread, one coarse label + a link to the spec/plan it names; goal / criteria / method live in that spec, not in cockpit. `## Next` = the next concrete executable single step + its plan link. The user adjusts either by directing the AI, not by hand-editing.
 
@@ -363,60 +363,59 @@ Hanging Tasks:     hand-maintained list — add new blocking items, clear resolv
 
 **`## Pending Review` is the sign-off queue (agent-judged, not AUTO).** Things the AI completed and self-judged `done` but you haven't approved yet — plus the surfaced stale `pending-review` notes from Step 3c (both are "awaiting your eyes"). Each row `- [<artifact/topic>] <what changed · how to look>`. **Non-blocking** (you can land with items queued — unlike `Hanging Tasks`) and **subjective** (human sign-off — unlike the objective `verify:` / `⚠ unverified` scan). Drains when you sign off, or at the next landing once confirmed; nothing queued → `- (none)`. **Aged-item forcing function:** an item that has survived **≥ 1 landing still unsigned** is no longer left to pile up silently — landing surfaces each aged item and prompts you per item: *sign off / keep / drop*. The sign-off stays explicit (items are never auto-deleted); the prompt only stops the queue from rotting into a junk drawer.
 
-**Accumulator-drain discipline.** `## Key Context` and `## Pending Review` are the two non-AUTO sections that *accumulate*; each MUST converge or it rots into a junk drawer. Convergence is a judgment step → it runs at **landing** (which already rewrites cockpit by judgment), not at the mechanical checkpoint. `Key Context` (transient staging, above): **drain** an entry whose referent died this session, **graduate** a durable entry to its home-by-kind — either exit removes it from cockpit; **shrink** a still-live entry to a one-line pointer. `Pending Review`: drain on sign-off, and **prompt** each item aged past one landing (sign off / keep / drop). The 80-line cap is the ceiling, not the discipline — converge per-entry first. (`walkaround` Audit 14 already flags a referent-died / oversized `Key Context` as a non-blocking INFO; it never drains.)
+**Accumulator-drain discipline.** `## Key Context` and `## Pending Review` are the two non-AUTO sections that *accumulate*; each MUST converge or it rots into a junk drawer. Convergence is a judgment step → it runs at **stage** (every turn — stage already rewrites cockpit by judgment), not deferred to land. `Key Context` (transient staging, above): **drain** an entry whose referent died this turn, **graduate** a durable entry to its home-by-kind — either exit removes it from cockpit; **shrink** a still-live entry to a one-line pointer. `Pending Review`: stage surfaces new items + shrinks + **prompts** each item aged past one land (sign off / keep / drop); the actual sign-off flip (`stale → active`) is land's valve action. The 80-line cap is the ceiling, not the discipline — converge per-entry first. (`walkaround` Audit 14 already flags a referent-died / oversized `Key Context` as a non-blocking INFO; it never drains.)
 
 **`Updated` is a freshness stamp, not a session-activity log.** It carries `<date> · <who> · Stage` and nothing more — **no parenthetical changelog of what the session did.** False triggers that must NOT bump it: pure exploration / grep / reading code; typo fixes; internal refactor with no user-perceivable surface; a commit that doesn't complete a cockpit task; running already-passing tests. The record of *what changed* lives in `git log` + the commit message + the spec/plan body — never as a narrative in cockpit.
 
-**When to update mid-session — this is the *checkpoint*:** at every plan / plan-task boundary, refresh `## Next` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — don't wait for landing. This lightweight board-sync has a name and a home: see [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
+**When to update mid-turn:** at every plan / plan-task boundary, refresh `## Next` and advance the plan's `## Progress` `current:` pointer **before** starting the next task — keep the board live; stage seals + commits it at turn-end. See [§ Stage](#stage--turn-end-persist--board-sync).
 
 **Length check before exit — gated criteria.** (1) **Line count:** `cockpit.md` > 80 lines → trim immediately (drop finished items; move design detail to a `specs/` entry). (2) **Per-field density** — catches the few-lines-but-dense-prose bloat the line count misses: scan each hand-maintained field against its soft cap — `Focus` ≤ one coarse line / ~100 chars · each `## Key Context` / `## Pending Review` entry ≤ a one-line literal pointer (and no entry whose target already archived/graduated — that case is the accumulator-drain above). (3) **Role-creep** — a field holding content that belongs in another home: `Updated` carrying a changelog (→ git log + commit) · `Focus` carrying goal/criteria/method (→ spec body) · `## Next` carrying a progress checklist / rationale list / milestone links (→ plan `## Progress`). Any (2)/(3) hit → **propose a gated trim**: route the off-home content back to its home (git / spec / plan), then cut the cockpit prose; ≤ cap and in-role → no-op (idempotent). The trim is **gated** because *which detail is still live and where it goes* is live judgment, never an auto-delete. `## In Progress` is AUTO and usually short; piled-up `active` is itself a focus-loss signal — **> ~5 active threads → emit a non-blocking nudge** "N active threads — consider parking/closing some" (remind only, never delete; the root cause is too many open threads, fixed by behavior not by cockpit). History is `git log` + the `archive/` folder, never cockpit.
 
-### Soft-landing banner — the visible safe-to-close signal
+### Staged banner — the visible safe-to-close signal
 
-A **soft-landing** (signal 3) ends the turn with the **unified banner** (full format / field rules → [protocol § Act-report-close loop](protocol.md#act-report-close-loop)):
+**Stage** ends every execution turn with the **unified banner** (full format / field rules → [protocol § Act-report-close loop](protocol.md#act-report-close-loop)):
 
 ```
-─── 🛬 soft landing ───
+─── 📥 staged ───
 [Stage]   <lifecycle stage>
-[Saved]   <≤3 filenames; overflow → "+N more">; cockpit updated.   (no commit hash — soft-landing does not commit)
+[Saved]   <≤3 filenames; overflow → "+N more">; committed locally <sha> (Flightdeck-Sync: <ref>).   (or [No change])
 [Pending] ⚠ <N> await verification → cockpit Pending Review.   (omit when empty)
 You can close / switch the conversation anytime — next preflight resumes from the board.
 ```
 
-- `[Saved]` wording is **persisted / saved, never "LANDED / archived / done"** — soft-landing does not archive and may not be `done`; never collide with `done ≠ archived`. No commit hash (soft-landing does not commit).
-- **No silence on no-increment:** a flow turn with no new knowledge still emits the banner with `[No change]` (an honest "nothing to save, board current, safe to close") — replacing the old print-nothing rule. Only a **pure conversation / clarification turn** (no flow, no deck change) prints no banner.
+- `[Saved]` wording is **persisted / saved / staged, never "LANDED / archived / done"** — stage does not archive, and a `done` item is still only *staged* (never collide with `done ≠ archived`). Stage **does** commit, so the local commit hash + `Flightdeck-Sync:` trailer ride in.
+- **No silence on no-increment:** a flow turn with no new knowledge still emits the banner with `[No change]` (an honest "nothing new to save, board current, safe to close"). If the board still moved (a `## Next` bump, an AUTO regen), stage committed it, so the commit line stays. Only a **pure conversation / clarification turn** (no flow, no deck change) prints no banner.
 
-## Checkpoint — lightweight board-sync subpath
+## Stage — turn-end persist + board-sync
 
-A **checkpoint** is the cheapest possible status-write: it keeps the persisted board (`cockpit.md` + the active plan file) equal to *actual* progress, so a user can close the conversation at any plan-task boundary and the next `/flightdeck:preflight` resumes on a true picture — no lost context. It is **a strict subset of landing**: landing = checkpoint + the wrap-up heavy lifting (knowledge-classify, INDEX regen, archive, smoke-check, commit).
+**Stage** is the automatic turn-end ritual: at the close of every **execution turn** (the AI is about to return control to the user) it flushes *everything this turn produced* to the staging area, so the user can close the conversation at any point and the next `/flightdeck:preflight` resumes on a true, fully-persisted picture — no lost context. There is **no intensity judgment** (the old soft/full split is gone) and **no threshold** — stage runs every execution turn, unconditionally.
 
-**Three tiers, one landing.** `checkpoint` ⊂ `soft-landing` ⊂ `full landing` — same machinery, different trigger + range (not three rituals):
+**Two phases, not three tiers.** The lifecycle is **stage (auto, every turn) → land (manual valve)** — two phases of *different kind*, not light/heavy versions of one action:
 
-| Tier | Essence | Trigger | Range | commit / archive |
+| Phase | Essence | Trigger | Does | commit / archive |
 |---|---|---|---|---|
-| **checkpoint** | save **state** | plan-task boundary / end-of-turn state-only increment | board only (`## Next` + plan `current:`), disk-only | none |
-| **soft-landing** | save **state + knowledge** | end-of-turn with a **knowledge increment** (signal 3) | checkpoint + classify knowledge + regen changed INDEX | **neither** |
-| **full landing** | + **advance lifecycle** | `done` / explicit `/flightdeck:landing` | soft-landing + archive done + promotion gate | + local commit + archive |
+| **stage** | persist **state + knowledge** to the staging area | every execution turn-end (auto) | classify + persist knowledge · mark `done`-not-archived · board drain (Key Context + Pending Review) · regen changed INDEX | **local commit** (auto), **no archive** |
+| **land** | open the **valve** — advance lifecycle | explicit `/flightdeck:landing` (manual) | archive `done` (Land Routine) · flip pending-review knowledge live (sign-off) | archive + its own batch commit; **push asks** |
 
-`soft-landing` carries **no commit and no archive** — both are "traceable tails" deferred to a full landing (durability rides on files being on disk; `preflight` reads files, not git). See [§ Land-readiness signal 3](#land-readiness-check).
+Everything this turn produced flows to the staging area and stops there; only an explicit **land** drains it out (archive + sign-off). `done`-not-archived and `stale`-with-`verify` are **normal staged states**, not residue — they sit visible in cockpit `## Staged (awaiting land)` until the user opens the valve.
 
-**Trigger (AI self-invoke — not a hook):** a plan or plan-task **finishes**. Trivial edits do **not** trigger (avoid noise commits/churn). This extends the "rituals self-invoke" trigger point from *session-wrap only* to *also task boundaries*; it is the AI deciding to run landing's light mode, never a harness-timed hook (consistent with flightdeck's deliberate no-startup-hooks design).
+**Stage action — what it persists, then the 📥 staged banner:**
+1. **Knowledge** → classify (heuristics (a)–(h)) and persist: pending-review → `status: stale` + `verify:`, confident → `active`.
+2. **Workflow** → mark a finished plan/task `status: done`, **but do not archive** (it stays in place — done-not-archived is the normal staged state).
+3. **Board** → refresh cockpit `## Next`, advance the active plan's `## Progress` `current:` pointer, and **drain** the accumulators (Key Context / Pending Review — see [§ Cockpit update](#cockpit-update--what-changes)).
+4. **Commit (local)** → auto, with the `Flightdeck-Sync:` trailer (the stale-detection anchor). **No push, no archive.**
 
-**Action — exactly two board writes, then stop:**
-1. Refresh cockpit `## Next` to the next concrete single action (the next task).
-2. Advance the active plan's `## Progress` `current:` pointer to the next task.
+**Why commit every turn (the accepted tradeoff):** local commits are reversible (reset/amend) and git is the history channel, so committing every staged turn costs only a more granular log — a noise the project has explicitly accepted in exchange for killing the soft/full intensity judgment. Commit is no longer the marker that distinguishes ritual tiers; it is simply part of stage. (Outward `push` stays a separate, gated axis — always asks.) Durability never *depends* on the commit: `preflight` reads the *files*, so a turn whose commit failed still resumes losslessly from disk; the missing `Flightdeck-Sync:` anchor just makes the next stale-detection fall back to a worktree diff.
 
-Both are **disk writes only**. A checkpoint **does NOT**: classify new knowledge · regen any INDEX · archive a `done` item · run the smoke-check · bump `Updated` for a non-milestone task · **commit**.
+**Pure-conversation turns don't stage.** A turn that ran no flow and changed no deck file (a question, a clarification) produces nothing to stage → no commit, no banner. "Stage every turn" means every turn that *touched the deck*.
 
-**Why no commit (the two orthogonal axes):** "close-and-reopen with context intact" rides on the **board being on disk**, not on git — `preflight` reads the *files*, regardless of commit state. So a checkpoint syncs the board (cheap, every task, uncommitted) while **commit stays a deliberate, separate axis** (landing or a milestone), avoiding a trail of noise commits. (If a checkpoint *does* coincide with a milestone worth a commit, a local commit is still within the default — reversible; push always asks.)
+**Mid-turn board-sync is just keeping the board live, not a separate ritual.** During a long turn that finishes several plan tasks, refresh cockpit `## Next` + the plan's `## Progress` `current:` pointer at each task boundary (don't let the board lag) — these are the same writes stage persists and commits at turn-end. There is no distinct "checkpoint" ritual anymore; the board-sync writes are continuous, stage is the turn-end seal.
 
-**Reuse, don't fork:** a checkpoint's two writes are the *same* `## Next` / `## Progress` logic landing's cockpit board-sync step uses — there is one implementation. `landing` simply has a `checkpoint` mode that runs only that board-sync step and skips everything else (see [landing SKILL.md § Modes](../landing/SKILL.md#modes--full--soft-landing--checkpoint)).
-
-**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## In Progress` AUTO region + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours at every plan-task boundary is the *judgment* half: refreshing `## Next`, advancing the plan's `## Progress` `current:` pointer, and the soft-land decision (any write-gated knowledge this turn? → persist it). This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
+**The *mechanical* half of board-sync is welded by a passive turn-end hook.** Every host fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`); it regenerates the `## In Progress` + `## Staged` AUTO regions + each `INDEX.md` `<!-- AUTO -->` region at end-of-turn (idempotent `scripts/flightdeck_index.py <deck>`; never blocks, never archives). So you **don't carry the mechanical AUTO regions at turn end — they self-heal.** What stays yours every turn is the *judgment* half: classifying knowledge, refreshing `## Next` / `Focus`, draining the accumulators, and the local commit. This hook is a deterministic enhancement, not a behavior the protocol depends on — see the project's cross-host-hooks doc for the passive-vs-gating hook decision principle.
 
 ## Land Routine
 
-The single source of truth for landing artifacts. Both `landing` (Step 3a above) and the `status` skill (`skills/status/SKILL.md`) MUST call this — do not reimplement it anywhere.
+The single source of truth for landing artifacts. Only `landing` (the manual valve) calls this — `status` never archives. Do not reimplement it anywhere.
 
 Landing operates on a **land set**: the one-or-more `done` artifacts archived in this operation (a single `status land` is a set of one; a `landing` sweep may land several at once). Process the whole set together — **collect the remap first, then migrate, then rewrite** — so cross-references *inside* the set survive:
 
@@ -433,27 +432,18 @@ Landing operates on a **land set**: the one-or-more `done` artifacts archived in
 
 The land record is the moved files in `archive/` (+ `git log` on git-backed decks) — flightdeck keeps **no separate landing log** under any git mode. `archive/<folder>/<file>` *is* the durable history; `preflight` reads files, not a journal.
 
-**There is a single implementation and a single source of truth. `landing` and `status` are merely two invocation paths.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
+**There is a single implementation and a single source of truth — `landing` (the valve) is its only invocation path.** A single-file land is just a land set of one: `M` has one entry, there are no intra-set edges, and edges pointing at still-active artifacts keep their active path (correct).
 
 **Landing failure does not roll back `done`.** If landing fails mid-run, the artifact stays `done` at its current in-place location (done-but-unlanded); the next landing sweep picks it up. Never revert `status: done` on a landing failure — `done` asserts user approval, not a system-check result.
 
-## Land-readiness check
+## Readiness — the staged amount
 
-Shared predicate, called by `status` (mid-session) and `preflight` (entry). **landable** = signal 1 OR signal 2 (each queues a full landing at end-of-turn). **signal 3** is separate — it triggers a *soft-landing* (knowledge + state persist only, no commit/archive), not a full landing:
+**Land is purely manual** — there is no automatic land trigger. `done` flips, knowledge increments, and changed-file counts no longer *queue* a landing; they just accumulate in the staging area. So "readiness" degrades from an active nudge into a **passive display of how much is staged**, surfaced for the user to decide when to open the valve.
 
-- **signal 1** — this `status` invocation just flipped an artifact to `done`.
-- **signal 2** — at session entry, `git status` shows **≥ 5** changed files under `flightdeck/`.
-- **signal 3** — at end-of-turn (the AI is about to return control to the user), the session has a **knowledge increment**: a new, not-yet-persisted, write-gated knowledge item — the [§ Write gate](protocol.md#write-gate) bar (changes future behavior / influences decisions / referenced repeatedly), transient byproducts excluded. A **state-only** increment (cockpit `## In Progress` / `## Next` / `Focus`, or plan-task progress, with **no** new knowledge) routes to **checkpoint**, not soft-landing. **A turn that advanced a plan task is not thereby state-only:** if it *also* produced a bug+root-cause, a decision, or a reusable procedure, the knowledge half makes it a **soft-landing** (the plan-progress half is the checkpoint; both fire in the same turn). Do not downgrade a knowledge increment to a checkpoint because the plan is unfinished or unverified — "plan unfinished / not yet verified" defers verification, not persistence.
-
-Mechanics:
-- signal 1 is emitted by `status` in the **same invocation** that performs the flip — the edge *is* the flip action, so no stored state is needed; an idempotent rerun on an already-`done` artifact is a no-op → no repeat, no nag.
-- **signal 1 auto-landing is end-of-turn debounced.** A `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, replacing the old unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. This is why landing rescans the whole `done`-in-place set (Land Routine step 0) rather than only the just-flipped artifact.
-- signal 2 is reported by `preflight` at entry as the **last line / a dedicated `## Land-readiness` block** (never mid-output), once per entry.
-- Whether to then auto-run landing reuses [Rule resolution order](protocol.md#rule-resolution-order) (default self-invocable + any deck rule).
-- **signal 3 fires a *soft-landing*** — full landing's knowledge-classify / changed-INDEX-regen / cockpit-board work, with **no commit, no archive, no promotion**. It is landing's no-`done` natural form + a visible banner. Timing is pinned: persist → emit the soft-landing banner → end the turn (never "reply then persist"). The banner format is in [§ Soft-landing banner](#soft-landing-banner--the-visible-safe-to-close-signal); the three-tier framing is in [§ Checkpoint](#checkpoint--lightweight-board-sync-subpath).
-- **soft-landing dedup is stateless — the board itself is the watermark.** A turn that already ran a full landing (a `done` flip's end-of-turn debounce) does **not** also soft-land (one turn, one landing path). Knowledge already on disk reads back `already clean` → no-op. If a checkpoint already ran at a plan-task boundary this turn, only a **knowledge increment produced after that checkpoint** (checkpoint-done → turn-end window — the interval between that checkpoint completing and the AI returning control) re-triggers soft-landing; a checkpoint at turn's end leaves an empty window → silent. **No `last_checkpoint_time` / turn-id is stored** — already-persisted content self-detects as clean.
-- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + each `INDEX.md`), so those are never stale between landings. It does **not** write `## Next` / `Focus`, classify knowledge, flip `done`, commit, or archive — every judgment + soft-landing step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole checkpoint/soft-landing.
-- **Deliberate gap (YAGNI):** a long session that churns without ever flipping a status **and without a knowledge increment** is not nudged at all (caught at next preflight entry). Signal 3 covers the knowledge-increment case at end-of-turn; pure **state-only** churn is the remaining gap. No mid-session watermark — it would need cross-call state.
+- **What's staged** = the cockpit `## Staged (awaiting land)` AUTO view: `done`-not-archived workflow + `stale`-with-`verify` knowledge (the derived staging projection; Pending Review is the separate hand-written sign-off queue).
+- **Where it surfaces** = `preflight` at entry reports the staged count as a neutral one-liner (`N staged (awaiting land)`) — no `⚠`, no "consider landing". Opening the valve is the user's call, never a system nudge.
+- **No stored state, no debounce, no signal bookkeeping.** Stage runs unconditionally every turn — it persists + commits whatever the turn produced, including a `done` flip or a knowledge increment — so there is nothing to *detect* or *dedup*: the board on disk is the whole record. A turn with no deck change simply doesn't stage. Persist timing is pinned: persist → emit the 📥 staged banner → end the turn (never "reply then persist").
+- **What the Stop hook does and does not do.** On Claude Code a passive `Stop` hook regenerates *only* the mechanical AUTO regions (`## In Progress` + `## Staged` + each `INDEX.md`), so those are never stale between stages. It does **not** classify knowledge, write `## Next` / `Focus`, flip `done`, commit, or archive — every judgment + stage step above stays agent-driven. "Board-sync is automatic" therefore means *the AUTO regions*, not the whole stage.
 
 ## See also
 
