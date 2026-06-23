@@ -1,6 +1,8 @@
 # version bump checklist
+
 SUMMARY: How to cut a new flightdeck release / bump the version number.
 READ WHEN: before cutting a new release / bumping the version number
+
 ---
 
 ## When to follow this

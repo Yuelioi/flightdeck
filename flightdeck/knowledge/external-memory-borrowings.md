@@ -1,6 +1,8 @@
 # external-memory borrowings
+
 SUMMARY: Memory-system mechanisms flightdeck borrows from (and rejects) when designing memory / knowledge / routing features.
 READ WHEN: before planning flightdeck memory / knowledge / routing capability, or adopting a memory-system mechanism
+
 ---
 
 > 2026-06-07 深读 `references/ReMe`（Python 向量记忆框架 + benchmark）与 `references/claude-mem`（Claude Code 记忆插件：daemon + SQLite + ChromaDB）后的提炼——**只取可移植的 prompt/策略/概念，弃其基础设施**。

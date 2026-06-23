@@ -1,10 +1,13 @@
 # ⚠ outer-ring docs drift
+
 SUMMARY: Change skills/ protocol semantics without syncing README / docs / adapters and the outer ring silently drifts.
 READ WHEN: after changing skills/ protocol semantics, the folder model, or ritual behaviour — deciding doc-sync scope
 RECHECK WHEN: the set of outer-ring docs (README / adapters / scaffolds) that mirror protocol changes
+
 ---
 
 ## Signature
+
 - symptom: README/docs/.github 等人类叙事文档描述的结构或机制在 skills/ 协议里已不存在（如 debriefs/、根 INDEX.md、sketches/、`## Next session`、checklist→rules 晋升级）
 - error_type: —
 - where: README.md / README.zh.md / docs/*.md / .github/PULL_REQUEST_TEMPLATE/
@@ -23,5 +26,6 @@ RECHECK WHEN: the set of outer-ring docs (README / adapters / scaffolds) that mi
 协议语义/文件夹模型/仪式行为变更落地时，清扫范围默认含外圈：README 中英 + docs/*.md + .github 模板 + adapters/*.md（CHANGELOG/TEST_PLAN/archive 是历史记录，不改）。手法用「关键词全仓 grep + 逐句对照权威源（protocol/folder-semantics/exit-ritual/templates）」，不点状修补。本档案 `applies_to` 即外圈清单，landing 的 stale 检测可借此挂钩。
 
 ## Cases
+
 - 2026-06-11 首次：用户指出 README 仍宣传 debriefs/ 与根 INDEX.md（实际 sketches/ 也已并入 specs）。
 - 2026-06-11 Case 2：用户追问「docs 是不是也没看清就写了」——逐句复核 docs/ 三篇，再出三处失实（晋升两级、MDC frontmatter 互操作、peer reviews before merge）+ architecture 漏 turn-end hook。

@@ -1,11 +1,14 @@
 # comments checklist
+
 SUMMARY: Conventions for writing and editing source-code comments.
 READ WHEN: before writing or editing any source-code comment
+
 ---
 
 写/改任何源码注释**前置**读这份. 这是项目无关的通用规范.
 
 依据 (有疑问回到原始出处, 别凭印象):
+
 - Google Style Guides — 注释解释 *why*, 不复述 *what* (<https://google.github.io/styleguide/>)
 - Go Doc Comments — 文档注释写完整句、以标识符开头 (<https://go.dev/doc/comment>)
 - 经典原则: **代码说"怎么做", 注释说"为什么"; 版本控制 / issue tracker 持有历史, 注释持有意图.**
@@ -101,6 +104,7 @@ grep -rniE "(spec[ ]*§|spec[ ]*sec|见.*spec|详见|Phase[ ]+[0-9A-G]|[ (]P[0-9
 理想**零命中** (`HACK`/`XXX` 极个别可留, 但要能解释为啥不进 tracker).
 
 命中后三选一:
+
 1. **删** —— 注释没必要
 2. **改写** —— 只留"为什么/不变量"那部分, 去掉过程坐标
 3. **搬走** —— TODO 搬 tracker/backlog, 历史搬 commit message, 然后删注释

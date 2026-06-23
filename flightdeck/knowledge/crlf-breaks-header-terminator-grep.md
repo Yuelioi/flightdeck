@@ -1,6 +1,8 @@
 # ⚠ CRLF breaks `^---$` header-terminator grep on Windows
+
 SUMMARY: On Windows, git autocrlf checks deck files out as CRLF, so a strict `^---$` grep misses the routing-header terminator (`---\r` ≠ `---`); start-anchored greps still work.
 READ WHEN: grepping deck routing headers, or writing/auditing tooling that detects the `---` terminator, on Windows or any CRLF checkout
+
 ---
 
 The routing header ends with a line `---`. With CRLF line endings that line is

@@ -1,9 +1,12 @@
 # ⚠ skill prose links into the dogfood deck
+
 SUMMARY: A markdown link / relative path inside skills/ prose can resolve into this dogfood deck instead of the user's — and it ships to every user.
 READ WHEN: before adding a markdown link or relative path inside any skills/ prose
+
 ---
 
 ## Signature
+
 - symptom: `skill 散文里的相对链接 ../../docs/why-no-hooks.md 从 skills/preflight/ 解析到仓库根 docs/（无此文件）；真正的文件在 dogfood deck flightdeck/docs/ 下`
 - error_type: dangling-link
 - where: skills/**（SKILL.md / protocol.md / exit-ritual.md / templates.md / folder-semantics.md）
@@ -35,4 +38,5 @@ shipped skill 指向 `flightdeck/…` 或算错深度的相对链接，对**每�
   `flightdeck/…` 路径绝不出现在 `skills/` 散文里。
 
 ## Cases
+
 - 2026-06-06 首次（checkpoint 特性 exit-ritual.md 的 why-no-hooks 死链，评审拦下）

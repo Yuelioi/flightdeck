@@ -33,7 +33,10 @@ net: a second pair of eyes reading what's actually there, not a schema validator
    **and any `uses`-subscribed global file** — must open with a routing header
    (`# <title>` + `SUMMARY:` + `READ WHEN:`, ended by `---`). Flag (`⚠`) any missing
    the header or the `---` terminator (won't route); flag (`i`) a header whose
-   `SUMMARY:` or `READ WHEN:` is present but empty (routes to nothing useful).
+   `SUMMARY:` or `READ WHEN:` is present but empty (routes to nothing useful), or
+   whose `---` terminator sits directly under the last header line with no blank line
+   above it (that line then parses as a setext heading and the terminator vanishes on
+   render).
 5. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<x>/archive/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state — leaving it

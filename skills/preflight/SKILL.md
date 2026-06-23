@@ -86,7 +86,19 @@ Invariants:
   `# ⚠ <title>`; checklist `# <X> checklist`), then `SUMMARY:` (one line), `READ
   WHEN:` (when to route here), optional `RECHECK WHEN:` (what it tracks — re-verify
   when that changes). Below `---`: free-form body. Routing reads only the header
-  (cheap); freshness = mtime + body + RECHECK WHEN.
+  (cheap); freshness = mtime + body + RECHECK WHEN. **Leave a blank line before the
+  `---`** (and one after the title) — without it the last header line and the `---`
+  parse together as a setext heading, so the terminator vanishes on render. Canonical
+  shape:
+
+      # <title>
+
+      SUMMARY: <one line>
+      READ WHEN: <when to route here>
+
+      ---
+
+      <free-form body>
 - **Write gate.** Record only what will change how you act later, or that you'll
   look up again. Skip: one-off logs; a build that passed; exploration that found
   nothing; a re-run that added nothing.

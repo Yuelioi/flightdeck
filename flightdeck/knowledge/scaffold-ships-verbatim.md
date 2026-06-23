@@ -1,9 +1,12 @@
 # ⚠ scaffold ships verbatim
+
 SUMMARY: scaffolds/full/ ships verbatim to users — careless edits break first-time setup.
 READ WHEN: before editing scaffolds/full/ or the first-time-setup flow
+
 ---
 
 ## Signature
+
 - symptom: `stray scratch files left in scaffolds/full/ get copied verbatim into every new user's deck`
 - error_type: —
 - where: scaffolds/full/ + preflight copy-the-scaffold first-time-setup
@@ -30,4 +33,5 @@ as a scratch location. Pre-ship check: `find scaffolds/full -type f` should list
 `cockpit.md`, and each folder's `INDEX.md` — nothing else.
 
 ## Cases
+
 - 2026-06-03 首次
