@@ -185,7 +185,10 @@ class AddSectionsTest(unittest.TestCase):
             "## In Progress\n\n<!-- AUTO:inprogress -->\n<!-- /AUTO -->\n"
         )
         out, added = add_missing_sections(text, "cockpit")
-        self.assertEqual(added, ["## Key Context", "## Pending Review", "## Hanging Tasks"])
+        self.assertEqual(
+            added,
+            ["## Staged (awaiting land)", "## Key Context", "## Pending Review", "## Hanging Tasks"],
+        )
         self.assertIn("## Key Context", out)
         self.assertIn("- (none)", out)
         # existing sections kept, not duplicated
@@ -197,6 +200,11 @@ class AddSectionsTest(unittest.TestCase):
         self.assertIn("## In Progress", added)
         self.assertIn("<!-- AUTO:inprogress -->", out)
         self.assertIn("<!-- /AUTO -->", out)
+
+    def test_staged_skeleton_carries_auto_markers(self):
+        out, added = add_missing_sections("# Cockpit\n", "cockpit")
+        self.assertIn("## Staged (awaiting land)", added)
+        self.assertIn("<!-- AUTO:staged -->", out)
 
     def test_no_duplicate_when_all_present(self):
         text = "".join(s + "\n\n- x\n\n" for s in COCKPIT_SECTIONS)

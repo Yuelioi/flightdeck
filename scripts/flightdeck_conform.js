@@ -54,11 +54,12 @@ const FOLDER_KIND = {
 const WALK_FOLDERS = Object.keys(FOLDER_KIND).filter((f) => !IMPORTED_KINDS.has(f));
 
 const COCKPIT_SECTIONS = [
-  '## Next', '## In Progress', '## Key Context',
-  '## Pending Review', '## Hanging Tasks',
+  '## Next', '## In Progress', '## Staged (awaiting land)',
+  '## Key Context', '## Pending Review', '## Hanging Tasks',
 ];
 const RULES_SECTIONS = ['## House rules', '### Project conventions', '### Rules'];
 const INPROGRESS_SKELETON = '<!-- AUTO:inprogress -->\n- (none)\n<!-- /AUTO -->';
+const STAGED_SKELETON = '<!-- AUTO:staged -->\n<!-- /AUTO -->';
 
 const RULES_STAMP = ['version', 'runtime', 'agents_md'];
 const RULES_DEFAULTS = { version: '3.0', agents_md: 'off' };
@@ -141,7 +142,9 @@ function stampRules(text, runtime) {
 }
 
 function sectionBody(section) {
-  return section === '## In Progress' ? INPROGRESS_SKELETON : '- (none)';
+  if (section === '## In Progress') return INPROGRESS_SKELETON;
+  if (section === '## Staged (awaiting land)') return STAGED_SKELETON;
+  return '- (none)';
 }
 
 function addMissingSections(text, which) {

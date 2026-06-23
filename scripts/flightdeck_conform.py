@@ -182,17 +182,20 @@ def stamp_rules(text, runtime):
 # only adds a missing heading + placeholder; deleting / relabeling sections is
 # the /flightdeck:conform AI pass.
 COCKPIT_SECTIONS = [
-    "## Next", "## In Progress", "## Key Context",
-    "## Pending Review", "## Hanging Tasks",
+    "## Next", "## In Progress", "## Staged (awaiting land)",
+    "## Key Context", "## Pending Review", "## Hanging Tasks",
 ]
 RULES_SECTIONS = ["## House rules", "### Project conventions", "### Rules"]
 
 _INPROGRESS_SKELETON = "<!-- AUTO:inprogress -->\n- (none)\n<!-- /AUTO -->"
+_STAGED_SKELETON = "<!-- AUTO:staged -->\n<!-- /AUTO -->"
 
 
 def _section_body(section):
     if section == "## In Progress":
         return _INPROGRESS_SKELETON
+    if section == "## Staged (awaiting land)":
+        return _STAGED_SKELETON
     return "- (none)"
 
 
