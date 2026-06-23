@@ -10,15 +10,15 @@ demand from [protocol.md](protocol.md).
 
 0. **Deck existence.** If `flightdeck/cockpit.md` is absent → print "No flightdeck
    deck here — create `flightdeck/cockpit.md` to start one." and **STOP**.
-1. **Read `flightdeck/rules.md`** (project house rules — single file, stable) and
+1. **Read `flightdeck/cockpit.md`** (full) — the recovery payload, read first: note
+   focus + next, the in-flight efforts (whatever is in `work/`), and open questions.
+   Do **not** rewrite it on entry.
+2. **Read `flightdeck/rules.md`** (project house rules — single file, stable) and
    **`flightdeck/uses.md`** (one `~/.flightdeck`-relative path per line this project
    subscribes to; `#` comments). Fold each subscribed global path into the routing
    tree alongside local `knowledge/`. Local shadows global on the same relpath
    (replace, not merge); a subscribed path that's missing/renamed → one soft warning,
    continue (never fail). See [protocol.md](protocol.md) § uses.md shadowing.
-2. **Read `flightdeck/cockpit.md`** (full) — note focus + next, the in-flight efforts
-   (whatever is in `work/`), and open questions. This is the recovery payload; do
-   **not** rewrite it on entry.
 3. **Walk the tree for what the task needs (lazy).** Default load = cockpit.md only;
    everything else is on demand. `ls` the deck (`work/`, `knowledge/<domain>/`, the
    subscribed global subtrees). When `ls` + filenames aren't enough to judge

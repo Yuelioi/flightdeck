@@ -11,15 +11,17 @@ and **STOP**. Never overwrite a live deck.
 ## Run this — seed the new-form skeleton
 
 The new form has no schema, no INDEX, no script runtime to record — so creation is
-just writing a few files. (Want git history on the deck? `git init` the project
-yourself; flightdeck doesn't require it, but the zero-loss guarantee rides on the
-project repo being committed each turn — see [../preflight/protocol.md](../preflight/protocol.md).)
+just writing a few files. flightdeck runs without git, but the **zero-loss guarantee
+only holds when the project is a git repo committed each turn** (persist's job) — so
+`git init` the project if it isn't one. See [../preflight/protocol.md](../preflight/protocol.md).
 
 Create under `flightdeck/`:
 
-- `cockpit.md` — seed with `# Cockpit — <project>`, an `Updated:` line, and empty
-  `## In flight (work/)`, `## Next`, `## Open questions` sections. This is the
-  recovery payload, rewritten each turn, kept small.
+- `cockpit.md` — seed with `# Cockpit — <project>` and one line naming the current
+  focus. Keep it **free-form** — no fixed schema, no `Updated:` field (git already
+  knows when/who). It only has to answer, in whatever shape fits: what you're doing /
+  where you are / next / open questions. It's the recovery payload, rewritten each
+  turn, kept small.
 - `rules.md` — `## House rules` with a one-line note that it holds project house
   rules + AI-maintenance preferences; read on preflight, stable.
 - `uses.md` — a comment line explaining it lists one `~/.flightdeck`-relative path

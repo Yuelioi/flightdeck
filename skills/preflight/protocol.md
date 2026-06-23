@@ -4,6 +4,31 @@ Read on demand when the micro-core's one-liners aren't enough. The micro-core (t
 verbs + layout + invariants) lives in [SKILL.md](SKILL.md), loaded on entry; this
 file is loaded only when you need the detail below.
 
+## Persist (turn end)
+
+The micro-core's second verb, spelled out. Persist runs at the **end of an execution
+turn** — one that did real work or produced knowledge; a pure conversation /
+clarification turn persists nothing. It is engaged only once preflight has loaded the
+protocol this session (the running session context carries that fact — it is not
+injected and does not survive into a fresh session that never runs preflight).
+
+At turn end, in order:
+
+- **Knowledge** — apply the write gate (below). Anything that passes (a decision, a
+  bug + root cause, a reusable procedure, a trap) → write it in place under
+  `knowledge/<domain>/` with a routing header. Nothing passes → write nothing.
+- **Efforts** — if a `work/<effort>/` finished this turn, move it out to
+  `~/.flightdeck/projects/<x>/archive/` (location is state). "Done" is a judgement:
+  **propose** it when the work reads as finished — don't silently archive something
+  the user still treats as open. Otherwise leave it in `work/`.
+- **cockpit.md** — rewrite it to reflect now: focus + next, the in-flight efforts,
+  open questions. Keep it small.
+- **commit** — `git commit` the project repo with a one-line summary of the turn's
+  increment. **One commit per turn** (mid-turn writes batch into it; the noise of
+  per-turn commits is the accepted price of zero-loss — squash later if you care). A
+  turn that produced no durable knowledge still commits the board ("nothing new to
+  save, board current") — the guarantee rides on the repo being committed.
+
 ## Write gate
 
 The micro-core rule: record only what changes how you act later, or that you'll
@@ -23,9 +48,12 @@ it belongs to. No fingerprint, no recurrence counter.
 
 - On hitting a pitfall: write a `# ⚠ <title>` trap, placed by **scope** — project-
   specific → project `knowledge/<domain>/`; general lesson → `~/.flightdeck/knowledge/<domain>/`.
-- On hitting it again: grep finds the existing trap → re-read it, do NOT rewrite.
+- On hitting it again: grep finds the existing trap → re-read it. Don't spawn a
+  second copy. *Do* update it in place if your understanding changed (new root cause,
+  better workaround) — "do not rewrite" means no duplicate, not frozen content.
 - Once the fix is stable: crystallize it into a same-domain checklist
-  (`# <X> checklist`) and let the trap fade. Location encodes scope, not count.
+  (`# <X> checklist`), then delete the trap (git keeps the history). Location encodes
+  scope, not count.
 
 ## uses.md shadowing
 
@@ -53,6 +81,8 @@ When walking the tree to route and `ls` + filenames aren't enough to decide whic
 knowledge files are relevant, run a transient `derive-listing <area>`: grep each
 file's routing header and print a one-shot relevance directory to context. The
 trigger is AI judgment — filenames alone won't decide — not a count or threshold.
+`derive-listing` is a **convention, an action you perform** — not an installed
+command: you run the grep yourself (ripgrep below, or whatever your environment has).
 
 What to surface per file: its path, title (`# …`, keeping the `⚠` / `checklist`
 glyph), `SUMMARY:`, and `READ WHEN:` — the routing-decision lines of the header,

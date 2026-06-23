@@ -6,7 +6,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 ## In flight (work/)
 
-- **ai-native-redesign/** — 重设的全部草稿真相源:`micro-core.md`(协议微核心,已接进 live `skills/preflight/SKILL.md`)、`protocol.md`(深层协议,已接进 live `skills/preflight/protocol.md`)、`coverage-check.md`(3.0→新形态 33 类 disposition,零孤儿)、`skills-draft/`(preflight/walkaround 草稿,已接 live)。
+- **ai-native-redesign/** — 草稿已全部 graduate 进 live `skills/`,**退役**(单一来源,免漂移);只留 `coverage-check.md`(3.0→新形态 33 类 disposition 映射记录)。真相源 = live `skills/preflight/{SKILL,protocol}.md` + `skills/walkaround/SKILL.md`。
 - **2026-06-23-ai-native-redesign.md** — 重设设计单一可信源(决策记录)。
 - **2026-06-22-stage-land-lifecycle.md** — 旧 stage/land 生命周期设计(active,其 plan 已 done 进冷 archive)。
 
@@ -17,6 +17,12 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 2. **repo 清理(新形态零脚本/零 hook)**:删死脚本 `flightdeck_{index,conform,new,lint,init,lib}` + 其 tests(新 skill 零脚本依赖;留 `migrate`(throwaway 跑完可删)、`build_stamp`/`bump_version` 发版用);删 `hooks/`(新形态不注入、无机械 board-sync)+ `skills/_shared/bootstrap.md`;`skills/launch` 改成新形态(零脚本建 deck:cockpit/rules/uses/work/knowledge)或并入 preflight 的「无 deck」分支。
 3. **外环文档**:README/README.zh/CHANGELOG/MIGRATION/AGENTS.md/GEMINI.md/`docs/`/`scaffolds/full` 全是 3.0 描述,需改新形态(incident `outer-ring-docs-drift` 警的就是这条)。
 4. **plan #1 verify**(人读):micro-core/protocol/coverage-check + 两 SKILL 英文散文 tone+sense —— 你来读。
+
+## 外审 triage(tmp/ds·claude·gpt,仅供参考——他们没拿到 walkaround、不知现状)
+
+- **修了的真问题**:① preflight 改 cockpit-first(原先读 rules/uses 再 cockpit,与 micro-core 自身表述矛盾)· ② launch 种子 cockpit 去 `Updated:` + 固定区块,改 free-form · ③ 退役重复草稿(双份 micro-core)· ④ protocol 补 **§Persist** 节(最核心机制原先只一句)· ⑤ §Incidents 澄清(trap「不重写」=不造重复≠根因变了也不改;「fade」=结晶后删)· ⑥ derive-listing 标明是「约定/动作」非「装好的命令」。
+- **误报**:rg 反引号语法错(源文件 recipe 干净,他们把 prose 行内代码 `` `<area>` `` 当 recipe)· walkaround「功能悬空」(skill 存在,只是没给他们看)。
+- **by-design 取舍(不改,spec 已认)**:每轮 commit 噪音史(zero-loss 的代价,可后 squash)· `present=valid` 二元(RECHECK WHEN+mtime+body 兜)· **整系统依赖 AI 记住协议**——这正是 spec 列的头号风险(无机械自纠偏),walkaround 是兜底网,非 bug。
 
 ## Open questions / 悬而未决
 
