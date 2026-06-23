@@ -29,6 +29,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 - **迁移器 nested-folder 局限**(已手工绕过,未加固——脚本 throwaway):`flightdeck_migrate.py` 只 glob 源文件夹顶层 `*.md`,没递归;真 deck 的 `references/`(外部知识子树)+ `archive/`(嵌套 incidents/plans/specs)漏搬,本次手工归位:archive 子树→冷 store;references 是**自带 .git 的外部克隆**(3.0 里就未跟踪),挪进**冷 `~/.flightdeck/knowledge/references/`**(跨项目外部参考,不 vendor 进项目 git)。flat fixture 测试没覆盖嵌套——若日后还要用此脚本得加 `**/*.md` 递归 + 子树目的地决策 + 跳过 embedded git repo。
 - **发布面**:cutover 全在 feature 分支 `feat/launch-recorded-config`、**未发版**;3.0 仍是 marketplace 上已 ship 的,直到显式 bump+release(rules:push 需你批准)。**版本号 gated**:新形态 README/plugin.json 描述已换,但 version 字符串仍留 `3.0.0-alpha.5`——发版时你 bump(可能 4.0,install 脚本旧注释提过)。- **冷 store** 已落 `~/.flightdeck/projects/flightdeck/`(archive=旧 done 的 specs/plans/incidents + 本会话 done 的 plan #1/plan3;不版本化,git 历史兜底)。
+- **母库 `~/.flightdeck` 已迁新形态(本会话)**:删 3.0 master-deck 骨架(`cockpit.md`/`rules.md` + `checklists/docs/incidents/plans/specs/references` 空壳 INDEX);3 个跨项目 checklist(comments/commits/subagent-guide)转路由头进 `knowledge/`(平铺);`skills/writing-claude-md` 挪进 `knowledge/` 当参考(保留 skill 格式,无路由头=browseable)。现 master = `knowledge/` + `projects/`。**knock-on**:其它项目(nuxtblog/aep-parser)若要订阅这些共享知识,得在各自 `uses.md` 写新路径 `knowledge/<file>`——原 `checklists/<file>` 路径已没;且那些项目本身还是 3.0,各自迁移另算。
 
 ## House pointers
 
