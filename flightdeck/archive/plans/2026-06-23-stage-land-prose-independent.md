@@ -1,9 +1,11 @@
 ---
-status: active
+status: done
 summary: Narrowed to the only surfaces touchable without contradicting the still-three-tier exit-ritual: walkaround Audit 13 done-but-unlanded flip (substantive, self-contained) + templates.md ## Staged field doc. status Step 7 (= signal-1 auto-land) and landing (Modes/banner/commit) are signal-coupled → moved to plan 3 with exit-ritual, so the three-tier/signal model is rewritten once, in one place. exit-ritual/protocol/preflight stay plan 3.
 last_updated: 2026-06-23
 implements: specs/2026-06-22-stage-land-lifecycle.md
 ---
+
+> **DONE 2026-06-23** — 收窄执行完，英文 sign-off：walkaround Audit 13 翻转（`d003b7d`）+ templates `## Staged` 文档（`04d7852`）+ plan-3 handoff 清单（`698f516`）。landing/status/exit-ritual/protocol/preflight 的三层/signal 重写交 **plan 3** 一次改完（见下 Handoff）。
 
 # Stage/land prose rewrite — independent surfaces (plan 2)
 

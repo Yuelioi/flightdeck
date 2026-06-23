@@ -1,8 +1,8 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: marker 自带化 + `marker-missing` 安全网 landed；补 land 久挂的 plan 1（stage/land script 地基，4 task 早已 commit 却没翻 done）→ 归档，看板回真
+Updated: 2026-06-23 · 月离 · Stage: stage/land plan 2 done+归档（收窄为 walkaround Audit 13 翻转 + templates ## Staged 文档；landing/status 经判断证实 signal 耦合→交 plan 3）
 
-Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1 done+归档；plan 2【独立散文面】已拆待执行；plan 3 signal 核心待起）
+Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1·2 done+归档；plan 3 = 三层/signal 模型一处一次改完 待起）
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
@@ -10,7 +10,6 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
-- [2026-06-23-stage-land-prose-independent.md](plans/2026-06-23-stage-land-prose-independent.md) — Narrowed to the only surfaces touchable without contradicting the still-three-ti…
 <!-- /AUTO -->
 
 ## Staged (awaiting land)
@@ -21,7 +20,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **执行 plan 2** → `plans/2026-06-23-stage-land-prose-independent.md`：5 task（landing 阀门化 / status done-非债 / walkaround Audit 13 翻转 / templates drain→stage / 一致性扫）。signal 耦合面（exit-ritual·protocol·preflight）留 **plan 3**。
+- **起 plan 3** — 三层/signal 模型一处一次改完：`landing` Modes 表/banner/commit 归属 + `status` Step 7（signal-1 auto-land）+ `exit-ritual`（signal 1/2/3 重设计 + 三层→stage/land + drain 下放）+ `protocol`（readiness 重设计）+ `preflight`（入口 readiness=staged 量）。**handoff 清单** → `archive/plans/2026-06-23-stage-land-prose-independent.md` 末 + spec Open Q3/Q5。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
 ## Key Context
