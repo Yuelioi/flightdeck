@@ -32,6 +32,15 @@ last_updated: 2026-06-23
    - **大赢**:无 schema → 痛点 #2(改了难迁移)基本蒸发;迁移 = 机械剥 frontmatter + 合并出首行。
    - **承重约定**:首行自述必须紧致(它是唯一路由锚)→ 这条进 `behave`。**代价**:grep 无 tag,同义词可能漏(赌:域文件夹 + AI 走树 + 读首行兜得住)。
 
+### 协议正文形态(2026-06-23,已定形)
+
+两层,**dogfood 惰加载原理**(= resume 读 state 再走树 的同构),两层**不重叠** → 零漂移:
+
+- **微核心(~1 页,进 `CLAUDE.md` 每会话常载)**:两动词(resume/persist)· 文件结构图 · 不变量(位置=状态 · 首行自述 · 写门 · 热层每轮 commit)· 一句「深层见 `behave/flightdeck.md`」。
+- **深层(`~/.flightdeck/behave/flightdeck.md`,按需读)**:write-gate skip 清单细节 · incident 母库↔项目阶梯 · uses 订阅+本地覆盖合并 · vendoring · 派生目录逃生口。
+
+骨架 7 节:① 一句话+两动词 ② 文件结构 ③ 位置即状态 ④ 知识约定(首行/⚠trap/按域;grep+走树;git+body 判新鲜)⑤ 写门 ⑥ 零丢失 ⑦ edge。**①–③ + ⑥精要 → 核心;④–⑤细节 + ⑦ → 深层。** 剩:authoring(英文发布面)。
+
 ## 动机:一个根,三个痛
 
 当前 flightdeck「笨重」。三个痛被确认为**同一个根:结构太多**——其中大半是「不信任 AI」加的脚手架:
@@ -135,7 +144,7 @@ last_updated: 2026-06-23
 - **从 3.0 deck 一次性迁到新形态**(讽刺但必要,但因零 schema 大大简化):specs/plans→work、各 knowledge 文件夹→behave/know(按域)+ 机械剥 frontmatter 合并出首行、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
 - **派生目录**约定(首行自述格式已定;剩「何时触发」的阈值)。
 - **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
-- AI 读的那份**极简协议**正文(替今天 ~169K 字符散文)。
+- **极简协议正文 authoring**(形态已定=两层,见上「协议正文形态」)——把今天 ~169K 字符压成微核心(~1 页进 `CLAUDE.md`)+ 深层(`behave/flightdeck.md`)。**发布面 = 英文**。
 
 > 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
 
