@@ -33,12 +33,12 @@ The manifest is structured the same as the working Claude one, and the skill con
 1. Install on Codex per the commands above.
 2. Open a project with `flightdeck/cockpit.md` populated.
 3. Start a fresh session, ask "What were we doing?" — confirm the AI reads `cockpit.md` first.
-4. Try one routing scenario from the README routing table (e.g., "Why did the migration break?" should consult `incident-reports/`).
+4. Try one routing scenario from the README routing table (e.g., "Why did the migration break?" should walk `knowledge/<domain>/` and surface a `# ⚠` trap).
 5. Open a PR that:
    - Updates the README compatibility matrix `⚠️ untested` → `✅ tested`.
    - Pastes the verification transcript here.
    - Notes any Codex-specific quirks (e.g., force-invoke syntax differences).
 
-## Invocation (no gate as of 3.0)
+## Invocation
 
-3.0 removed the model-invocation gate: all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) **always self-invoke**, so no call-source detection is needed on this platform. (Pre-3.0 `model_invocable` lists are read but ignored.) See [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
+The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked slash commands; **persist** runs automatically at turn end (no command). Nothing fires on session start, so no call-source detection is needed on this platform.

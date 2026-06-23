@@ -40,25 +40,12 @@ For users who don't want to use the plugin marketplace, the installers at the re
 After install:
 
 ```
-~/.claude/skills/preflight/             # /flightdeck:preflight — session-entry takeover (read-only; deckless → launch)
+~/.claude/skills/preflight/    # /flightdeck:preflight — session-entry takeover (read-only; deckless → launch)
 ├── SKILL.md
-├── protocol.md
-├── folder-semantics.md
-├── templates.md
-└── exit-ritual.md
-~/.claude/skills/launch/                # /flightdeck:launch — first-time deck creation
+└── protocol.md
+~/.claude/skills/launch/       # /flightdeck:launch — first-time deck creation
 └── SKILL.md
-~/.claude/skills/new/                    # /flightdeck:new — author a deck artifact
-└── SKILL.md
-~/.claude/skills/landing/               # /flightdeck:landing explicit trigger
-└── SKILL.md
-~/.claude/skills/walkaround/            # /flightdeck:walkaround integrity audit
-└── SKILL.md
-~/.claude/skills/emit-agents-md/        # /flightdeck:emit-agents-md AGENTS.md emitter
-└── SKILL.md
-~/.claude/skills/status/                # /flightdeck:status lifecycle status flip (model-invocable; opt-in via rules.md)
-└── SKILL.md
-~/.claude/skills/sync/                  # /flightdeck:sync — refresh vendored shared-knowledge against the master deck
+~/.claude/skills/walkaround/   # /flightdeck:walkaround — read-only integrity audit
 └── SKILL.md
 ```
 
@@ -69,7 +56,7 @@ After install (either path), in a Claude Code session:
 1. Start a session in any project directory.
 2. The `preflight` skill should appear in the available skills list with description starting "Use when explicitly invoking the flightdeck entry ritual...".
 3. Force-invoke with `/flightdeck:preflight` and confirm the takeover runs (read-only; in a deckless dir it points to `/flightdeck:launch`).
-4. Force-invoke `/flightdeck:landing` and `/flightdeck:walkaround` — these should run the corresponding rituals explicitly.
+4. Force-invoke `/flightdeck:walkaround` — it should run the integrity audit (read-only; reports drift, fixes nothing).
 
 If the skill does not appear:
 - Direct install: check `ls ~/.claude/skills/preflight/SKILL.md` exists.
@@ -78,8 +65,9 @@ If the skill does not appear:
 
 ## How invocation works
 
-- **Nothing loads automatically** — flightdeck installs no startup hook. You run `/flightdeck:preflight` to begin a session.
-- `/flightdeck:preflight` is the session-entry takeover: it reads `cockpit.md`, reconciles against git (passive note only), and reports the next item. In a deckless dir (no `cockpit.md`) it points you to `/flightdeck:launch` and stops — deck creation lives there.
+- **Nothing loads automatically** — flightdeck installs no startup hook. You run `/flightdeck:preflight` to begin a session; if you never run it, flightdeck isn't engaged.
+- `/flightdeck:preflight` is the session-entry takeover: it loads the protocol, reads `cockpit.md` (plus `rules.md` / `uses.md`), walks the tree for what's needed, and reports the next item. In a deckless dir (no `cockpit.md`) it points you to `/flightdeck:launch` and stops — deck creation lives there.
+- **persist** is automatic, not a command: at the end of any turn that did real work, the AI rewrites `cockpit.md`, writes new knowledge in place, and commits the repo.
 - Flightdeck is **self-contained**: it does not require any other plugin to function. If you also have `superpowers` installed, the SKILL.md mentions its `brainstorming` / `writing-plans` skills as optional companions — fine if present, fine if absent.
 
 ## Uninstall
@@ -94,16 +82,14 @@ Direct path:
 
 ```bash
 # macOS / Linux
-rm -rf ~/.claude/skills/{preflight,launch,new,landing,walkaround,emit-agents-md,status}
+rm -rf ~/.claude/skills/{preflight,launch,walkaround}
 ```
 
 ```powershell
 # Windows
-Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\new", "$env:USERPROFILE\.claude\skills\landing", "$env:USERPROFILE\.claude\skills\walkaround", "$env:USERPROFILE\.claude\skills\emit-agents-md", "$env:USERPROFILE\.claude\skills\status"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:USERPROFILE\.claude\skills\launch", "$env:USERPROFILE\.claude\skills\walkaround"
 ```
 
-## Invocation (no gate as of 3.0)
+## Invocation
 
-All five flightdeck rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) **always self-invoke** — 3.0 removed the model-invocation gate, so there is no call-source check. Claude Code still injects a `<command-name>/flightdeck:<ritual></command-name>` marker on explicit user invocation, but flightdeck no longer keys any behavior off it. (Pre-3.0 `model_invocable` lists are read but ignored.)
-
-The 5th ritual `status` is auto-discovered from `skills/status/` (directory-based manifest); `launch` (first-time deck creation) likewise from `skills/launch/`. No manifest edit is needed to add either.
+The three verbs — `preflight` (session entry), `launch` (first-time deck creation), and `walkaround` (integrity audit) — are user-invoked slash commands. Claude Code injects a `<command-name>/flightdeck:<verb></command-name>` marker on explicit invocation; flightdeck keys no behavior off it. **persist** runs automatically at turn end (no command). Nothing fires on session start.

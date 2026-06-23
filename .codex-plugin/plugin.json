@@ -1,7 +1,7 @@
 {
   "name": "flightdeck",
   "version": "3.0.0-alpha.5",
-  "description": "Operational protocol for AI-assisted engineering sessions — preflight, scenario triggers, write gate, and landing ritual",
+  "description": "Operational protocol for AI-assisted engineering sessions — preflight entry, automatic per-turn persist, a write gate, and a walkaround audit",
   "author": {
     "name": "月离",
     "email": "yuelioi1210@gmail.com",
@@ -21,11 +21,10 @@
     "preflight"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks-codex.json",
   "interface": {
     "displayName": "Flightdeck",
     "shortDescription": "Operational protocol for AI-assisted engineering sessions",
-    "longDescription": "Flightdeck gives your AI assistant a persistent operational protocol across sessions — a directory convention plus a protocol for preflight, scenario-based triggers, strict write gating, and landing ritual. The next session knows what you were doing, why, and what to do next.",
+    "longDescription": "Flightdeck gives your AI assistant a persistent operational protocol across sessions — a directory convention plus a protocol for preflight, automatic per-turn persist, strict write gating, and a walkaround audit. The next session knows what you were doing, why, and what to do next.",
     "developerName": "月离 (Yuelioi)",
     "category": "Coding",
     "capabilities": [

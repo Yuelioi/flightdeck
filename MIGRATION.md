@@ -1,11 +1,14 @@
----
-current: 3.0
----
-
 # Migration
 
-3.0 是 flightdeck 格式基线（第 0 版）；3.0 之前无向后兼容历史需维护。
-`flightdeck/rules.md` 的 `version` 字段是 deck 版本戳，由 `launch` 写入的静态戳（3.0 后无人动态改写），仅供参考。
-当 3.1 改变 deck 格式时，在此记录 3.0→3.1 迁移步骤。
+This rewrite ships **no automatic migration machinery** — there is no schema, no
+version field, and no in-place upgrader. A deck created by an older version is not
+auto-upgraded.
 
-<!-- 3.0 以前的迁移历史已随版本校验子系统一并删除（无向后兼容老 deck 需求）。 -->
+To move an older deck forward: create a fresh deck with `/flightdeck:launch`, then
+hand-copy your old `cockpit.md` content and any still-relevant knowledge files into
+`knowledge/<domain>/`, giving each a routing header (`# <title>` + `SUMMARY:` +
+`READ WHEN:`, ended by `---`). Location is state — put in-flight efforts under
+`work/`, leave finished ones out.
+
+If a future release changes the deck format, concrete migration steps will be
+recorded here.

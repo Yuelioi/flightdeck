@@ -41,7 +41,6 @@ INCLUDE = [
     ".codex-plugin",
     ".cursor-plugin",
     "gemini-extension.json",
-    "AGENTS.md",
     "GEMINI.md",
     "CLAUDE.md",
 ]

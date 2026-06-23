@@ -15,7 +15,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 **cutover 收尾(剩余,按序)**:
 1. ✓ **知识路由头语义趟(完成)** + **格式钉死(本会话)**:9 个活的补了路由头、12 个 3.0 机械的归冷。本会话补:routing-header 空行布局钉进 micro-core 的 canonical 范例(`---` 前空行 load-bearing——否则末行 + `---` 被解析成 setext H2、终止符渲染时消失)+ walkaround #4 加一眼;10 个 knowledge 文件格式修对;**markdownlint 判 off-design 弃用**(机械 linter 违背新形态「零脚手架」命题,dogfood 应与真产品一致走协议+walkaround,不养调过的 lint config)。
 2. ✓ **repo 清理(完成)**:死脚本/hooks/_shared 已删,launch 改零脚本。
-3. **外环文档**:✓ 本会话扫了 `scaffolds/`(**退役删除**——新 launch 直接写文件、不再 copy,留着就是重复源/漂移面)+ README/README.zh(全重写到新形态,2 verbs+work/+knowledge+routing header+uses,删 INDEX/sync/landing/new/emit 等 3.0 描述)+ install.ps1/sh(去 `-Scaffold` + 修 docstring)+ plugin.json description + build_stamp.py(去 scaffolds input + 修 `checklists→knowledge` 路径)。**剩**:CHANGELOG / MIGRATION / AGENTS.md / GEMINI.md / `docs/`(architecture、philosophy)仍 3.0;root `AGENTS.md` 孤儿(emit-agents-md 已删)。
+3. **外环清理(本会话基本扫完)**:scaffolds 退役删 · README×2 全重写 · install.ps1/sh 去 `-Scaffold` · 全 manifest(plugin.json×3 描述/去死 `./hooks/` 引用)· GEMINI.md 修 `@`-include(4 死文件→SKILL+protocol)· adapters×4 重写到 3 verbs(去 7 死 skill、"no-gate as of 3.0"、companion 文件、2.x `incident-reports/`)· `.github` PR 模板重写到新形态 · MIGRATION.md 重写(英文)· **删** AGENTS.md(孤儿)/ TEST_PLAN.md(3.0)/ `docs/`(architecture+philosophy+README)/ flightdeck_migrate.py(+test,throwaway)· CLAUDE.md+rules.md 去 scaffolds 例子 · build_stamp 去 scaffolds+AGENTS.md input。**剩**:CHANGELOG.md(历史,发版时补条目);版本号 gated 未动(3.0.0-alpha.5)。
 4. **plan #1 verify**(人读):新 skills 英文散文 tone —— 你来读(本会话又加了 README×2 发布面英文,一并可读)。
 
 ## Review triage
@@ -28,9 +28,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 ## Open questions
 
 - **迁移器 nested-folder 局限**(已手工绕过,未加固——脚本 throwaway):`flightdeck_migrate.py` 只 glob 源文件夹顶层 `*.md`,没递归;真 deck 的 `references/`(外部知识子树)+ `archive/`(嵌套 incidents/plans/specs)漏搬,本次手工归位:archive 子树→冷 store;references 是**自带 .git 的外部克隆**(3.0 里就未跟踪),挪进**冷 `~/.flightdeck/knowledge/references/`**(跨项目外部参考,不 vendor 进项目 git)。flat fixture 测试没覆盖嵌套——若日后还要用此脚本得加 `**/*.md` 递归 + 子树目的地决策 + 跳过 embedded git repo。
-- **发布面**:cutover 全在 feature 分支 `feat/launch-recorded-config`、**未发版**;3.0 仍是 marketplace 上已 ship 的,直到显式 bump+release(rules:push 需你批准)。**版本号 gated**:新形态 README/plugin.json 描述已换,但 version 字符串仍留 `3.0.0-alpha.5`——发版时你 bump(可能 4.0,install 脚本旧注释提过)。
-- **小清理待办**:`flightdeck/rules.md` 的 `### Project conventions` + 根 `CLAUDE.md` 的「发布面」清单仍把 `scaffolds/` 列为发布面例子——已删,become stale,下次顺手去掉。
-- **冷 store** 已落 `~/.flightdeck/projects/flightdeck/`(archive=旧 done 的 specs/plans/incidents + 本会话 done 的 plan #1/plan3;不版本化,git 历史兜底)。
+- **发布面**:cutover 全在 feature 分支 `feat/launch-recorded-config`、**未发版**;3.0 仍是 marketplace 上已 ship 的,直到显式 bump+release(rules:push 需你批准)。**版本号 gated**:新形态 README/plugin.json 描述已换,但 version 字符串仍留 `3.0.0-alpha.5`——发版时你 bump(可能 4.0,install 脚本旧注释提过)。- **冷 store** 已落 `~/.flightdeck/projects/flightdeck/`(archive=旧 done 的 specs/plans/incidents + 本会话 done 的 plan #1/plan3;不版本化,git 历史兜底)。
 
 ## House pointers
 

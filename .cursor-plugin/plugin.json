@@ -20,6 +20,5 @@
     "context-persistence",
     "preflight"
   ],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks-cursor.json"
+  "skills": "./skills/"
 }

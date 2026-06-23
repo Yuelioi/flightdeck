@@ -25,7 +25,7 @@ Cursor's skill / rules discovery has evolved across versions. The manifest follo
 
 ## Likely Cursor-specific concerns
 
-- **Rule budget**: Cursor injects rules into every prompt. If Cursor reads the full SKILL.md plus the three supporting files inline every turn, the token cost is meaningful. We may need a "lite" mode that loads only `SKILL.md` for Cursor and leaves the rest as on-demand reference.
+- **Rule budget**: Cursor injects rules into every prompt. The micro-core in `SKILL.md` is the only always-loaded piece; `protocol.md` is on-demand. If Cursor reads both inline every turn, the token cost is meaningful — a "lite" mode that loads only `SKILL.md` and leaves `protocol.md` as on-demand reference may be needed.
 - **Manual reload**: Cursor may not pick up changes to plugin content without restart.
 
 ## How to verify (and flip the matrix to ✅ tested)
@@ -39,6 +39,6 @@ Cursor's skill / rules discovery has evolved across versions. The manifest follo
    - Pastes the verification transcript here.
    - Notes token cost observations and whether a "lite" mode is needed.
 
-## Invocation (no gate as of 3.0)
+## Invocation
 
-3.0 removed the model-invocation gate: all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) **always self-invoke**, so no call-source detection is needed on this platform. (Pre-3.0 `model_invocable` lists are read but ignored.) See [protocol § Rule resolution order](../../skills/preflight/protocol.md#rule-resolution-order).
+The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked slash commands; **persist** runs automatically at turn end (no command). Nothing fires on session start, so no call-source detection is needed on this platform.

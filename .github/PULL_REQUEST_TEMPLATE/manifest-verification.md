@@ -6,19 +6,19 @@ Use this template when reporting end-to-end behavioral verification of one of fl
 
 **AI tool**: <Codex CLI / Cursor / Gemini CLI / other>
 **Tool version**: <e.g., Codex CLI 0.42.1>
-**Flightdeck version**: <e.g., 1.2.0>
+**Flightdeck version**: <e.g., 3.0.0-alpha.5>
 **Test date**: YYYY-MM-DD
 
-## Scenarios from the release-gate spec
+## Scenarios
 
-The full scenario specs are in `flightdeck/archive/specs/2026-05-23-v1.0-release-gate.md`. For each scenario, mark the result:
+For each scenario, mark the result:
 
-- [ ] **S1 — Cold-start in a project with `flightdeck/`**: AI reads `cockpit.md` first, reconciles against git, executes the first `## Next` item.
-- [ ] **S2 — Bug + root cause → `incidents/`**: AI uses the incident template, banned root-cause language ("forgot" / "careless") absent, `status` frontmatter present.
-- [ ] **S3 — Ambiguous classification**: AI applies first-match-wins heuristic or asks user with structured options.
-- [ ] **S4 — Status + INDEX upkeep at landing**: AI writes `status:` frontmatter on each new/changed artifact and regenerates the affected folder's `INDEX.md` so it matches the files on disk.
-- [ ] **S5 — Review feedback without disposition**: AI keeps raw feedback in project-root `tmp/` and folds its disposition (adopt / reject / defer) into the reviewed spec's `## 评审纪要`; if unable to dispose, adds a hanging task to `cockpit.md`; refuses clean landing until acknowledged.
-- [ ] **S6 — Default-brainstorm trap**: AI <=1 brainstorm invocation, >=3 direct classifications.
+- [ ] **S1 — Cold-start in a project with `flightdeck/`**: running `/flightdeck:preflight`, the AI reads `cockpit.md` first, glances at git, and reports the first `## Next` item without starting work.
+- [ ] **S2 — Routing to knowledge**: a "why did X break?" prompt makes the AI walk `knowledge/<domain>/` and surface the matching `# ⚠` trap by its routing header — not a full-context dump.
+- [ ] **S3 — Pitfall capture**: after hitting a pitfall, the AI writes a `# ⚠ <title>` trap under `knowledge/<domain>/` with a routing header (SUMMARY / READ WHEN) and a root cause.
+- [ ] **S4 — Persist at turn end**: a turn that did real work rewrites `cockpit.md` to reflect now and makes one local commit; a pure-conversation turn commits nothing.
+- [ ] **S5 — walkaround audit**: `/flightdeck:walkaround` surfaces drift (cockpit vs reality, orphaned `work/`, duplicate traps, missing routing headers) read-only, and fixes nothing.
+- [ ] **S6 — Deckless launch**: in a directory with no `cockpit.md`, `/flightdeck:preflight` points to `/flightdeck:launch`, which seeds the skeleton (`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`).
 
 Mark each `[x]` if pass, `[!]` with note if partial, `[ ]` if fail (and explain).
 
@@ -38,13 +38,11 @@ If you found a manifest field that should be added/removed/changed to make the t
 
 ## What this PR proposes
 
-- [ ] Update the capability x tool matrix in `flightdeck/archive/specs/2026-05-23-v1.0-release-gate.md` to reflect verification results
+- [ ] Update the compatibility matrix in [`README.md`](../../README.md#compatibility) to reflect verification results (`⚠️ untested` → `✅ tested`)
 - [ ] (Optional) Patch the manifest based on findings
-- [ ] (Optional) Add a tool-specific incident to `flightdeck/incidents/` if a host-specific bug was found
 
 ## Checklist
 
-- [ ] I read the release-gate spec scenarios
-- [ ] I ran on a fresh subagent / fresh session (no carry-over context)
+- [ ] I ran on a fresh session (no carry-over context)
 - [ ] My evidence is reproducible from the manifest + a project with `flightdeck/`
 - [ ] I've not embedded secrets / credentials in transcripts
