@@ -13,10 +13,10 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 ## Next
 
 **cutover 收尾(剩余,按序)**:
-1. **知识路由头语义趟**:`knowledge/` 下 ~18 个文件迁移时被剥了 frontmatter,只剩 `# 标题`,缺 `SUMMARY`/`READ WHEN` 路由头 + 未按域归拢。逐个补路由头(`# title`/`# ⚠ title`/`# X checklist` + `SUMMARY:` + `READ WHEN:`,`RECHECK WHEN:`←旧 when_to_update)并按域归进 `knowledge/<域>/`。walkaround 第 4 审计(缺路由头)现在会全亮。
-2. **repo 清理(新形态零脚本/零 hook)**:删死脚本 `flightdeck_{index,conform,new,lint,init,lib}` + 其 tests(新 skill 零脚本依赖;留 `migrate`(throwaway 跑完可删)、`build_stamp`/`bump_version` 发版用);删 `hooks/`(新形态不注入、无机械 board-sync)+ `skills/_shared/bootstrap.md`;`skills/launch` 改成新形态(零脚本建 deck:cockpit/rules/uses/work/knowledge)或并入 preflight 的「无 deck」分支。
-3. **外环文档**:README/README.zh/CHANGELOG/MIGRATION/AGENTS.md/GEMINI.md/`docs/`/`scaffolds/full` 全是 3.0 描述,需改新形态(incident `outer-ring-docs-drift` 警的就是这条)。
-4. **plan #1 verify**(人读):micro-core/protocol/coverage-check + 两 SKILL 英文散文 tone+sense —— 你来读。
+1. ✓ **知识路由头语义趟(完成)**:`knowledge/` 21 文件**分流**——9 个活的(4 trap + 4 checklist + external-memory-borrowings)补了路由头(`# /# ⚠ /# X checklist` + SUMMARY + READ WHEN[+RECHECK],值取自旧 frontmatter);**12 个记 3.0 已删机械的(conform/sync/index/hooks/recorded-config/status 生命周期/cockpit AUTO/…)判过时,归冷** `~/.flightdeck/projects/flightdeck/archive/3.0-knowledge/`(项目 git 历史也留)。derive-listing recipe 已 dogfood 跑通。
+2. ✓ **repo 清理(完成,上轮)**:死脚本/hooks/_shared 已删,launch 改零脚本。
+3. **外环文档(剩)**:README/README.zh/CHANGELOG/MIGRATION/AGENTS.md/GEMINI.md/`scaffolds/full` 全是 3.0 描述,需改新形态(`outer-ring-docs-drift` trap 警的就是这条)。root `AGENTS.md` 现是孤儿(emit-agents-md 已删)。
+4. **plan #1 verify**(人读):新 skills 英文散文 tone+sense —— 你来读。
 
 ## 外审 triage(tmp/ds·claude·gpt,仅供参考——他们没拿到 walkaround、不知现状)
 

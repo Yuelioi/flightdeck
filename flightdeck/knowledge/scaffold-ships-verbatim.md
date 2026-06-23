@@ -1,4 +1,7 @@
-# scaffolds/full/ ships verbatim — keep it pristine
+# ⚠ scaffold ships verbatim
+SUMMARY: scaffolds/full/ ships verbatim to users — careless edits break first-time setup.
+READ WHEN: before editing scaffolds/full/ or the first-time-setup flow
+---
 
 ## Signature
 - symptom: `stray scratch files left in scaffolds/full/ get copied verbatim into every new user's deck`

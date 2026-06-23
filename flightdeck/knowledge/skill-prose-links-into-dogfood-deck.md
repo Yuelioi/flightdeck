@@ -1,4 +1,7 @@
-# shipped skill 散文不得相对链接进 dogfood deck（flightdeck/…）
+# ⚠ skill prose links into the dogfood deck
+SUMMARY: A markdown link / relative path inside skills/ prose can resolve into this dogfood deck instead of the user's — and it ships to every user.
+READ WHEN: before adding a markdown link or relative path inside any skills/ prose
+---
 
 ## Signature
 - symptom: `skill 散文里的相对链接 ../../docs/why-no-hooks.md 从 skills/preflight/ 解析到仓库根 docs/（无此文件）；真正的文件在 dogfood deck flightdeck/docs/ 下`

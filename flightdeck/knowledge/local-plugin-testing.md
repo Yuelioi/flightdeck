@@ -1,4 +1,7 @@
-# Local plugin testing checklist
+# local plugin testing checklist
+SUMMARY: How to locally test an unpublished flightdeck build / sync the working tree into the plugin cache.
+READ WHEN: before locally testing an unpublished build / syncing the working tree into the plugin cache
+---
 
 ## When to follow this
 

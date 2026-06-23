@@ -1,4 +1,7 @@
-# test_hooks 全军覆没：PATH 上 WSL bash 遮蔽 Git Bash
+# ⚠ WSL bash shadows Git Bash in tests
+SUMMARY: On Windows, WSL bash shadowing Git Bash makes bash-invoked tests fail with returncode 127 — environment noise, not a real failure.
+READ WHEN: when scripts/tests that bash-invoke hooks fail with returncode 127
+---
 
 ## Signature
 - symptom: `/bin/bash: E:projectstoolsflightdeckhookssession-start: No such file or directory`

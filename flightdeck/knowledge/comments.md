@@ -1,4 +1,7 @@
-# Comments Playbook
+# comments checklist
+SUMMARY: Conventions for writing and editing source-code comments.
+READ WHEN: before writing or editing any source-code comment
+---
 
 写/改任何源码注释**前置**读这份. 这是项目无关的通用规范.
 

@@ -1,4 +1,8 @@
-# 外圈人类文档随协议变更静默漂移
+# ⚠ outer-ring docs drift
+SUMMARY: Change skills/ protocol semantics without syncing README / docs / adapters and the outer ring silently drifts.
+READ WHEN: after changing skills/ protocol semantics, the folder model, or ritual behaviour — deciding doc-sync scope
+RECHECK WHEN: the set of outer-ring docs (README / adapters / scaffolds) that mirror protocol changes
+---
 
 ## Signature
 - symptom: README/docs/.github 等人类叙事文档描述的结构或机制在 skills/ 协议里已不存在（如 debriefs/、根 INDEX.md、sketches/、`## Next session`、checklist→rules 晋升级）

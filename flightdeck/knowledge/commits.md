@@ -1,4 +1,7 @@
-# Commits Playbook
+# commits checklist
+SUMMARY: How to write commit messages, stage files, and prepare a PR.
+READ WHEN: before writing a commit message / staging files / preparing a PR
+---
 
 写 commit / 整理提交时**前置**读这份.
 
