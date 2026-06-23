@@ -1,3 +1,11 @@
+---
+status: done
+summary: Author the new preflight skill's two-layer protocol — a ≤3000-char always-loaded micro-core plus an on-demand deep protocol.md — in English, validated against the redesign spec (budget/coverage/overlap/section-mapping all green) with a 3.0→new coverage check proving zero load-bearing rule dropped without a spec 取舍. Drafts land in work/ai-native-redesign/, unwired (wiring = later sub-plan #4).
+last_updated: 2026-06-24
+implements: specs/2026-06-23-ai-native-redesign.md
+verify: human-read work/ai-native-redesign/{micro-core,protocol,coverage-check}.md English prose for tone + sense before wiring into skills/preflight/ (sub-plan #4)
+---
+
 # AI-native Protocol Authoring Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
