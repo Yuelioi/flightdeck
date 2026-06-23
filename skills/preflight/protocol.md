@@ -20,8 +20,9 @@ At turn end, in order:
   `knowledge/<domain>/` with a routing header. Nothing passes → write nothing.
 - **Efforts** — if a `work/<effort>/` finished this turn, move it out to
   `~/.flightdeck/projects/<x>/archive/` (location is state). "Done" is a judgement:
-  **propose** it when the work reads as finished — don't silently archive something
-  the user still treats as open. Otherwise leave it in `work/`.
+  when the work reads as finished, **say in your turn report that you're archiving it**
+  (so the user can object next turn) rather than archiving silently. Otherwise leave
+  it in `work/`.
 - **cockpit.md** — rewrite it to reflect now: focus + next, the in-flight efforts,
   open questions. Keep it small.
 - **commit** — `git commit` the project repo with a one-line summary of the turn's
@@ -29,8 +30,9 @@ At turn end, in order:
   per-turn commits is the accepted price of zero-loss — squash later if you care). If
   the turn moved the board but produced no new knowledge, the cockpit rewrite is
   itself a real change → commit it ("nothing new to save, board current"). Only a turn
-  that changed *nothing* commits nothing. No git repo → no commit and no zero-loss;
-  that's why launch points you to `git init`.
+  that changed *nothing* commits nothing. No git repo → no commit and no zero-loss:
+  say so once ("no git repo — zero-loss not active") so the user isn't assuming a
+  guarantee that isn't on; that's why launch points you to `git init`.
 
 ## Write gate
 
@@ -55,7 +57,8 @@ it belongs to. No fingerprint, no recurrence counter.
   second copy. *Do* update it in place if your understanding changed (new root cause,
   better workaround) — "do not rewrite" means no duplicate, not frozen content.
 - Once the fix is stable: crystallize it into a same-domain checklist
-  (`# <X> checklist`), then delete the trap (git keeps the history). Location encodes
+  (`# <X> checklist`), then delete the trap — git keeps the history for a project
+  trap; a cold trap in `~/.flightdeck` just goes (unversioned). Location encodes
   scope, not count.
 
 ## uses.md shadowing
@@ -102,11 +105,11 @@ it, otherwise any grep; this is one way, not a fixed command):
 rg --no-heading -N -g '*.md' '^(# |SUMMARY:|READ WHEN:)' AREA/
 ```
 
-It prints, per file, `path:line` for the title + the labelled header lines — a flat
-directory to scan. It catches the `READ WHEN:` label but not keywords that spill onto
-`-` bullet lines, so **keep `READ WHEN` to one line of keywords where you can**; when
-a header you care about has bullets, read that file's block directly (the lines above
-its first `---` — cheap, it's the top of the file). The recipe is a starting glance,
-not a contract.
+It prints, per file, `path:line` for the title + labelled header lines — a flat
+directory to scan. It surfaces the `READ WHEN:` label but not keywords on its `-`
+bullet lines; for the full header (bullets included) read the file's block — the
+lines above its first `---`, i.e. the top of the file, so it's cheap. The recipe is
+a first glance, not a contract, and it doesn't constrain the header format — bullets
+under `READ WHEN:` are fine.
 
 It is **never written to disk** — transient, zero-maintenance, zero-drift.

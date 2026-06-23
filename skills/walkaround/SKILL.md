@@ -27,19 +27,20 @@ net: a second pair of eyes reading what's actually there, not a schema validator
 3. **Duplicate traps.** Two `# ⚠ <title>` trap files describing the same pitfall (same
    domain, near-identical title/symptom) → flag; recurrence should re-read the existing
    trap, not spawn a copy (see [../preflight/protocol.md](../preflight/protocol.md) § Incidents).
-4. **Missing routing headers.** Every file under `knowledge/` must open with a routing
-   header (`# <title>` + `SUMMARY:` + `READ WHEN:`, ended by `---`). Flag any knowledge
-   file missing the header or the `---` terminator — it won't route.
+4. **Missing / empty routing headers.** Every knowledge file — local `knowledge/`
+   **and any `uses`-subscribed global file** — must open with a routing header
+   (`# <title>` + `SUMMARY:` + `READ WHEN:`, ended by `---`). Flag (`⚠`) any missing
+   the header or the `---` terminator (won't route); flag (`i`) a header whose
+   `SUMMARY:` or `READ WHEN:` is present but empty (routes to nothing useful).
 5. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<x>/archive/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state — leaving it
    in `work/` says "still live").
-6. **uses.md health.** For each line in `uses.md`: flag a subscribed
-   `~/.flightdeck/…` path that's missing or renamed (dead subscription, `⚠`); note
-   (`i`) a local `knowledge/` file that shadows a global one (replace is intended —
-   surface it so it's deliberate, not accidental); flag (`i`) a subscription whose
-   target was already vendored into the repo (the copy + the live subscription now
-   double up).
+6. **uses.md health.** For each line in `uses.md`: flag (`⚠`) a subscribed
+   `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) a
+   subscription whose target was already vendored into the repo (the copy + the live
+   subscription now double up). Local-shadows-global is by-design, not drift — don't
+   flag it.
 
 ## Output
 
