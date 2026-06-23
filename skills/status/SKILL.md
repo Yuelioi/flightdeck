@@ -72,18 +72,13 @@ When the user approves / signs off:
 
    `verify` is a **status add-on marker, not a new status** — the full per-kind semantics (present = owes verification, absent = verified, no `verify: failed` value, non-blocking re-surfacing every preflight) live in [protocol § verify field](../preflight/protocol.md#verify--the-verification-marker) and [protocol § Non-blocking verification](../preflight/protocol.md#non-blocking-verification). **The WHEN — when `done` is offered and confirmed — is unchanged.**
 
-2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unarchived). Whether to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it evaluates `--archivable` deterministically — see [exit-ritual § Land Routine](../preflight/exit-ritual.md#land-routine)). Emit the land-readiness nudge (Step 7) so the user / model knows landing is available.
+2. **Do not archive.** status leaves the artifact `done` in its source folder (done-but-unarchived). Whether to move it into `archive/` is `/flightdeck:landing`'s smart, cross-reference-aware judgment (it evaluates `--archivable` deterministically — see [exit-ritual § Land Routine](../preflight/exit-ritual.md#land-routine)). `done`-not-archived is the **normal staged state** — it waits in the staging area (cockpit `## Staged`) until the user opens the land valve; status emits no land nudge (Step 7).
 
-## Step 7 — land-readiness (signal 1)
+## Step 7 — `done` is a staged state (no land trigger)
 
-If this invocation flipped an artifact to `done`, run the shared [Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) — signal 1 is satisfied, so:
+Flipping an artifact to `done` does **not** trigger landing. `done`-not-archived is the **normal staged state**: it sits in the staging area (cockpit `## Staged (awaiting land)`) until the user opens the land valve (`/flightdeck:landing`). `status` does no debounce, no nudge, no auto-land — it flips `done` (+ regen `## In Progress`) and stops. A no-op transition emits nothing.
 
-- **Default (end-of-turn debounce):** queue a single landing at end-of-turn (see [exit-ritual § Land-readiness check](../preflight/exit-ritual.md#land-readiness-check) and [protocol § Rule resolution order](../preflight/protocol.md#rule-resolution-order)). If multiple `done` flips happen in the same turn, the debounce collapses them into one landing run — not one per flip.
-- **Degraded by a deck `### Rules` nudge-on-done entry:** instead of auto-running landing, emit a one-line nudge only ("looks like a landing point — run `/flightdeck:landing`?").
-
-Edge-triggered by the flip itself; a no-op transition emits nothing (no nag).
-
-**signal 3 (end-of-turn soft-landing) does NOT go through `status`.** It is the AI's own end-of-turn self-invoke when a knowledge increment exists (see [exit-ritual § Land-readiness](../preflight/exit-ritual.md#land-readiness-check)); `status` only emits **signal 1** (this flip → `done`). When soft-landing needs to judge a state-only "actual change", it **reuses this skill's `## In Progress` diff logic** (Step 5a — re-derive from the current `status: active` set), not a new diff.
+**Stage (the automatic turn-end persist) does NOT go through `status`.** Every execution turn auto-stages — classify knowledge + board-sync + local commit (see [exit-ritual § Stage](../preflight/exit-ritual.md#stage--turn-end-persist--board-sync)); `status` is only the mid-flight single-artifact flip. When stage judges a state-only "actual change", it **reuses this skill's `## In Progress` diff logic** (Step 5a — re-derive from the current `status: active` set), not a new diff.
 
 ## Don't do
 
