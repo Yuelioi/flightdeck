@@ -28,7 +28,8 @@ last_updated: 2026-06-23
 5. **自动 stale 全砍。** 无机械 stale flip;`last_updated`/`when_to_update` 只是 AI 加载时读的提示,当场自判「可能过期、验一下」。persist 不再做路径交集。
 6. **frontmatter 全砍 → 零 schema(deck-wide)。** 第 5 条砍掉 auto-stale 后,保 frontmatter 的理由只剩路由,而路由可由首行自述 + grep 替代 → 整个新 deck **零 frontmatter**。
    - **约定**:每个 knowledge 文件首行 = `# <标题> — <何时读>`;trap 文件首行 `⚠ trap: …`;body 自带领域关键词。
-   - **路由** = grep 文件名 + 首行 + body;**新鲜度** = AI 读 git mtime + body 自判。`when_to_read`→首行散文,`applies_to`/`last_updated`/`when_to_update`/`status` 全砍。
+   - **路由** = grep 文件名 + 首行 + body;**新鲜度** = AI 看**文件系统 mtime**(走树 `ls -l` 时顺带,不走 git)+ body 自判。`when_to_read`→首行散文,`applies_to`/`last_updated`/`when_to_update`/`status` 全砍。
+     - **为何 mtime 不走 git**:① 母库不版本化 → 那儿没 git 可问,mtime 是唯一信号 → **一套机制管两层**;② 路由已是 `ls` 走树,mtime 顺路白嫖,省每文件 `git log`;③ 新鲜度只是软提示,不需 git 级精度。**坑**:mtime 在 clone/checkout/cp/同步后重置——但单机为主 + 软提示 + body 兜底,不咬人。
    - **大赢**:无 schema → 痛点 #2(改了难迁移)基本蒸发;迁移 = 机械剥 frontmatter + 合并出首行。
    - **承重约定**:首行自述必须紧致(它是唯一路由锚)→ 这条进 `behave`。**代价**:grep 无 tag,同义词可能漏(赌:域文件夹 + AI 走树 + 读首行兜得住)。
 
@@ -39,7 +40,7 @@ last_updated: 2026-06-23
 - **微核心(~1 页,进 `CLAUDE.md` 每会话常载)**:两动词(resume/persist)· 文件结构图 · 不变量(位置=状态 · 首行自述 · 写门 · 热层每轮 commit)· 一句「深层见 `behave/flightdeck.md`」。
 - **深层(`~/.flightdeck/behave/flightdeck.md`,按需读)**:write-gate skip 清单细节 · incident 母库↔项目阶梯 · uses 订阅+本地覆盖合并 · vendoring · 派生目录逃生口。
 
-骨架 7 节:① 一句话+两动词 ② 文件结构 ③ 位置即状态 ④ 知识约定(首行/⚠trap/按域;grep+走树;git+body 判新鲜)⑤ 写门 ⑥ 零丢失 ⑦ edge。**①–③ + ⑥精要 → 核心;④–⑤细节 + ⑦ → 深层。** 剩:authoring(英文发布面)。
+骨架 7 节:① 一句话+两动词 ② 文件结构 ③ 位置即状态 ④ 知识约定(首行/⚠trap/按域;grep+走树;mtime+body 判新鲜)⑤ 写门 ⑥ 零丢失 ⑦ edge。**①–③ + ⑥精要 → 核心;④–⑤细节 + ⑦ → 深层。** 剩:authoring(英文发布面)。
 
 ## 动机:一个根,三个痛
 
@@ -84,7 +85,7 @@ last_updated: 2026-06-23
 └── know/                       项目专属知识(树状嵌套,含按域共置的坑)
 ```
 
-无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · **无 frontmatter schema(deck-wide)**——首行自述(`# <标题> — <何时读>`)+ 文件名 + 内容 grep 替路由,git mtime 替 `last_updated` · 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
+无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · **无 frontmatter schema(deck-wide)**——首行自述(`# <标题> — <何时读>`)+ 文件名 + 内容 grep 替路由,文件系统 mtime(走树 `ls` 顺带)替 `last_updated` · 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
 
 ### 1. 两个动词替八个 skill
 - **resume**(原 preflight):读 `state.md`(+ 解析 `uses.md`),按需走树开相关篇。默认**只载 state.md**,其余惰性。
