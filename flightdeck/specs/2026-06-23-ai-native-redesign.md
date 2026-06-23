@@ -21,7 +21,7 @@ last_updated: 2026-06-23
 ### 本周期锤定(2026-06-23,6 条)
 
 1. **砍常驻 INDEX → grep + 走树。** resume 默认只读 `state.md`;任务起时 grep **文件名 + 首行自述 + body**(无 frontmatter 可 grep,见第 6 条)+ `ls` 走树按需开篇。成本 ∝ 命中,守住 token 红线;无派生副本 = 无漂移。超大 area 才脚本派生一行目录(YAGNI 逃生口)。
-2. **全砍 status 机 → 位置替状态。** 文件「在不在项目里」= 活不活。`work/` 里有 = active,挪走 = done;knowledge 同理。status 字段消失,生命周期长链随之拆掉。
+2. **全砍 status 机 → 位置替状态(仅 work)。** `work/` 里有 = active,挪走 = done。status 字段消失,生命周期长链随之拆掉。(**knowledge 不套此规** —— 常驻,present=有效/删除=死,见第二轮锤定 #3。)
 3. **冷存储全进母库。** 项目 `flightdeck/` 只剩热的(state/uses/work/behave/know);`~/.flightdeck/` 持 `know/`(跨项目 + first-seen incident 暂存池)+ `projects/<x>/`(本项目归档 + idea 池)。
    - **incident 晋升阶梯(位置即复发计数)**:第一次撞 → 进母库 `know/`(还不知是否本项目专属,先 park 跨项目池);再撞 → 检索母库被提醒;**第三次 → 回项目**(证明本项目复发,落本地)。替掉 `recurrences` 计数器 + promotion gate;补救稳定后结晶进 `behave`。
 4. **母库不版本化。** `~/.flightdeck/` 是普通全局目录,不进 git。**零丢失红线只覆盖热层**(项目 repo,persist 每轮 commit);冷层无损兜底、不做硬保证(错题大不了重记、归档 git 大半已有且极少翻)。连带出局:**git/undo 载体、多 agent 并发、hook 强制 commit**——单机用户为主,undo 场景 99% 不存在。
@@ -41,6 +41,35 @@ last_updated: 2026-06-23
 - **深层(`~/.flightdeck/behave/flightdeck.md`,按需读)**:write-gate skip 清单细节 · incident 母库↔项目阶梯 · uses 订阅+本地覆盖合并 · vendoring · 派生目录逃生口。
 
 骨架 7 节:① 一句话+两动词 ② 文件结构 ③ 位置即状态 ④ 知识约定(首行/⚠trap/按域;grep+走树;mtime+body 判新鲜)⑤ 写门 ⑥ 零丢失 ⑦ edge。**①–③ + ⑥精要 → 核心;④–⑤细节 + ⑦ → 深层。** 剩:authoring(英文发布面)。
+
+### 第二轮锤定(2026-06-23 · 回应外审,关掉最后开口)
+
+外审(ds/claude/gpt)收敛出几个我上轮误标「已定」的真开口——撤回「设计层已无悬而未决」,逐个锤死:
+
+1. **uses.md 格式 + 合并 = 纯列表 + 本地全替(不 merge)。**
+   - 格式:每行一条 `~/.flightdeck/` 下的相对路径;目录条 = 订阅整棵子树;`#` 注释;无 YAML。例:`behave/commits.md` / `know/auth/`。
+   - resume 读 uses.md → 这些全局文件/目录并入路由树(同本地 know/behave)。
+   - **同 relpath 冲突 = 本地整文件 shadow 全局(replace,不 merge)。** 砍掉「AI 合并/扩展」——那正是外审戳的「又造两个来源 + 运行时合并 = 漂移没消除」。要扩展就自己读两边,但**文件级规则是本地覆盖** → 确定性、零维护、两次 resume 同结果。
+   - 全局文件失踪/改名:resume 出一行软警告,不 fail。
+
+2. **incident 阶梯砍计数,改「按 scope 定居 + grep 去重 + 判断结晶」。**
+   - 外审对:三次回项目 = 没用字段的状态机,母库不版本化 → 计数无处存、跨机器重置。
+   - 新规:撞坑 → 写 `⚠ trap:`,**按 scope 落位**(本项目专属 → 项目 `know/<域>/`;通用教训 → 全局 `know/`;AI 写时判)。复发 = 再撞 grep 到既有 trap → **读了不重写**;补救稳定 → 判断结晶进 `behave/`。
+   - **无计数、无「第三次」。** 位置编码 **scope(项目/通用)**,不是次数——scope 稳定,次数不稳。
+
+3. **「位置即状态」收窄到 *work*,不套知识。**
+   - gpt 对:work 靠在不在 `work/` 表 active/done 成立;know/behave **常驻**,「在项目里 ≠ 活」。
+   - 精确版:**work = 位置即状态(active/done);knowledge = 常驻(present=有效 / 删除=死),本就无状态。** 知识不「完成」只「失效被删」;obsolete 知识 = 删(不 drain archive——知识不是 done 是 wrong)。
+
+4. **write-gate 洞补死(我草稿 bug)。** 砍宽到没边的「informs a decision」;微核心给**完整可操作**门:正面 =「只写**会改你以后怎么做**、或**以后要再查**的」;skip 短清单进核心(一次性日志 / build 只是过了 / 探索没结论 / 重跑没新增),完整例子留深层。
+
+5. **「Git is the history」措辞改(我草稿 bug)。** done 挪进**不版本化**母库,archive 不在 git 里。改:git 是**项目 repo(热层)**的历史;归档进冷存储**留着但不在 git**,项目 git log 只记「它离开了」。
+
+6. **零丢失红线 = 精确化,不松绑。** 红线保的「上下文」一直 = **恢复载荷**(resume 续上所需:state + work + 项目 know/behave,全热层、全在项目 git、每轮 commit)。冷存储(归档/idea/通用 trap)**从来不是恢复载荷**,丢了不影响 resume。故:**恢复载荷零丢失完整保住;冷存储 = 留存但不版本化,显式排除在零丢失外。**
+
+**头号风险(记入取舍,不当已解决)**:gpt 戳的本质 —— 砍机械(schema/INDEX/sync/status 机/walkaround)的同时,把 stale/路由/复发/promote/uses/write-gate 全压到 **AI 判断 + 约定**;而**机械自纠偏(walkaround 抓漂移),约定+判断不会**。AI 哪轮偷懒 → 质量静默退化,兜底只有 preflight/resume 重读 + 人注意到。这是「机械保证→信任 AI」赌注的代价面,**认,列头号风险**。
+
+**术语统一**:① **母库**只指整棵 `~/.flightdeck/`;其子目录叫**冷存储 `projects/<x>/`**(免「母库套母库」)。② behave/know 出现处标**全局/项目**限定。③ **温度 = 版本化与否**:热层 = 项目 repo(git);冷层 = 全局 deck(无 git)。全局 behave/know 是**冷存(无版本)但活查(经 uses 订阅)**——温度 ≠ 活跃度。
 
 ## 动机:一个根,三个痛
 
@@ -63,7 +92,9 @@ last_updated: 2026-06-23
 
 ---
 
-## 已定的设计
+## 已定的设计(§0–8 = 历史推演底稿)
+
+> ⚠ **§0–8 是更早的推演底稿,部分已被「本周期锤定」+「第二轮锤定」+「变动指南」覆盖**(incident 阶梯计数、knowledge 套位置即状态、母库术语等)。**终稿真相一律以上方那三节为准**;此处只读流程脉络,勿当现行规范引用。定档时这些会被收敛/删除。
 
 ### 0. 文件结构(全貌)
 
@@ -153,7 +184,9 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 ---
 
 ## 接受的取舍
-- 零丢失:机械保证 → 信任 AI 维护 state + commit。**红线只保热层**(项目 repo 每轮 commit);冷层尽力而为。
+- **【头号风险】机械自纠偏 → 约定+AI 自觉无自纠偏。** 砍掉的机械(schema/INDEX/sync/status 机/walkaround)会自动抓漂移;新形态把 stale/路由/复发/promote/uses/write-gate 全压到 AI 判断 + 约定,**没有自纠偏兜底**——AI 哪轮偷懒,质量静默退化,只靠 preflight/resume 重读 + 人注意到。这是「机械保证→信任 AI」的代价面,认。
+- 零丢失:机械保证 → 信任 AI 维护 state + commit。**保的是恢复载荷**(state+work+项目 know/behave,全热层、全在 git、每轮 commit);冷存储(归档/idea/通用 trap)不是恢复载荷,显式排除、不版本化、尽力而为。
+- 跨项目本地覆盖 = **本地整文件 shadow 全局(replace,不 merge)**;要扩展自己读两边。不引入运行时合并(那会把 sync 漂移换成合并漂移)。
 - repo 自包含性丢失(引用依赖机器 `~/.flightdeck`,且冷存储也在母库);要可移植/可 ship 时,vendoring 作为「引用快照成拷贝」按需加回。
 - **冷层(归档/idea 池/first-seen incident)无版本、无 undo、不跨机器** —— 单机为主,错题可重记、归档 git 大半已有且极少翻,只当万一兜底。
 - 语义路由比手写 `when_to_read` 略粗(赌:AI 看自描述文件名 + 走树足以判断)。
@@ -212,13 +245,13 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 - **语义(AI 一趟)**:① 每个知识文件**合成首行** `# <title> — <when_to_read>`(从旧 frontmatter title+when_to_read 拼,AI 润);② `cockpit.md`→`state.md` 重塑(In Progress/Focus/Next 搬进;Staged/AUTO 区丢;Pending/Hanging→「悬而未决」)。
 - **纪律**:破坏性(mv/rm)→ 先 `--check` 干跑列清单 + 迁移前留一个 git commit,跑完人工扫一眼。**一次性,跑完即弃**(3.0 布局消失后脚本无用)。
 
-## 还要锤(未定)
+## 待执行(设计已定,非设计抉择)
 - **从 3.0 deck 一次性迁到新形态**:映射表 + **脚本形态已定**(见上「迁移脚本形态」);剩**写脚本 + 跑**(等新形态实体存在后才有意义)。
 - ~~**派生目录触发阈值**~~ **已定**:无数字阈值、不落盘。它是 resume **走树时的按需读工具**——AI 判断「`ls` + 文件名不足以路由」时跑 `derive-listing <area>`(grep 每文件首行,打印一次性目录到上下文),**transient,不存文件** → 零维护、零漂移。触发 = AI 判断,不是计数。
 - **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
 - **极简协议正文 authoring**(形态已定=两层)——**微核心英文初稿已草拟**(见下「协议微核心初稿」);剩:深层(`behave/flightdeck.md`)authoring + 与今天 ~169K 散文对照查漏 + 定稿润色。**发布面 = 英文**。
 
-> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发、新鲜度载体(→ mtime)、产品形态(→ doc-first)、协议形态(→ 两层)、派生目录阈值、迁移脚本形态 —— 见上各节。**设计层已无悬而未决的抉择。**
+> 已消解(2026-06-23):INDEX 去留、status 机边界、自动 stale 范围、frontmatter(→ 零 schema)、git/undo 载体、零丢失机械兜底、多 agent 并发、新鲜度载体(→ mtime)、产品形态(→ doc-first)、协议形态(→ 两层)、派生目录阈值、迁移脚本形态;**第二轮**再关:uses 格式+合并、incident 阶梯、位置即状态对知识、write-gate 洞、Git-is-history、零丢失措辞 —— 见各节。剩开的:深层协议 authoring 的具体措辞 + 产品化细节(缓)+ 头号风险(认了、非待决)。
 
 ## 提议:协议微核心初稿(英文,进 `CLAUDE.md`)
 
@@ -228,41 +261,48 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 ## flightdeck (micro-core)
 
 Two automatic verbs:
-- **resume** (session start): read `flightdeck/state.md`; then walk the tree
-  (`ls` + grep) for whatever the task needs. Default load = state.md only;
-  everything else is lazy.
+- **resume** (session start): read `flightdeck/state.md` and `uses.md`; then
+  walk the tree (`ls` + grep) for whatever the task needs. Default load =
+  state.md only; everything else is lazy.
 - **persist** (turn end): rewrite `state.md`, write knowledge in place,
-  `git commit`. "Done" = move the effort out of `work/` into
-  `~/.flightdeck/projects/<project>/archive/`. Git is the history.
+  `git commit` the project repo. A **work** effort is done when you move it
+  out of `work/` into the cold store; the project's git log records that it
+  left.
 
 Layout:
-    <project>/flightdeck/
+    <project>/flightdeck/            warm tier — git-tracked, committed each turn
       state.md   now — in-flight efforts · focus + next · open questions
                  (rewritten each turn, kept small)
-      uses.md    which global files this project subscribes to
+      uses.md    one global path per line that this project subscribes to
       work/      in-flight multi-step efforts (one file or one folder each)
       behave/    conventions to obey on matching tasks
       know/      knowledge to consult (nested by domain)
-    ~/.flightdeck/   (plain global directory, not under git)
-      behave/  know/      cross-project; first-seen incidents land in know/
-      projects/<x>/       this project's cold store: archive/ + ideas/
+    ~/.flightdeck/                   cold tier — plain global dir, NOT git
+      behave/                        cross-project conventions (consulted via uses)
+      know/                          cross-project knowledge; general traps live here
+      projects/<x>/                  this project's cold store: archive/ + ideas/
 
 Invariants:
-- **Location is state.** In `work/` = active; moved to the global store = done.
-  There is no status field.
-- **First-line self-description.** Every knowledge file opens with
-  `# <title> — <when to read>`; a pitfall opens with `⚠ trap: …`. Routing =
-  grep filename / first line / body + walk the tree. Freshness = glance at the
-  file's mtime (`ls -l`, free while walking) plus the body, and judge.
-- **Write gate.** Record only what changes future behavior, informs a decision,
-  or gets referenced again. Skip one-off logs, green-build noise, and
-  dead-end exploration that concluded nothing.
-- **Zero-loss (warm tier).** persist commits the project repo every turn;
-  `state.md` must answer: what you're doing / where you are / next step /
-  open questions.
+- **Location is state — for work only.** In `work/` = active; moved to the cold
+  store = done. There is no status field. Knowledge (`behave/` `know/`) is
+  *resident*, not work: present = valid, deleted = dead; it has no status.
+- **First-line self-description** (the one lightweight convention — no YAML
+  schema). Every knowledge file opens with `# <title> — <when to read>`; a
+  pitfall opens with `⚠ trap: …`. Routing = grep filename / first line / body +
+  walk the tree. Freshness = glance at the file's mtime (`ls -l`, free while
+  walking) plus the body, and judge; in the warm tier `git log` is the precise
+  fallback when mtime looks reset.
+- **Write gate.** Record only what will change how you act later, or that you
+  will look up again. Skip: one-off logs; a build that merely passed;
+  exploration that concluded nothing; a re-run that added nothing.
+- **Zero-loss covers the recovery payload** (state + work + project know/behave —
+  all warm, all in git): persist commits the project repo every turn, and
+  `state.md` must answer what you're doing / where you are / next step / open
+  questions. The cold store is kept but unversioned — out of the guarantee.
 
-Depth (read on demand): `~/.flightdeck/behave/flightdeck.md` — write-gate skip
-list, incident master↔project ladder, uses-merge, vendoring, derived-listing.
+Depth (read on demand): `~/.flightdeck/behave/flightdeck.md` — write-gate
+examples, incident scope+crystallize rule, uses shadowing, vendoring,
+derived-listing.
 ```
 
 ## 原理自洽性自检
