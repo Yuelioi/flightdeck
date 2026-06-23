@@ -1,8 +1,8 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: plan 3 执行完（stage/land 模型 6 面一次改完，6 commits）— done+verify，staged 待 land
+Updated: 2026-06-23 · 月离 · Stage: brainstorming「AI-native 重设」（设计草案已落 spec，边锤边填）— plan 3 仍 staged 待 land
 
-Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1·2·3 done；plan 3 staged 待 land → 一 land 即 graduate spec → docs/）
+Focus: AI-native 重设 brainstorm（少结构·多信任 AI）→ `specs/2026-06-23-ai-native-redesign.md`；stage/land plan 3 暂 parked（staged 待 land）
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
@@ -10,6 +10,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
+- [2026-06-23-ai-native-redesign.md](specs/2026-06-23-ai-native-redesign.md) — 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendori…
 <!-- /AUTO -->
 
 ## Staged (awaiting land)
@@ -21,7 +22,8 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
+- **继续锤 AI-native 重设** — 下一段「零丢失怎么不靠 AUTO 区还保住」；填 spec「还要锤」清单(git/undo 载体、检索、多 agent 并发、3.0→新形态一次性迁移、极简协议、产品化去留)。brainstorm 进行中 → `specs/2026-06-23-ai-native-redesign.md`。
+- （**parked**，focus 已切走）**review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
 ## Key Context
