@@ -1,6 +1,6 @@
 ---
 status: active
-summary: 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendoring,位置替状态+冷存储进母库(不版本化)。设计进行中
+summary: 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendoring,位置替状态+冷存储进母库(不版本化)+frontmatter 全砍(零 schema,首行自述替路由)。设计进行中
 last_updated: 2026-06-23
 ---
 
@@ -15,10 +15,10 @@ last_updated: 2026-06-23
 这是对下文早期草案的**修正,以此为准**(下文「无 frontmatter schema / when_to_read 降级成首行 / 砍派生目录」等早期判断被本节覆盖):
 
 - **目录结构 = 新的**:`state.md` + `uses.md` + `work/` + `behave/`(域嵌套)+ `know/`(按域共置、坑带 ⚠)。沿用下文。
-- **frontmatter = 保留旧版的路由+新鲜度字段**:`when_to_read` / `applies_to` / `last_updated` / `when_to_update` 留着(路由资产保住,用户投资过的)。**但 `status` 字段砍掉**——见下「位置替状态」。
+- **frontmatter = 全砍(deck-wide 无 schema)**:这是对 pivot「保留旧版 frontmatter」的**反转**——auto-stale 一砍,保 frontmatter 只剩路由价值,而路由由**首行自述 + grep** 替代。knowledge 不带 frontmatter;`when_to_read` 降级成首行散文,`applies_to`/`last_updated`/`when_to_update`/`status` 全砍。详第 6 条。
 - **生命周期 = 砍大部分**:status 机 · idea→active→done→archive→graduate→promotion 链 · stage/land 两段 · conform/迁移 · sync 子系统 —— 全砍,只留最小(知识能写/能读 + AI 自判新鲜度)。
 
-### 本周期锤定(2026-06-23,5 条)
+### 本周期锤定(2026-06-23,6 条)
 
 1. **砍常驻 INDEX → grep + 走树。** resume 默认只读 `state.md`;任务起时 grep 文件头 `applies_to`/`when_to_read` + `ls` 走树按需开篇。成本 ∝ 命中,守住 token 红线;无派生副本 = 无漂移。超大 area 才脚本派生一行目录(YAGNI 逃生口)。
 2. **全砍 status 机 → 位置替状态。** 文件「在不在项目里」= 活不活。`work/` 里有 = active,挪走 = done;knowledge 同理。status 字段消失,生命周期长链随之拆掉。
@@ -26,6 +26,11 @@ last_updated: 2026-06-23
    - **incident 晋升阶梯(位置即复发计数)**:第一次撞 → 进母库 `know/`(还不知是否本项目专属,先 park 跨项目池);再撞 → 检索母库被提醒;**第三次 → 回项目**(证明本项目复发,落本地)。替掉 `recurrences` 计数器 + promotion gate;补救稳定后结晶进 `behave`。
 4. **母库不版本化。** `~/.flightdeck/` 是普通全局目录,不进 git。**零丢失红线只覆盖热层**(项目 repo,persist 每轮 commit);冷层无损兜底、不做硬保证(错题大不了重记、归档 git 大半已有且极少翻)。连带出局:**git/undo 载体、多 agent 并发、hook 强制 commit**——单机用户为主,undo 场景 99% 不存在。
 5. **自动 stale 全砍。** 无机械 stale flip;`last_updated`/`when_to_update` 只是 AI 加载时读的提示,当场自判「可能过期、验一下」。persist 不再做路径交集。
+6. **frontmatter 全砍 → 零 schema(deck-wide)。** 第 5 条砍掉 auto-stale 后,保 frontmatter 的理由只剩路由,而路由可由首行自述 + grep 替代 → 整个新 deck **零 frontmatter**。
+   - **约定**:每个 knowledge 文件首行 = `# <标题> — <何时读>`;trap 文件首行 `⚠ trap: …`;body 自带领域关键词。
+   - **路由** = grep 文件名 + 首行 + body;**新鲜度** = AI 读 git mtime + body 自判。`when_to_read`→首行散文,`applies_to`/`last_updated`/`when_to_update`/`status` 全砍。
+   - **大赢**:无 schema → 痛点 #2(改了难迁移)基本蒸发;迁移 = 机械剥 frontmatter + 合并出首行。
+   - **承重约定**:首行自述必须紧致(它是唯一路由锚)→ 这条进 `behave`。**代价**:grep 无 tag,同义词可能漏(赌:域文件夹 + AI 走树 + 读首行兜得住)。
 
 ## 动机:一个根,三个痛
 
@@ -70,7 +75,7 @@ last_updated: 2026-06-23
 └── know/                       项目专属知识(树状嵌套,含按域共置的坑)
 ```
 
-无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · 保留 frontmatter 路由+新鲜度字段(`when_to_read`/`applies_to`/`last_updated`/`when_to_update`,**无 `status`**)· 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
+无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · **无 frontmatter schema(deck-wide)**——首行自述(`# <标题> — <何时读>`)+ 文件名 + 内容 grep 替路由,git mtime 替 `last_updated` · 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
 
 ### 1. 两个动词替八个 skill
 - **resume**(原 preflight):读 `state.md`(+ 解析 `uses.md`),按需走树开相关篇。默认**只载 state.md**,其余惰性。
@@ -127,13 +132,12 @@ last_updated: 2026-06-23
 - incident 去重/回归检测从机械(指纹/archive 扫描)→ AI 读了再写 + 判断 + 位置阶梯(母库↔项目)。
 
 ## 还要锤(未定)
-- **从 3.0 deck 一次性迁到新形态**(讽刺但必要):specs/plans→work、各 knowledge 文件夹→behave/know(按域)、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
-- **frontmatter 必留 vs 可松** 的精确字段表(`applies_to` 现在承重 = grep 路由全靠它 → 必填;`when_to_read`/`last_updated`/`when_to_update` 的强制度待定)。
-- **派生目录**约定(首行自述格式;何时触发)。
+- **从 3.0 deck 一次性迁到新形态**(讽刺但必要,但因零 schema 大大简化):specs/plans→work、各 knowledge 文件夹→behave/know(按域)+ 机械剥 frontmatter 合并出首行、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
+- **派生目录**约定(首行自述格式已定;剩「何时触发」的阈值)。
 - **产品化**去留(缓议:adapters/scaffold/发布面/可移植时 vendoring 按需加回)。
 - AI 读的那份**极简协议**正文(替今天 ~169K 字符散文)。
 
-> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
+> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
 
 ## 原理自洽性自检
 每个 scale 顾虑(母库、100 选 10、多半成品、superpowers、多级知识库、incident/checklist)修法都落回贯穿原理。「少结构」≠「零结构」——留**挣得起**的(订阅清单、work/ 一效一档、behave/know 两层、文件夹树)、砍**不挣钱**的(维护机器/派生副本/同步/迁移/校验)。
