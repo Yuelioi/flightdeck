@@ -1,58 +1,98 @@
 ---
 name: preflight
-description: Use when explicitly invoking the flightdeck entry ritual — mechanically refreshes vendored shared-knowledge from the master (its one write; git-deck auto, non-git asks), reads INDEX/cockpit and reports the next step, warms the routing catalog, and gives a passive note on obvious git misalignment. No deck (no cockpit.md) → points to /flightdeck:launch and stops. Triggered by /flightdeck:preflight.
+description: Use when explicitly invoking the flightdeck entry ritual — loads the protocol, reads cockpit.md / rules.md / uses.md, walks the deck tree (ls + grep) for what the task needs, and reports the next step. Nothing is injected; not running preflight = flightdeck not engaged. Triggered by /flightdeck:preflight.
 ---
 
-## Run this checklist exactly  _(read-only session-entry — protocol textbook: [protocol.md](protocol.md))_
+## Run this — read-only session entry
 
-0. **Deck existence.** If `flightdeck/cockpit.md` absent → print "No flightdeck deck here — run `/flightdeck:launch` to create one." and **STOP**.
-1. **Read `flightdeck/rules.md`.** Resolve config per [protocol § Rule resolution order](protocol.md#rule-resolution-order).
-1.5. **Shared-knowledge refresh (mechanical, pre-read).** A deterministic, zero-AI splice — a distinct mechanical layer (same category as the turn-end INDEX hook), not a judgment step; runs after rules-resolution, before the cockpit/catalog read. Using the recorded `runtime`, run the index script `<deck> --sync-pull`:
-   - **git deck** → apply directly (reversible via git); if it pulled, report one line `↻ synced N shared file(s) from master`. Silent when nothing was stale.
-   - **non-git deck** → run `--sync-pull --check` first (writes nothing; prints `would-pull` lines), show what would change, and **ask** before applying (irreversible — same discipline as conform).
-   - `master-missing` (`~/.flightdeck` absent) or a broken recorded runtime → silent no-op.
-   - **Escape hatch:** a deck `### Rules` entry (e.g. "sync: detect-only on entry") downgrades this to read-only `--sync-pull --check` + a one-line stale note (no auto-write), per the [Rule resolution order](protocol.md#rule-resolution-order).
-   This is the **only** write preflight triggers, and it touches **only** vendored shared regions — preflight's own checklist (the steps below) stays zero-write.
-2. **Read `flightdeck/cockpit.md`** (full) — note `Updated`, `Focus`, `## In Progress`, `## Next`, `## Key Context`. Do **not** rewrite anything.
-3. **Catalog warm-up (READ ≠ DISPLAY).** Read `flightdeck/checklists/INDEX.md`, `flightdeck/incidents/INDEX.md` fully, and `flightdeck/docs/INDEX.md` top-level only — all fully into context (routing intact); display counts only; do NOT drill sub-folders or individual files. **pending-verify scan:** run the index script `<deck> --verify-pending` (call form per the recorded `runtime` — [protocol § Rule resolution order](protocol.md#rule-resolution-order)); render each as `⚠ unverified: <file> — <how to verify>`. If the recorded runtime is broken, append a non-blocking `⚠ recorded runtime broken` and continue read-only (skip the scan — preflight never repairs). See [protocol § Non-blocking verification](protocol.md#non-blocking-verification).
-4. **Passive git note.** Run `git branch --show-current` + `git status --short`. Emit one non-blocking line only if: branch token clearly mismatches `Focus` → `⚠ git state looks off (branch ≠ Focus) — review before continuing`; or detached HEAD → same pattern. All other git state: say nothing.
-5. **Report item #1, then STOP.** State `## Next` in one sentence, then emit the standardized **`─── 🛫 preflight ───` banner** (see Output format) carrying `[Stage]` + `[Next]` item #1 + the read-only / "say go" line. You MUST NOT load task files or start execution. In-banner final line: if cockpit `## Staged (awaiting land)` is non-empty → report `N staged (awaiting land)` (a neutral readiness display — opening the land valve is the user's call; **no `⚠`, no "consider"**). Also non-blocking (any git mode): if `## In Progress` lists > ~5 active threads → add `⚠ N active threads — consider parking/closing some` (focus-loss signal, never a block).
+The protocol you load on entry is the **micro-core** below; the deep details load on
+demand from [protocol.md](protocol.md).
 
-## Fallback when `## Next` is empty
+0. **Deck existence.** If `flightdeck/cockpit.md` is absent → print "No flightdeck
+   deck here — create `flightdeck/cockpit.md` to start one." and **STOP**.
+1. **Read `flightdeck/rules.md`** (project house rules — single file, stable) and
+   **`flightdeck/uses.md`** (one `~/.flightdeck`-relative path per line this project
+   subscribes to; `#` comments). Fold each subscribed global path into the routing
+   tree alongside local `knowledge/`. Local shadows global on the same relpath
+   (replace, not merge); a subscribed path that's missing/renamed → one soft warning,
+   continue (never fail). See [protocol.md](protocol.md) § uses.md shadowing.
+2. **Read `flightdeck/cockpit.md`** (full) — note focus + next, the in-flight efforts
+   (whatever is in `work/`), and open questions. This is the recovery payload; do
+   **not** rewrite it on entry.
+3. **Walk the tree for what the task needs (lazy).** Default load = cockpit.md only;
+   everything else is on demand. `ls` the deck (`work/`, `knowledge/<domain>/`, the
+   subscribed global subtrees). When `ls` + filenames aren't enough to judge
+   relevance, run a transient `derive-listing <area>` (grep routing headers; see
+   [protocol.md](protocol.md) § Derived listing) — never written to disk.
+4. **Passive git note.** `git branch --show-current` + `git status --short`. Emit one
+   non-blocking line only if the branch clearly mismatches the cockpit focus, or on a
+   detached HEAD. Otherwise say nothing.
+5. **Report the next step, then STOP.** State the cockpit's next action in one
+   sentence and emit the `─── 🛫 preflight ───` banner (`[Stage]` + `[Next]` +
+   read-only / "say go"). Do NOT load task files or start execution.
 
-Don't auto-start. Search in order and present candidates: (1) `plans/INDEX.md` — `active` rows first; `done`-but-unlanded → offer to land; (2) `specs/INDEX.md` — `active` designs not yet planned; (3) `specs/INDEX.md` `Backlog (idea)` pool — ask which to start.
+## Not engaged unless you run this
 
-## Output format
+Nothing auto-fires and nothing is injected: if you never run preflight this session,
+flightdeck isn't engaged — no protocol loaded, nothing auto-persists, and just
+looking around the tree costs nothing. Turn-end **persist** (rewrite cockpit, write
+knowledge in place, commit the project repo) only applies once preflight has loaded
+the protocol this session.
 
-**Prose first** — cockpit + catalog + any debt:
+## Fallback when the cockpit names no next action
 
-```
-↻ synced N shared file(s) from master   ← omit when nothing pulled / detect-only / master-missing
-Cockpit (Updated: …; Focus: …)
-Routing catalog (loaded into context; audit → /flightdeck:walkaround): docs N · checklist N · incident N
-  ← omit zero-count kinds; if all folder INDEXes absent: "Routing catalog: (empty)"
-Verify pending: ⚠ <file> — <how>   ← omit when scan empty
-```
+Don't auto-start. Surface candidates: active efforts in `work/` first; then ideas in
+`~/.flightdeck/projects/<x>/ideas/`. Ask which to start.
 
-**Then the standardized banner, last** (per [protocol § Act-report-close loop](protocol.md#act-report-close-loop)):
+---
 
-```
-─── 🛫 preflight ───
-[Stage]   <lifecycle stage>
-[Next]    item #1: …   (Key Context: … — omit when none)
-Read-only — say "go" to execute item #1.   (N staged (awaiting land) — open the valve with /flightdeck:landing when ready)
-```
+# flightdeck (micro-core)
 
-## Don't do
+Two verbs:
+- **preflight** (on request — you run `/flightdeck:preflight`): load this
+  protocol, read `cockpit.md`, `rules.md` and `uses.md`, then walk the tree (`ls`
+  + grep) for what's needed. Default load = cockpit.md only, rest lazy. Nothing is
+  injected, it never auto-fires — skip preflight this session and it's
+  disengaged (nothing auto-persists); looking around is free.
+- **persist** (automatic, turn end): rewrite `cockpit.md`, write knowledge in
+  place, `git commit` the project repo. A **work** effort is done when you move it
+  out of `work/` to the cold store; git log records it left.
 
-- Don't create a deck; don't audit (status legality, INDEX↔folder, migration) — that's `/flightdeck:walkaround`.
-- Don't prompt "Resolve which?" for git divergence — passive one-liner only.
-- Don't auto-pick a fallback; don't bump `Updated`; don't grep codebase for tasks.
-- **preflight performs no *judgment* writes** — no `Updated` bump, no INDEX regen, no artifact/status writes; all such writes belong to landing/walkaround. The **sole** exception is the mechanical shared-knowledge refresh (Step 1.5), a deterministic splice that touches only vendored shared regions (and on a non-git deck only after you ask).
+Plus one audit command — **walkaround** (on request): sweep for drift
+(cockpit vs reality, orphaned work, duplicate traps, missing headers). The only
+trust-but-verify net; nothing mechanical self-corrects.
 
-## Protocol knowledge (load on demand)
+Layout:
+    <project>/flightdeck/   warm tier — git-tracked, committed each turn
+      cockpit.md   now — in-flight efforts · focus + next · open questions
+                   (rewritten each turn, kept small)
+      rules.md     project house rules — read on preflight, stable
+      uses.md      one global path per line this project subscribes to
+      work/        in-flight multi-step efforts (one file or folder each)
+      knowledge/   persistent — nested by domain; type via title line
+    ~/.flightdeck/   cold tier — plain global dir, NOT git
+      knowledge/     cross-project knowledge (consulted via uses)
+      projects/<x>/  this project's cold store: archive/ + ideas/
 
-- [protocol.md](protocol.md) — data model · status · INDEX · folder map · routing · authority order · write gate · lifecycle
-- [folder-semantics.md](folder-semantics.md) — what each folder holds; deck layout
-- [templates.md](templates.md) — per-file frontmatter + cockpit / rules.md / INDEX templates
-- [exit-ritual.md](exit-ritual.md) — stage/land ritual + staged-amount readiness _(first-time deck creation: `/flightdeck:launch`)_
+Invariants:
+- **Location is state.** In the project = live; moved into `~/.flightdeck` = cold
+  (done/parked). No status field: in `work/` = active, moved out = done.
+  Knowledge (`knowledge/`) is *resident*, not work: present = valid, deleted =
+  dead — no lifecycle. Nuanced states (blocked/reviewing/waiting) live in cockpit
+  prose, not folders.
+- **Routing header** (the one lightweight convention, no YAML schema). Every
+  knowledge file opens with a header ended by `---`: a title (`# <title>`; pitfall
+  `# ⚠ <title>`; checklist `# <X> checklist`), then `SUMMARY:` (one line), `READ
+  WHEN:` (when to route here), optional `RECHECK WHEN:` (what it tracks — re-verify
+  when that changes). Below `---`: free-form body. Routing reads only the header
+  (cheap); freshness = mtime + body + RECHECK WHEN.
+- **Write gate.** Record only what will change how you act later, or that you'll
+  look up again. Skip: one-off logs; a build that passed; exploration that found
+  nothing; a re-run that added nothing.
+- **Zero-loss covers the recovery payload** (cockpit.md + rules.md + work +
+  knowledge — all warm, all in git): persist commits the repo every turn;
+  `cockpit.md` must answer what you're doing / where you are / next / open
+  questions. The cold store is kept but unversioned — out of the guarantee.
+
+Depth (`protocol.md`, read on demand): write-gate examples, incident
+scope+crystallize rule, uses shadowing, vendoring, derived-listing.
