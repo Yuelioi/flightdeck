@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: 「AI-native 重设」已定档（两轮锤定 + 外审回应 + 历史底稿收敛成单一可信源）— spec = 决策记录，剩 authoring/迁移执行；plan 3 仍 staged 待 land
+Updated: 2026-06-23 · 月离 · Stage: 「AI-native 重设」已定档 + resume 触发修正（resume 手动轻触发、persist 自动 = 保护你的自动/打扰你的按需，命令面=1 非 0）— spec = 决策记录，剩 authoring/迁移执行；plan 3 仍 staged 待 land
 
 Focus: AI-native 重设 brainstorm（少结构·多信任 AI）→ `specs/2026-06-23-ai-native-redesign.md`；stage/land plan 3 暂 parked（staged 待 land）
 

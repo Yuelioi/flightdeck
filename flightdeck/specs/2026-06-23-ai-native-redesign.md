@@ -73,6 +73,14 @@ last_updated: 2026-06-23
 
 **术语统一**:① **母库**只指整棵 `~/.flightdeck/`;其子目录叫**冷存储 `projects/<x>/`**(免「母库套母库」)。② behave/know 出现处标**全局/项目**限定。③ **温度 = 版本化与否**:热层 = 项目 repo(git);冷层 = 全局 deck(无 git)。全局 behave/know 是**冷存(无版本)但活查(经 uses 订阅)**——温度 ≠ 活跃度。
 
+### resume 触发:手动;persist 自动(2026-06-23 · 补,修正「命令数=0」)
+
+上轮把命令面塌成 0 时混了「自动知道」和「自动接管」。毛病:preflight 式的**进场强制接管**(读完报 next、等你 go)在「只想看一眼别的」时是打扰。修正成一个**干净的非对称**——**保护你的自动,打扰你的按需**:
+
+- **persist = 自动**(turn-end,gated on 实际 deck 改动):零丢失的**写侧**,不能漏;无 deck 改动 = no-op。
+- **resume = 手动轻触发**(你说「resume / 接上」):**读侧**,跳过无损(state 还在,下次再读)。只想看别的 → 不说就静默,**零打扰**。接管只在你要求时发生。
+- 故 **命令面 = 1**(resume),非 0。resume 可实现成一个 slash command 或一个识别短语;产品仍 doc-first(persist + 协议正文照旧自动/常载)。
+
 ## 动机:一个根,三个痛
 
 当前 flightdeck「笨重」。三个痛被确认为**同一个根:结构太多**——其中大半是「不信任 AI」加的脚手架:
@@ -176,8 +184,8 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 ### 表 1 · 命令(skill)
 | 原命令 | 去向 | 说明 |
 |---|---|---|
-| `preflight` | → **resume**(自动,无命令) | 进场读 `state.md` + 惰性走树 |
-| `stage`(turn-end) | → **persist**(自动,无命令) | 收尾重写 state + 就地写知识 + commit |
+| `preflight` | → **resume**(**手动轻触发**:你说「resume/接上」) | 读 `state.md` + 惰性走树;不进场强制接管(免打扰「只想看一眼」) |
+| `stage`(turn-end) | → **persist**(自动,无命令) | 收尾重写 state + 就地写知识 + commit;gated on 实际 deck 改动 |
 | `landing` | **并入 persist** | 「做完」时 persist 把 work 挪母库;归档说人话,无独立阀 |
 | `status` | **砍** | 位置即状态,无 status 字段/转换 |
 | `walkaround` | **砍** | 无 schema/INDEX/status 可审;无派生副本=无一致性可查 |
@@ -186,7 +194,7 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 | `new` | **砍** | 无 frontmatter 要 stamp;新知识=写带首行的 md |
 | `emit-agents-md` | **砍** | 协议正文 install 时入 `CLAUDE.md`/`AGENTS.md`;无 AUTO 区可 emit |
 
-**剩下命令数 = 0**(resume/persist 是自动行为,非 slash command)。
+**剩下命令数 = 1**:`resume`(手动轻触发);`persist` 自动、无命令。(见上「resume 触发」补。)
 
 ### 表 2 · 文件 / 目录
 | 原 | 新 | 说明 |
@@ -227,7 +235,7 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 ## 待执行(设计已定,非设计抉择)
 - **从 3.0 deck 一次性迁到新形态**:映射表 + **脚本形态已定**(见上「迁移脚本形态」);剩**写脚本 + 跑**(等新形态实体存在后才有意义)。
 - ~~**派生目录触发阈值**~~ **已定**:无数字阈值、不落盘。它是 resume **走树时的按需读工具**——AI 判断「`ls` + 文件名不足以路由」时跑 `derive-listing <area>`(grep 每文件首行,打印一次性目录到上下文),**transient,不存文件** → 零维护、零漂移。触发 = AI 判断,不是计数。
-- **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
+- **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:persist 自动 + resume 仅一个手动轻触发,手动阀又基本砍光 → **命令面 ≈ 1** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
 - **极简协议正文 authoring**(形态已定=两层)——**微核心英文初稿已草拟**(见下「协议微核心初稿」);剩:深层(`behave/flightdeck.md`)authoring + 与今天 ~169K 散文对照查漏 + 定稿润色。**发布面 = 英文**。
 
 > 已消解(2026-06-23):INDEX 去留、status 机边界、自动 stale 范围、frontmatter(→ 零 schema)、git/undo 载体、零丢失机械兜底、多 agent 并发、新鲜度载体(→ mtime)、产品形态(→ doc-first)、协议形态(→ 两层)、派生目录阈值、迁移脚本形态;**第二轮**再关:uses 格式+合并、incident 阶梯、位置即状态对知识、write-gate 洞、Git-is-history、零丢失措辞 —— 见各节。剩开的:深层协议 authoring 的具体措辞 + 产品化细节(缓)+ 头号风险(认了、非待决)。
@@ -239,11 +247,12 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 ```markdown
 ## flightdeck (micro-core)
 
-Two automatic verbs:
-- **resume** (session start): read `flightdeck/state.md` and `uses.md`; then
-  walk the tree (`ls` + grep) for whatever the task needs. Default load =
-  state.md only; everything else is lazy.
-- **persist** (turn end): rewrite `state.md`, write knowledge in place,
+Two verbs:
+- **resume** (on request — you say "resume"): read `flightdeck/state.md` and
+  `uses.md`, then walk the tree (`ls` + grep) for whatever the task needs.
+  Default load = state.md only; everything else is lazy. Not fired on entry —
+  so just opening the project to look around costs nothing.
+- **persist** (automatic, turn end): rewrite `state.md`, write knowledge in place,
   `git commit` the project repo. A **work** effort is done when you move it
   out of `work/` into the cold store; the project's git log records that it
   left.
