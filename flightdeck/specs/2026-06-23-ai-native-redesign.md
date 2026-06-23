@@ -8,6 +8,23 @@ last_updated: 2026-06-23
 
 > 状态:**设计进行中**(brainstorm 草案,边锤边填)。这是 flightdeck 自身的一次彻底重设方向探索,不取代当前 3.0;3.0 继续运行,本 spec 探索「纯 AI 形态」。
 
+## ⏸ 最新方向(2026-06-23 本周期收尾,下周期继续)
+
+> 用户拍板(原话):**「使用新的目录结构,但保留旧版本的 frontmatter,不过删减大部分生命周期。」**
+
+这是对下文早期草案的**修正,以此为准**(下文「无 frontmatter schema / when_to_read 降级成首行 / 砍派生目录」等早期判断被本节覆盖):
+
+- **目录结构 = 新的**:`state.md` + `uses.md` + `work/` + `behave/`(域嵌套)+ `know/`(按域共置、坑带 ⚠)。沿用下文。
+- **frontmatter = 保留旧版**:`when_to_read` / `applies_to` / `when_to_update` / `status` 这套**留着**(不 de-schema 化、不降级成首行)→ 路由 + 自动 stale 的资产全保住(用户投资过的东西)。retrieval / stale 之前那两个待决问号,被「保留 frontmatter」一并消解。
+- **生命周期 = 砍大部分**:idea→active→done→archive→graduate→promotion 链 · stage/land 两段 · status 机仪式 · conform/迁移 · sync 子系统 —— 过程税砍掉,只保留最小(知识能写/能读/能标 stale)。
+
+**下周期要锤(本次未决):**
+- frontmatter 留 ⇒ **INDEX 留不留?** 若留,改成「从 frontmatter 派生、零同步」而非手维护。
+- **张力**:frontmatter(schema)在 = 「改了难迁移」痛仍在。用户选择为路由价值接受这点——下周期定**哪些字段必留、哪些可松**。
+- **自动 stale**:frontmatter 既留,这台机器可一并留(它读 frontmatter)→ 确认范围。
+- **「删减大部分生命周期」的精确边界**:哪些 status 转换 / 归档行为留、哪些砍(尤其 done/archive、graduate→docs、incident promotion)。
+- 仍开:git/undo 载体 · 多 agent 并发 · 产品化去留 · 3.0→新形态一次性迁移 · 极简协议正文。
+
 ## 动机:一个根,三个痛
 
 当前 flightdeck「笨重」。三个痛被确认为**同一个根:结构太多**——其中大半是「不信任 AI」加的脚手架:
