@@ -47,8 +47,28 @@ is opt-in and on-demand — the default is live subscription, no copy.
 
 ## Derived listing
 
-When walking the tree for routing and `ls` + filenames aren't enough to decide
-relevance, run a transient `derive-listing <area>`: grep each file's routing
-header and print a one-shot directory to context. It is **never written to disk**
-— transient, zero-maintenance, zero-drift. The trigger is AI judgment, not a count
-or threshold.
+When walking the tree to route and `ls` + filenames aren't enough to decide which
+knowledge files are relevant, run a transient `derive-listing <area>`: grep each
+file's routing header and print a one-shot relevance directory to context. The
+trigger is AI judgment — filenames alone won't decide — not a count or threshold.
+
+What to surface per file: its path, title (`# …`, keeping the `⚠` / `checklist`
+glyph), `SUMMARY:`, and `READ WHEN:` — the routing-decision lines of the header,
+i.e. everything above the first `---`. Omit `RECHECK WHEN:` (that's freshness, not
+relevance) and the free-form body.
+
+`<area>` is just a path, so this works the same on a local `knowledge/<domain>/`
+or a `uses`-subscribed `~/.flightdeck/knowledge/…` subtree.
+
+Reference recipe (ripgrep ships with the agent; adapt to whatever grep your
+environment has):
+
+    rg --no-heading -N -g '*.md' '^(# |SUMMARY:|READ WHEN:)' <area>/
+
+This prints, per matching file, `path:line` for the title + summary + read-when
+lines — a flat directory the AI scans to pick what to open. When a header's
+`READ WHEN:` spills onto `-` bullet lines you need, read that file's block
+directly (everything up to its first `---`); the recipe is a starting glance, not
+a contract.
+
+It is **never written to disk** — transient, zero-maintenance, zero-drift.
