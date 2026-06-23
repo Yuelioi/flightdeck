@@ -1,8 +1,8 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: marker 自带化 + `marker-missing` 安全网 landed（spec+plan 归档；脚本 py/js + 4 skill 散文 + 设计 doc 全翻；母库三文件 stamp、本仓副本 in-sync）
+Updated: 2026-06-23 · 月离 · Stage: marker 自带化 + `marker-missing` 安全网 landed；补 land 久挂的 plan 1（stage/land script 地基，4 task 早已 commit 却没翻 done）→ 归档，看板回真
 
-Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1 执行中：`plans/2026-06-22-stage-land-staged-view-script.md`，Task 1 待跑）
+Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（plan 1【script 地基】done+归档；待起 plan 2 散文重写 / plan 3 signal+walkaround）
 
 Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各 folder INDEX · 历史 → archive/
 
@@ -10,7 +10,6 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 <!-- AUTO:inprogress -->
 - [2026-06-22-stage-land-lifecycle.md](specs/2026-06-22-stage-land-lifecycle.md) — Two-phase lifecycle replacing the checkpoint/soft-landing/full-landing split: st…
-- [2026-06-22-stage-land-staged-view-script.md](plans/2026-06-22-stage-land-staged-view-script.md) — Script foundation for stage/land: named-marker multi-AUTO-region support + regen…
 <!-- /AUTO -->
 
 ## Staged (awaiting land)
@@ -21,7 +20,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- 执行 **plan 1** → `plans/2026-06-22-stage-land-staged-view-script.md`：从 Task 1（AUTO 定位改命名 marker）起，4 个 TDD task。后续 plan 2（散文重写）/ plan 3（signal 体系 + walkaround 翻转）。
+- **起 plan 2** — stage/land 三层散文 → stage/land 重写（spec `2026-06-22-stage-land-lifecycle.md` 已落，plan 1 script 地基 done+归档）。后续 plan 3 = signal 体系重设计 + walkaround 翻转。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
 ## Key Context

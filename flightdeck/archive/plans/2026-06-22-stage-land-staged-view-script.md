@@ -1,9 +1,11 @@
 ---
-status: active
+status: done
 summary: Script foundation for stage/land: named-marker multi-AUTO-region support + regen_cockpit_staged (done-not-archived workflow + stale-with-verify knowledge) + scaffold ## Staged section + .js byte-parity twin.
-last_updated: 2026-06-22
+last_updated: 2026-06-23
 implements: specs/2026-06-22-stage-land-lifecycle.md
 ---
+
+> **DONE 2026-06-23** — 全 4 task 已实现并提交:Task 1 `cff0638`（命名 marker 定位）· Task 2 `de93c80`（`regen_cockpit_staged`）· Task 3 `c1de6fc`（挂 regen + scaffold + spec 措辞「不并入」）· Task 4 `949daca`（`.js` 孪生）+ `f8ef525`（`extractAutoBlock` 跟进修）。派生 `## Staged` 区已上线（本仓 cockpit 在用）。本 plan 是 lifecycle spec 的**第 1/3 块**（plan 2 散文重写 / plan 3 signal+walkaround 仍待起）。
 
 # Plan 1: ## Staged derived-view script foundation
 
