@@ -1,6 +1,6 @@
 ---
 status: active
-summary: 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendoring。设计进行中
+summary: 少结构·多信任 AI 重设:砍流程/迁移/冗余三痛,resume+persist 两动词,behave/know/now 三层软知识,引用订阅替 vendoring,位置替状态+冷存储进母库(不版本化)。设计进行中
 last_updated: 2026-06-23
 ---
 
@@ -8,22 +8,24 @@ last_updated: 2026-06-23
 
 > 状态:**设计进行中**(brainstorm 草案,边锤边填)。这是 flightdeck 自身的一次彻底重设方向探索,不取代当前 3.0;3.0 继续运行,本 spec 探索「纯 AI 形态」。
 
-## ⏸ 最新方向(2026-06-23 本周期收尾,下周期继续)
+## ⏸ 最新方向(2026-06-23,边锤边填)
 
-> 用户拍板(原话):**「使用新的目录结构,但保留旧版本的 frontmatter,不过删减大部分生命周期。」**
+> 用户拍板(原话):**「使用新的目录结构,但保留旧版本的 frontmatter,不过删减大部分生命周期。」** + 续锤:**「位置替状态——冷的进母库,项目只剩热的;母库不版本化,单机为主,undo 基本不要。」**
 
 这是对下文早期草案的**修正,以此为准**(下文「无 frontmatter schema / when_to_read 降级成首行 / 砍派生目录」等早期判断被本节覆盖):
 
 - **目录结构 = 新的**:`state.md` + `uses.md` + `work/` + `behave/`(域嵌套)+ `know/`(按域共置、坑带 ⚠)。沿用下文。
-- **frontmatter = 保留旧版**:`when_to_read` / `applies_to` / `when_to_update` / `status` 这套**留着**(不 de-schema 化、不降级成首行)→ 路由 + 自动 stale 的资产全保住(用户投资过的东西)。retrieval / stale 之前那两个待决问号,被「保留 frontmatter」一并消解。
-- **生命周期 = 砍大部分**:idea→active→done→archive→graduate→promotion 链 · stage/land 两段 · status 机仪式 · conform/迁移 · sync 子系统 —— 过程税砍掉,只保留最小(知识能写/能读/能标 stale)。
+- **frontmatter = 保留旧版的路由+新鲜度字段**:`when_to_read` / `applies_to` / `last_updated` / `when_to_update` 留着(路由资产保住,用户投资过的)。**但 `status` 字段砍掉**——见下「位置替状态」。
+- **生命周期 = 砍大部分**:status 机 · idea→active→done→archive→graduate→promotion 链 · stage/land 两段 · conform/迁移 · sync 子系统 —— 全砍,只留最小(知识能写/能读 + AI 自判新鲜度)。
 
-**下周期要锤(本次未决):**
-- frontmatter 留 ⇒ **INDEX 留不留?** 若留,改成「从 frontmatter 派生、零同步」而非手维护。
-- **张力**:frontmatter(schema)在 = 「改了难迁移」痛仍在。用户选择为路由价值接受这点——下周期定**哪些字段必留、哪些可松**。
-- **自动 stale**:frontmatter 既留,这台机器可一并留(它读 frontmatter)→ 确认范围。
-- **「删减大部分生命周期」的精确边界**:哪些 status 转换 / 归档行为留、哪些砍(尤其 done/archive、graduate→docs、incident promotion)。
-- 仍开:git/undo 载体 · 多 agent 并发 · 产品化去留 · 3.0→新形态一次性迁移 · 极简协议正文。
+### 本周期锤定(2026-06-23,5 条)
+
+1. **砍常驻 INDEX → grep + 走树。** resume 默认只读 `state.md`;任务起时 grep 文件头 `applies_to`/`when_to_read` + `ls` 走树按需开篇。成本 ∝ 命中,守住 token 红线;无派生副本 = 无漂移。超大 area 才脚本派生一行目录(YAGNI 逃生口)。
+2. **全砍 status 机 → 位置替状态。** 文件「在不在项目里」= 活不活。`work/` 里有 = active,挪走 = done;knowledge 同理。status 字段消失,生命周期长链随之拆掉。
+3. **冷存储全进母库。** 项目 `flightdeck/` 只剩热的(state/uses/work/behave/know);`~/.flightdeck/` 持 `know/`(跨项目 + first-seen incident 暂存池)+ `projects/<x>/`(本项目归档 + idea 池)。
+   - **incident 晋升阶梯(位置即复发计数)**:第一次撞 → 进母库 `know/`(还不知是否本项目专属,先 park 跨项目池);再撞 → 检索母库被提醒;**第三次 → 回项目**(证明本项目复发,落本地)。替掉 `recurrences` 计数器 + promotion gate;补救稳定后结晶进 `behave`。
+4. **母库不版本化。** `~/.flightdeck/` 是普通全局目录,不进 git。**零丢失红线只覆盖热层**(项目 repo,persist 每轮 commit);冷层无损兜底、不做硬保证(错题大不了重记、归档 git 大半已有且极少翻)。连带出局:**git/undo 载体、多 agent 并发、hook 强制 commit**——单机用户为主,undo 场景 99% 不存在。
+5. **自动 stale 全砍。** 无机械 stale flip;`last_updated`/`when_to_update` 只是 AI 加载时读的提示,当场自判「可能过期、验一下」。persist 不再做路径交集。
 
 ## 动机:一个根,三个痛
 
@@ -51,11 +53,12 @@ last_updated: 2026-06-23
 ### 0. 文件结构(全貌)
 
 ```
-~/.flightdeck/                 全局 deck(原「母库」降格)
+~/.flightdeck/                 全局母库(普通目录,不版本化)
 ├── behave/                     跨项目约定(obey)
 │   ├── commits.md  comments.md ...
 │   └── flightdeck.md           ← 极简协议本身
-└── know/                       跨项目知识(consult)
+├── know/                       跨项目知识(consult)+ first-seen incident 暂存池
+└── projects/<x>/               每项目冷存储:归档 + idea 池(冷的全搬这)
 
 <project>/flightdeck/           项目 deck(在项目 git repo 内)
 ├── state.md                    now/仪表盘 —— 唯一恢复载荷,每轮重写
@@ -67,7 +70,7 @@ last_updated: 2026-06-23
 └── know/                       项目专属知识(树状嵌套,含按域共置的坑)
 ```
 
-无 `specs/plans/incidents/checklists/docs/references` 六分 · 无 `INDEX.md` · 无 frontmatter schema · 无 `archive/` · 无 status 机 · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
+无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · 保留 frontmatter 路由+新鲜度字段(`when_to_read`/`applies_to`/`last_updated`/`when_to_update`,**无 `status`**)· 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
 
 ### 1. 两个动词替八个 skill
 - **resume**(原 preflight):读 `state.md`(+ 解析 `uses.md`),按需走树开相关篇。默认**只载 state.md**,其余惰性。
@@ -117,19 +120,20 @@ last_updated: 2026-06-23
 ---
 
 ## 接受的取舍
-- 零丢失:机械保证 → 信任 AI 维护 state + commit。
-- repo 自包含性丢失(引用依赖机器 `~/.flightdeck`);要可移植/可 ship 时,vendoring 作为「引用快照成拷贝」按需加回。
+- 零丢失:机械保证 → 信任 AI 维护 state + commit。**红线只保热层**(项目 repo 每轮 commit);冷层尽力而为。
+- repo 自包含性丢失(引用依赖机器 `~/.flightdeck`,且冷存储也在母库);要可移植/可 ship 时,vendoring 作为「引用快照成拷贝」按需加回。
+- **冷层(归档/idea 池/first-seen incident)无版本、无 undo、不跨机器** —— 单机为主,错题可重记、归档 git 大半已有且极少翻,只当万一兜底。
 - 语义路由比手写 `when_to_read` 略粗(赌:AI 看自描述文件名 + 走树足以判断)。
-- incident 去重/回归检测从机械(指纹/archive 扫描)→ AI 读了再写 + 判断。
+- incident 去重/回归检测从机械(指纹/archive 扫描)→ AI 读了再写 + 判断 + 位置阶梯(母库↔项目)。
 
 ## 还要锤(未定)
-- **git 历史 / undo 载体**:git-as-blob 还是 append 日志;`persist` 每轮 commit 与 undo「截断尾」怎么咬合。
-- **零丢失那一丝机械兜底**(hook→强制 commit)留不留。
-- **从 3.0 deck 一次性迁到新形态**(讽刺但必要):specs/plans→work、各 knowledge 文件夹→behave/know(按域)、cockpit→state、sync 拆解。
+- **从 3.0 deck 一次性迁到新形态**(讽刺但必要):specs/plans→work、各 knowledge 文件夹→behave/know(按域)、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
+- **frontmatter 必留 vs 可松** 的精确字段表(`applies_to` 现在承重 = grep 路由全靠它 → 必填;`when_to_read`/`last_updated`/`when_to_update` 的强制度待定)。
 - **派生目录**约定(首行自述格式;何时触发)。
-- **多 agent 并发**(当前协议假设单会话)。
-- **产品化**去留(缓议:adapters/scaffold/发布面/迁移层)。
+- **产品化**去留(缓议:adapters/scaffold/发布面/可移植时 vendoring 按需加回)。
 - AI 读的那份**极简协议**正文(替今天 ~169K 字符散文)。
+
+> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
 
 ## 原理自洽性自检
 每个 scale 顾虑(母库、100 选 10、多半成品、superpowers、多级知识库、incident/checklist)修法都落回贯穿原理。「少结构」≠「零结构」——留**挣得起**的(订阅清单、work/ 一效一档、behave/know 两层、文件夹树)、砍**不挣钱**的(维护机器/派生副本/同步/迁移/校验)。
