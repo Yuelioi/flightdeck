@@ -29,7 +29,7 @@ Every skill resolves each behavior in this order — **first hit wins**:
 
 1. **Frontmatter field** — a recorded-config field in `rules.md` frontmatter (`runtime`, `agents_md`) read directly; no inference needed. **Frontmatter fields outrank conflicting `### Rules` prose** for the keys they cover (see [templates.md § rules.md](templates.md#rulesmd)).
 2. **Deck rule** — a matching free-prose rule in `rules.md` `### Rules` (the AI reads and honors it; it overrides the default).
-3. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`landing` auto-runs on `done`** (debounced to once at end-of-turn). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
+3. **Built-in default** — `commit` = **local commit auto, push asks** (local is reversible — reset/amend; push is outward, gated); **all five rituals (`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`) self-invocable**; `status` auto-flips `start` (idea→active) and `done` (on approval) but **never archives** (landing's cross-reference-aware judgment); **`stage` auto-runs every execution turn-end** (persist knowledge + board-sync + local commit); **`landing` is the manual valve — never auto-triggered** (the user opens it to archive `done` + sign off pending-review knowledge). Reversible runs without asking; the one outward action (push) stays gated — see [Act-report-close loop](#act-report-close-loop).
 
 There is **no environment-inference step** (3.0): `runtime` and `agents_md` are recorded frontmatter fields read at step 1 — never re-probed; `git` is a launch-enforced install precondition (launch's doctor offers `git init` and refuses if you decline or git is absent, then it holds at runtime), not a resolved item.
 
@@ -37,7 +37,7 @@ There is **no environment-inference step** (3.0): `runtime` and `agents_md` are 
 
 **Override authority** (which config wins): **the project's agent instruction file (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`, per the running agent) > deck rules (`rules.md` `### Rules`) > flightdeck defaults.** flightdeck always honors the project's own agent rules above its own deck rules. Internal conflicts among deck rules are the user's responsibility — flightdeck never auto-resolves contradictory rules (it may passively flag one, never silently pick).
 
-A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving is landing's judgment), no `runtime` toggle in `### Rules` (`runtime` is a required frontmatter field stamped by launch — not a free-prose setting), and no `disabled_folders` (empty folders are simply not flagged).
+A deck rule is **free prose the AI interprets** — there is **no magic-string table, no lenient-substring matcher, no canonical-phrase requirement** (deleted in 3.0: the AI authors and reads its own rules, so a fixed vocabulary served no one). There is no self-invoke override (all five rituals always self-invoke), no `auto land` toggle (archiving happens only at the manual land valve), no `runtime` toggle in `### Rules` (`runtime` is a required frontmatter field stamped by launch — not a free-prose setting), and no `disabled_folders` (empty folders are simply not flagged).
 
 **Runtime dispatch (the `runtime` field).** The `runtime` frontmatter value (`uv` | `python` | `node`, stamped by `launch`) selects the **call form** for every bundled script: `uv run <pkg>/scripts/<name>.py` / `python <pkg>/scripts/<name>.py` / `node <pkg>/scripts/<name>.js` — the `.py` and `.js` are byte-parity twins sharing a basename stem. A script runtime is **mandatory in 3.0** — there is no hand-rebuild markdown fallback. A recorded runtime that cannot be found is a **hard failure** at the script step: surface `⚠ recorded runtime '<x>' not found — update rules.md (runtime:) or reinstall` and stop that step (never silently fall through to manual reconstruction). `preflight` stays read-only / zero-write even here — it does not repair; it appends a non-blocking `⚠ recorded runtime broken` note and continues its read-only report.
 
@@ -163,7 +163,7 @@ Workflow chain: `idea → active → done`. Rejection **deletes** the file (no s
 
 | Trigger | Flip | Who | Auto? |
 |---|---|---|---|
-| Recent changed paths intersect doc's `applies_to` | `active→stale` (or no-op if already `stale`) | exit-ritual (landing/soft-landing) | **auto** (landing; idempotent) |
+| Recent changed paths intersect doc's `applies_to` | `active→stale` (or no-op if already `stale`) | exit-ritual (stage) | **auto** (stage; idempotent) |
 | User confirms doc is now current | `stale→active` | user-asserted only | **never auto** |
 | Verify passes (knowledge `stale` + `verify`) | `stale→active` (+ drop `verify`) | SKILL (on user-performed verification) | **auto-on-pass** (verify-pass path only — see [Non-blocking verification](#non-blocking-verification)) |
 | User confirms doc is dead / obsolete | `→obsolete` | user-asserted only | **never auto** |
@@ -177,15 +177,15 @@ Iron rules:
 - **Needs-verify task:** the AI **may** self-assert `done`, but **must carry `verify: <how>`** — not a silent self-completion: the debt is re-surfaced every preflight and the write is reversible (one frontmatter field + `mv`). See [verify field](#verify--the-verification-marker) + [Non-blocking verification](#non-blocking-verification).
 - Every flip bumps `last_updated` (bare `idea` excepted).
 
-Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: the exit ritual (landing/soft-landing) intersects this turn's changed paths with each knowledge artifact's `applies_to` paths and auto-flips `status: stale` on a hit (idempotent — already-stale is a no-op); preflight neither detects nor flips stale (read-only, zero-write) — stale visibility rides the folder INDEX rows (`⚠`) it already loads. The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; landing drains it to `archive/`.
+Knowledge kinds (`incidents/` `checklists/` `docs/` `references/`) use `active / stale / obsolete`. Automatic flips: the exit ritual (stage) intersects this turn's changed paths with each knowledge artifact's `applies_to` paths and auto-flips `status: stale` on a hit (idempotent — already-stale is a no-op); preflight neither detects nor flips stale (read-only, zero-write) — stale visibility rides the folder INDEX rows (`⚠`) it already loads. The `stale→active` reset and the `→obsolete` death-decision are **user-asserted only** — the AI does not self-certify either transition, consistent with the **no-verify** `→done` rule for workflow. Set `obsolete` by hand; landing drains it to `archive/`.
 
 ### The status / landing seam
 
-`done` is the **single seam** between the lightweight `status` ritual and the heavy `landing` ritual:
+`done` is the **seam** between the lightweight `status` ritual and the manual `landing` valve:
 
 - `idea→active` is light work — `status` does it alone.
-- **`→done` = the "completion" moment = landing's trigger point.** Reaching `done` hands control to landing for wrap-up + archival decision. `status` itself still does not commit / archive — it recognizes completion and passes the baton.
-- **End-of-turn debounce:** a `done` flip does **not** immediately run landing per-item; it marks "owes one landing" and runs landing **once before the AI returns control to the user** (end-of-turn — a *decidable* event, not an unimplementable "natural pause"), aggregating all of this turn's `done`s into the **same** landing. An explicit `/flightdeck:landing` is also a trigger. (See [landing auto-trigger](#rule-resolution-order) in Rule resolution order.)
+- **`→done` marks completion — it does NOT trigger landing.** Reaching `done` is a **staged** state: `status` flips `done` (+ regen `## In Progress`) and stops — it does not commit, archive, or queue a landing. `done`-not-archived is the normal staged state.
+- **Land is manual.** Archival happens only when the user runs `/flightdeck:landing`. A turn's `done` flips just accumulate in the staging area (visible in cockpit `## Staged`); landing rescans the whole `done`-in-place set when the user opens the valve.
 - **Archival criterion = a deterministic structural edge** (not AI prose reading): a `done` artifact archives into `archive/` **iff no `active` artifact points at it via a structural edge** (`implements:` active plan → done spec). `supersedes` is traceability-only and is **NOT** a pinning edge — `flightdeck_index.py --archivable` does not include it in the blocking set. `flightdeck_index.py --archivable` computes the archivable-`done` set as a **reproducible fact** (same input → same conclusion); prose markdown links are for humans only and **don't enter the criterion**. Pointed-at by an active inbound edge → stays done-but-unlanded.
 - **Drain, don't accumulate:** every landing rescans **all** `done`-in-place artifacts (not just this session's), sweeping away any whose inbound edges have cleared — so done-but-unlanded **drains automatically** and never lingers. Still-pointed-at ones are listed by `walkaround` as INFO (naming the **blocking active artifact**, not a vague "reason").
 - **Landing failure does not roll back `done`.** `done` asserts **user approval**, not "landing's smoke-check passed" — the two are orthogonal. If landing fails mid-run (smoke-check error, script crash, interrupted session), the artifact stays `done` at its current location (done-but-unlanded); the next landing sweep picks it up. Never revert `status: done` on a landing failure.
@@ -262,7 +262,7 @@ Knowledge artifacts may carry `when_to_update`: a concrete-change-event phrase (
 
 `stale` covers **two pending-review sources** — `when_to_update`-matched suspected-outdated (this section) **and** new-but-unverified knowledge (`stale` + [`verify`](#verify--the-verification-marker)). The `verify` field distinguishes them: present = unverified, absent = `when_to_update`-outdated. Both render in the catalog as `⚠` (the scan splits them — `⚠ pending-review` vs `⚠ unverified`).
 
-**Detection runs only at the exit ritual (landing/soft-landing — the single on-exit ritual):** `--changed-since-anchor` emits the paths changed since the anchor plus worktree uncommitted changes; intersect them with each knowledge artifact's `applies_to` paths and flip `stale` on a hit. preflight neither detects nor flips stale (read-only, zero-write) — its only debt scan is `--verify-pending`; un-flipped stale waits for the next landing.
+**Detection runs only at stage (the single on-exit ritual, every turn):** `--changed-since-anchor` emits the paths changed since the anchor plus worktree uncommitted changes; intersect them with each knowledge artifact's `applies_to` paths and flip `stale` on a hit. preflight neither detects nor flips stale (read-only, zero-write) — its only debt scan is `--verify-pending`; un-flipped stale waits for the next stage.
 
 **Anchor:** the git ref recorded by the most recent exit-ritual (stored as a `Flightdeck-Sync:` trailer in the landing commit — a concrete recorded ref, never a guess). The anchor advances at each landing commit.
 
@@ -316,11 +316,11 @@ idea →(flip one field)→ active → done   →(land = move to archive/)
                                   (rejected = delete the file)
 ```
 
-A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## In Progress`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **checkpoints** keep the board synced at each plan-task boundary (cockpit `## Next` + the plan's `## Progress` `current:` pointer, disk-write only, no commit) — the lightweight subset of landing that makes a mid-plan close-and-reopen lossless. See [exit-ritual § Checkpoint](exit-ritual.md#checkpoint--lightweight-board-sync-subpath).
+A spec starts `status: idea` (unstarted, no date prefix). Starting it is **just a field flip** `idea → active` (which auto-adds the `YYYY-MM-DD-` prefix and surfaces it in cockpit `## In Progress`) — no folder move, no relation-edge rewrite. Each plan carries optional `implements: specs/<x>.md`. `location` (active vs `archive/`) is derived from landing a done item. Folder says the kind; frontmatter `status` says the state. While a plan is `active`, **stage** keeps the board synced every turn (cockpit `## Next` + the plan's `## Progress` `current:` pointer, plus a local commit) so a mid-plan close-and-reopen is lossless. See [exit-ritual § Stage](exit-ritual.md#stage--turn-end-persist--board-sync).
 
-Beyond the `done`-triggered landing, an **end-of-turn knowledge increment** auto-runs a **soft-landing** (signal 3 — classify knowledge + regen changed INDEX + cockpit board, plus the **unified soft-landing banner** — see [Act-report-close loop](#act-report-close-loop) — no commit/archive); default-on, downgradable via a deck `### Rules` entry. See [exit-ritual § Land-readiness](exit-ritual.md#land-readiness-check).
+Every **execution turn-end** auto-runs **stage** — classify knowledge + regen changed INDEX + cockpit board + **local commit** + the unified **📥 staged banner** (see [Act-report-close loop](#act-report-close-loop)); no archive, no push. **Land** (`/flightdeck:landing`) is the manual valve that drains the staging area — archive `done` + flip pending-review knowledge live. See [exit-ritual § Stage](exit-ritual.md#stage--turn-end-persist--board-sync) + [§ Readiness](exit-ritual.md#readiness--the-staged-amount).
 
-A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between landings. It never blocks, archives, or writes judgment fields (`## Next` / `Focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
+A passive **turn-end hook** additionally regenerates the mechanical board AUTO regions (`## In Progress` + `## Staged` + each `INDEX.md`) at every end-of-turn on every host that fires it (Claude/Codex `Stop`, Cursor `stop`, Gemini `AfterAgent`) — a deterministic enhancement that keeps those regions from going stale between stages. It never blocks, archives, or writes judgment fields (`## Next` / `Focus` / knowledge classification stay agent-driven); the protocol does **not** depend on it.
 
 A **rejected** spec is **deleted** (only on explicit user instruction; git log keeps the history, the commit body records the reason). There is no `scrapped` status value or tombstone group.
 
@@ -330,9 +330,9 @@ A **rejected** spec is **deleted** (only on explicit user instruction; git log k
 
 ## Exit ritual
 
-90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md) and is run by `/flightdeck:landing`.
+90% of exits are obvious — classify and write directly. Only truly ambiguous items invoke brainstorming. The full decision tree (classification heuristics, hanging-task gate, INDEX regeneration, cockpit update) lives in [exit-ritual.md](exit-ritual.md): the per-turn parts run automatically at **stage**, the archive + sign-off parts at the manual **land** valve (`/flightdeck:landing`).
 
-After classifying: update `cockpit.md` (`Updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**). landing regenerates the INDEX of any folders changed this session.
+After classifying: update `cockpit.md` (`Updated` + regen `## In Progress` from `status: active` + auto-write `## Next` + any `Hanging Tasks` changes); then commit locally per the commit default (auto local commit, **push asks**). Stage regenerates the INDEX of any folders changed this turn.
 
 ## Act-report-close loop
 
@@ -358,18 +358,18 @@ Every flow turn = **prose first, then exactly one standardized banner at the ver
 <key info / recovery path, one per line>
 ```
 
-- **icon + flow name** per the [Brand glyphs table](#brand-glyphs-per-command) (`preflight` 🛫 · `landing` / `soft landing` 🛬 · `new` ✍️ · `walkaround` 🔍 · `status` 🔄). Flow name + field labels are **structural English** (i18n); content after a label is in the user's working language.
+- **icon + flow name** per the [Brand glyphs table](#brand-glyphs-per-command) (`preflight` 🛫 · `landing` 🛬 · `staged` 📥 · `new` ✍️ · `walkaround` 🔍 · `status` 🔄). Flow name + field labels are **structural English** (i18n); content after a label is in the user's working language.
 - **"Turn" =** one user input → one complete AI response (including any internal multi-step actions). **One aggregated banner per turn**, not one per atomic action.
-- **Trigger**: a turn that ran a flow or did real work emits a banner (`preflight` / `landing` / `soft landing` / `new` / `walkaround` / an execution turn). A **pure-conversation / clarification turn** (no flow, no deck change) emits none. "No change" = *a flow ran but produced no new knowledge* (still a banner) — not a pure-chat turn.
-- **Nesting**: a flow nested in another (landing triggers soft-landing) emits only the **outermost** banner; inner `[Saved]` / `[Pending]` info is **merged (union)** in — "one banner" means aggregated into one, inner increments not dropped.
+- **Trigger**: a turn that ran a flow or did real work emits a banner (`preflight` / `landing` / `staged` / `new` / `walkaround` / an execution turn). A **pure-conversation / clarification turn** (no flow, no deck change) emits none. "No change" = *a flow ran but produced no new knowledge* (still a banner) — not a pure-chat turn.
+- **Nesting**: a flow nested in another (an explicit `landing` over a turn that also staged) emits only the **outermost** banner; inner `[Saved]` / `[Pending]` info is **merged (union)** in — "one banner" means aggregated into one, inner increments not dropped.
 - **Failure**: a crashed / partial / failed flow **still emits a banner**, with a `[Failed]` line: failure point, what was persisted, how to resume.
 
 **Field set:** always — `[Stage]` (recovery needs it) + the closing "you can close now" line. Conditional — `[Saved]` (knowledge persisted) / `[No change]` (no new knowledge), mutually exclusive; `[Pending]` **only when Pending Review is non-empty** (omit when empty, never an empty `[Pending]`); `[Failed]` (failure). Each flow's minimal field set lives with its SKILL (preflight ≥ `[Next]` + routing counts).
 
 ```
-─── 🛬 soft landing ───
+─── 📥 staged ───
 [Stage]     <lifecycle stage, see below>
-[Saved]     specs/ +1 <file>; cockpit Next updated.        (or [No change])
+[Saved]     specs/ +1 <file>; committed locally <sha>.        (or [No change])
 [No change] No new knowledge this turn; board is current.
 [Pending]   ⚠ N item(s) await verification: … → see cockpit Pending Review.
 You can close / switch the conversation anytime — next preflight resumes from the board.
@@ -377,9 +377,9 @@ You can close / switch the conversation anytime — next preflight resumes from 
 
 ### Undo channel ("rollback")
 
-One universal undo replaces per-action gates. The undo unit is **the most recent landing unit as a whole** — one `landing` / `checkpoint` commit, or this turn's uncommitted deck changes — not a file-level last change.
+One universal undo replaces per-action gates. The undo unit is **the most recent staged/landed unit as a whole** — one commit carrying the `Flightdeck-Sync:` trailer (a stage or land commit), or this turn's uncommitted deck changes — not a file-level last change.
 
-- **Cross-session recoverable**: target derived from git + the board, not conversation memory. Read `git log -1 --oneline`; a commit clearly tagged (`landing:` / `checkpoint:`) → revert that unit; **untagged / spans multiple turns / ambiguous → ask the user** (never force-guess). Makes "undo after closing the conversation" deterministically implementable.
+- **Cross-session recoverable**: target derived from git + the board, not conversation memory. Read `git log -1` for the trailer; a commit carrying a `Flightdeck-Sync:` trailer (a stage or land unit) → revert that unit; **no trailer / spans multiple turns / ambiguous → ask the user** (never force-guess). Makes "undo after closing the conversation" deterministically implementable.
 - **Action**: reverse that unit's reversible changes (un-flip status / un-archive / local git revert / delete a just-promoted checklist). `push` is never in undo scope.
 - **No undo stack**: the "most recent landing unit" is reconstructed from git + board.
 
@@ -389,7 +389,7 @@ Work may stop at any stage and be interrupted; the banner `[Stage]` + the board 
 
 | Stage | Recovery anchor |
 | --- | --- |
-| brainstorming | no artifact yet; cockpit Focus / Next records "brainstorming X, asked up to …"; decided points incrementally soft-land into a spec |
+| brainstorming | no artifact yet; cockpit Focus / Next records "brainstorming X, asked up to …"; decided points incrementally stage into a spec |
 | spec written | spec(active) in In Progress; Next = review → write plan |
 | plan written | plan(active) in In Progress; Next = execute plan step N |
 | plan partially done | Next = continue from the next unfinished step (plan `## Progress`); finished parts not redone |
@@ -410,12 +410,12 @@ Three entry rituals, three non-overlapping jobs — so no check is both everyone
 | Ritual | Role | Writes? | Cockpit 80-line trim | INDEX | Deep per-file audit |
 | --- | --- | --- | --- | --- | --- |
 | `preflight` | read-only takeover at session start | **no judgment writes** — the sole write is the mechanical shared-knowledge refresh (deterministic splice into vendored shared regions, before the read; git-deck auto / non-git asks); deckless redirects to /flightdeck:launch | reads only — passive note on git state | reads folder INDEX as catalog | no — audits belong to walkaround |
-| `landing` | write the session's outcome (full mode); board-sync only (checkpoint mode at task boundaries) | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
+| `landing` | persist every turn's outcome at **stage** (knowledge + board-sync + commit); archive + sign-off at the manual **land** valve | yes | **owns the trim** (proposes → confirms → edits) | regenerates changed folders' INDEX | no |
 | `walkaround` | integrity audit on demand | **no — audit-only, never fix** (proposes fixes, never auto-applies) | flags `> 80` as INFO | full INDEX↔frontmatter check | **owns** status / orphan / dangling-ref / stray-file audits |
 
-The 80-line cockpit trim is **landing's** (it is the only ritual that writes cockpit); `walkaround` only flags it; `preflight` never touches it.
+The 80-line cockpit trim is **stage's** (stage writes cockpit by judgment every turn); `walkaround` only flags it; `preflight` never touches it.
 
-Checkpoint is **landing's lightweight mode**, not a fourth ritual — it reuses landing's cockpit board-sync step and writes nothing else (no INDEX, no archive, no commit). `preflight` performs no judgment writes; checkpoint never runs at entry.
+**Stage** is the automatic turn-end ritual (it persists knowledge + board-syncs + local-commits every execution turn); **land** (`/flightdeck:landing`) is the manual valve (archive `done` + sign off pending-review knowledge). `preflight` performs no judgment writes; stage never runs at entry.
 
 **The shared-knowledge refresh is a distinct mechanical layer**, not a checklist step — the same category as the turn-end INDEX hook (`## In Progress` + `INDEX.md` AUTO regions). It is deterministic (`--sync-pull`, a text splice with zero AI), runs **before** preflight's read, and touches only the master-owned shared region of vendored files. Like the turn-end hook, the protocol does not depend on it and it never writes judgment fields; unlike that hook (which fires automatically), preflight invokes it explicitly because flightdeck has no guaranteed entry hook. On a non-git deck it degrades to detect-only (`--check`) and asks before writing — see [SKILL § Step 1.5](SKILL.md).
 
@@ -503,6 +503,8 @@ Every flightdeck command carries a brand emoji on its **runtime main report / co
 | status | 🔄 | U+1F504 | status transition |
 | landing | 🛬 | U+1F6EC | land & archive |
 | emit-agents-md | 🌉 | U+1F309 | cross-tool bridge |
+
+**Non-command banner glyph:** the turn-end **stage** ritual is automatic (not a slash command), so it is not in the table above; it carries **📥** (U+1F4E5) on its `─── 📥 staged ───` banner. Its glyph authority is [exit-ritual § Staged banner](exit-ritual.md#staged-banner--the-visible-safe-to-close-signal), not this command table.
 
 Scope of force: a passive documentation convention, not program-enforced — changing a command's glyph requires manually syncing this table (preflight does not auto-validate it).
 
