@@ -7,7 +7,6 @@
 [![Version: 3.0.0-alpha.5](https://img.shields.io/badge/version-3.0.0--alpha.5-orange?style=flat-square)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
-[![AGENTS.md](https://img.shields.io/badge/emits-AGENTS.md-blueviolet?style=flat-square)](https://agents.md)
 
 🇨🇳 中文 · 🇬🇧 [English README](README.md)
 
@@ -16,14 +15,14 @@
 ---
 
 > [!WARNING]
-> **`3.0.0-alpha.5` —— 面向早期试用者的预发布版。** 3.0 是**破坏性更新**、也是新的格式基线：2.x 创建的 deck **不会**自动迁移 —— 请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。正式 3.0.0 之前格式与行为仍可能再变，先别在生产项目上依赖它。反馈正是这个 alpha 的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
+> **面向早期试用者的预发布版。** 这是 flightdeck 的 AI-native 重写版 —— 更少零件、无 schema、无脚本。格式与行为仍可能再变，先别在生产项目上依赖它。旧版创建的 deck **不会**自动迁移：请用 `/flightdeck:launch` 新建 deck，再把旧 `cockpit.md` 里仍有用的内容手工搬过来。反馈正是这个预发布版的意义 —— 欢迎提 [issue](https://github.com/Yuelioi/flightdeck/issues)。
 
 > 你的 AI 助手在两次对话之间会失忆。**flightdeck** 是一套目录约定加一个 skill，给它跨会话的操作连续性 —— 让下一次会话知道你在做什么、为什么、下一步做什么。
 
-## ✨ 3.0 亮点
+## ✨ 亮点
 
-- **自动着陆 —— 有真实增量就自己落盘。** 一轮产出了值得保留的东西时，不用记着跑收尾命令：新知识自动软着陆（分类 + 入 INDEX）；一项工作完成则自动触发 full landing（归档 + 本地 commit）。每个执行回合末尾都出一行 soft-landing banner —— 有落盘则 `[Saved]`，没有则 `[No change]`（诚实地说「没东西要存、看板已最新」）—— 信号恒在。`/flightdeck:landing` 仍保留为显式收尾入口。
-- **看到 banner 再关窗口 —— 什么都不丢。** soft-landing banner 在每个执行回合末尾给一行「可随时关闭」信号，表示恢复载荷（cockpit + INDEX + 已落盘工件）已在盘上；从这一刻起杀掉聊天窗口是安全的：下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
+- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：重写 `cockpit.md`、就地写入新知识、提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
+- **无 schema、无脚本、无 INDEX。** 整套东西就是纯 markdown 加两条约定：**位置即状态**（项目里的文件夹 = 活的，移出 = 完成）和每个知识文件一行的**路由头**。没东西要迁移、没东西要保持同步、没东西会在模型升级时坏掉。
 
 ## TL;DR
 
@@ -32,55 +31,68 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch`，先做个 doctor 体检（git + 运行时）再建好一个 deck —— 没 repo 时问一句 `git init`。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch` 建好一个 deck。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
-一个你的 AI 按约定读写的 `flightdeck/` 目录：
+一个你的 AI 按约定读写的 `flightdeck/` 目录 —— 一层**温存层（warm tier）**住在你的仓库里、每回合提交，加一层放在全局普通目录、装「已完成或搁置」的**冷存层（cold tier）**：
 
 ```
-flightdeck/
-├── cockpit.md          # 必读入口 —— Active focus / Next / Hanging Tasks
-├── rules.md            # 项目配置 —— version + 自由散文 house rules
-│
-├── specs/              # 范围化的设计文档（status: idea = 待启动池）
-├── plans/              # 分步实施计划
-├── incidents/          # 教训记录（根因，不许"忘了"）
-├── checklists/         # 可复用流程
-├── docs/               # 自撰常驻技术资料
-├── references/         # 导入的外部材料（RFC、竞品代码）
-└── archive/            # 完成的工作，移出活跃区
+your-project/
+└── flightdeck/            # 温存层 —— git 跟踪，每回合提交
+    ├── cockpit.md         # 必读的恢复载荷（Focus / In flight / Next / Open questions）
+    ├── rules.md           # 项目 house rules —— 进场时读，稳定
+    ├── uses.md            # 共享知识订阅（每行一个 ~/.flightdeck 路径）
+    ├── work/              # 进行中的多步工作（每项一个文件或文件夹）
+    └── knowledge/         # 常驻知识，按域嵌套
+
+~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
+├── knowledge/             # 跨项目知识（经 uses.md 订阅）
+└── projects/<name>/       # 本项目的冷存：archive/ + ideas/
 ```
 
-每个知识文件夹各带一份自动重生成的 `INDEX.md`（文件 · status · 一行摘要）—— 没有根级 INDEX。
+没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的一项是活的；把它移进 `~/.flightdeck/projects/<name>/archive/` 就标记为完成。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
 
 ### cockpit.md —— 唯一必读文件
 
-每次会话首先读取，硬上限 80 行：
+每次会话首先读取。它故意保持小 —— 它是恢复载荷，每回合重写：
 
 ```markdown
 # Cockpit — payment-service
 
-**Last updated**: 2026-05-28 by alice (shipped Stripe webhook refactor)
-**Active focus**: stabilize Stripe webhook handler — failing edge cases in incidents/
+Focus: stabilize the Stripe webhook handler — failing edge cases under knowledge/stripe/
 
-## In Progress
+## In flight
 
-<!-- AUTO:inprogress -->
-- specs/2026-05-26-stripe-hardening.md — active
-<!-- /AUTO -->
+- webhook-idempotency/ — reproducing the duplicate-event bug; deciding DB vs Redis key
 
 ## Next
 
-1. Reproduce the duplicate-event bug from incidents/stripe-idempotency.md (Case 3).
-2. Decide: idempotency key in DB vs Redis.
+Reproduce the duplicate-event case from knowledge/stripe/idempotency.md, then pick the key store.
 
-## Hanging Tasks
+## Open questions
 
-- (none)
+- Is the duplicate caused by Stripe retries or our own re-enqueue? (unverified)
 ```
 
-没有 500 行的上下文倾倒 —— 历史内容都在更深一层的文件夹里，按需从各文件夹的 `INDEX.md` 读取。
+没有 500 行的上下文倾倒 —— 历史内容都在 `knowledge/` 更深一层，按需通过走目录树 + grep 路由头取得。
+
+### 路由头 —— 唯一的约定
+
+每个知识文件以一个小头部开场，以 `---` 结束：
+
+```markdown
+# <title>          (坑用 # ⚠ <title> · 流程用 # <X> checklist)
+
+SUMMARY: <一行 —— 这份文件装了什么>
+READ WHEN: <什么时候路由到这里才对>
+
+---
+
+<自由散文正文>
+```
+
+路由只读头部（便宜）。标题字形编码了类型，所以没有 `kind` 字段、也没有「一类一文件夹」—— 知识改为按**域**嵌套，目录树本身就是索引。
 
 ## 安装
 
@@ -104,104 +116,85 @@ flightdeck/
 
 </details>
 
-你不用手动建 deck —— 跑一次 `/flightdeck:launch` 就帮你建好。
+你不用手动搭 deck —— 跑一次 `/flightdeck:launch`，它直接把骨架写出来。
 
 ## 用法
 
 **会话开始** —— 运行 `/flightdeck:preflight`。它：
 
-1. 读 `flightdeck/cockpit.md`。
-2. 瞥一眼 `git status`（分支 / 版本）—— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
-3. 报告下一项 —— 说 "go" 执行。
+1. 加载协议、读 `flightdeck/cockpit.md`（外加 `rules.md` 和 `uses.md`）。
+2. 按任务所需走目录树（懒加载 —— 默认只读 cockpit）。
+3. 瞥一眼 `git status` —— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
+4. 报告下一项 —— 说 "go" 执行。
 
-全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：先做个 **doctor 体检**（git 仓库 + 脚本运行时）再复制脚手架 —— 缺 repo 时问一句 `git init? [y/N]`，无访谈、不问 `AGENTS.md`。开始干活时再填 `cockpit.md` 的 `Active focus` / `## Next`；`/flightdeck:emit-agents-md` 随时可选做。
+全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：做个快速检查后播种骨架（没 repo 时问一句 `git init` —— 零丢失保证需要 git）。
 
-**会话结束** —— 一轮产出了真实增量时，flightdeck 在轮末自己着陆。纯状态推进 → 静默 **checkpoint**（看板保持真实）；新知识 → **软着陆**，分类（bug → `incidents/`、流程 → `checklists/`、一次性 → 丢弃）并打出「已保存」标记 —— 看到它才表示可以放心关窗口；一项工作完成 → **full landing**（刷新 `cockpit.md`、归档、本地 commit）。很小的一轮（没有增量）不会触发任何 landing。想显式收尾就运行 `/flightdeck:landing`。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
+**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：把 `cockpit.md` 重写到当下、就地写入新知识（受写入门控约束）、做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
 ### 命令
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:launch` | **首次建 deck** —— 先 doctor 体检 git + 运行时（没 repo 问一句 `git init`），再复制脚手架、播种 `cockpit.md`。deck 已存在则拒绝。 |
-| `/flightdeck:preflight` | **会话入口接管** —— 读 `cockpit.md`、瞥一眼 git、报告下一项。无 deck → 指向 `/flightdeck:launch`。 |
-| `/flightdeck:new` | 撰写 deck 工件（spec/plan/incident/checklist/reference/doc）—— 盖 frontmatter + 命名、重生 INDEX/cockpit。代替手搓。 |
-| `/flightdeck:landing` | 会话收尾 —— 分类新知识、更新 cockpit、提交。 |
-| `/flightdeck:walkaround` | 完整性审计 —— 协议漂移检测。 |
-| `/flightdeck:emit-agents-md` | 从 `cockpit.md` 重生 `AGENTS.md`。 |
-| `/flightdeck:sync` | 把本 deck 下发的共享知识文件按母库刷新 —— 母库是每个文件 shared 段的唯一写者，靠内容指纹判过期、纯脚本机械替换（无 AI 合并），逐字保留项目专属段。`promote <path>` 把本地新文件上提到母库；`--fanout` 把母库改动推给每个消费者。 |
+| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `cockpit.md` / `rules.md` / `uses.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
+| `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
+| `/flightdeck:walkaround` | **完整性审计** —— 一个只读、按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、孤儿 work、重复 trap、缺路由头）。唯一的 trust-but-verify 网。只报告，不修。 |
 
-工件 `status` **自动**推进（idea→active→done）。五个仪式（`preflight` / `landing` / `walkaround` / `emit-agents-md` / `status`）都可自调；`landing` 按判断决定归档（被 active 工件交叉引用的 `done` 工件留在原地）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。`/flightdeck:launch` 是显式的一次性命令（建 deck），不是会话仪式。会话开始不加载任何东西，也没有后台进程。
+**persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（重写 cockpit、写知识、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
 
 ### 路由 —— 什么触发什么
 
 | 当下情形 | AI 去读 |
 | --- | --- |
 | 会话开始 /「我们刚在干嘛？」 | `cockpit.md` |
-|「迁移为啥挂了？」 | `incidents/` |
-|「测试怎么跑？」 | `checklists/` |
-|「来设计个 X」 | `specs/` |
-|「拆成任务」 | `plans/` |
+| 一项进行中的多步工作 | `work/<effort>/` |
+|「迁移为啥挂了？」 | `knowledge/<域>/` 下的 `# ⚠` trap |
+|「测试怎么跑？」 | `knowledge/<域>/` 下的 `# … checklist` |
 
 ## 配置
 
-`flightdeck/rules.md` 是按项目的控制面板 —— 必需（承载 deck 的 `version`）：
+`flightdeck/rules.md` 是按项目的控制面板 —— 单一、稳定、进场时读。无 frontmatter、无结构化字段：
 
-```yaml
----
-version: <release>       # 唯一的结构化字段
----
-
+```markdown
 ## House rules
 
 ### Project conventions
-# deck 局部约定，如 "specs 用中文"、"不用 references/"
+deck 局部约定，如 "specs 用中文"、"发布面一律英文"
 
 ### Rules
-# AI 按你自然话维护的行为规则；省略 = 默认（本地 commit 自动、push 才先问；仪式都可自调）
+AI 按你自然话维护的行为规则；省略 = 默认
 ```
 
-`version` 是唯一的结构化字段。其余全靠**推断、默认或 skill 判断**：
-
-- **git** —— 由是否有 `.git` 目录推断。
-- **AGENTS.md** 重生 —— 由是否有 `AGENTS.md` 文件推断。
-- **脚本** —— 由是否能跑到 `uv`/`python` 推断（否则走 markdown 兜底）。
-- **仪式** —— 五个都可自调；**`status`** 自动推进 idea→active→done，但**从不归档**（归档是 `landing` 按交叉引用的判断）；**`commit`** 本地自动、**push 才先问**。
-
-要改某个行为，**直接用自然话告诉 AI 一条持久偏好** —— 「commit 前先问我」「这个 deck 不走 git」「specs 别自动 start」—— AI 会在 `### Rules` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录：规则由 AI 自己写、自己读。
+一切靠**推断或 skill 判断** —— git 由是否有 `.git` 目录推断，其余由协议决定。要改某个行为，**直接用自然话告诉 AI 一条持久偏好** ——「commit 前先问我」「别自动 start 工作」—— AI 会在 `### Rules` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录。
 
 ## 跨项目共享知识
 
-有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用同一份权威副本。flightdeck 用**下发式共享知识（vendored shared-knowledge）**来处理：一份 checklist 或 doc 存在**母库（master deck）**里，被拷贝进各消费 deck，进项目时自动刷新（也可按需手动）。
+有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用一份。flightdeck 用一个普通的**订阅清单**来处理：
 
-- **母库** —— 固定在 `~/.flightdeck`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
-- **下发副本** —— frontmatter 标 `synced: true`，且镜像母库的相对路径。`<!-- flightdeck:project-specific -->` 锚把文件切两段：锚以上是 **shared 段**（母库所有），锚以下是你 deck 的**项目段**（你的，永不被碰）。
-- **单写者** —— 母库是 shared 段唯一写者，consumer 从不改它。判过期靠 shared 段内容指纹，所以同步是纯脚本文本 splice —— AI 一字不读、零 token。
-- **进场自动刷新** —— `/flightdeck:preflight` 在读 deck 前先跑同一个机械 pull，项目下次开工就自愈到最新共享知识，基本不用手动 sync。
-- **`/flightdeck:sync`** —— 显式按需跑：把过期文件的 shared 段从母库拉下来，逐字保留你的项目段和 frontmatter。
-- **`/flightdeck:sync promote <path>`** —— 把**本地新写**的文件上提到母库（唯一的 consumer→母库 路径；shared 段无 back-flow），并把本 deck 注册为消费者。
-- **`/flightdeck:sync --fanout`** —— 可选：改完母库文件后，立刻推给每个已注册 consumer，而不必等各自下次进场刷新。
+- **`uses.md`** —— 每行一个 `~/.flightdeck` 相对路径（`#` 注释）。目录项订阅其整棵子树。进场时 preflight 把订阅的全局文件折进路由树，与本地 `knowledge/` 并列。
+- **冷存层作共享库** —— 全局知识住在 `~/.flightdeck/knowledge/`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
+- **本地遮蔽全局** —— 项目若在同一相对路径有自己的文件，本地的整份胜出（替换，非合并）—— 确定、零维护。
+- **下发（vendoring，可选）** —— 需要仓库自包含时，把订阅的全局文件快照进仓库当冻结副本、并撤掉订阅。默认是活订阅、不拷贝。
 
-只有 `checklists/` 和 `docs/` 参与共享。没有下发文件的 deck 从不碰母库，可独立工作。
+`uses.md` 为空的 deck 从不碰全局库，可独立工作。
 
 ## 为什么需要它
 
-多数"AI memory"方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会影响未来决策的）、**文件夹=类型 + status 生命周期**（工作推进、再归档到 `archive/`）、**INDEX 优先读**（大项目省 token）、以及会话收尾时分类新知识的**landing 仪式**。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
+多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（工作在项目里就是活的，移进冷存就是完成）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `rules.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 
 ## 横向对比
 
-flightdeck 架在 [AGENTS.md](https://agents.md) **之上**而非与之竞争，并补上裸记忆工具没有的生命周期 + 写入纪律：
+flightdeck 与 [AGENTS.md](https://agents.md) 互补 —— 用 `AGENTS.md` 放静态规则，让 flightdeck 处理裸记忆工具没有的跨会话生命周期：
 
 | | flightdeck | [AGENTS.md](https://agents.md) | Cline Memory Bank | OpenSpec | Cursor MDC | Letta Code |
 | --- | --- | --- | --- | --- | --- | --- |
-| 静态项目规则 | 经 emit | ✅ 原生 | — | — | ✅ | — |
+| 静态项目规则 | 用 AGENTS.md | ✅ 原生 | — | — | ✅ | — |
 | 跨会话接续 | ✅ | — | ✅ | — | — | ✅ |
-| 生命周期模型（文件夹=类型 · status · archive） | ✅ | — | — | ✅ | — | — |
+| 位置即状态生命周期（work ↔ 冷存） | ✅ | — | — | ✅ | — | — |
 | 严格写入门控（防垃圾抽屉） | ✅ | — | — | — | — | — |
-| 错题/教训追踪（根因） | ✅ | — | — | — | — | — |
-| 外部评审处置 | ✅ | — | — | — | — | — |
-| INDEX 优先省 token | ✅ | — | — | — | — | — |
+| 坑/教训追踪（根因） | ✅ | — | — | — | — | — |
+| 懒路由（grep 头部，不全量倾倒） | ✅ | — | — | — | — | — |
 | 单一显式入口（`/preflight`） | ✅ | — | — | — | — | — |
 | 工具无关（markdown + 文件系统） | ✅ | ✅ | 部分 | ✅ | 仅 Cursor | — |
 
@@ -221,38 +214,33 @@ flightdeck 架在 [AGENTS.md](https://agents.md) **之上**而非与之竞争，
 <details>
 <summary><b>这和直接用 AGENTS.md 区别在哪？</b></summary>
 
-[AGENTS.md](https://agents.md) 是*静态*项目规则的跨工具标准。flightdeck 架在它之上 —— `/flightdeck:emit-agents-md` 从 `cockpit.md` 往 `AGENTS.md` 写一个 fenced block —— 并补上 AGENTS.md 没有的：跨会话接续、status 生命周期、防垃圾抽屉的写入门控、错题追踪。如果你只需要一份静态规则清单，单用 AGENTS.md 就够了。
+[AGENTS.md](https://agents.md) 是*静态*项目规则的跨工具标准 —— 每次会话加载、很少变。flightdeck 是它之上的*动态*层：跨会话接续、防垃圾抽屉的写入门控、坑追踪。两者可组合 —— 留着你的 `AGENTS.md`，再加一个 `flightdeck/` deck。如果你只需要一份静态规则清单，单用 AGENTS.md 就够了。
 
 </details>
 
 <details>
 <summary><b>我有个旧的 <code>flightdeck/</code> —— 怎么升级？</b></summary>
 
-3.0 是格式基线（第 0 版）—— **没有**自动迁移机制，2.x 创建的 deck 不会被自动升级。推荐路径：用 `/flightdeck:launch` 新建 deck，把旧 `cockpit.md` 内容和仍有用的工件手工搬过来。从 3.0 之后第一个改变 deck 结构的版本开始，具体迁移步骤会按需写进 [MIGRATION.md](MIGRATION.md)。
+这次重写**没有**自动迁移机制，旧 deck 不会被自动升级。推荐路径：用 `/flightdeck:launch` 新建 deck，把旧 `cockpit.md` 内容和仍有用的知识文件手工搬过来（每份补一个路由头）。说明见 [MIGRATION.md](MIGRATION.md)。
 
 </details>
 
 ## 文档
 
-**深入指南** —— 见 [`docs/`](docs/)：[架构](docs/architecture.md) · [设计哲学](docs/philosophy.md)
-
-**协议参考**（canonical，AI 向）：[protocol.md](skills/preflight/protocol.md) · [文件夹语义](skills/preflight/folder-semantics.md) · [模板](skills/preflight/templates.md) · [landing 仪式](skills/preflight/exit-ritual.md) · [MIGRATION.md](MIGRATION.md) · [CHANGELOG.md](CHANGELOG.md)
+**协议参考**（canonical，AI 向）：进场加载的 micro-core 在 [skills/preflight/SKILL.md](skills/preflight/SKILL.md)；深层细节在 [protocol.md](skills/preflight/protocol.md)。历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 贡献
 
-skill 改动遵循 **RED-GREEN-REFACTOR** —— 没有失败测试不许改（[TEST_PLAN.md](TEST_PLAN.md)）。最高信号的贡献：一份 AI 钻协议空子的 transcript，或某个 Codex / Cursor / Gemini manifest 的端到端验证日志（[模板](.github/PULL_REQUEST_TEMPLATE/manifest-verification.md)）。
+最高信号的贡献：一份 AI 偏离协议的 transcript（整套设计要防的就是这个失败模式），或某个 Codex / Cursor / Gemini manifest 的端到端验证日志（[模板](.github/PULL_REQUEST_TEMPLATE/manifest-verification.md)）。
 
 ## Roadmap
 
-可选文件夹（`briefing/`、`blackbox/`、`crew-handover/`、`experiments/`）· "continuance" 基准（给 AI 一个半截项目的 deck、说"继续"、量化恢复质量）· 归档合成/压缩 · 未测适配器的端到端验证 · MCP server。完整历史见 [CHANGELOG.md](CHANGELOG.md)。
+一个 "continuance" 基准（给 AI 一个半截项目的 deck、说"继续"、量化恢复质量）· 冷存合成/压缩 · 未测适配器的端到端验证 · MCP server。完整历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 致谢
 
-- [AGENTS.md](https://agents.md) —— wire format
-- [OpenSpec](https://github.com/openspec/openspec) —— spec 演化标记
-- [Cursor MDC](https://docs.cursor.com) —— 路径范围 frontmatter
-- [Letta Code](https://github.com/letta-ai/letta) —— 晋升门模式
-- [superpowers](https://github.com/anthropic-experimental/superpowers) —— 协议风格
+- [AGENTS.md](https://agents.md) —— 纯 markdown 约定
+- [superpowers](https://github.com/anthropic-experimental/superpowers) —— 协议 / skill 风格
 - [Cline Memory Bank](https://docs.cline.bot) —— 启发写入门控的那个模式
 
 ## License

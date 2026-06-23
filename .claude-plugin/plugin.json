@@ -1,7 +1,7 @@
 {
   "name": "flightdeck",
   "version": "3.0.0-alpha.5",
-  "description": "Operational protocol for AI-assisted engineering sessions — preflight, scenario triggers, write gate, and landing ritual",
+  "description": "Operational protocol for AI-assisted engineering sessions — preflight entry, automatic per-turn persist, a write gate, and a walkaround audit",
   "author": {
     "name": "月离",
     "email": "yuelioi1210@gmail.com"

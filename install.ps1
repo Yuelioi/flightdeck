@@ -4,38 +4,32 @@
 
 .DESCRIPTION
     Detects installed AI tools and copies every skills/* subdir to the
-    appropriate target. Installs preflight + landing + walkaround +
-    emit-agents-md. Optionally scaffolds a flightdeck/
-    directory in the current working directory.
+    appropriate target. Installs preflight + launch + walkaround.
+
+    Creating a deck is not part of install — run /flightdeck:launch in a
+    session and the skill writes the deck files directly (no scaffold to copy).
 
 .PARAMETER Tool
     Which AI tool to install for. Default: auto-detect.
     Supported (active):  claude
     Stub (PRs welcome):  codex, cursor, gemini
 
-.PARAMETER Scaffold
-    Scaffold a flightdeck/ directory (full layout) in the current working directory.
-    Values: none (default), full. (minimal is deprecated/ignored in 3.x; the -Scaffold value is removed in 4.0.)
-
 .PARAMETER Force
     Overwrite an existing install without prompting.
 
 .EXAMPLE
     .\install.ps1
-    Auto-detects AI tool and installs the skill.
+    Auto-detects AI tool and installs the skills.
 
 .EXAMPLE
-    .\install.ps1 -Tool claude -Scaffold full
-    Installs the Claude adapter and scaffolds a full flightdeck/ in cwd.
+    .\install.ps1 -Tool claude -Force
+    Installs the Claude adapter, overwriting any existing install.
 #>
 
 [CmdletBinding()]
 param(
     [ValidateSet('auto', 'claude', 'codex', 'cursor', 'gemini')]
     [string]$Tool = 'auto',
-
-    [ValidateSet('none', 'minimal', 'full')]
-    [string]$Scaffold = 'none',
 
     [switch]$Force
 )
@@ -102,30 +96,6 @@ function Install-Stub {
     Write-Host ""
 }
 
-function Invoke-Scaffold {
-    param([string]$Variant)
-    $source = Join-Path $repoRoot "scaffolds\$Variant\flightdeck"
-    $target = Join-Path (Get-Location) 'flightdeck'
-
-    if (-not (Test-Path $source)) {
-        Write-Error "Scaffold variant not found: $source"
-        return
-    }
-
-    if ((Test-Path $target) -and -not $Force) {
-        Write-Host "Target already exists: $target"
-        $answer = Read-Host "Overwrite? [y/N]"
-        if ($answer -ne 'y' -and $answer -ne 'Y') {
-            Write-Host "Scaffold skipped."
-            return
-        }
-        Remove-Item -Recurse -Force $target
-    }
-
-    Copy-Item -Recurse $source $target
-    Write-Host "Scaffolded: $target ($Variant)" -ForegroundColor Green
-}
-
 # --- main ---
 
 if ($Tool -eq 'auto') {
@@ -143,13 +113,6 @@ switch ($Tool) {
     'codex'  { Install-Stub -ToolName 'codex' }
     'cursor' { Install-Stub -ToolName 'cursor' }
     'gemini' { Install-Stub -ToolName 'gemini' }
-}
-
-if ($Scaffold -ne 'none') {
-    if ($Scaffold -ne 'full') {
-        Write-Warning "-Scaffold $Scaffold is deprecated (3.x) and ignored; the full layout is always installed; the -Scaffold value is removed in 4.0."
-    }
-    Invoke-Scaffold -Variant 'full'
 }
 
 Write-Host ""

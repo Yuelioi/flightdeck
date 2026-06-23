@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Install all flightdeck skills into your AI tool's skills directory.
 #
-# Installs preflight + landing + walkaround + emit-agents-md.
+# Installs preflight + launch + walkaround.
+#
+# Creating a deck is not part of install — run /flightdeck:launch in a session
+# and the skill writes the deck files directly (no scaffold to copy).
 #
 # Usage:
 #   ./install.sh                          # auto-detect AI tool, install skills
 #   ./install.sh --tool=claude            # explicit AI tool
-#   ./install.sh --scaffold               # also scaffold flightdeck/ (full layout; --scaffold value deprecated/ignored in 3.x, flag removed in 4.0)
 #   ./install.sh --tool=claude --force    # overwrite existing install
 #
 # Supported (active):  claude
@@ -18,17 +20,15 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skills_source="$repo_root/skills"
 
 tool="auto"
-scaffold="none"
 force="false"
 
 # parse args
 for arg in "$@"; do
     case "$arg" in
         --tool=*)     tool="${arg#--tool=}" ;;
-        --scaffold=*) scaffold="${arg#--scaffold=}" ;;
         --force)      force="true" ;;
         -h|--help)
-            head -n 12 "$0" | tail -n 11
+            head -n 15 "$0" | tail -n 14
             exit 0
             ;;
         *)
@@ -101,26 +101,6 @@ install_stub() {
     echo ""
 }
 
-invoke_scaffold() {
-    local variant="$1"
-    local source="$repo_root/scaffolds/$variant/flightdeck"
-    local target="$(pwd)/flightdeck"
-
-    if [[ ! -d "$source" ]]; then
-        echo "Scaffold variant not found: $source" >&2
-        return 1
-    fi
-
-    if ! confirm_overwrite "$target"; then
-        echo "Scaffold skipped."
-        return
-    fi
-
-    rm -rf "$target"
-    cp -R "$source" "$target"
-    echo "Scaffolded: $target ($variant)"
-}
-
 # --- main ---
 
 if [[ "$tool" == "auto" ]]; then
@@ -142,13 +122,6 @@ case "$tool" in
         exit 1
         ;;
 esac
-
-if [[ "$scaffold" != "none" ]]; then
-    if [[ "$scaffold" != "full" ]]; then
-        echo "warning: --scaffold=$scaffold is deprecated (3.x) and ignored; the full layout is always installed; the --scaffold flag is removed in 4.0." >&2
-    fi
-    invoke_scaffold "full"
-fi
 
 echo ""
 echo "Done."

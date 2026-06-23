@@ -6,11 +6,11 @@ repo. After editing a skill/script you can't tell, from inside a session, whethe
 cache still reflects your edits or is stale and needs a re-sync.
 
 This computes a short content hash over the **plugin build inputs** (the source set that
-`local-plugin-testing.md`'s robocopy mirrors into the cache — skills/scripts/scaffolds/
-adapters/manifests/context files; NOT the `flightdeck/` deck, docs/, or tmp/). The hash
+`local-plugin-testing.md`'s robocopy mirrors into the cache — skills/scripts/adapters/
+manifests/context files; NOT the `flightdeck/` deck, docs/, or tmp/). The hash
 is stored in `.current` at repo root.
 
-Wiring (see flightdeck/checklists/local-plugin-testing.md):
+Wiring (see flightdeck/knowledge/local-plugin-testing.md):
   --write   recompute the hash and write it to .current. Run this **as the first step of
             the sync**, right before robocopy /MIR — so the mirror carries the fresh stamp
             into the cache too. Never run --write without then syncing, or .current will
@@ -36,7 +36,6 @@ STAMP = ROOT / ".current"
 INCLUDE = [
     "skills",
     "scripts",
-    "scaffolds",
     "adapters",
     ".claude-plugin",
     ".codex-plugin",
@@ -101,7 +100,7 @@ def main(argv=None) -> int:
         return 0
     print(
         f"stale - working tree {live} != synced {stored}; "
-        f"reload cache (see flightdeck/checklists/local-plugin-testing.md)"
+        f"reload cache (see flightdeck/knowledge/local-plugin-testing.md)"
     )
     return 1
 
