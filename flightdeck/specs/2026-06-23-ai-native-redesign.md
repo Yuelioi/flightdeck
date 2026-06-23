@@ -6,7 +6,9 @@ last_updated: 2026-06-23
 
 # AI-native redesign: less structure, more trust
 
-> 状态:**设计进行中**(brainstorm 草案,边锤边填)。这是 flightdeck 自身的一次彻底重设方向探索,不取代当前 3.0;3.0 继续运行,本 spec 探索「纯 AI 形态」。
+> 状态:**设计已锤定(两轮 + 外审回应)= 决策记录**。剩 authoring(协议正文)+ 迁移执行,非设计抉择。这是 flightdeck 自身的彻底重设探索,**不取代当前 3.0**;3.0 继续运行,本 spec 探索「纯 AI 形态」。
+>
+> **读法**:决策真相 = 「⏸ 最新方向 → 本周期锤定 → 协议正文形态 → 第二轮锤定」;落地细节 = 「现行设计」;迁移/取舍/待办/协议初稿见后。
 
 ## ⏸ 最新方向(2026-06-23,边锤边填)
 
@@ -92,37 +94,32 @@ last_updated: 2026-06-23
 
 ---
 
-## 已定的设计(§0–8 = 历史推演底稿)
+## 现行设计(终稿细节)
 
-> ⚠ **§0–8 是更早的推演底稿,部分已被「本周期锤定」+「第二轮锤定」+「变动指南」覆盖**(incident 阶梯计数、knowledge 套位置即状态、母库术语等)。**终稿真相一律以上方那三节为准**;此处只读流程脉络,勿当现行规范引用。定档时这些会被收敛/删除。
+> 上方「本周期锤定 + 第二轮锤定 + 协议正文形态 + 变动指南」是决策真相;本节是落地的结构细节(已与决策对齐;旧推演底稿 §1/5/6/7/8 已删,内容并入决策节)。
 
-### 0. 文件结构(全貌)
+### 文件结构(全貌)
 
 ```
-~/.flightdeck/                 全局母库(普通目录,不版本化)
-├── behave/                     跨项目约定(obey)
-│   ├── commits.md  comments.md ...
-│   └── flightdeck.md           ← 极简协议本身
-├── know/                       跨项目知识(consult)+ first-seen incident 暂存池
-└── projects/<x>/               每项目冷存储:归档 + idea 池(冷的全搬这)
+~/.flightdeck/                 母库 = 全局 deck(普通目录,不版本化 = 冷层)
+├── behave/                     全局约定(obey;经 uses 订阅)
+│   └── flightdeck.md           ← 深层协议(微核心在各工具 CLAUDE.md)
+├── know/                       全局知识(consult;通用 trap 落这)
+└── projects/<x>/               冷存储:archive/(done 的 work)+ ideas/(暂定)
 
-<project>/flightdeck/           项目 deck(在项目 git repo 内)
-├── state.md                    now/仪表盘 —— 唯一恢复载荷,每轮重写
-├── uses.md                     订阅清单 —— 引用全局那 N 个
-├── work/                       在飞的多步工作(替 specs+plans)
+<project>/flightdeck/           项目 deck(在项目 git repo 内 = 热层,每轮 commit)
+├── state.md                    now/仪表盘 —— 恢复载荷,每轮重写,小
+├── uses.md                     订阅清单 —— 每行一条全局相对路径
+├── work/                       在飞多步工作(替 specs+plans)
 │   ├── <effort-a>/  design.md  plan.md     ← superpowers 产出原样放
 │   └── <effort-b>.md                       ← 轻量 effort 单文件
-├── behave/                     项目专属约定
-└── know/                       项目专属知识(树状嵌套,含按域共置的坑)
+├── behave/                     项目约定
+└── know/                       项目知识(按域树状嵌套,坑同域共置)
 ```
 
-无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · **无 frontmatter schema(deck-wide)**——首行自述(`# <标题> — <何时读>`)+ 文件名 + 内容 grep 替路由,文件系统 mtime(走树 `ls` 顺带)替 `last_updated` · 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
+无 `specs/plans/incidents/checklists/docs/references` 六分 · 无常驻 `INDEX.md` · **无 frontmatter schema(deck-wide)**——首行自述 + 文件名 + 内容 grep 替路由,mtime 替 `last_updated` · 项目内无 `archive/`(冷的搬母库)· 无 status 机 · 无自动 stale flip · 无 cockpit AUTO 区 · 无 conform/version/runtime/agents_md · 无 sync 子系统 · 无大部分脚本。
 
-### 1. 两个动词替八个 skill
-- **resume**(原 preflight):读 `state.md`(+ 解析 `uses.md`),按需走树开相关篇。默认**只载 state.md**,其余惰性。
-- **persist**(原 stage/land/status/new/conform/sync/walkaround/emit):重写 `state.md` + 知识就地增改 + `git commit`。「做完」= 从 work/state 删掉,历史在 git。
-
-### 2. state.md = now / 仪表盘
+### state.md = now / 仪表盘
 自由格式,每轮重写,**小**:列「在飞 effort」(一效一行,指向 `work/<x>`)+ 标「当前焦点 + 下一步」+「悬而未决」。它是索引 + 此刻,**不装下所有工作**。只随活动量涨,不随知识总量涨。
 
 #### 旧 cockpit ~10 字段 → state.md(本次分析)
@@ -143,13 +140,13 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 
 **净结果**:state.md = 在飞 effort 列表 + 焦点/下一步 + 悬而未决,**外加 git 给的时间线**。旧的两个 AUTO 区(In Progress / Staged)消失——没有派生副本可同步,也就没有 hook 要 weld。
 
-### 3. work/ = 在飞工作(+ superpowers 集成,硬约束)
+### work/ = 在飞工作(+ superpowers 集成,硬约束)
 - 每个在飞努力 = 一个**文件**(轻量)或一个**文件夹**(多产物)。无 frontmatter、无 status、无 INDEX。
 - **superpowers 咬合**:`work/<effort>/` 原样装 `design.md`(brainstorming)+ `plan.md`(writing-plans);`- [ ]` 复选框**归 executing-plans 管,flightdeck 不碰**。
 - **集成税归零**:新设计无 required frontmatter → superpowers 产出**不必过 `/flightdeck:new` re-stamp**,直接落 `work/`。brainstorming 默认路径用「用户偏好覆盖」改指 `flightdeck/work/<effort>/`。
 - 分工:**superpowers = 写一个 effort 的引擎;flightdeck = 跨会话记忆 + 知识层的薄壳。**
 
-### 4. behave / know = 软知识两层
+### behave / know = 软知识两层
 按「怎么用」分,不按内容类型分:
 
 | 层 | 是什么 | 谁落进来 |
@@ -159,27 +156,9 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 
 - **checklist → behave**,**incident → know**。
 - **incident 按域共置,不建 silo**:`know/auth/oauth-flow.md` 旁边就是 `know/auth/oauth-trap.md`;「它是坑」= 首行 `⚠ trap:` 标记,不是文件夹类型。讲解与坑同域同查,就放一起。
-- incident 机器(fingerprint/recurrence/promotion/archive 扫描)→ **AI 读了再写(就地补,不重复)+ 判断复发 + 复用域内可见**。补救稳定后结晶进 behave(旧 promotion 链,靠判断)。
+- incident **不建机器**(无 fingerprint/recurrence 计数):撞坑 → 按 scope 写 trap(本项目→项目 `know/`,通用→全局 `know/`)→ 再撞 grep 到就不重写 → 补救稳定结晶进 `behave/`(详第二轮锤定 #2)。
 
-### 5. 知识导航 = 走文件夹树(砍 per-area INDEX)
-- `know/`(及需要时 `behave/`)**按 area 任意嵌套**。**文件夹树就是层级 + 索引。**
-- 导航 = 惰性走树:`ls` 顶层 area → 钻相关 → 开相关篇。token ∝ 你要的那条枝,不是整库。
-- **砍 per-area `INDEX.md`**:它只是「这 area 有哪些文件」的派生拷贝(= 漂移+维护)。`ls` 文件系统本身就是永远准确的查询。
-- **大项目反而更省**:今天 preflight 读遍所有 INDEX(成本 ∝ 知识总量);新设计默认只载 state.md、按需走树(成本 ∝ 当前任务)。
-- **逃生口(YAGNI)**:极大单 area 连文件名都判不出时,脚本**派生**一行目录(从首行自述抽,派生=零维护)。只在真不够时上。
-
-### 6. 跨项目 = 引用订阅(不 vendor)
-- 旧「母库」→ **全局 deck `~/.flightdeck/`**(同 behave/know)。
-- 项目放 `uses.md` 引用它实际用的那 N 个全局文件(解决「100 选 10」:那 90 个不进视野)。
-- **引用 ≠ 拷贝 → 整个 sync 子系统蒸发**(`synced`/边界锚/指纹/`--sync-pull`/`--fanout`/`consumers` 全砍)。改全局 = 下次读到新版,自动传播。本地同名文件覆盖/扩展全局(AI 合并,不在文件内 splice)。
-
-### 7. 零丢失 = 单真相 + git 兜底(热层;砍 AUTO 区/hook)
-- 今天 AUTO 区/hook/确定性恢复都是**防 cockpit 与现实漂移**;漂移需要两份拷贝。**新设计 state.md 是唯一真相,无投影副本 → 无可漂移之物**,机械同步失去存在理由。
-- 零丢失靠三层:① 单一真相 + 每轮重写;② **git 兜底**(persist 每轮 commit,漏了可从 diff/commit msg 补)——**只覆盖热层**(项目 repo);③ 一条 behave 约定「state 答得出 在做什么/到哪/下一步/悬而未决」。
-- **机械兜底(hook→强制 commit)留不留 → 已定(本周期):砍。** 母库不版本化、git/undo 出局(单机为主,undo 99% 不存在);零丢失只靠上面三层,冷层(母库)无 git 兜底、尽力而为。
-
-### 8. 极简协议放哪
-放项目 **`CLAUDE.md`/`AGENTS.md`**(每会话必载、最稳,也是今天引导 AI 的方式)。全局通用部分可同时作 `~/.flightdeck/behave/flightdeck.md` 供订阅。
+> 导航(走树砍 INDEX)、跨项目订阅、零丢失三层、协议放哪 —— 旧 §5/6/7/8,已并入「本周期锤定 #1」「第二轮锤定 #1/#6」「协议正文形态」,此处不再重述。
 
 ---
 
