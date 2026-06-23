@@ -23,8 +23,13 @@ At turn end, in order:
   when the work reads as finished, **say in your turn report that you're archiving it**
   (so the user can object next turn) rather than archiving silently. Otherwise leave
   it in `work/`.
-- **cockpit.md** — rewrite it to reflect now: focus + next, the in-flight efforts,
-  open questions. Keep it small.
+- **cockpit.md** — rewrite it to reflect now, in the **canonical skeleton**: a
+  `Focus:` line + `## In flight` (active `work/` efforts) + `## Next` (next concrete
+  action) + `## Open questions` (blocked / waiting / undecided — the nuanced states
+  that have no folder). Those four are the minimum; extra sections are fine. It's a
+  light convention (same weight as the routing header), not a YAML schema — no status
+  field, no `Updated:` line (git knows when/who). Keep it small — it's the recovery
+  payload.
 - **commit** — `git commit` the project repo with a one-line summary of the turn's
   increment. **One commit per turn** (mid-turn writes batch into it; the noise of
   per-turn commits is the accepted price of zero-loss — squash later if you care). If

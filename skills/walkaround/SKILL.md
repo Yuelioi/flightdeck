@@ -18,9 +18,11 @@ nothing; this is a report. The cockpit is free-form prose, so these checks are
 **read-by-judgement**, not field-matching — that's the point of a trust-but-verify
 net: a second pair of eyes reading what's actually there, not a schema validator.
 
-1. **Cockpit vs reality.** Does the cockpit's focus / next / in-flight list match
-   what's actually in `work/`? Flag efforts the cockpit claims that aren't in `work/`,
-   and a focus/next that points at something already moved to the cold store.
+1. **Cockpit shape + reality.** The cockpit should carry the canonical skeleton
+   (`Focus:` + `## In flight` + `## Next` + `## Open questions`) — flag (`i`) a missing
+   section. Then check reality: does `## In flight` match what's actually in `work/`?
+   Flag (`⚠`) efforts the cockpit claims that aren't in `work/`, and a focus/next that
+   points at something already moved to the cold store.
 2. **Orphaned work.** Each `work/<effort>/` should be reachable from the cockpit
    (named in focus / next / in-flight). Flag any effort folder the cockpit never
    mentions — it's either lost or finished-but-not-recorded.

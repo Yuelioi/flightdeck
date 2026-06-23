@@ -4,7 +4,7 @@ Updated: 2026-06-24 · 月离
 
 Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
-## In flight (work/)
+## In flight
 
 - **ai-native-redesign/** — 草稿已全部 graduate 进 live `skills/`,**退役**(单一来源,免漂移);只留 `coverage-check.md`(3.0→新形态 33 类 disposition 映射记录)。真相源 = live `skills/preflight/{SKILL,protocol}.md` + `skills/walkaround/SKILL.md`。
 - **2026-06-23-ai-native-redesign.md** — 重设设计单一可信源(决策记录)。
@@ -18,7 +18,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 3. **外环文档(剩)**:README/README.zh/CHANGELOG/MIGRATION/AGENTS.md/GEMINI.md/`scaffolds/full` 全是 3.0 描述,需改新形态(`outer-ring-docs-drift` trap 警的就是这条)。root `AGENTS.md` 现是孤儿(emit-agents-md 已删)。
 4. **plan #1 verify**(人读):新 skills 英文散文 tone+sense —— 你来读。
 
-## External review triage (tmp/ds·claude·gpt — reference only; they lacked walkaround / current state)
+## Review triage
 
 - **第1轮修**:① preflight cockpit-first · ② launch 去 `Updated:`+固定区块改 free-form · ③ 退役重复草稿 · ④ protocol 补 §Persist · ⑤ §Incidents trap 澄清 · ⑥ derive-listing 标明=约定/动作。
 - **第2轮修(含 walkaround)**:⑦ §Persist 空提交矛盾澄清(板动了→commit;啥没变→不 commit;非 git→无 commit 无 zero-loss)· ⑧ preflight banner 去残留 `[Stage]`(新形态无 Stage 字段)· ⑨ derive-listing recipe 改 fenced + `AREA` 占位(免尖括号渲染歧义)+ 注明 READ WHEN 尽量单行 · ⑩ walkaround 补 **uses 健康检查**(死订阅/shadow/vendor 残留)+ 点明它是「读 prose 的判断网」非字段匹配。

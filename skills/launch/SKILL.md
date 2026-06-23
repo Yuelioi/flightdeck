@@ -17,11 +17,11 @@ only holds when the project is a git repo committed each turn** (persist's job) 
 
 Create under `flightdeck/`:
 
-- `cockpit.md` — seed with `# Cockpit — <project>` and one line naming the current
-  focus. Keep it **free-form** — no fixed schema, no `Updated:` field (git already
-  knows when/who). It only has to answer, in whatever shape fits: what you're doing /
-  where you are / next / open questions. It's the recovery payload, rewritten each
-  turn, kept small.
+- `cockpit.md` — seed the **canonical skeleton**: `# Cockpit — <project>`, a `Focus:`
+  line, and empty `## In flight`, `## Next`, `## Open questions` sections. No YAML, no
+  `Updated:` field (git knows when/who), no status — the skeleton is a light
+  convention (extra sections fine), not a schema. It's the recovery payload, rewritten
+  each turn, kept small.
 - `rules.md` — `## House rules` with a one-line note that it holds project house
   rules + AI-maintenance preferences; read on preflight, stable.
 - `uses.md` — a comment line explaining it lists one `~/.flightdeck`-relative path

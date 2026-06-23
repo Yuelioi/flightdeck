@@ -65,8 +65,8 @@ trust-but-verify net; nothing mechanical self-corrects.
 
 Layout:
     <project>/flightdeck/   warm tier — git-tracked, committed each turn
-      cockpit.md   now — in-flight efforts · focus + next · open questions
-                   (rewritten each turn, kept small)
+      cockpit.md   Focus line + ## In flight + ## Next + ## Open questions
+                   (canonical skeleton, extra sections fine; rewritten each turn)
       rules.md     project house rules — read on preflight, stable
       uses.md      one global path per line this project subscribes to
       work/        in-flight multi-step efforts (one file or folder each)
