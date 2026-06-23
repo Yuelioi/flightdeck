@@ -84,9 +84,9 @@ A vendored file (`synced: true`) is split by the literal marker line `<!-- fligh
 - **shared region** — the frontmatter-stripped body **above** the marker, owned by the master; replaced wholesale by every mechanical pull.
 - **project section** — the marker and everything **below** it, owned by the consumer; never pulled and never pushed.
 - **frontmatter** (routing `when_to_read` / `applies_to` + `synced: true`) is consumer-local; never overwritten.
-- **no marker** → the whole body is the shared region (a pure-shared file); the master's own files carry no marker.
+- **no marker** → the whole body is treated as the shared region. **Vendorable master files ship the marker + a stub project section by default** (so the marker travels to consumers — no hand-authoring); a `synced` file that lacks the marker **and** has drifted surfaces as `marker-missing` (below), not `stale`.
 
-Staleness is keyed to a **fingerprint** over the normalized shared region (NFC, LF, per-line trailing whitespace and trailing blank lines ignored) — not a timestamp. `flightdeck_index.py --sync-status` reports `in-sync` / `stale` / `dangling` / `master-missing`; `--sync-pull` applies the mechanical splice (a text splice, zero AI). `/flightdeck:sync` owns the ritual; preflight's [Step 1.5](SKILL.md) runs the same splice mechanically on entry.
+Staleness is keyed to a **fingerprint** over the normalized shared region (NFC, LF, per-line trailing whitespace and trailing blank lines ignored) — not a timestamp. `flightdeck_index.py --sync-status` reports `in-sync` / `stale` / `marker-missing` (drifted + no marker → a pull would overwrite the whole body, so `--sync-pull` skips it; add the marker first) / `dangling` / `master-missing`; `--sync-pull` applies the mechanical splice (a text splice, zero AI). `/flightdeck:sync` owns the ritual; preflight's [Step 1.5](SKILL.md) runs the same splice mechanically on entry.
 
 ### Supersession model
 

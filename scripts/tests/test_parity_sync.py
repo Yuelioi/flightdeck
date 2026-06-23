@@ -75,8 +75,10 @@ class SyncParity(unittest.TestCase):
         )
         deck = Path(tempfile.mkdtemp()) / "flightdeck"
         (deck / "checklists").mkdir(parents=True)
+        # marker present so the drift is pull-eligible `stale` (not `marker-missing`)
         (deck / "checklists" / "commits.md").write_text(
-            "---\nsynced: true\nlast_updated: 2026-01-01\n---\n# Commits\n\nDECK drifted body\n",
+            "---\nsynced: true\nlast_updated: 2026-01-01\n---\n# Commits\n\nDECK drifted body\n"
+            "<!-- flightdeck:project-specific -->\n\n## Project overrides\n",
             encoding="utf-8",
         )
         (py, jsr) = _both(deck, ["--sync-pull", "--check"], self._env(home))

@@ -560,7 +560,16 @@ function syncStatus(deck) {
     const masterFile = path.join(masterRoot, rel);
     if (!isFile(masterFile)) { out.push(['dangling', rel]); continue; }
     const masterText = readText(masterFile);
-    const state = sharedFingerprint(text) === sharedFingerprint(masterText) ? 'in-sync' : 'stale';
+    let state;
+    if (sharedFingerprint(text) === sharedFingerprint(masterText)) {
+      state = 'in-sync';
+    } else if (!text.includes(PROJECT_MARKER)) {
+      // drifted AND no marker → the whole body is treated as shared, so --sync-pull
+      // would overwrite any local additions wholesale: surface louder than `stale`.
+      state = 'marker-missing';
+    } else {
+      state = 'stale';
+    }
     out.push([state, rel]);
   }
   return out.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));

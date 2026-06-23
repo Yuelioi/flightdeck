@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-22 · 月离 · Stage: v3.0.0-alpha.4 已发布；exit-ritual 收紧 soft-landing 知识落库反模式（知识增量回合当回合落 incident，不推迟到整盘 landing）
+Updated: 2026-06-23 · 月离 · Stage: marker 自带化 + `marker-missing` 安全网 landed（spec+plan 归档；脚本 py/js + 4 skill 散文 + 设计 doc 全翻；母库三文件 stamp、本仓副本 in-sync）
 
 Focus: stage/land 生命周期重构 → `specs/2026-06-22-stage-land-lifecycle.md`（spec 收敛完，待拆 plan）
 
@@ -34,6 +34,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 - [shared-knowledge-sync **v2** 实现] 9 任务 land（169 测试绿、子代理两段评审 + opus 终审 ready；spec graduate→`docs/shared-knowledge-sync.md`、plan 归档）；母库已**物理移到** `~/.flightdeck`、本仓两 vendored 文件 `synced_from`→`synced` 迁移 + 补注册（`--list-consumers` 命中本仓、`in-sync`）。**跨项目 `--fanout` live 实证待做**（需第二个消费 deck）。审分支 diff `feat/shared-knowledge-sync-v2`；**不满意说「翻回」**。分支**未并入 main**（本仓只本地、不 push）。
 - ⚠待复核 `docs/script-layer.md`：本会话 v2 又加 `--register/list/prune-consumers` + 改 `sync_status`（继上次 `--sync-status` 之后），脚本层文档仍未补；下次补齐这批 flag。
 - [exit-ritual soft-landing hardening] heuristic (a) + signal-3 定义两段散文，钉死「知识增量回合推迟到整盘 landing 才落 incident」反模式 + 指明「未验证→照写+verify: 债，非推迟理由」；沉淀 incident `soft-landing-knowledge-defer-drift`。改的是**产品发布面协议散文**（governance edit）——复核两段英文措辞是否合意 · 看 `skills/preflight/exit-ritual.md`（heuristic (a) 末尾 + signal 3 那段）。**未 commit**。
+- [marker 自带化 英文散文] 本会话翻 vendorable-master「自带 marker+stub」约定 + `marker-missing` 安全网,改了**发布面英文散文**:`skills/sync/SKILL.md`（boundary-marker 节 + mode-A 状态表 + mode-C re-stamp + 报告 banner）、`skills/walkaround/SKILL.md`（Audit 15 WARN 文案）、`skills/preflight/protocol.md` + `templates.md`（旧「母库无 marker」断言翻转）。canonical stub 措辞 = `## Project overrides` + 斜体注（用户已选 B）。**复核英文措辞是否合意**;设计真相 → `docs/shared-knowledge-sync.md`。
 
 ## Hanging Tasks
 

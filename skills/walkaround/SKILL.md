@@ -52,6 +52,7 @@ Run all 16 in order. First read `flightdeck/rules.md` if present; resolve behavi
 **Audit 15** — Check vendored files carrying `synced: true`. Sync state uses the read-only `flightdeck_index <deck> --sync-status` (emits `state<TAB>relpath`; the master store is fixed at `~/.flightdeck`):
 - Validate the relpath invariant: no source file at the same relpath in the master store → `dangling`, report **WARNING**;
 - `stale` (the shared-region fingerprint differs from the master's) → report **INFO** "N shared files stale — run `/flightdeck:sync`";
+- `marker-missing` (drifted **and** the consumer file has no `<!-- flightdeck:project-specific -->` marker) → report **WARNING** "local additions will be overwritten on next pull — add the project-specific marker before syncing": the whole body is treated as shared, so a `--sync-pull` would splice it away (the pull itself skips these, but the file is stuck out-of-sync until the marker is added);
 - `master-missing` (`~/.flightdeck` absent) → **do not report** (no master store on this machine, not drift).
 
 Also check (reading frontmatter directly, not `--sync-status` output): a consumer-side `synced: true` file that carries a `consumers` field → report **WARNING** (`consumers` is a master-store-only field, must be stripped when vendoring; its presence in a consumer copy is illegal).

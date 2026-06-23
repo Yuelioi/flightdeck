@@ -686,7 +686,8 @@ def sync_status(deck):
     The shared region is master-authoritative, so any fingerprint difference is
     `stale` (no timestamp-based direction split). States:
       in-sync         shared-region fingerprint equals the master's
-      stale           shared regions differ → /flightdeck:sync can mechanically pull
+      stale           shared regions differ (marker present, project section safe) → /flightdeck:sync can mechanically pull
+      marker-missing  shared regions differ AND the consumer has no project-specific marker → a --sync-pull would overwrite the whole body, eating any local additions; add the marker before pulling
       dangling        master root exists, but the same-relpath source is not a readable file (missing/type mismatch)
       master-missing  master root ~/.flightdeck does not exist → whole deck skipped gracefully
     Paths are deck-relative, POSIX-slashed; sorted by relpath. archive/ excluded."""
@@ -713,7 +714,14 @@ def sync_status(deck):
             out.append(("dangling", rel))
             continue
         master_text = master_file.read_text(encoding="utf-8")
-        state = "in-sync" if shared_fingerprint(text) == shared_fingerprint(master_text) else "stale"
+        if shared_fingerprint(text) == shared_fingerprint(master_text):
+            state = "in-sync"
+        elif PROJECT_MARKER not in text:
+            # drifted AND no marker → the whole body is treated as shared, so --sync-pull
+            # would overwrite any local additions wholesale: surface louder than `stale`.
+            state = "marker-missing"
+        else:
+            state = "stale"
         out.append((state, rel))
     return sorted(out, key=lambda t: t[1])
 

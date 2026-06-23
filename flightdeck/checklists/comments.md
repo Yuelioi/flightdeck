@@ -109,3 +109,11 @@ grep -rniE "(spec[ ]*§|spec[ ]*sec|见.*spec|详见|Phase[ ]+[0-9A-G]|[ (]P[0-9
 1. **删** —— 注释没必要
 2. **改写** —— 只留"为什么/不变量"那部分, 去掉过程坐标
 3. **搬走** —— TODO 搬 tracker/backlog, 历史搬 commit message, 然后删注释
+
+<!-- flightdeck:project-specific -->
+
+---
+
+## 项目覆盖 (本仓库专属)
+
+(暂无 —— 本仓特有约定在此补.)

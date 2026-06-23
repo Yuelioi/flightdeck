@@ -9,7 +9,7 @@ The master deck is the single source of truth for the **shared region** of every
 
 ## The boundary marker
 
-Each vendored file may carry the literal marker line:
+Every vendored file is split by the literal marker line:
 
 ```
 <!-- flightdeck:project-specific -->
@@ -18,7 +18,20 @@ Each vendored file may carry the literal marker line:
 - **Above the marker** (frontmatter-stripped body) = the **shared region**, owned by the master, replaced wholesale on every pull.
 - **The marker and everything below it** = the **project section**, owned by the consumer, **never pulled and never pushed**.
 - **Frontmatter** (routing: `when_to_read` / `applies_to`, plus `synced: true`) stays consumer-local and is never overwritten.
-- **No marker** → the whole body is the shared region (a pure-shared file); the master's own files carry no marker.
+
+**Vendorable master files ship the marker by default**, followed by a stub project section, so the marker travels with the copy and a consumer never has to hand-author it (and never risks a pull silently eating un-marked local additions — see `marker-missing` below). The canonical ending a vendorable master file carries:
+
+```
+<!-- flightdeck:project-specific -->
+
+## Project overrides
+
+_This section is yours — sync never overwrites anything below the marker above._
+```
+
+The stub sits below the marker, so it is excluded from the shared-region fingerprint (it seeds the consumer's copy on first vendoring and is never compared thereafter). A consumer may freely localize that heading and text.
+
+**No marker** → the whole body is treated as the shared region. This is still valid for a genuinely pure-shared file, but for a `synced` file it is now the anomaly the safety net watches: if such a file has also drifted from the master, a pull would overwrite its whole body, so it surfaces as `marker-missing` rather than `stale`.
 
 Staleness ignores frontmatter, per-line trailing whitespace, and trailing blank lines: only the normalized shared region is fingerprinted.
 
@@ -34,8 +47,9 @@ Call form per the deck's recorded `runtime` (e.g. `uv run scripts/flightdeck_ind
 
 1. Run `flightdeck_index.py <deck> --sync-pull` → it applies the mechanical splice to every `stale` file, printing `pulled<TAB>relpath` per file: the shared region is replaced with the master's body, while frontmatter + marker + project section are kept verbatim. **No AI merge.**
 2. States (from `--sync-status`):
-   - `stale` → pulled (shared region replaced).
+   - `stale` → pulled (shared region replaced; the marker keeps the project section safe).
    - `in-sync` → skipped (fingerprint already matches).
+   - `marker-missing` → drifted **and** the consumer file has no marker → **not pulled** (a splice would overwrite the whole body, eating any local additions). Report and ask the user to add a `<!-- flightdeck:project-specific -->` marker above their local content first, then re-run; or, if there is nothing to keep, pull deliberately.
    - `dangling` → the master source is gone; not pulled. Report and ask the user: delete the local copy / keep / re-point.
    - `master-missing` → `~/.flightdeck` absent; report once, no-op.
 3. **Irreversibility** (non-git deck): run `--sync-pull --check` first (prints `would-pull<TAB>relpath`, writes nothing, exit 1 if any stale), review, then apply. A git deck's pull is reversible via git, so apply directly.
@@ -55,7 +69,7 @@ Call form per the deck's recorded `runtime` (e.g. `uv run scripts/flightdeck_ind
 
 Lift a **locally authored** file (no `synced`) up to the master once it has become general enough to share — the AI judges the generality (the only AI step in sync).
 1. Confirm the file is genuinely project-agnostic.
-2. Copy its **body** (the shared region, above any marker) to the master at the **same relpath**; the master's `last_updated` takes that file's value.
+2. Copy its **body** (the shared region, above any marker) to the master at the **same relpath**; the master's `last_updated` takes that file's value. **Then append the canonical marker + stub** (see *The boundary marker*) to the master copy, so the promoted file follows the vendorable-master convention and ships the marker onward.
 3. Stamp `synced: true` onto the local file (it becomes a vendored consumer from now on) and run `--register-consumer <this-deck> <relpath>` against the master.
 4. If the master already has a file of that relpath → **stop and ask** (that's a conflict, not a promote).
 5. regen both the **master** and this deck's INDEX.
@@ -88,6 +102,7 @@ Unified banner at the end (prose first, then the banner, one per turn):
 ─── 🔄 sync ───
 [Synced]  N pulled · M in-sync · D dangling
 [Master]  <resolved master root>   (or "master-missing — ~/.flightdeck absent / not a directory, skipped")
+⚠ K marker-missing — <relpath…> : add a project-specific marker before pulling (omit when none)
 ```
 
 (In `--fanout` mode, additionally one line per deck `<deck>: pulled N / in-sync / skipped / error <reason>` + a total.)

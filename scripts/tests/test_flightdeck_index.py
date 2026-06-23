@@ -887,7 +887,9 @@ class SyncStatusTest(unittest.TestCase):
             master = root / ".flightdeck"
             self._master_file(master, "checklists/commits.md", "2026-06-20", body="# T\n\nMASTER body\n")
             deck = self._consumer(root)
-            self._vendored(deck, "checklists/commits.md", "2026-06-18", body="# T\n\nDRIFTED body\n")  # shared differs → stale
+            # marker present + shared drifted → stale (the consumer has a project section, no silent-loss risk)
+            self._vendored(deck, "checklists/commits.md", "2026-06-18",
+                           body="# T\n\nDRIFTED body\n<!-- flightdeck:project-specific -->\n\n## Project overrides\n")
             self._vendored(deck, "checklists/ahead.md", "2026-06-25")     # no master source → dangling (source absent)
             (deck / "checklists" / "local.md").write_text(
                 "---\nstatus: active\nwhen_to_read: x\napplies_to: [y]\nlast_updated: 2026-06-18\n---\n# local\n",
@@ -924,6 +926,33 @@ class SyncStatusTest(unittest.TestCase):
             self._vendored(deck, "checklists/commits.md", "2026-06-18")
             with self._home(root):
                 self.assertEqual(sync_status(deck)[0][0], "master-missing")
+
+    def test_marker_missing_when_no_marker_and_drifted(self):
+        # A synced file with NO project-specific marker whose body has drifted from the
+        # master's shared region is the silent-data-loss trap: --sync-pull would overwrite
+        # the whole body. It must surface as `marker-missing`, louder than plain `stale`.
+        from flightdeck_index import sync_status
+        marker = "<!-- flightdeck:project-specific -->"
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            master = root / ".flightdeck"
+            self._master_file(master, "checklists/danger.md", "2026-06-20", body="# T\n\nMASTER body\n")
+            self._master_file(master, "checklists/good.md", "2026-06-20", body="# T\n\nMASTER body\n")
+            self._master_file(master, "checklists/pure.md", "2026-06-20", body="# T\n\nSHARED body\n")
+            deck = self._consumer(root)
+            # no marker + drifted (local additions appended without a marker) → marker-missing
+            self._vendored(deck, "checklists/danger.md", "2026-06-18",
+                           body="# T\n\nMASTER body\n\nLOCAL NOTE with no marker\n")
+            # marker present + drifted → ordinary stale (project section is safe)
+            self._vendored(deck, "checklists/good.md", "2026-06-18",
+                           body=f"# T\n\nDRIFTED body\n{marker}\n\n## Project overrides\n")
+            # no marker but body equals master shared → legitimately in-sync (pure-shared file)
+            self._vendored(deck, "checklists/pure.md", "2026-06-18", body="# T\n\nSHARED body\n")
+            with self._home(root):
+                states = {rel: st for st, rel in sync_status(deck)}
+            self.assertEqual(states["checklists/danger.md"], "marker-missing")
+            self.assertEqual(states["checklists/good.md"], "stale")
+            self.assertEqual(states["checklists/pure.md"], "in-sync")
 
     def test_read_only_writes_nothing(self):
         from flightdeck_index import sync_status
@@ -1129,7 +1158,9 @@ class SyncStatusFingerprintTest(unittest.TestCase):
                                    return_value=master):
                 self.assertEqual(
                     flightdeck_index.sync_status(deck),
-                    [("stale", "checklists/comments.md"),    # sorted by relpath: comments < commits
+                    # comments.md drifted with NO marker → marker-missing (not plain stale);
+                    # commits.md drifted but the drift is below the marker → in-sync.
+                    [("marker-missing", "checklists/comments.md"),    # sorted by relpath: comments < commits
                      ("in-sync", "checklists/commits.md")])
 
     def test_dangling_when_master_lacks_file(self):
@@ -1169,6 +1200,25 @@ class SyncPullCliTest(unittest.TestCase):
                 # second apply is a no-op now in-sync: exit 0, content stable
                 self.assertEqual(flightdeck_index.main([str(deck), "--sync-pull"]), 0)
                 self.assertEqual(body, cpath.read_text(encoding="utf-8"))
+
+    def test_marker_missing_file_is_not_pulled(self):
+        # A drifted synced file with NO marker is `marker-missing`, not `stale`, so
+        # --sync-pull must leave it untouched (overwriting it would eat local additions).
+        with tempfile.TemporaryDirectory() as d:
+            deck = Path(d) / "deck"
+            master = Path(d) / "master"
+            _mk(master / "checklists" / "commits.md", "---\n---\n# T\n\nFRESH\n")
+            cpath = deck / "checklists" / "commits.md"
+            _mk(cpath, "---\nsynced: true\n---\n# T\n\nFRESH\n\nLOCAL NOTE no marker\n")
+            before = cpath.read_text(encoding="utf-8")
+            with mock.patch.object(flightdeck_index, "_resolve_master_root",
+                                   return_value=master):
+                # --check: no stale file pending → exit 0, no would-pull line
+                self.assertEqual(
+                    flightdeck_index.main([str(deck), "--sync-pull", "--check"]), 0)
+                # apply: file is left byte-for-byte intact (no silent overwrite)
+                self.assertEqual(flightdeck_index.main([str(deck), "--sync-pull"]), 0)
+                self.assertEqual(before, cpath.read_text(encoding="utf-8"))
 
     def test_master_missing_is_graceful_noop(self):
         with tempfile.TemporaryDirectory() as d:
