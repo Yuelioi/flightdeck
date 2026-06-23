@@ -22,7 +22,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **继续锤 AI-native 重设** — 本周期已锤定 6 条（位置替状态 / 冷存储进母库 / 母库不版本化 / 砍 INDEX / 砍自动 stale / **frontmatter 全砍→零 schema**，连带 git-undo·多 agent·机械兜底·迁移痛 #2 出局）。剩「还要锤」：3.0→新形态一次性迁移 · 派生目录触发阈值 · 产品化去留 · 极简协议正文。brainstorm 进行中 → `specs/2026-06-23-ai-native-redesign.md`。
+- **继续锤 AI-native 重设** — 本周期已锤定 6 条（位置替状态 / 冷存储进母库 / 母库不版本化 / 砍 INDEX / 砍自动 stale / **frontmatter 全砍→零 schema**，连带 git-undo·多 agent·机械兜底·迁移痛 #2 出局）。产品化方向已锁（doc-first 薄产品，细节缓）。剩「还要锤」：3.0→新形态一次性迁移 · 极简协议正文 · 派生目录触发阈值。brainstorm 进行中 → `specs/2026-06-23-ai-native-redesign.md`。
 - （**parked**，focus 已切走）**review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 

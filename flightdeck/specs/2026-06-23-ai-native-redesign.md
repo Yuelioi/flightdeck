@@ -134,7 +134,7 @@ last_updated: 2026-06-23
 ## 还要锤(未定)
 - **从 3.0 deck 一次性迁到新形态**(讽刺但必要,但因零 schema 大大简化):specs/plans→work、各 knowledge 文件夹→behave/know(按域)+ 机械剥 frontmatter 合并出首行、冷的(归档/idea 池/first-seen incident)搬母库、cockpit→state、sync 拆解。
 - **派生目录**约定(首行自述格式已定;剩「何时触发」的阈值)。
-- **产品化**去留(缓议:adapters/scaffold/发布面/可移植时 vendoring 按需加回)。
+- **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
 - AI 读的那份**极简协议**正文(替今天 ~169K 字符散文)。
 
 > 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
