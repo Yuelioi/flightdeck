@@ -12,7 +12,7 @@ last_updated: 2026-06-23
 
 > 用户拍板(原话):**「使用新的目录结构,但保留旧版本的 frontmatter,不过删减大部分生命周期。」** + 续锤:**「位置替状态——冷的进母库,项目只剩热的;母库不版本化,单机为主,undo 基本不要。」**
 
-这是对下文早期草案的**修正,以此为准**(下文「无 frontmatter schema / when_to_read 降级成首行 / 砍派生目录」等早期判断被本节覆盖):
+这是对下文早期草案的**修正,以此为准**。早期草案经 pivot、再经本周期 6 条迭代(frontmatter 一度被 pivot 保留、又被锤定 #6 反转回全砍)——**最终态一律以「本周期锤定」+「变动指南」为准**,下文 §0–8 是更早的推演底稿。
 
 - **目录结构 = 新的**:`state.md` + `uses.md` + `work/` + `behave/`(域嵌套)+ `know/`(按域共置、坑带 ⚠)。沿用下文。
 - **frontmatter = 全砍(deck-wide 无 schema)**:这是对 pivot「保留旧版 frontmatter」的**反转**——auto-stale 一砍,保 frontmatter 只剩路由价值,而路由由**首行自述 + grep** 替代。knowledge 不带 frontmatter;`when_to_read` 降级成首行散文,`applies_to`/`last_updated`/`when_to_update`/`status` 全砍。详第 6 条。
@@ -20,7 +20,7 @@ last_updated: 2026-06-23
 
 ### 本周期锤定(2026-06-23,6 条)
 
-1. **砍常驻 INDEX → grep + 走树。** resume 默认只读 `state.md`;任务起时 grep 文件头 `applies_to`/`when_to_read` + `ls` 走树按需开篇。成本 ∝ 命中,守住 token 红线;无派生副本 = 无漂移。超大 area 才脚本派生一行目录(YAGNI 逃生口)。
+1. **砍常驻 INDEX → grep + 走树。** resume 默认只读 `state.md`;任务起时 grep **文件名 + 首行自述 + body**(无 frontmatter 可 grep,见第 6 条)+ `ls` 走树按需开篇。成本 ∝ 命中,守住 token 红线;无派生副本 = 无漂移。超大 area 才脚本派生一行目录(YAGNI 逃生口)。
 2. **全砍 status 机 → 位置替状态。** 文件「在不在项目里」= 活不活。`work/` 里有 = active,挪走 = done;knowledge 同理。status 字段消失,生命周期长链随之拆掉。
 3. **冷存储全进母库。** 项目 `flightdeck/` 只剩热的(state/uses/work/behave/know);`~/.flightdeck/` 持 `know/`(跨项目 + first-seen incident 暂存池)+ `projects/<x>/`(本项目归档 + idea 池)。
    - **incident 晋升阶梯(位置即复发计数)**:第一次撞 → 进母库 `know/`(还不知是否本项目专属,先 park 跨项目池);再撞 → 检索母库被提醒;**第三次 → 回项目**(证明本项目复发,落本地)。替掉 `recurrences` 计数器 + promotion gate;补救稳定后结晶进 `behave`。
@@ -92,7 +92,25 @@ last_updated: 2026-06-23
 - **persist**(原 stage/land/status/new/conform/sync/walkaround/emit):重写 `state.md` + 知识就地增改 + `git commit`。「做完」= 从 work/state 删掉,历史在 git。
 
 ### 2. state.md = now / 仪表盘
-自由格式,每轮重写,**小**:列「在飞 effort」(一效一行,指向 `work/<x>`)+ 标「当前焦点 + 下一步」。它是索引 + 此刻,**不装下所有工作**。只随活动量涨,不随知识总量涨。
+自由格式,每轮重写,**小**:列「在飞 effort」(一效一行,指向 `work/<x>`)+ 标「当前焦点 + 下一步」+「悬而未决」。它是索引 + 此刻,**不装下所有工作**。只随活动量涨,不随知识总量涨。
+
+#### 旧 cockpit ~10 字段 → state.md(本次分析)
+state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派生区**(state 即真相,无投影副本 → 无漂移,turn-end welding hook 一并蒸发):
+
+| 旧 cockpit 字段 | 去向 |
+|---|---|
+| `Updated`(日期·人·Stage) | 时间/人 → git 已知;**Stage(生命周期阶段)** 留进 state(恢复要) |
+| `Focus` | → state「当前焦点」 |
+| `Pointers`(配置→rules.md…) | 删(rules.md 没了);定位归协议微核心 |
+| `## In Progress`(AUTO,派生 status:active) | → state「在飞 effort」一效一行(**手写,非 AUTO**) |
+| `## Staged (awaiting land)`(AUTO) | **删**:无 stage/land 两段、无 archive 阀;done 直接 persist 挪母库 |
+| `## Next` | → state「下一步」 |
+| `## Key Context` | → state free-form(活的)或就近放 `work/<effort>` |
+| `## Pending Review`(待复核 / verify 债) | → state「悬而未决」一行(无 verify 字段;下次碰到再复核) |
+| `## Hanging Tasks`(阻塞) | → state「悬而未决」一行 |
+| `## Note on dogfooding`(项目专属) | → `behave/`(项目约定) |
+
+**净结果**:state.md = 在飞 effort 列表 + 焦点/下一步 + 悬而未决,**外加 git 给的时间线**。旧的两个 AUTO 区(In Progress / Staged)消失——没有派生副本可同步,也就没有 hook 要 weld。
 
 ### 3. work/ = 在飞工作(+ superpowers 集成,硬约束)
 - 每个在飞努力 = 一个**文件**(轻量)或一个**文件夹**(多产物)。无 frontmatter、无 status、无 INDEX。
@@ -124,10 +142,10 @@ last_updated: 2026-06-23
 - 项目放 `uses.md` 引用它实际用的那 N 个全局文件(解决「100 选 10」:那 90 个不进视野)。
 - **引用 ≠ 拷贝 → 整个 sync 子系统蒸发**(`synced`/边界锚/指纹/`--sync-pull`/`--fanout`/`consumers` 全砍)。改全局 = 下次读到新版,自动传播。本地同名文件覆盖/扩展全局(AI 合并,不在文件内 splice)。
 
-### 7. 零丢失 = 单真相 + git 兜底(砍 AUTO 区/hook)
+### 7. 零丢失 = 单真相 + git 兜底(热层;砍 AUTO 区/hook)
 - 今天 AUTO 区/hook/确定性恢复都是**防 cockpit 与现实漂移**;漂移需要两份拷贝。**新设计 state.md 是唯一真相,无投影副本 → 无可漂移之物**,机械同步失去存在理由。
-- 零丢失靠三层:① 单一真相 + 每轮重写;② **git 兜底**(persist 每轮 commit,漏了可从 diff/commit msg 补);③ 一条 behave 约定「state 答得出 在做什么/到哪/下一步/悬而未决」。
-- **这是 trust 最吃重最险处**:hook 本无活可干;若想留一丝机械兜底,可退化成「每轮强制 commit」。**(留/不留 = 用户选,待定。)**
+- 零丢失靠三层:① 单一真相 + 每轮重写;② **git 兜底**(persist 每轮 commit,漏了可从 diff/commit msg 补)——**只覆盖热层**(项目 repo);③ 一条 behave 约定「state 答得出 在做什么/到哪/下一步/悬而未决」。
+- **机械兜底(hook→强制 commit)留不留 → 已定(本周期):砍。** 母库不版本化、git/undo 出局(单机为主,undo 99% 不存在);零丢失只靠上面三层,冷层(母库)无 git 兜底、尽力而为。
 
 ### 8. 极简协议放哪
 放项目 **`CLAUDE.md`/`AGENTS.md`**(每会话必载、最稳,也是今天引导 AI 的方式)。全局通用部分可同时作 `~/.flightdeck/behave/flightdeck.md` 供订阅。
