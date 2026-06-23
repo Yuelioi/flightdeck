@@ -207,13 +207,63 @@ state.md 把旧 cockpit 塌缩成 **3 样 free-form**,并**砍掉所有 AUTO 派
 | incident 复发计数 | 位置阶梯:first-seen→母库 `know/`;复发→检索母库;第三次→回项目 |
 | incident 退休/晋升 | 补救稳定 → 结晶进 `behave/`(旧 promotion 链,靠判断) |
 
-## 还要锤(未定)
-- **从 3.0 deck 一次性迁到新形态**:**映射表已出**(见上「变动指南」);剩**机械执行脚本**——批量 mv/删、剥 frontmatter 合并出首行、冷的搬母库。一次性,跑完即弃。
-- **派生目录**约定(首行自述格式已定;剩「何时触发」的阈值)。
-- **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
-- **极简协议正文 authoring**(形态已定=两层,见上「协议正文形态」)——把今天 ~169K 字符压成微核心(~1 页进 `CLAUDE.md`)+ 深层(`behave/flightdeck.md`)。**发布面 = 英文**。
+### 迁移脚本形态(一次性,分工同 conform)
+- **机械(脚本)**:按三表批量 `mv`/`rm` —— specs/plans→`work/`、checklists→`behave/`、docs/incidents→`know/<域>/`、archive+done+idea→母库、删所有 `INDEX.md`、剥所有 frontmatter。
+- **语义(AI 一趟)**:① 每个知识文件**合成首行** `# <title> — <when_to_read>`(从旧 frontmatter title+when_to_read 拼,AI 润);② `cockpit.md`→`state.md` 重塑(In Progress/Focus/Next 搬进;Staged/AUTO 区丢;Pending/Hanging→「悬而未决」)。
+- **纪律**:破坏性(mv/rm)→ 先 `--check` 干跑列清单 + 迁移前留一个 git commit,跑完人工扫一眼。**一次性,跑完即弃**(3.0 布局消失后脚本无用)。
 
-> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发 —— 见上「本周期锤定」。
+## 还要锤(未定)
+- **从 3.0 deck 一次性迁到新形态**:映射表 + **脚本形态已定**(见上「迁移脚本形态」);剩**写脚本 + 跑**(等新形态实体存在后才有意义)。
+- ~~**派生目录触发阈值**~~ **已定**:无数字阈值、不落盘。它是 resume **走树时的按需读工具**——AI 判断「`ls` + 文件名不足以路由」时跑 `derive-listing <area>`(grep 每文件首行,打印一次性目录到上下文),**transient,不存文件** → 零维护、零漂移。触发 = AI 判断,不是计数。
+- **产品化**——**方向已锁:doc-first 薄产品**(细节缓)。依据:resume/persist 是协议驱动的**自动行为**(非 slash command),手动阀又基本砍光 → **命令面蒸发** → 产品 ≈「**协议正文** + **每工具安装知识**(Claude→`CLAUDE.md` / Codex→`AGENTS.md` / Cursor→`.cursor/rules/*.mdc` / Gemini→`GEMINI.md`)+ **按需 vendoring 快照**」。scripts/scaffold-as-code 随零 schema·无 INDEX·无 sync 一并砍光。**缓**:具体留几个手动阀、要不要 setup helper、adapter 打包形态——等协议正文 + 迁移稳定再定(那时才看得清该留什么阀)。
+- **极简协议正文 authoring**(形态已定=两层)——**微核心英文初稿已草拟**(见下「协议微核心初稿」);剩:深层(`behave/flightdeck.md`)authoring + 与今天 ~169K 散文对照查漏 + 定稿润色。**发布面 = 英文**。
+
+> 已消解(2026-06-23 本周期):INDEX 去留、status 机边界、自动 stale 范围、**frontmatter 字段表(→ 零 schema)**、git/undo 载体、零丢失机械兜底、多 agent 并发、新鲜度载体(→ mtime)、产品形态(→ doc-first)、协议形态(→ 两层)、派生目录阈值、迁移脚本形态 —— 见上各节。**设计层已无悬而未决的抉择。**
+
+## 提议:协议微核心初稿(英文,进 `CLAUDE.md`)
+
+> 这是 ~1 页微核心的英文初稿(发布面 = 英文)。它同时是「~1 页真能装下全部决定吗」的自检——下稿通过即证明骨架自洽。深层 `behave/flightdeck.md` 另拟。
+
+```markdown
+## flightdeck (micro-core)
+
+Two automatic verbs:
+- **resume** (session start): read `flightdeck/state.md`; then walk the tree
+  (`ls` + grep) for whatever the task needs. Default load = state.md only;
+  everything else is lazy.
+- **persist** (turn end): rewrite `state.md`, write knowledge in place,
+  `git commit`. "Done" = move the effort out of `work/` into
+  `~/.flightdeck/projects/<project>/archive/`. Git is the history.
+
+Layout:
+    <project>/flightdeck/
+      state.md   now — in-flight efforts · focus + next · open questions
+                 (rewritten each turn, kept small)
+      uses.md    which global files this project subscribes to
+      work/      in-flight multi-step efforts (one file or one folder each)
+      behave/    conventions to obey on matching tasks
+      know/      knowledge to consult (nested by domain)
+    ~/.flightdeck/   (plain global directory, not under git)
+      behave/  know/      cross-project; first-seen incidents land in know/
+      projects/<x>/       this project's cold store: archive/ + ideas/
+
+Invariants:
+- **Location is state.** In `work/` = active; moved to the global store = done.
+  There is no status field.
+- **First-line self-description.** Every knowledge file opens with
+  `# <title> — <when to read>`; a pitfall opens with `⚠ trap: …`. Routing =
+  grep filename / first line / body + walk the tree. Freshness = glance at the
+  file's mtime (`ls -l`, free while walking) plus the body, and judge.
+- **Write gate.** Record only what changes future behavior, informs a decision,
+  or gets referenced again. Skip one-off logs, green-build noise, and
+  dead-end exploration that concluded nothing.
+- **Zero-loss (warm tier).** persist commits the project repo every turn;
+  `state.md` must answer: what you're doing / where you are / next step /
+  open questions.
+
+Depth (read on demand): `~/.flightdeck/behave/flightdeck.md` — write-gate skip
+list, incident master↔project ladder, uses-merge, vendoring, derived-listing.
+```
 
 ## 原理自洽性自检
 每个 scale 顾虑(母库、100 选 10、多半成品、superpowers、多级知识库、incident/checklist)修法都落回贯穿原理。「少结构」≠「零结构」——留**挣得起**的(订阅清单、work/ 一效一档、behave/know 两层、文件夹树)、砍**不挣钱**的(维护机器/派生副本/同步/迁移/校验)。

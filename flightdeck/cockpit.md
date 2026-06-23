@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-23 · 月离 · Stage: brainstorming「AI-native 重设」（本周期锤定 6 条：位置替状态 + 冷存储进母库 + frontmatter 全砍，边锤边填）— plan 3 仍 staged 待 land
+Updated: 2026-06-23 · 月离 · Stage: 「AI-native 重设」设计层收官（锤定 6 条 + 产品/协议/迁移/派生目录全定 + 一致性清理 + 微核心英文初稿）— 剩纯 authoring/执行；plan 3 仍 staged 待 land
 
 Focus: AI-native 重设 brainstorm（少结构·多信任 AI）→ `specs/2026-06-23-ai-native-redesign.md`；stage/land plan 3 暂 parked（staged 待 land）
 
@@ -22,7 +22,7 @@ Pointers: 配置 → rules.md · 约定/偏好 → CLAUDE.md · artifact → 各
 
 ## Next
 
-- **继续锤 AI-native 重设** — 本周期已锤定 6 条（位置替状态 / 冷存储进母库 / 母库不版本化 / 砍 INDEX / 砍自动 stale / **frontmatter 全砍→零 schema**，连带 git-undo·多 agent·机械兜底·迁移痛 #2 出局）。产品化方向已锁（doc-first 薄产品）+ 协议正文形态已定（两层：微核心常载 + 深层惰加载）。设计性大叉基本锤完——剩偏「写/执行」：极简协议 authoring（英文发布面）· 3.0→新形态迁移（**映射表已出**=spec「变动指南」三表；剩机械执行脚本）· 派生目录触发阈值。brainstorm 进行中 → `specs/2026-06-23-ai-native-redesign.md`。
+- **AI-native 重设 — 设计层已收官** — 本周期锤定 6 条 + 产品化（doc-first 薄产品）+ 协议形态（两层）+ 迁移脚本形态 + 派生目录阈值 + 新鲜度（mtime）全定,一致性清理过,**微核心英文初稿已在 spec**。**无悬而未决的设计抉择。** 剩纯「写/执行」,无需更多 brainstorm:① 深层 `behave/flightdeck.md` authoring + 对照 169K 查漏 + 微核心定稿;② 迁移脚本(等新形态实体后写+跑);③ 产品化细节(缓:几个手动阀/setup helper)。**下一步建议**:review 微核心初稿定稿,或起 `work/` 写深层。 → `specs/2026-06-23-ai-native-redesign.md`。
 - （**parked**，focus 已切走）**review + land plan 3** — 通读 6 文件英文散文（`exit-ritual`/`protocol`/`landing`/`status`/`preflight`(SKILL+templates+folder-semantics)/`bootstrap`）确认 tone+自洽；满意后 `/flightdeck:landing` → 归档 plan 3 + graduate spec `2026-06-22-stage-land-lifecycle` → `docs/`。验证 = plan `verify:` 行；grep 旧术语已清零（仅留 2 处「not three tiers / no checkpoint ritual」negative mention）。**Downstream**（未做，plan 末「Downstream」节）：`docs/session-flow.md` 等 deck 内文档 + README/CHANGELOG 的 soft-landing 提及，land 时会被 stale-flag。
 - （**parked**）本地缓存已同步当前构建（`build_stamp` `current`），多日 dogfood 中；跨项目 `--fanout` live 实证待做（需第二个消费 deck）→ `checklists/local-plugin-testing.md`。
 
