@@ -7,10 +7,11 @@ file is loaded only when you need the detail below.
 ## Persist (turn end)
 
 The micro-core's second verb, spelled out. Persist runs at the **end of an execution
-turn** — one that did real work or produced knowledge; a pure conversation /
-clarification turn persists nothing. It is engaged only once preflight has loaded the
-protocol this session (the running session context carries that fact — it is not
-injected and does not survive into a fresh session that never runs preflight).
+turn** — one that did real work or moved the board. A pure conversation /
+clarification turn that changed nothing persists nothing. Persist applies for the
+rest of any session in which you ran preflight; a session that never runs preflight
+is not engaged (nothing auto-loads, nothing auto-saves — "engaged" is just normal
+conversation history, not an injected flag).
 
 At turn end, in order:
 
@@ -25,9 +26,11 @@ At turn end, in order:
   open questions. Keep it small.
 - **commit** — `git commit` the project repo with a one-line summary of the turn's
   increment. **One commit per turn** (mid-turn writes batch into it; the noise of
-  per-turn commits is the accepted price of zero-loss — squash later if you care). A
-  turn that produced no durable knowledge still commits the board ("nothing new to
-  save, board current") — the guarantee rides on the repo being committed.
+  per-turn commits is the accepted price of zero-loss — squash later if you care). If
+  the turn moved the board but produced no new knowledge, the cockpit rewrite is
+  itself a real change → commit it ("nothing new to save, board current"). Only a turn
+  that changed *nothing* commits nothing. No git repo → no commit and no zero-loss;
+  that's why launch points you to `git init`.
 
 ## Write gate
 
@@ -92,15 +95,18 @@ relevance) and the free-form body.
 `<area>` is just a path, so this works the same on a local `knowledge/<domain>/`
 or a `uses`-subscribed `~/.flightdeck/knowledge/…` subtree.
 
-Reference recipe (ripgrep ships with the agent; adapt to whatever grep your
-environment has):
+Reference recipe — `AREA` is the directory you're routing into (ripgrep if you have
+it, otherwise any grep; this is one way, not a fixed command):
 
-    rg --no-heading -N -g '*.md' '^(# |SUMMARY:|READ WHEN:)' <area>/
+```sh
+rg --no-heading -N -g '*.md' '^(# |SUMMARY:|READ WHEN:)' AREA/
+```
 
-This prints, per matching file, `path:line` for the title + summary + read-when
-lines — a flat directory the AI scans to pick what to open. When a header's
-`READ WHEN:` spills onto `-` bullet lines you need, read that file's block
-directly (everything up to its first `---`); the recipe is a starting glance, not
-a contract.
+It prints, per file, `path:line` for the title + the labelled header lines — a flat
+directory to scan. It catches the `READ WHEN:` label but not keywords that spill onto
+`-` bullet lines, so **keep `READ WHEN` to one line of keywords where you can**; when
+a header you care about has bullets, read that file's block directly (the lines above
+its first `---` — cheap, it's the top of the file). The recipe is a starting glance,
+not a contract.
 
 It is **never written to disk** — transient, zero-maintenance, zero-drift.

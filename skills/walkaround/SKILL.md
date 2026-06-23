@@ -14,7 +14,9 @@ act on. Nothing here self-heals.
 ## Run this — read-only audit
 
 Sweep the deck and report each finding with a severity (`⚠` warn / `i` info). Fix
-nothing; this is a report.
+nothing; this is a report. The cockpit is free-form prose, so these checks are
+**read-by-judgement**, not field-matching — that's the point of a trust-but-verify
+net: a second pair of eyes reading what's actually there, not a schema validator.
 
 1. **Cockpit vs reality.** Does the cockpit's focus / next / in-flight list match
    what's actually in `work/`? Flag efforts the cockpit claims that aren't in `work/`,
@@ -32,6 +34,12 @@ nothing; this is a report.
    `~/.flightdeck/projects/<x>/archive/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state — leaving it
    in `work/` says "still live").
+6. **uses.md health.** For each line in `uses.md`: flag a subscribed
+   `~/.flightdeck/…` path that's missing or renamed (dead subscription, `⚠`); note
+   (`i`) a local `knowledge/` file that shadows a global one (replace is intended —
+   surface it so it's deliberate, not accidental); flag (`i`) a subscription whose
+   target was already vendored into the repo (the copy + the live subscription now
+   double up).
 
 ## Output
 

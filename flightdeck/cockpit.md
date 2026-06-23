@@ -20,8 +20,9 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 ## 外审 triage(tmp/ds·claude·gpt,仅供参考——他们没拿到 walkaround、不知现状)
 
-- **修了的真问题**:① preflight 改 cockpit-first(原先读 rules/uses 再 cockpit,与 micro-core 自身表述矛盾)· ② launch 种子 cockpit 去 `Updated:` + 固定区块,改 free-form · ③ 退役重复草稿(双份 micro-core)· ④ protocol 补 **§Persist** 节(最核心机制原先只一句)· ⑤ §Incidents 澄清(trap「不重写」=不造重复≠根因变了也不改;「fade」=结晶后删)· ⑥ derive-listing 标明是「约定/动作」非「装好的命令」。
-- **误报**:rg 反引号语法错(源文件 recipe 干净,他们把 prose 行内代码 `` `<area>` `` 当 recipe)· walkaround「功能悬空」(skill 存在,只是没给他们看)。
+- **第1轮修**:① preflight cockpit-first · ② launch 去 `Updated:`+固定区块改 free-form · ③ 退役重复草稿 · ④ protocol 补 §Persist · ⑤ §Incidents trap 澄清 · ⑥ derive-listing 标明=约定/动作。
+- **第2轮修(含 walkaround)**:⑦ §Persist 空提交矛盾澄清(板动了→commit;啥没变→不 commit;非 git→无 commit 无 zero-loss)· ⑧ preflight banner 去残留 `[Stage]`(新形态无 Stage 字段)· ⑨ derive-listing recipe 改 fenced + `AREA` 占位(免尖括号渲染歧义)+ 注明 READ WHEN 尽量单行 · ⑩ walkaround 补 **uses 健康检查**(死订阅/shadow/vendor 残留)+ 点明它是「读 prose 的判断网」非字段匹配。
+- **误报(两轮都报,有据驳)**:rg 反引号语法错——`cat -A` 证源文件第 98 行 `… '^(…)' <area>/` **铁无反引号**,是他们那侧尖括号渲染被吃;walkaround「悬空」(第1轮没给他们看,第2轮给了)。
 - **by-design 取舍(不改,spec 已认)**:每轮 commit 噪音史(zero-loss 的代价,可后 squash)· `present=valid` 二元(RECHECK WHEN+mtime+body 兜)· **整系统依赖 AI 记住协议**——这正是 spec 列的头号风险(无机械自纠偏),walkaround 是兜底网,非 bug。
 
 ## Open questions / 悬而未决

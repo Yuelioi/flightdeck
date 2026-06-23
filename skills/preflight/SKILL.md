@@ -22,14 +22,15 @@ demand from [protocol.md](protocol.md).
 3. **Walk the tree for what the task needs (lazy).** Default load = cockpit.md only;
    everything else is on demand. `ls` the deck (`work/`, `knowledge/<domain>/`, the
    subscribed global subtrees). When `ls` + filenames aren't enough to judge
-   relevance, run a transient `derive-listing <area>` (grep routing headers; see
-   [protocol.md](protocol.md) § Derived listing) — never written to disk.
+   relevance, perform a transient *derive-listing* of that area — run the grep over
+   routing headers yourself (see [protocol.md](protocol.md) § Derived listing); it's a
+   convention, not an installed command, and prints to context only (never to disk).
 4. **Passive git note.** `git branch --show-current` + `git status --short`. Emit one
    non-blocking line only if the branch clearly mismatches the cockpit focus, or on a
    detached HEAD. Otherwise say nothing.
 5. **Report the next step, then STOP.** State the cockpit's next action in one
-   sentence and emit the `─── 🛫 preflight ───` banner (`[Stage]` + `[Next]` +
-   read-only / "say go"). Do NOT load task files or start execution.
+   sentence and emit the `─── 🛫 preflight ───` banner (`[Next]` + the read-only /
+   "say go" line). Do NOT load task files or start execution.
 
 ## Not engaged unless you run this
 
