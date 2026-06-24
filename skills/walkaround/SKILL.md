@@ -38,7 +38,7 @@ net: a second pair of eyes reading what's actually there, not a schema validator
    above it (that line then parses as a setext heading and the terminator vanishes on
    render).
 5. **Done but not archived.** A finished effort should be moved out of `work/` into
-   `~/.flightdeck/projects/<x>/archive/`. Flag a `work/` effort whose cockpit notes /
+   `~/.flightdeck/projects/<slug>/archive/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state — leaving it
    in `work/` says "still live").
 6. **uses.md health.** For each line in `uses.md`: flag (`⚠`) a subscribed

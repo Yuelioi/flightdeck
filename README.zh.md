@@ -47,8 +47,9 @@ your-project/
     └── knowledge/         # 常驻知识，按域嵌套
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
-├── knowledge/             # 跨项目知识（经 uses.md 订阅）
-└── projects/<name>/       # 本项目的冷存：archive/ + ideas/
+├── knowledge/             # 真·跨项目知识（经 uses.md 订阅）
+└── projects/<slug>/       # 单个项目的冷存：archive/ + ideas/ + references/
+                           # <slug> = 项目绝对路径，分隔符 → -（防同名碰撞）
 ```
 
 没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的一项是活的；把它移进 `~/.flightdeck/projects/<name>/archive/` 就标记为完成。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。

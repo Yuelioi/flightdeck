@@ -19,7 +19,8 @@ At turn end, in order:
   bug + root cause, a reusable procedure, a trap) → write it in place under
   `knowledge/<domain>/` with a routing header. Nothing passes → write nothing.
 - **Efforts** — if a `work/<effort>/` finished this turn, move it out to
-  `~/.flightdeck/projects/<x>/archive/` (location is state). "Done" is a judgement:
+  `~/.flightdeck/projects/<slug>/archive/` (location is state; `<slug>` see § Cold tier).
+  "Done" is a judgement:
   when the work reads as finished, **say in your turn report that you're archiving it**
   (so the user can object next turn) rather than archiving silently. Otherwise leave
   it in `work/`.
@@ -38,6 +39,24 @@ At turn end, in order:
   that changed *nothing* commits nothing. No git repo → no commit and no zero-loss:
   say so once ("no git repo — zero-loss not active") so the user isn't assuming a
   guarantee that isn't on; that's why launch points you to `git init`.
+
+## Cold tier (`~/.flightdeck`)
+
+A plain global directory, **not** git — outside the zero-loss guarantee. Two kinds of
+thing live here:
+
+- `knowledge/` — **genuinely cross-project** knowledge: a comment-style guide, a commit
+  checklist — what any project would consult. Projects opt in by listing a path under it
+  in their `uses.md`. Don't park one project's research here.
+- `projects/<slug>/` — **one project's** cold store, three subdirs: `archive/` (efforts
+  moved out of `work/` when done), `ideas/` (unstarted, out of the project view), and
+  `references/` (that project's imported external material — RFC / competitor clones,
+  too heavy and browse-only for the warm deck).
+
+`<slug>` is the project's **absolute path with `/`, `\`, and `:` replaced by `-`** — e.g.
+`E:\projects\tools\flightdeck` → `E--projects-tools-flightdeck`. Keying on the full path,
+not the basename, keeps two same-named projects from colliding; it's the same scheme
+Claude Code uses for `~/.claude/projects/`.
 
 ## Write gate
 

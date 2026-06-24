@@ -47,8 +47,9 @@ your-project/
     └── knowledge/         # persistent knowledge, nested by domain
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
-├── knowledge/             # cross-project knowledge (subscribed via uses.md)
-└── projects/<name>/       # this project's cold store: archive/ + ideas/
+├── knowledge/             # genuinely cross-project knowledge (subscribed via uses.md)
+└── projects/<slug>/       # one project's cold store: archive/ + ideas/ + references/
+                           # <slug> = the project's abs path, separators → - (collision-proof)
 ```
 
 There is no `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` effort is active; moving it to `~/.flightdeck/projects/<name>/archive/` marks it done. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.

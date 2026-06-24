@@ -43,7 +43,8 @@ the protocol this session.
 ## Fallback when the cockpit names no next action
 
 Don't auto-start. Surface candidates: active efforts in `work/` first; then ideas in
-`~/.flightdeck/projects/<x>/ideas/`. Ask which to start.
+`~/.flightdeck/projects/<slug>/ideas/` (`<slug>` = the project's path-slug, see
+[protocol.md](protocol.md) § Cold tier). Ask which to start.
 
 ---
 
@@ -72,8 +73,9 @@ Layout:
       work/        in-flight multi-step efforts (one file or folder each)
       knowledge/   persistent — nested by domain; type via title line
     ~/.flightdeck/   cold tier — plain global dir, NOT git
-      knowledge/     cross-project knowledge (consulted via uses)
-      projects/<x>/  this project's cold store: archive/ + ideas/
+      knowledge/     cross-project knowledge — genuinely universal (consulted via uses)
+      projects/<slug>/  one project's cold store: archive/ + ideas/ + references/
+                        <slug> = project abs path, separators / \ : → -  (collision-proof)
 
 Invariants:
 - **Location is state.** In the project = live; moved into `~/.flightdeck` = cold
