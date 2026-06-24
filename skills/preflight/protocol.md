@@ -13,6 +13,16 @@ rest of any session in which you ran preflight; a session that never runs prefli
 is not engaged (nothing auto-loads, nothing auto-saves — "engaged" is just normal
 conversation history, not an injected flag).
 
+**Don't let the cockpit lag a long run.** The trigger is every turn that moved the
+board — and a single effort can span many turns (running a plan, a batch of tasks, a
+subagent loop). Persist at each completed batch / milestone, not only when the whole
+effort wraps: the bar is that someone could close the conversation *right now* and
+recover from `cockpit.md` alone — if recovery would need reading git, the cockpit is
+already stale, so bring it current. The same bar holds when you're executing under
+another workflow (executing-plans, subagent-driven, an external task runner): that
+workflow's own ledger is **not** the cockpit, and an engaged session still owes the
+cockpit a current `Focus` / `## In flight` at each milestone.
+
 At turn end, in order:
 
 - **Knowledge** — apply the write gate (below). Anything that passes (a decision, a

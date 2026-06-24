@@ -33,7 +33,8 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 ## Dogfood findings (from real-world use)
 
-- **跨工作流 cockpit 陈旧**(2026-06-24,用户带回外项目)→ `knowledge/sibling-workflow-leaves-cockpit-stale.md`。一整场会话跑别的工作流(SDD/executing-plans)、没跑 preflight → flightdeck 没 engage → turn-end persist 不存在 → cockpit 哑掉烂在旧焦点;**工作没丢**(git+SDD 账本),丢的是恢复载荷时效性;re-entry 的 preflight **drift 检测兜住了**(报焦点对不上)。是 spec 头号风险(无机械自纠偏)的尖锐子型,非 bug,但值得 spec 收口考虑。
+- **跨工作流 cockpit 陈旧**(2026-06-24,用户带回外项目)→ `knowledge/sibling-workflow-leaves-cockpit-stale.md`。一整场会话跑别的工作流(SDD/executing-plans)、没跑 preflight → flightdeck 没 engage → turn-end persist 不存在 → cockpit 哑掉烂在旧焦点;**工作没丢**(git+SDD 账本),丢的是恢复载荷时效性;re-entry 的 preflight **drift 检测兜住了**(报焦点对不上)。是 spec 头号风险(无机械自纠偏)的尖锐子型。
+  **已加固(发布面协议)**:protocol.md § Persist 触发钉成 milestone 粒度 + 点名跨工作流;SKILL.md 微核 persist 行同步;SKILL.md 第4步 passive git note 扩到「最近提交 vs focus」(强化 re-entry 网)。改不了的:没跑 preflight 的会话读不到协议——加固后保证 = engaged 不再 lag + re-entry 更可靠报警,非「绝对不陈旧」。
 
 ## House pointers
 

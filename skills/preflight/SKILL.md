@@ -25,9 +25,12 @@ demand from [protocol.md](protocol.md).
    relevance, perform a transient *derive-listing* of that area — run the grep over
    routing headers yourself (see [protocol.md](protocol.md) § Derived listing); it's a
    convention, not an installed command, and prints to context only (never to disk).
-4. **Passive git note.** `git branch --show-current` + `git status --short`. Emit one
-   non-blocking line only if the branch clearly mismatches the cockpit focus, or on a
-   detached HEAD. Otherwise say nothing.
+4. **Passive git note.** `git branch --show-current` + `git status --short`, with a
+   glance at the last few commit subjects (`git log --oneline -5`). Emit one
+   non-blocking line only if reality clearly diverges from the cockpit focus — the
+   branch *or* the recent commits are plainly about something else (a sign the last
+   session moved the board without persisting, e.g. it ran under another workflow) —
+   or on a detached HEAD. Otherwise say nothing.
 5. **Report the next step, then STOP.** State the cockpit's next action in one
    sentence and emit the `─── 🛫 preflight ───` banner (`[Next]` + the read-only /
    "say go" line). Do NOT load task files or start execution.
@@ -56,8 +59,10 @@ Two verbs:
   + grep) for what's needed. Default load = cockpit.md only, rest lazy. Nothing is
   injected, it never auto-fires — skip preflight this session and it's
   disengaged (nothing auto-persists); looking around is free.
-- **persist** (automatic, turn end): rewrite `cockpit.md`, write knowledge in
-  place, `git commit` the project repo. A **work** effort is done when you move it
+- **persist** (automatic — each turn / completed batch that moves the board):
+  rewrite `cockpit.md`, write knowledge in place, `git commit` the project repo. Keep
+  the cockpit current enough to recover from it alone, without reading git — don't
+  defer it to the end of a long run. A **work** effort is done when you move it
   out of `work/` to the cold store; git log records it left.
 
 Plus one audit command — **walkaround** (on request): sweep for drift

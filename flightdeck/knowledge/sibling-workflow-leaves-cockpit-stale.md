@@ -49,6 +49,21 @@ A,三者对不上,确认焦点"。也就是 cockpit 烂了但 re-entry 把它兜
 - 别指望 cockpit 反映"会话外"做的事——flightdeck 对自己仪式外的工作是瞎的(by design)。
 - re-entry 看到 drift 警告 = 网在干活,不是 bug;按提示确认焦点即可。
 
+## 已加固(2026-06-24,发布面协议)
+
+能改的改了,改不了的说清楚:
+
+- **engaged 会话**:`protocol.md` § Persist 把触发从模糊的「turn end」钉成 **milestone
+  粒度**——每做完一批任务/里程碑就刷 cockpit,判据「现在关对话光靠 cockpit 能恢复、不用
+  翻 git」;并点名跨工作流(executing-plans/SDD/subagent)那套账本不是 cockpit。
+  `SKILL.md` 微核 persist 行同步。
+- **re-entry 网**:`SKILL.md` 第4步 passive git note 从只比「分支 vs focus」扩到也看
+  「最近几条提交 vs focus」(`git log --oneline -5`)——这是唯一能兜住「上场没 persist」
+  的机制(本 case 正是靠它)。
+- **改不了的**:没跑 preflight 的会话物理上读不到 protocol.md。彻底堵死只能靠 startup
+  hook(flightdeck 故意不要)或用户混用时也跑一次 preflight。加固后真实保证 = engaged
+  不再 lag + re-entry 更可靠报警,不是「绝对不会陈旧」。
+
 ## Cases
 
 - 2026-06-24 首次(用户带回外项目 dogfood:detect-click SDD 会话没跑 preflight,cockpit
