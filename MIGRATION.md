@@ -33,14 +33,21 @@ judgement pass.
    every AUTO region, and `## Staged`. `Pending Review` / `Hanging Tasks` fold into
    `## Open questions` prose.
 
-4. **`rules.md`:** keep the house rules; delete the recorded-config frontmatter
-   (`version` / `runtime` / `agents_md`).
+4. **`rules.md`:** delete the recorded-config frontmatter (`version` / `runtime` /
+   `agents_md`); keep the house rules. Also fix any `### Project conventions` text that
+   names a now-removed structure (`INDEX`, `specs/`, kind-folders) — repoint it to the
+   new shape (`knowledge/` routing headers, `work/`).
 
 5. **Shared knowledge:** if the old deck vendored a `synced: true` file, delete the local
    copy and subscribe to the master path in `uses.md` (e.g. `knowledge/commits.md`).
 
 6. **Commit** the reshaped deck, then run `/flightdeck:walkaround` to catch leftovers —
    missing routing headers, orphaned `work/`, cockpit-vs-reality drift.
+
+> **Body cross-links go stale when files move.** `[[wikilink]]` / relative `[text](path)`
+> references inside knowledge bodies that point at moved siblings will dangle. Routing
+> greps headers — it never follows these — so they're not load-bearing; repoint the
+> high-value ones, or accept the staleness and fix on next touch.
 
 ## Start fresh (simpler, loses structure)
 
