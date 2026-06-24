@@ -48,7 +48,7 @@ your-project/
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
 ├── knowledge/             # 真·跨项目知识（经 uses.md 订阅）
-└── projects/<slug>/       # 单个项目的冷存：archive/ + ideas/ + references/
+└── projects/<slug>/       # 单个项目的冷存：archive/ + ideas/
                            # <slug> = 项目绝对路径，分隔符 → -（防同名碰撞）
 ```
 

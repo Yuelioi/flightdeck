@@ -48,15 +48,18 @@ thing live here:
 - `knowledge/` — **genuinely cross-project** knowledge: a comment-style guide, a commit
   checklist — what any project would consult. Projects opt in by listing a path under it
   in their `uses.md`. Don't park one project's research here.
-- `projects/<slug>/` — **one project's** cold store, three subdirs: `archive/` (efforts
-  moved out of `work/` when done), `ideas/` (unstarted, out of the project view), and
-  `references/` (that project's imported external material — RFC / competitor clones,
-  too heavy and browse-only for the warm deck).
+- `projects/<slug>/` — **one project's** cold store: `archive/` (efforts moved out of
+  `work/` when done) and `ideas/` (unstarted, out of the project view).
 
 `<slug>` is the project's **absolute path with `/`, `\`, and `:` replaced by `-`** — e.g.
 `E:\projects\tools\flightdeck` → `E--projects-tools-flightdeck`. Keying on the full path,
 not the basename, keeps two same-named projects from colliding; it's the same scheme
 Claude Code uses for `~/.claude/projects/`.
+
+Imported external material (RFC / competitor clones, vendored docs) is **not** a protocol
+slot — keep it wherever suits you: in the project (`.gitignore` it if it's heavy and you
+want it live-viewable but uncommitted), or in the cold store. The protocol doesn't define
+or manage a `references/` location; it's your call.
 
 ## Write gate
 

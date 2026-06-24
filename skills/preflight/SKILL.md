@@ -74,7 +74,7 @@ Layout:
       knowledge/   persistent — nested by domain; type via title line
     ~/.flightdeck/   cold tier — plain global dir, NOT git
       knowledge/     cross-project knowledge — genuinely universal (consulted via uses)
-      projects/<slug>/  one project's cold store: archive/ + ideas/ + references/
+      projects/<slug>/  one project's cold store: archive/ + ideas/
                         <slug> = project abs path, separators / \ : → -  (collision-proof)
 
 Invariants:

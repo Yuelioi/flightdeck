@@ -48,7 +48,7 @@ your-project/
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
 ├── knowledge/             # genuinely cross-project knowledge (subscribed via uses.md)
-└── projects/<slug>/       # one project's cold store: archive/ + ideas/ + references/
+└── projects/<slug>/       # one project's cold store: archive/ + ideas/
                            # <slug> = the project's abs path, separators → - (collision-proof)
 ```
 

@@ -11,7 +11,8 @@ __pycache__/
 .env
 .env.local
 
-flightdeck/references/
+# Imported external reference material — heavy clones, browse-only, never committed.
+/references/
 
 # Session scratch (flightdeck 1.2: ephemeral working notes live here)
 tmp/
@@ -20,6 +21,3 @@ tmp/
 # Records THIS machine's last cache sync — meaningless/misleading if shared. Never commit.
 .current
 .claude
-
-# Cursor injection projection: hook-generated, never hand-edited (flightdeck 3.0).
-**/.cursor/rules/flightdeck-context.mdc
