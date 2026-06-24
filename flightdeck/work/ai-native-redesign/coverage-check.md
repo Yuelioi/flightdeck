@@ -15,7 +15,7 @@ new mechanism, or deliberately dropped **with a spec section justifying it**.
 | status `done` as a staged state + status/landing seam | automatic | micro persist: a work effort is done when moved out of `work/` to the cold store |
 | forward-only status state machine + transition authority table | dropped | spec 表3: no status field; location encodes active/done, nuance → cockpit prose |
 | INDEX.md (per-folder + root) + AUTO regions | dropped | spec 表2: INDEX 全删; routing = grep + walk tree + routing header |
-| stage / land ritual (Stage + Land Routine) | automatic | spec 表1 (stage/landing → persist); micro persist (turn-end: rewrite cockpit, write knowledge, commit) |
+| stage / land ritual (Stage + Land Routine) | automatic | spec 表1 (stage/landing → persist); micro persist (turn-end: scan for knowledge, rewrite cockpit, commit) |
 | write gate | carried | micro invariant **Write gate** + deep §Write gate (RECORD/SKIP examples) |
 | Pending Review (cockpit field) | replaced | spec §位置即状态: fine-grained states (reviewing/waiting) → cockpit "open questions" prose, not a field |
 | Hanging Tasks (block session exit) | replaced | spec §位置即状态: blocked/waiting → cockpit prose (no folder/field) |
