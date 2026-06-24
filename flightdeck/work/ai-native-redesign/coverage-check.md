@@ -7,7 +7,7 @@ new mechanism, or deliberately dropped **with a spec section justifying it**.
 - disposition ∈ {carried → new protocol section · automatic → persist · replaced →
   new mechanism · dropped → spec 取舍/迁移 §}.
 - "where": micro = `micro-core.md`; deep = `protocol.md`; spec = the redesign spec
-  (`specs/2026-06-23-ai-native-redesign.md`) §接受的取舍 / §迁移 表1·2·3 / §形态.
+  (`design.md`, sibling in this effort folder) §接受的取舍 / §迁移 表1·2·3 / §形态.
 
 | 3.0 rule-category | disposition | where |
 |---|---|---|

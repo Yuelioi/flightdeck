@@ -6,9 +6,8 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 ## In flight
 
-- **ai-native-redesign/** — 草稿已全部 graduate 进 live `skills/`,**退役**(单一来源,免漂移);只留 `coverage-check.md`(3.0→新形态 33 类 disposition 映射记录)。真相源 = live `skills/preflight/{SKILL,protocol}.md` + `skills/walkaround/SKILL.md`。
-- **2026-06-23-ai-native-redesign.md** — 重设设计单一可信源(决策记录)。
-- **2026-06-22-stage-land-lifecycle.md** — 旧 stage/land 生命周期设计(active,其 plan 已 done 进冷 archive)。
+- **ai-native-redesign/** — 重设 effort,设计 + 验证**共置一个 folder**(spec 推荐结构):`design.md`(重设决策单一可信源)+ `coverage-check.md`(3.0→新形态 disposition 映射)。草稿已 graduate 进 live `skills/`;真相源 = live `skills/preflight/{SKILL,protocol}.md` + `skills/walkaround/SKILL.md`。
+- **2026-06-22-stage-land-lifecycle.md** — 旧 stage/land 生命周期设计(轻量单文件 effort;其 plan 已 done 进冷 archive)。
 
 ## Next
 

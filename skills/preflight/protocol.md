@@ -40,6 +40,16 @@ At turn end, in order:
   say so once ("no git repo — zero-loss not active") so the user isn't assuming a
   guarantee that isn't on; that's why launch points you to `git init`.
 
+## Work efforts
+
+An effort in `work/` is **one file or one folder — never both**. A lightweight effort is
+a single `work/<effort>.md`. A multi-artifact effort is a folder `work/<effort>/` that
+keeps everything for it in one place — a brainstorming `design.md`, a `plan.md`
+(superpowers' writing-plans output drops in as-is; flightdeck doesn't re-stamp it), plus
+any notes or checks. Don't scatter one effort's design and plan across a top-level file
+**and** a separate folder — co-locating an effort's artifacts is the whole point. The
+`- [ ]` checkboxes inside a plan belong to executing-plans; flightdeck doesn't touch them.
+
 ## Cold tier (`~/.flightdeck`)
 
 A plain global directory, **not** git — outside the zero-loss guarantee. Two kinds of
