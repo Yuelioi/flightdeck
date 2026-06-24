@@ -17,7 +17,10 @@ judgement pass.
      regrouped **by domain**, not by kind.
    - `specs/` (idea) → `~/.flightdeck/projects/<slug>/ideas/`.
    - `specs/` (done) + `archive/` → `~/.flightdeck/projects/<slug>/archive/`.
-   - Delete every `INDEX.md`; strip all YAML frontmatter.
+   - Delete the deck's kind-folder `INDEX.md` (specs/plans/checklists/docs/incidents/
+     references). **Leave** an `INDEX.md` that belongs to an unrelated subsystem living
+     inside the deck (e.g. a source or showcase tree) — it's not a routing index. Strip
+     YAML frontmatter from the moved knowledge files.
 
    (`<slug>` = the project's absolute path with `/`, `\`, `:` replaced by `-` — see
    [protocol.md](skills/preflight/protocol.md) § Cold tier.)
@@ -38,8 +41,11 @@ judgement pass.
    names a now-removed structure (`INDEX`, `specs/`, kind-folders) — repoint it to the
    new shape (`knowledge/` routing headers, `work/`).
 
-5. **Shared knowledge:** if the old deck vendored a `synced: true` file, delete the local
-   copy and subscribe to the master path in `uses.md` (e.g. `knowledge/commits.md`).
+5. **Shared knowledge:** for each vendored `synced: true` file (`comments` / `commits` /
+   `subagent-guide` / …), subscribe to its master path in `uses.md` (e.g.
+   `knowledge/commits.md`) and delete the local copy. **If the local copy carries a
+   project-specific addition** beyond the master's shared region (extra commit scopes,
+   local conventions), fold that part into `rules.md` first — don't lose it.
 
 6. **Commit** the reshaped deck, then run `/flightdeck:walkaround` to catch leftovers —
    missing routing headers, orphaned `work/`, cockpit-vs-reality drift.
@@ -48,6 +54,10 @@ judgement pass.
 > references inside knowledge bodies that point at moved siblings will dangle. Routing
 > greps headers — it never follows these — so they're not load-bearing; repoint the
 > high-value ones, or accept the staleness and fix on next touch.
+
+> **Extra root files are fine.** A deck may carry files beyond the skeleton (e.g. a custom
+> `conventions.md`). The skeleton is a minimum, not a cap — keep them and fix any stale
+> structure references inside, or fold their content into `rules.md`.
 
 ## Start fresh (simpler, loses structure)
 
