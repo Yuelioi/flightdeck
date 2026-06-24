@@ -28,7 +28,7 @@ $dst = "$env:CLAUDE_CONFIG_DIR\plugins\cache\flightdeck-marketplace\flightdeck\<
 # only place --write runs — see "Build-stamp anchor" below.
 uv run "$src\scripts\build_stamp.py" --write   # writes $src\.current = hash(build inputs)
 
-robocopy $src $dst /MIR /XD .git tmp .vscode /XF .in_use   # /MIR mirrors deletions too
+robocopy $src $dst /MIR /XD .git tmp .vscode references /XF .in_use   # /MIR mirrors deletions too; references/ = gitignored heavy clones, kept out of the cache
 # robocopy exit code 0–7 = success; >=8 = failure.
 
 # /MIR deletes .in_use (it is NOT in $src). Recreate it (see gotcha below):
@@ -50,8 +50,8 @@ $m.Attributes = $m.Attributes -bor [System.IO.FileAttributes]::Hidden
 
 Inside a dogfood session you can't see whether the loaded cache reflects your latest edits.
 `.current` (repo root, **git-ignored**) holds a short content hash over the **plugin build inputs**
-(`skills/ scripts/ scaffolds/ adapters/`, the `*-plugin/` manifests, `gemini-extension.json`,
-`AGENTS.md`/`GEMINI.md`/`CLAUDE.md`) — **not** the `flightdeck/` deck, `docs/`, or `tmp/`.
+(`skills/ scripts/ adapters/`, the `*-plugin/` manifests, `gemini-extension.json`,
+`GEMINI.md`/`CLAUDE.md`) — **not** the `flightdeck/` deck, `references/`, or `tmp/`.
 
 > **Why git-ignored, never committed.** `.current` measures "*this* machine's working tree ==
 > the build *this* machine last synced into *its* cache." That's per-machine local state. A
