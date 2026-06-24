@@ -39,8 +39,8 @@ demand from [protocol.md](protocol.md).
 
 Nothing auto-fires and nothing is injected: if you never run preflight this session,
 flightdeck isn't engaged — no protocol loaded, nothing auto-persists, and just
-looking around the tree costs nothing. Turn-end **persist** (rewrite cockpit, write
-knowledge in place, commit the project repo) only applies once preflight has loaded
+looking around the tree costs nothing. Turn-end **persist** (scan for knowledge,
+rewrite cockpit, commit the project repo) only applies once preflight has loaded
 the protocol this session.
 
 ## Fallback when the cockpit names no next action
@@ -59,13 +59,25 @@ Two verbs:
   + grep) for what's needed. Default load = cockpit.md only, rest lazy. Nothing is
   injected, it never auto-fires — skip preflight this session and it's
   disengaged (nothing auto-persists); looking around is free.
-- **persist** (automatic — each turn / completed batch that moves the board):
-  rewrite `cockpit.md`, write knowledge in place, `git commit` the project repo, then
-  print a one-line `─── 🛬 landing ───` confirmation of what was saved (pairs with
-  preflight's `🛫`; it's a confirmation, **not** a command). Keep the cockpit current
-  enough to recover from it alone, without reading git — don't defer it to the end of
-  a long run. A **work** effort is done when you move it out of `work/` to the cold
-  store; git log records it left.
+- **persist** (automatic — each turn / completed batch that moves the board), in
+  order:
+  1. **Scan for knowledge — a real step, run it every turn, not "when you remember."**
+     Pass what this turn produced through the write gate: a bug + its root cause, a
+     decision and why, a reusable procedure, a trap. Each hit is written **now**, in
+     place under `knowledge/<domain>/` with a routing header — catching the learning
+     *is* the trigger; do not defer it to when the effort wraps (by then it's the
+     gitignored scratch note that never graduates). "Nothing qualified" is a valid
+     outcome — but you must reach it **on purpose**, by scanning, every turn.
+  2. **Rewrite `cockpit.md`** so the board recovers from it alone, without reading git.
+  3. **`git commit`** the project repo (one commit per turn).
+
+  Then print a one-line `─── 🛬 landing ───` confirmation that **always names the
+  knowledge count, including zero** — `cockpit ✓ · knowledge: 0 · commit a1b2c3d`. A
+  string of `knowledge: 0` across turns is a visible flatline, not silence; it's the
+  heartbeat that makes a skipped scan obvious. It pairs with preflight's `🛫`; it's a
+  confirmation, **not** a command. Don't defer any of this to the end of a long run. A
+  **work** effort is done when you move it out of `work/` to the cold store; git log
+  records it left.
 
 Plus one audit command — **walkaround** (on request): sweep for drift
 (cockpit vs reality, orphaned work, duplicate traps, missing headers). The only

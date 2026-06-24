@@ -25,9 +25,18 @@ cockpit a current `Focus` / `## In flight` at each milestone.
 
 At turn end, in order:
 
-- **Knowledge** — apply the write gate (below). Anything that passes (a decision, a
-  bug + root cause, a reusable procedure, a trap) → write it in place under
-  `knowledge/<domain>/` with a routing header. Nothing passes → write nothing.
+- **Knowledge** — **scan first, every turn; this is a forcing step, not a reflex you
+  hope fires.** Run the write gate (below) over what the turn produced and *classify*
+  each piece, first match wins: a bug + its root cause → a trap or fix note; a
+  repeated procedure → a checklist; a decision + why → a design note; imported
+  external material → a reference. Anything that passes → write it **now**, in place
+  under `knowledge/<domain>/` with a routing header — at the moment of learning, not
+  batched to effort-end (deferred knowledge is the learning that ends up in a
+  gitignored scratch file and never graduates). "Nothing qualified" is a legitimate
+  outcome — but you reach it by scanning on purpose, and you **report it** (see the
+  landing line), so a flatline of empty scans is visible rather than silent. This
+  scan replaces the structured "classify new knowledge" step the older landing ritual
+  ran; persist got lighter, but the forcing function has to survive.
 - **Efforts** — if a `work/<effort>/` finished this turn, move it out to
   `~/.flightdeck/projects/<slug>/archive/` (location is state; `<slug>` see § Cold tier).
   "Done" is a judgement:
@@ -51,13 +60,17 @@ At turn end, in order:
   guarantee that isn't on; that's why launch points you to `git init`.
 - **landing line** — close persist with a one-line confirmation, so the user can see
   the board was saved without opening anything: `─── 🛬 landing ───` followed by what
-  changed — e.g. `cockpit ✓ · +1 knowledge · commit a1b2c3d`, or
-  `cockpit ✓ · archived <effort> · commit a1b2c3d`. It pairs with preflight's `🛫`
-  banner (entry ↔ persist) and is the at-a-glance signal that zero-loss actually fired
-  this turn. **"landing" is only the name of this confirmation — not a command, not a
-  separate ritual.** There is no `/landing`; it prints automatically as the last step
-  of persist. A turn that persisted nothing prints no landing line. No git repo → say
-  `─── 🛬 landing ─── no git, not committed` so the missing guarantee stays visible.
+  changed. **Always name the knowledge count, including zero** — `cockpit ✓ ·
+  knowledge: 0 · commit a1b2c3d`, `cockpit ✓ · knowledge: 1 · commit a1b2c3d`, or
+  `cockpit ✓ · knowledge: 0 · archived <effort> · commit a1b2c3d`. The zero is
+  load-bearing: a string of `knowledge: 0` across turns is the flatline that makes a
+  skipped scan obvious — drop the segment when nothing was written and the omission
+  hides. It pairs with preflight's `🛫` banner (entry ↔ persist) and is the
+  at-a-glance signal that zero-loss actually fired this turn. **"landing" is only the
+  name of this confirmation — not a command, not a separate ritual.** There is no
+  `/landing`; it prints automatically as the last step of persist. A turn that
+  persisted nothing prints no landing line. No git repo → say `─── 🛬 landing ─── no
+  git, not committed` so the missing guarantee stays visible.
 
 ## Work efforts
 

@@ -46,6 +46,17 @@ net: a second pair of eyes reading what's actually there, not a schema validator
    subscription whose target was already vendored into the repo (the copy + the live
    subscription now double up). Local-shadows-global is by-design, not drift — don't
    flag it.
+7. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one
+   sub-action with no turn-to-turn forcing function (the cockpit gets rewritten because
+   the loop hands it back; knowledge doesn't), so it's the first thing a drifting
+   session drops. Glance at the recent commit subjects (`git log --oneline -20`): if a
+   run clearly caught bugs / made decisions / hit traps (fix/bug/race/decision-shaped
+   subjects) yet `knowledge/` saw no add or update across the same span, flag (`⚠`) the
+   flatline — the learnings likely never crystallized. Then look for **orphaned
+   external scratch**: a sibling workflow's working dir left in the repo (e.g.
+   `.superpowers/…`, a `tmp/` progress log) — often *where* the uncrystallized
+   knowledge actually lives. Flag (`i`) it as both cleanup and a crystallize prompt:
+   mine it for what passes the write gate, then clear it.
 
 ## Output
 

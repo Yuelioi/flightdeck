@@ -21,7 +21,7 @@
 
 ## ✨ Highlights
 
-- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it rewrites `cockpit.md`, writes new knowledge in place, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
+- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites `cockpit.md`, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
 - **No schema, no scripts, no INDEX.** The whole thing is plain markdown and two conventions: **location is state** (a folder in the project is live; moved out is done) and a one-line **routing header** on each knowledge file. Nothing to migrate, nothing to keep in sync, nothing that breaks on a model upgrade.
 
 ## TL;DR
@@ -130,7 +130,7 @@ You don't build the deck by hand — run `/flightdeck:launch` once and it writes
 
 On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which seeds the skeleton after a quick check (one `git init` offer if there's no repo — the zero-loss guarantee needs git).
 
-**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: rewrites `cockpit.md` to reflect now, writes any new knowledge in place (subject to the write gate), and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
+**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: scans what the turn produced for anything that passes the write gate and writes it to `knowledge/`, rewrites `cockpit.md` to reflect now, and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
 
 ### Commands
 
@@ -140,7 +140,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
 | `/flightdeck:walkaround` | **Integrity audit** — a read-only, on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, orphaned work, duplicate traps, missing routing headers). The only trust-but-verify net. Reports findings; fixes nothing. |
 
-**persist** is the fourth verb, but it's not a command — it runs automatically at the end of any execution turn (rewrite cockpit, write knowledge, commit). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). Nothing fires on session start; there's no background process.
+**persist** is the fourth verb, but it's not a command — it runs automatically at the end of any execution turn (scan for knowledge, rewrite cockpit, commit). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). Nothing fires on session start; there's no background process.
 
 ### Routing — what triggers what
 

@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-25 · 月离 · +dogfood finding: spec 落 docs/ 而非 work/(已修发布面)
+Updated: 2026-06-25 · 月离 · +dogfood finding: persist knowledge 子动作没心跳(p-downloader 实战;已修发布面+外圈+knowledge)
 
 Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
@@ -40,6 +40,9 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 - **spec 落 `docs/` 而非 `work/`**(2026-06-25,用户带回 p-downloader 新项目)→ 根因 **不是内容缺失,是层级**:effort 产物归 `work/<effort>/` 的指引只在 **read-on-demand 的 `protocol.md` § Work efforts**;preflight 只加载 micro-core,brainstorming 会话很可能从没加载 protocol.md → 信号不在上下文 → 跟着 spec-generator 硬编码的 `docs/` 走。
   **已修(发布面,内嵌插件本体)**:① `SKILL.md` micro-core 的 `work/` layout 行抬出明确归属(`spec/design/plan` 归 `work/<effort>/`,非 side `docs/` tree)——**载重那处**,把信号从「按需层」提到「始终加载层」;② `protocol.md` § Work efforts 补**工具无关**的撞车处理一句(spec-generator 默认落别处→收进 work/;成品/参考 docs 仍可留 docs/)。narrow scope:只管活跃 effort 产物,不禁 docs/。
   **否决项**:不改 seed/初始文件(用户:别给每个新项目塞默认,内嵌本体即可);不绑死 superpowers(用户:可能用别的 spec 生成器,发布面须工具无关)。**遗留**:§ Work efforts line 66-67 旧的 `superpowers' writing-plans` 点名未动,待定是否一并去耦合。
+
+- **persist knowledge 子动作没心跳**(2026-06-25,用户带回 p-downloader 实战报告 `flightdeck-field-report.md`)→ `knowledge/persist-knowledge-scan-no-heartbeat.md`。engaged 长跑(SDD 15 任务)cockpit 每 cycle 满分,但 `knowledge/` **零文件**——抓到的 channel deadlock / event-emit race / UTF-8 截断类 class-bug 全留在 gitignored `.superpowers/sdd/progress.md`,+47 个 scratch 没清;人工点名才补。根因:persist 三子动作只有 cockpit 有逐回合 forcing function,knowledge-write 没心跳 → 拖延 → 永不;写入门控其实在抓到 bug 那刻就已满足。spec 头号风险(无机械自纠偏)的又一尖锐子型,与 sibling-workflow 同源(那个 cockpit 跨工作流陈旧,这个 knowledge 子动作没心跳)。
+  **本会话续修(上场中断的修复)+ 收尾(发布面协议)**:① `SKILL.md` 微核 persist 重排有序三步,**scan-for-knowledge 提为第一步**(forcing,当场写不拖到收尾);② `protocol.md` § Knowledge 改「scan first, every turn」+ landing 行钉死知识计数(含 0)= 可见心电平线;③ walkaround #7 加「知识平线 + 孤儿 scratch」检查;④ **外圈续扫**(本会话):README 中英(亮点+会话结束+verb 表)+ adapters/claude persist 叙述从被动「writes knowledge in place」改主动「scans … and writes」+ scan-first 排序(走 outer-ring-docs-drift 全圈规则;codex/gemini/cursor 不枚举子动作,未动)。**否决项**:不在 seed/`rules.md` 塞默认 landing checklist(用户既定:别给新项目塞默认);external-scratch 清理走 walkaround 不进 persist 核心 scope(对应 field report 建议 4 与建议 3 的边界)。**改不了的**:仍靠 AI 记得扫——把「忘了扫」从沉默变显形,非物理强制。
 
 ## House pointers
 

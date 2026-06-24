@@ -21,7 +21,7 @@
 
 ## ✨ 亮点
 
-- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：重写 `cockpit.md`、就地写入新知识、提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
+- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：扫描这一回合的产出、把值得留的新知识写进 `knowledge/`，重写 `cockpit.md`，提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
 - **无 schema、无脚本、无 INDEX。** 整套东西就是纯 markdown 加两条约定：**位置即状态**（项目里的文件夹 = 活的，移出 = 完成）和每个知识文件一行的**路由头**。没东西要迁移、没东西要保持同步、没东西会在模型升级时坏掉。
 
 ## TL;DR
@@ -130,7 +130,7 @@ READ WHEN: <什么时候路由到这里才对>
 
 全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：做个快速检查后播种骨架（没 repo 时问一句 `git init` —— 零丢失保证需要 git）。
 
-**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：把 `cockpit.md` 重写到当下、就地写入新知识（受写入门控约束）、做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
+**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：扫描这一回合的产出、把过了写入门控的写进 `knowledge/`，把 `cockpit.md` 重写到当下，做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
 ### 命令
 
@@ -140,7 +140,7 @@ READ WHEN: <什么时候路由到这里才对>
 | `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
 | `/flightdeck:walkaround` | **完整性审计** —— 一个只读、按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、孤儿 work、重复 trap、缺路由头）。唯一的 trust-but-verify 网。只报告，不修。 |
 
-**persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（重写 cockpit、写知识、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
+**persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（扫描知识、重写 cockpit、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
 
 ### 路由 —— 什么触发什么
 
