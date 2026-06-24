@@ -77,7 +77,8 @@ Layout:
                    (canonical skeleton, extra sections fine; rewritten each turn)
       rules.md     project house rules — read on preflight, stable
       uses.md      one global path per line this project subscribes to
-      work/        in-flight multi-step efforts (one file or folder each)
+      work/        in-flight multi-step efforts (one file or folder each);
+                   an effort's spec/design/plan live in work/<effort>/, not a side docs/ tree
       knowledge/   persistent — nested by domain; type via title line
     ~/.flightdeck/   cold tier — plain global dir, NOT git
       knowledge/     cross-project knowledge — genuinely universal (consulted via uses)

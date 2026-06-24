@@ -66,8 +66,13 @@ a single `work/<effort>.md`. A multi-artifact effort is a folder `work/<effort>/
 keeps everything for it in one place — a brainstorming `design.md`, a `plan.md`
 (superpowers' writing-plans output drops in as-is; flightdeck doesn't re-stamp it), plus
 any notes or checks. Don't scatter one effort's design and plan across a top-level file
-**and** a separate folder — co-locating an effort's artifacts is the whole point. The
-`- [ ]` checkboxes inside a plan belong to executing-plans; flightdeck doesn't touch them.
+**and** a separate folder — co-locating an effort's artifacts is the whole point.
+Sibling workflows or spec-generators may default their output to their own location
+(often a `docs/` tree) — for a flightdeck-tracked effort, point them at (or relocate
+into) `work/<effort>/`, so the deck (cockpit, routing, walkaround, the done→cold move)
+can see it. A project's own finished/reference docs can still live in `docs/`; this is
+about the *active* effort's working artifacts. The `- [ ]` checkboxes
+inside a plan belong to executing-plans; flightdeck doesn't touch them.
 
 ## Cold tier (`~/.flightdeck`)
 

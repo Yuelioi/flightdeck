@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-24 · 月离 · +dogfood finding: 跨工作流 cockpit 陈旧
+Updated: 2026-06-25 · 月离 · +dogfood finding: spec 落 docs/ 而非 work/(已修发布面)
 
 Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
@@ -36,6 +36,10 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 - **跨工作流 cockpit 陈旧**(2026-06-24,用户带回外项目)→ `knowledge/sibling-workflow-leaves-cockpit-stale.md`。一整场会话跑别的工作流(SDD/executing-plans)、没跑 preflight → flightdeck 没 engage → turn-end persist 不存在 → cockpit 哑掉烂在旧焦点;**工作没丢**(git+SDD 账本),丢的是恢复载荷时效性;re-entry 的 preflight **drift 检测兜住了**(报焦点对不上)。是 spec 头号风险(无机械自纠偏)的尖锐子型。
   **已加固(发布面协议)**:protocol.md § Persist 触发钉成 milestone 粒度 + 点名跨工作流;SKILL.md 微核 persist 行同步;SKILL.md 第4步 passive git note 扩到「最近提交 vs focus」(强化 re-entry 网)。改不了的:没跑 preflight 的会话读不到协议——加固后保证 = engaged 不再 lag + re-entry 更可靠报警,非「绝对不陈旧」。
   **+ landing 确认行**:persist 收尾打一行 `─── 🛬 landing ───`(cockpit ✓ · +N knowledge · commit sha),配 preflight 的 🛫,补上「看不见 persist 有没有发生」的盲点。明钉「landing 只是确认名、非命令/仪式,无 `/landing`」防 AI 误以为旧命令回归。
+
+- **spec 落 `docs/` 而非 `work/`**(2026-06-25,用户带回 p-downloader 新项目)→ 根因 **不是内容缺失,是层级**:effort 产物归 `work/<effort>/` 的指引只在 **read-on-demand 的 `protocol.md` § Work efforts**;preflight 只加载 micro-core,brainstorming 会话很可能从没加载 protocol.md → 信号不在上下文 → 跟着 spec-generator 硬编码的 `docs/` 走。
+  **已修(发布面,内嵌插件本体)**:① `SKILL.md` micro-core 的 `work/` layout 行抬出明确归属(`spec/design/plan` 归 `work/<effort>/`,非 side `docs/` tree)——**载重那处**,把信号从「按需层」提到「始终加载层」;② `protocol.md` § Work efforts 补**工具无关**的撞车处理一句(spec-generator 默认落别处→收进 work/;成品/参考 docs 仍可留 docs/)。narrow scope:只管活跃 effort 产物,不禁 docs/。
+  **否决项**:不改 seed/初始文件(用户:别给每个新项目塞默认,内嵌本体即可);不绑死 superpowers(用户:可能用别的 spec 生成器,发布面须工具无关)。**遗留**:§ Work efforts line 66-67 旧的 `superpowers' writing-plans` 点名未动,待定是否一并去耦合。
 
 ## House pointers
 
