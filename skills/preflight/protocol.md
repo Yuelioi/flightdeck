@@ -49,6 +49,15 @@ At turn end, in order:
   that changed *nothing* commits nothing. No git repo → no commit and no zero-loss:
   say so once ("no git repo — zero-loss not active") so the user isn't assuming a
   guarantee that isn't on; that's why launch points you to `git init`.
+- **landing line** — close persist with a one-line confirmation, so the user can see
+  the board was saved without opening anything: `─── 🛬 landing ───` followed by what
+  changed — e.g. `cockpit ✓ · +1 knowledge · commit a1b2c3d`, or
+  `cockpit ✓ · archived <effort> · commit a1b2c3d`. It pairs with preflight's `🛫`
+  banner (entry ↔ persist) and is the at-a-glance signal that zero-loss actually fired
+  this turn. **"landing" is only the name of this confirmation — not a command, not a
+  separate ritual.** There is no `/landing`; it prints automatically as the last step
+  of persist. A turn that persisted nothing prints no landing line. No git repo → say
+  `─── 🛬 landing ─── no git, not committed` so the missing guarantee stays visible.
 
 ## Work efforts
 

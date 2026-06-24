@@ -60,10 +60,12 @@ Two verbs:
   injected, it never auto-fires — skip preflight this session and it's
   disengaged (nothing auto-persists); looking around is free.
 - **persist** (automatic — each turn / completed batch that moves the board):
-  rewrite `cockpit.md`, write knowledge in place, `git commit` the project repo. Keep
-  the cockpit current enough to recover from it alone, without reading git — don't
-  defer it to the end of a long run. A **work** effort is done when you move it
-  out of `work/` to the cold store; git log records it left.
+  rewrite `cockpit.md`, write knowledge in place, `git commit` the project repo, then
+  print a one-line `─── 🛬 landing ───` confirmation of what was saved (pairs with
+  preflight's `🛫`; it's a confirmation, **not** a command). Keep the cockpit current
+  enough to recover from it alone, without reading git — don't defer it to the end of
+  a long run. A **work** effort is done when you move it out of `work/` to the cold
+  store; git log records it left.
 
 Plus one audit command — **walkaround** (on request): sweep for drift
 (cockpit vs reality, orphaned work, duplicate traps, missing headers). The only
