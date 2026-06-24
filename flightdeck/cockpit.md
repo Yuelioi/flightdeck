@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-24 · 月离
+Updated: 2026-06-24 · 月离 · +dogfood finding: 跨工作流 cockpit 陈旧
 
 Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
@@ -30,6 +30,10 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 - **发布面**:cutover 全在 feature 分支 `feat/launch-recorded-config`、**未发版**;3.0 仍是 marketplace 上已 ship 的,直到显式 bump+release(rules:push 需你批准)。**版本号 gated**:新形态 README/plugin.json 描述已换,但 version 字符串仍留 `3.0.0-alpha.5`——发版时你 bump(可能 4.0,install 脚本旧注释提过)。- **冷 store** 已落 `~/.flightdeck/projects/flightdeck/`(archive=旧 done 的 specs/plans/incidents + 本会话 done 的 plan #1/plan3;不版本化,git 历史兜底)。
 - **母库 `~/.flightdeck` 已迁新形态(本会话)**:删 3.0 master-deck 骨架(`cockpit.md`/`rules.md` + `checklists/docs/incidents/plans/specs/references` 空壳 INDEX);3 个跨项目 checklist(comments/commits/subagent-guide)转路由头进 `knowledge/`(平铺);`skills/writing-claude-md` 挪进 `knowledge/` 当参考(保留 skill 格式,无路由头=browseable)。现 master = `knowledge/` + `projects/`。**knock-on**:其它项目(nuxtblog/aep-parser)若要订阅这些共享知识,得在各自 `uses.md` 写新路径 `knowledge/<file>`——原 `checklists/<file>` 路径已没;且那些项目本身还是 3.0,各自迁移另算。
 - **冷层模型(本会话定稿)**:① `projects/<x>` → **flattened 全路径 slug**(`E--projects-tools-flightdeck`,防同名碰撞,同 Claude Code `~/.claude/projects/`);母库已改名。② **references 不进协议**:协议冷存只定义 `archive/ + ideas/`,外部参考料放哪是用户的事(协议不 mandate);flightdeck 自己那 4 个克隆从母库挪回 **repo 根 `references/` + gitignore**(实时可看、不提交;3 个带自己 .git,所以必须 gitignore)。skill/README 措辞同步:micro-core layout、protocol `## Cold tier`(slug 编码 + 「references 非协议槽、用户自定」一句)、walkaround/fallback `<x>`→`<slug>`。`knowledge/` 现只剩真·通用(comments/commits/subagent-guide/writing-claude-md)。
+
+## Dogfood findings (from real-world use)
+
+- **跨工作流 cockpit 陈旧**(2026-06-24,用户带回外项目)→ `knowledge/sibling-workflow-leaves-cockpit-stale.md`。一整场会话跑别的工作流(SDD/executing-plans)、没跑 preflight → flightdeck 没 engage → turn-end persist 不存在 → cockpit 哑掉烂在旧焦点;**工作没丢**(git+SDD 账本),丢的是恢复载荷时效性;re-entry 的 preflight **drift 检测兜住了**(报焦点对不上)。是 spec 头号风险(无机械自纠偏)的尖锐子型,非 bug,但值得 spec 收口考虑。
 
 ## House pointers
 
