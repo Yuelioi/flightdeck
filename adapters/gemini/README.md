@@ -44,4 +44,4 @@ Gemini CLI's extension mechanism loads `GEMINI.md` as project / session context.
 
 ## Invocation
 
-The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked; **persist** runs automatically at turn end. On Gemini, `GEMINI.md` only `@`-includes the **preflight** protocol, so `launch` / `walkaround` aren't loaded inline — a pre-existing, untested gap (the manifest is "behaviorally untested"). Wiring the other verbs into `GEMINI.md` is tracked separately.
+The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked; **persist** runs automatically as you work — at each turn / milestone that moves the board. On Gemini, `GEMINI.md` only `@`-includes the **preflight** protocol, so `launch` / `walkaround` aren't loaded inline — a pre-existing, untested gap (the manifest is "behaviorally untested"). Wiring the other verbs into `GEMINI.md` is tracked separately.

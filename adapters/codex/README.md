@@ -41,4 +41,4 @@ The manifest is structured the same as the working Claude one, and the skill con
 
 ## Invocation
 
-The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked slash commands; **persist** runs automatically at turn end (no command). Nothing fires on session start, so no call-source detection is needed on this platform.
+The three verbs — `preflight` / `launch` / `walkaround` — are user-invoked slash commands; **persist** runs automatically as you work — at each turn / milestone that moves the board (no command). Nothing fires on session start, so no call-source detection is needed on this platform.

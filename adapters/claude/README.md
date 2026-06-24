@@ -92,4 +92,4 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\preflight", "$env:U
 
 ## Invocation
 
-The three verbs — `preflight` (session entry), `launch` (first-time deck creation), and `walkaround` (integrity audit) — are user-invoked slash commands. Claude Code injects a `<command-name>/flightdeck:<verb></command-name>` marker on explicit invocation; flightdeck keys no behavior off it. **persist** runs automatically at turn end (no command). Nothing fires on session start.
+The three verbs — `preflight` (session entry), `launch` (first-time deck creation), and `walkaround` (integrity audit) — are user-invoked slash commands. Claude Code injects a `<command-name>/flightdeck:<verb></command-name>` marker on explicit invocation; flightdeck keys no behavior off it. **persist** runs automatically as you work — at each turn / milestone that moves the board (no command). Nothing fires on session start.
