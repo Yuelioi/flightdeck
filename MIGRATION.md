@@ -11,12 +11,16 @@ these steps once. Everything is mechanical except the routing headers, which nee
 judgement pass.
 
 1. **Move folders.**
-   - `specs/` (active) + `plans/` → `work/<effort>/` (one folder per effort, its design
-     and plan together; a lightweight effort can be a single `work/<effort>.md`).
-   - `checklists/` + `docs/` + `incidents/` + `references/` → `knowledge/<domain>/`,
-     regrouped **by domain**, not by kind.
-   - `specs/` (idea) → `~/.flightdeck/projects/<slug>/ideas/`.
-   - `specs/` (done) + `archive/` → `~/.flightdeck/projects/<slug>/archive/`.
+   - Route `specs/` + `plans/` by their `status:` frontmatter — cross-check the cockpit's
+     in-flight list (a spec marked `active` but actually delivered/parked is really an idea):
+     `active` → `work/<effort>/` (one folder per effort, design + plan together; a
+     lightweight effort can be a single `work/<effort>.md`); `idea` / delivered-or-parked →
+     `~/.flightdeck/projects/<slug>/ideas/`; `done` → `~/.flightdeck/projects/<slug>/archive/`.
+   - `checklists/` + `docs/` + `incidents/` → `knowledge/<domain>/`, regrouped **by
+     domain**, not by kind.
+   - `references/` (imported external material): light reference docs → `knowledge/` with
+     routing headers like the rest; **heavy clones (whole repos) aren't routing-header
+     knowledge — leave them where they sit** (gitignored), don't dump them into `knowledge/`.
    - Delete the deck's kind-folder `INDEX.md` (specs/plans/checklists/docs/incidents/
      references). **Leave** an `INDEX.md` that belongs to an unrelated subsystem living
      inside the deck (e.g. a source or showcase tree) — it's not a routing index. Strip
@@ -28,8 +32,9 @@ judgement pass.
 2. **Add a routing header to each knowledge file** (the judgement pass). Replace the
    stripped frontmatter with a header ended by `---`:
    - title `# <title>` — a pitfall/incident → `# ⚠ <title>`; a checklist → `# <X> checklist`
-   - `SUMMARY:` (one line) · `READ WHEN:` (← old `when_to_read`) · optional
-     `RECHECK WHEN:` (← old `when_to_update`)
+   - `SUMMARY:` (one line — use the old `summary:` field if present; else a clean one-liner
+     from the title, **not** the first body line, which is often a code fence or bullet) ·
+     `READ WHEN:` (← old `when_to_read`) · optional `RECHECK WHEN:` (← old `when_to_update`)
 
 3. **Reshape `cockpit.md`** to the canonical skeleton: a `Focus:` line + `## In flight`
    (active `work/` efforts) + `## Next` + `## Open questions`. Drop the `Updated:` line,
