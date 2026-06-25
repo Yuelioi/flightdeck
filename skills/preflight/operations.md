@@ -149,12 +149,24 @@ keeps the deferred tier on the radar rather than dropping it:
 "ignored for good" — an `# ⚠` trap whose symptom never appears simply never needs reading,
 but the moment the symptom shows it routes you straight there.
 
-**Authoring side — the header's shape sets the tier.** When you *write* a knowledge file,
-its `READ WHEN:` phrasing and title glyph decide how preflight will rank it later — no
-separate priority field exists, by design. Want it honoured as a standing rule → phrase
-`READ WHEN:` proactively ("before \<a routine action>") and title it a `checklist`. It's a
-gotcha to pull on a symptom → phrase it reactively ("when \<a symptom / failure>") and open
-`# ⚠`. Write the header for how you want the file to surface.
+**Authoring side — the words you choose are the priority.** When you *write* a knowledge
+file, its `READ WHEN:` phrasing and title glyph decide how preflight ranks it later — no
+separate priority field exists, by design, so phrase the header to the tier you want. The
+reader (preflight) elevates on a specific vocabulary; write to it:
+
+- **To land *In force*** (a standing rule honoured every relevant turn): title it a
+  `checklist`; write `READ WHEN:` **proactive + universal** — "before **any** \<routine
+  action>", not a narrow case; voice `SUMMARY:` as a **directive** — "**Always** …",
+  "**Never** … without …" — not a description ("notes on …"). The harder the rule, the
+  more unconditional the words: *any / every / always / never / before* read as binding.
+- **To leave *On call*** (a gotcha pulled at its trigger): open `# ⚠` and write
+  `READ WHEN:` as the **symptom** — "when \<a failure shows>". This is not "lower value" —
+  it is "read exactly when it bites" (defers, never discards).
+
+Same content, opposite surfacing — a comment convention written "Always comment *why*, not
+*what*; before editing any comment" binds every turn; the same lesson written "notes on a
+case where a comment was wrong" sinks out of sight. Match the wording to how load-bearing
+the knowledge actually is.
 
 Reference recipe — `AREA` is the directory you're routing into (ripgrep if you have it,
 otherwise any grep; one way, not a fixed command):

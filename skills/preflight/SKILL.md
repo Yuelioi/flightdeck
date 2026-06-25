@@ -90,9 +90,13 @@ repo → `─── 🛬 landing ─── no git, not committed`. Full detail: 
   the `---`. Routing reads only the header. The header's **shape is also its priority
   signal** — preflight tiers a file by how its `READ WHEN:` reads (proactive "before \<an
   action>" / `checklist` = a standing rule held *In force*; reactive "when \<a symptom>" /
-  `# ⚠` = pulled *On call* at its trigger). So write it for how you want it to surface:
-  phrase a must-honour rule proactively, a gotcha reactively. Full anatomy + example:
-  concepts.md.
+  `# ⚠` = pulled *On call* at its trigger). So write it for how you want it to surface —
+  these are the words that read as binding: a must-honour rule gets **unconditional,
+  normative** wording (`READ WHEN: before any <action>`; `SUMMARY:` voiced as *Always …* /
+  *Never … without …*; a `checklist` title) and reads *In force*; a gotcha gets its
+  **symptom** (`READ WHEN: when <X> shows`; `# ⚠`) and sits *On call*. Universal scope
+  ("any / every / always / never") elevates; a narrow descriptive note ("notes on …")
+  sinks. Full anatomy + example: concepts.md.
 - **Write gate.** Record only what changes how you'll act later, or that you'll look up
   again. Skip one-off logs, a passing build, fruitless exploration, a no-op rerun.
 - **Zero-loss covers the recovery payload** (cockpit.md + briefing.md + work + knowledge,
