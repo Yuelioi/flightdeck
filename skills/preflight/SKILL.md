@@ -22,15 +22,23 @@ rule overrides a flightdeck default; a direct user request overrides everything.
 1. **Read `flightdeck/briefing.md` first — establish the rules.** `## Conventions` = this
    deck's house rules + AI-maintenance preferences; `## Subscriptions` = the
    `~/.flightdeck`-relative paths this project pulls in from the global tier. Fold each
-   subscribed path into the routing tree alongside local `knowledge/`; local shadows
-   global on the same relpath; a missing subscribed path → one soft warning, continue.
+   subscribed path into the routing tree alongside local `knowledge/` — its routing
+   header joins the map scanned in step 3; local shadows global on the same relpath; a
+   missing subscribed path → one soft warning, continue.
 2. **Read `flightdeck/cockpit.md` — the recovery payload.** Note focus + next, the
    in-flight efforts (`work/`), open questions. Do **not** rewrite it on entry.
-3. **Walk the tree for what the task needs (lazy).** Default load = briefing + cockpit
-   only; everything else on demand. `ls` the deck (`work/`, `knowledge/<domain>/`, the
-   subscribed global subtrees). When `ls` + filenames don't settle relevance, run a
-   transient derived-listing (grep the routing headers — see operations.md); it prints to
-   context only, never to disk.
+3. **Scan the routing headers — map first, bodies on demand.** `ls work/` for the effort
+   folders; then read the routing header (title + `SUMMARY:` + `READ WHEN:`) of every file
+   across local `knowledge/` and the subscribed subtrees — *every* entry, not only when
+   filenames are ambiguous. Headers are one-liners by design: the whole map is cheap to
+   hold, and a `READ WHEN:` can't fire unless it's resident. Pull them in one shot with the
+   derived-listing grep (operations.md) — prints to context, never to disk. **Rank the map,
+   don't flat-read it**, by the shape of each `READ WHEN:`: *proactive* ("before \<a routine
+   action>" / checklists) → hold as a live constraint, honoured when that action arises;
+   *reactive* ("when \<a symptom>" / `# ⚠` traps) → note it exists, pull its **body** only
+   when the symptom shows. Binding conventions (comment / commit rules and the like) stay
+   foregrounded regardless of task. **Bodies stay lazy** — load one only when its
+   `READ WHEN:` matches the work at hand.
 4. **Reality note (cockpit ↔ git + work).** Two cheap cross-checks; one soft line each or
    silence, report-don't-fix:
    - *git:* `git branch --show-current` + `git status --short` + `git log --oneline -5`.

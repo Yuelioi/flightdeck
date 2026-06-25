@@ -115,16 +115,27 @@ store. The protocol doesn't define or manage a `references/` location; it's your
 
 ## Derived listing
 
-When walking the tree to route and `ls` + filenames aren't enough to decide which knowledge
-files are relevant, run a transient `derive-listing <area>`: grep each file's routing header
-and print a one-shot relevance directory to context. The trigger is AI judgment — filenames
-won't decide — not a count or threshold. It is **a convention, an action you perform** — not
-an installed command: you run the grep yourself.
+The routing-header **map** preflight scans on every entry (SKILL.md step 3): run a transient
+`derive-listing <area>` — grep each file's routing header and print a one-shot directory to
+context. It runs at entry as a matter of course, not only when `ls` + filenames are
+ambiguous: a `READ WHEN:` can't route you anywhere unless it's resident, so the cheap
+one-liner headers are loaded up front and the bodies stay on demand. It is **a convention, an
+action you perform** — not an installed command: you run the grep yourself.
 
 Surface per file: its path, title (keeping the `⚠` / `checklist` glyph), `SUMMARY:`, and
 `READ WHEN:` — everything above the first `---`. Omit `RECHECK WHEN:` (freshness, not
 relevance) and the body. `<area>` is just a path, so this works the same on a local
 `knowledge/<domain>/` or a subscribed `~/.flightdeck/knowledge/…` subtree.
+
+**Rank the map; don't read it flat.** The `READ WHEN:` and the title glyph already tell you
+how a file routes — no extra field needed. A header shaped *proactive* ("before \<a routine
+action>", and `checklist` titles) is a convention you hold as a live constraint and honour
+when that action comes up; one shaped *reactive* ("when \<a symptom / failure>", and `# ⚠`
+traps) is a gotcha you note and whose body you pull only once the symptom actually appears.
+Binding conventions (comment / commit rules and the like) stay foregrounded whatever the
+task. This ranking is what keeps a large deck usable — a deck can be mostly reactive traps,
+and foregrounding all of them as equal "must-read" rules would drown the few that bind; the
+map is scanned whole, but only the proactive handful occupies attention.
 
 Reference recipe — `AREA` is the directory you're routing into (ripgrep if you have it,
 otherwise any grep; one way, not a fixed command):

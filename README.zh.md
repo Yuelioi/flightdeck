@@ -123,7 +123,7 @@ READ WHEN: <什么时候路由到这里才对>
 **会话开始** —— 运行 `/flightdeck:preflight`。它：
 
 1. 加载协议、读 `flightdeck/cockpit.md`（外加 `briefing.md`）。
-2. 按任务所需走目录树（懒加载 —— 默认只读 cockpit）。
+2. 扫路由头地图（便宜的一行头），再按需加载 body —— 按各头的 `READ WHEN:` 排序，约束性约定常驻前台、reactive trap 等症状出现才拉。
 3. 瞥一眼 `git status` —— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
 4. 报告下一项 —— 说 "go" 执行。
 

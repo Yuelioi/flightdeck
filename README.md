@@ -123,7 +123,7 @@ You don't build the deck by hand — run `/flightdeck:launch` once and it writes
 **Session start** — run `/flightdeck:preflight`. It:
 
 1. Loads the protocol and reads `flightdeck/cockpit.md` (plus `briefing.md`).
-2. Walks the tree for what the task needs (lazy — only the cockpit loads by default).
+2. Scans the routing-header map (cheap one-liners), then loads bodies on demand — ranked by each header's `READ WHEN:`, so binding conventions stay foregrounded and reactive traps wait for their symptom.
 3. Glances at `git status` — a passive one-line note only when something looks off, never a blocking prompt.
 4. Reports the next item — say "go" to execute.
 

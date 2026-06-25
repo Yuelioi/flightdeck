@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Updated: 2026-06-25 · 月离 · +dogfood finding: persist knowledge 子动作没心跳(p-downloader 实战;已修发布面+外圈+knowledge)
+Updated: 2026-06-26 · 月离 · +dogfood finding: preflight 入口不读路由头(aep-parser/YHFish 实测;已改协议→扫头默认+分层「先地图后领土」)。+待办:终端 GBK 复制乱码(环境层,已诊断未交付修法)
 
 Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿」推进到「真切」)。本 deck 自身已迁到新形态(两目录 work/+knowledge/、free-form cockpit、零 INDEX/YAML)。
 
@@ -43,6 +43,10 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 - **persist knowledge 子动作没心跳**(2026-06-25,用户带回 p-downloader 实战报告 `flightdeck-field-report.md`)→ `knowledge/persist-knowledge-scan-no-heartbeat.md`。engaged 长跑(SDD 15 任务)cockpit 每 cycle 满分,但 `knowledge/` **零文件**——抓到的 channel deadlock / event-emit race / UTF-8 截断类 class-bug 全留在 gitignored `.superpowers/sdd/progress.md`,+47 个 scratch 没清;人工点名才补。根因:persist 三子动作只有 cockpit 有逐回合 forcing function,knowledge-write 没心跳 → 拖延 → 永不;写入门控其实在抓到 bug 那刻就已满足。spec 头号风险(无机械自纠偏)的又一尖锐子型,与 sibling-workflow 同源(那个 cockpit 跨工作流陈旧,这个 knowledge 子动作没心跳)。
   **本会话续修(上场中断的修复)+ 收尾(发布面协议)**:① `SKILL.md` 微核 persist 重排有序三步,**scan-for-knowledge 提为第一步**(forcing,当场写不拖到收尾);② `protocol.md` § Knowledge 改「scan first, every turn」+ landing 行钉死知识计数(含 0)= 可见心电平线;③ walkaround #7 加「知识平线 + 孤儿 scratch」检查;④ **外圈续扫**(本会话):README 中英(亮点+会话结束+verb 表)+ adapters/claude persist 叙述从被动「writes knowledge in place」改主动「scans … and writes」+ scan-first 排序(走 outer-ring-docs-drift 全圈规则;codex/gemini/cursor 不枚举子动作,未动)。**否决项**:不在 seed/`rules.md` 塞默认 landing checklist(用户既定:别给新项目塞默认);external-scratch 清理走 walkaround 不进 persist 核心 scope(对应 field report 建议 4 与建议 3 的边界)。**改不了的**:仍靠 AI 记得扫——把「忘了扫」从沉默变显形,非物理强制。
+
+- **preflight 入口不读路由头**(2026-06-26,用户带回 aep-parser/YHFish 实测)→ `knowledge/routing-headers-not-resident-at-entry.md`。AI 跑 preflight 自陈「根本没读订阅开头,连本仓库知识开头也没读」;dogfood 当场复现(本会话开头我只 `ls` 没读头)。根因:旧 step 3 把扫头框成**条件兜底**(「ls 不够才 grep」),`READ WHEN:` 永不进上下文 → 触发器没承载体 → 订阅+知识全成死重。与 [[sibling-workflow]]/[[persist-no-heartbeat]] 同源(散文把 load-bearing 动作写成可选)。
+  **已改(发布面协议,与用户 brainstorm 后定 A=从现有头语义推导、不加字段)**:「先地图后领土」两跳——① hop1 扫头**每次入口必做**(从兜底提为默认);② 给地图按 READ-WHEN 形状**分层**(proactive/checklist→活约束常驻;reactive/`# ⚠` trap→挂索引、症状才拉 body;comments/commits 不分任务常驻);③ hop2 body 仍懒。改:`SKILL.md` step1+3、`operations.md` Derived listing、`README` 中英第2步。**验证**:claude-mem 3-layer / ReMe hop-based 独立推出同模式(见 [[external-memory-borrowings]] #5/#3);跨 aep-parser(65/76 reactive trap)+YHFish 规模成立——deck 越大分层越值钱。**改不了的**:仍靠 AI 记得扫+排序,非物理强制。
+- **终端 GBK 复制乱码**(2026-06-26):用户贴回的内容 UTF-8 字节被当 Latin-1/cp1252 重解、且有损不可逆。根因=控制台代码页 **936(GBK)**、Python stdout `gbk`;banner 花 glyph(`───`/`🛫`)是诱因。环境层非 flightdeck 逻辑。修法(待交付):`chcp 65001` 临时 / Windows Terminal 或系统「UTF-8 全球语言支持」持久。用户当时选「现在排查」,未选「banner 降 ASCII」。
 
 ## House pointers
 
