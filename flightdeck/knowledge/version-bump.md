@@ -16,11 +16,11 @@ The mechanical parts — bumping all five manifests **and both READMEs** and ver
 - **`bump_version.py set X.Y.Z`** — write the version into all five manifests **and both READMEs** (badge + banner) at once (kills the "forgot one manifest" / "README badge drifted" pitfalls below). It rewrites only anchored version sites, so bare semvers in prose (e.g. "the final 3.0.0") are left untouched.
 - **`bump_version.py --check`** — verify the five manifests + both READMEs agree and match the `CHANGELOG.md` top heading; exit non-zero on drift.
 
-It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate two-part *layout* version, not the release semver) or write the CHANGELOG. Everything in Steps 1, 3–6 that needs judgment stays manual.
+It deliberately does **not** write the CHANGELOG. Everything in Steps 1, 3–6 that needs judgment stays manual.
 
 ## Pre-release gates (block the release if any fails)
 
-- **Publishing surface is English-only.** `skills/`, `scaffolds/`, `templates`, README, banners, field labels ship to every user — prose, headings, anchors, and examples must all be English (see `rules.md` `### Project conventions`). A prose rule alone has repeatedly failed to hold, so this is a hard release gate: `rg -lP '\p{Han}' skills scaffolds` must return **nothing**. Any hit → translate before cutting the release (mind Chinese-named headings that other files anchor-link to, and Chinese-named section conventions like `## 评审纪要`).
+- **Publishing surface is English-only.** `skills/` (incl. the launch scaffold), `examples/`, README, banners, field labels ship to / are seen by every user — prose, headings, anchors, and examples must all be English (see `briefing.md` `## Conventions`). A prose rule alone has repeatedly failed to hold, so this is a hard release gate: `rg -lP '\p{Han}' skills examples` must return **nothing**. Any hit → translate before cutting the release (mind Chinese-named headings that other files anchor-link to, and Chinese-named section conventions like `## 评审纪要`).
 
 ## Steps
 
@@ -37,7 +37,7 @@ It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate t
    - `gemini-extension.json`
    - `README.md` + `README.zh.md` (version badge + warning-banner token — `set` rewrites both)
 3. **Add a `CHANGELOG.md` entry** at the top under a new `## [x.y.z] — YYYY-MM-DD` heading, grouped Keep-a-Changelog style (`Added` / `Changed` / `Fixed` / etc.). Link archived specs/plans in `flightdeck/archive/` where relevant.
-   - **Also bump `MIGRATION.md` frontmatter `current`** to the new version. If the release changes deck structure (a mandatory new field, a removed cockpit field, any contract change requiring existing decks to migrate), write a `3.0 → X.Y` migration section in `MIGRATION.md`. (3.0 = format baseline / version 0: no backward-compat machinery — migration is authored on demand starting at the first structural release after 3.0, not pre-wired.) Purely additive releases need no migration section.
+   - **Migration is `/flightdeck:walkaround`'s job, not a doc.** If a release changes deck structure, fold the old→new mapping into walkaround's check 8 and update the `examples/deck/` reference — there is no migration file to bump.
 4. **Commit** — subject `vX.Y.Z: <one-line summary>` (matches existing release commits). Follow `checklists/commits.md` if present.
 5. **Tag — annotated** — `git tag -a vX.Y.Z -m "vX.Y.Z — <summary>"`. Must be annotated: lightweight tags (`git tag vX.Y.Z`) are silently skipped by `--follow-tags` and never reach origin. The README version badge reads GitHub releases, which come from tags.
 6. **Push** — `git push origin main --follow-tags` (commit + annotated tag together), then confirm with `git ls-remote --tags origin`. If the tag is missing, push it explicitly: `git push origin vX.Y.Z`.
@@ -47,7 +47,7 @@ It deliberately does **not** touch `MIGRATION.md` (its `current` is a separate t
 - All five manifests + both READMEs agree + match the CHANGELOG: `uv run scripts/bump_version.py --check` (or `grep -rn '"version"' .claude-plugin .codex-plugin .cursor-plugin gemini-extension.json` for one value).
 - `CHANGELOG.md` top entry matches that value and carries today's date.
 - `git tag --points-at HEAD` shows `vX.Y.Z`.
-- **Publishing surface English-only**: `rg -lP '\p{Han}' skills scaffolds` returns nothing.
+- **Publishing surface English-only**: `rg -lP '\p{Han}' skills examples` returns nothing.
 - `git status` clean and `main` not ahead of `origin/main` after push.
 
 ## Common pitfalls

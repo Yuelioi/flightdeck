@@ -46,7 +46,7 @@ Focus: **把 AI-native 重设 cutover 到真产品**(本会话从「探索草稿
 
 ## House pointers
 
-配置 → rules.md · 约定/偏好 → 项目根 CLAUDE.md · 知识 → knowledge/<域> · 冷/归档/idea → ~/.flightdeck
+配置/约定 → briefing.md · 偏好 → 项目根 CLAUDE.md · 知识 → knowledge/<域> · 冷/归档/idea → ~/.flightdeck
 
 ## Note on dogfooding
 

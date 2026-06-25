@@ -25,7 +25,7 @@ Cursor's skill / rules discovery has evolved across versions. The manifest follo
 
 ## Likely Cursor-specific concerns
 
-- **Rule budget**: Cursor injects rules into every prompt. The micro-core in `SKILL.md` is the only always-loaded piece; `protocol.md` is on-demand. If Cursor reads both inline every turn, the token cost is meaningful — a "lite" mode that loads only `SKILL.md` and leaves `protocol.md` as on-demand reference may be needed.
+- **Rule budget**: Cursor injects rules into every prompt. The micro-core in `SKILL.md` is the only always-loaded piece; `concepts.md` / `operations.md` are on-demand. If Cursor reads them all inline every turn, the token cost is meaningful — a "lite" mode that loads only `SKILL.md` and leaves `concepts.md` / `operations.md` as on-demand reference may be needed.
 - **Manual reload**: Cursor may not pick up changes to plugin content without restart.
 
 ## How to verify (and flip the matrix to ✅ tested)

@@ -1,65 +1,94 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck integrity audit — a read-only, on-demand sweep for drift the new form has no mechanism to self-correct: cockpit vs reality, orphaned work, duplicate traps, missing routing headers, done-but-not-archived. The only trust-but-verify net. Triggered by /flightdeck:walkaround.
+description: Use when explicitly invoking the flightdeck repair pass — sweeps the deck against the current shape and fixes what's off (cockpit vs reality, orphaned work, duplicate traps, missing routing headers, done-but-not-archived, dead subscriptions, knowledge flatline), and migrates an older-shaped deck to the current form. Triggered by /flightdeck:walkaround.
 ---
 
-## Why this exists
+## What this is
 
-The new form drops every mechanical self-corrector (no schema/INDEX/sync/status
-machine). Stale, routing, recurrence, write-gate are all on AI judgement + convention.
-**walkaround is the only trust-but-verify net** — a read-only, on-demand sweep a human
-runs to catch where the AI drifted. It writes nothing; it reports findings for you to
-act on. Nothing here self-heals.
+flightdeck has no mechanical self-corrector — no schema / INDEX / sync / status machine;
+routing, freshness, and the write gate all ride on AI judgement + convention. So a deck can
+end up not matching the current shape two ways, and **walkaround is the one pass that fixes
+both**:
 
-## Run this — read-only audit
+- **a usage slip** — a step was skipped: a knowledge file with no routing header, an effort
+  left in `work/` after it finished, a cockpit that no longer matches reality. → Fix it.
+- **an older shape** — the deck predates the current form (`INDEX.md`, YAML frontmatter,
+  kind-folders, recorded config). → Migrate it.
 
-Sweep the deck and report each finding with a severity (`⚠` warn / `i` info). Fix
-nothing; this is a report. The cockpit is free-form prose, so these checks are
-**read-by-judgement**, not field-matching — that's the point of a trust-but-verify
-net: a second pair of eyes reading what's actually there, not a schema validator.
+There is no separate "drift" to chase and no separate migrate command: a deck either matches
+the current shape or it gets brought to it. What the current shape *is* lives in
+[../preflight/concepts.md](../preflight/concepts.md) (definitions) and
+[../preflight/operations.md](../preflight/operations.md) (procedures) — walkaround checks
+against those, it doesn't restate them.
 
-1. **Cockpit shape + reality.** The cockpit should carry the canonical skeleton
-   (`Focus:` + `## In flight` + `## Next` + `## Open questions`) — flag (`i`) a missing
-   section. Then check reality: does `## In flight` match what's actually in `work/`?
-   Flag (`⚠`) efforts the cockpit claims that aren't in `work/`, and a focus/next that
-   points at something already moved to the cold store.
-2. **Orphaned work.** Each `work/<effort>/` should be reachable from the cockpit
-   (named in focus / next / in-flight). Flag any effort folder the cockpit never
-   mentions — it's either lost or finished-but-not-recorded.
-3. **Duplicate traps.** Two `# ⚠ <title>` trap files describing the same pitfall (same
-   domain, near-identical title/symptom) → flag; recurrence should re-read the existing
-   trap, not spawn a copy (see [../preflight/protocol.md](../preflight/protocol.md) § Incidents).
-4. **Missing / empty routing headers.** Every knowledge file — local `knowledge/`
-   **and any `uses`-subscribed global file** — must open with a routing header
-   (`# <title>` + `SUMMARY:` + `READ WHEN:`, ended by `---`). Flag (`⚠`) any missing
-   the header or the `---` terminator (won't route); flag (`i`) a header whose
-   `SUMMARY:` or `READ WHEN:` is present but empty (routes to nothing useful), or
-   whose `---` terminator sits directly under the last header line with no blank line
-   above it (that line then parses as a setext heading and the terminator vanishes on
-   render).
+## Safety — how it writes
+
+walkaround repairs, so it writes. Two postures, chosen by risk:
+
+- **Mechanical & lossless → apply, then report what you changed.** Adding a missing routing
+  header, moving a finished effort to the cold archive, deleting an `INDEX.md`, stripping
+  YAML frontmatter, repointing a stale cockpit line.
+- **Lossy or a judgement call → propose, don't apply.** Merging two near-duplicate traps,
+  deciding which effort an orphaned folder belongs to, removing a dead subscription.
+- **Never delete content you can't place.** Unknown material is folded into the nearest home
+  and flagged — never dropped.
+
+## Run this — sweep and fix
+
+Go check by check. The cockpit is free-form prose, so these are read-by-judgement, not
+field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (mechanical) or
+**propose** the fix (lossy), per the safety postures above.
+
+1. **Cockpit shape + reality.** It should carry the canonical skeleton (`Focus:` +
+   `## In flight` + `## Next` + `## Open questions`) — note (`i`) a missing section. Then
+   reality: does `## In flight` match what's in `work/`? Flag (`⚠`) efforts the cockpit
+   claims that aren't in `work/`, and a focus/next pointing at something already moved to the
+   cold store. → Fix: repoint/rewrite the cockpit line (mechanical).
+2. **Orphaned work.** Each `work/<effort>/` should be reachable from the cockpit (focus /
+   next / in-flight). Flag a folder the cockpit never mentions — lost, or
+   finished-but-unrecorded. → Fix: if clearly finished, archive it (mechanical); if it's
+   unclear what it is or where it belongs, propose.
+3. **Duplicate traps.** Two `# ⚠ <title>` files describing the same pitfall (same domain,
+   near-identical symptom) → recurrence should re-read the existing trap, not spawn a copy
+   (see operations.md § Incidents). → Propose a merge (lossy).
+4. **Missing / empty routing headers.** Every knowledge file — local `knowledge/` **and any
+   subscribed global file** — must open with a routing header (`# <title>` + `SUMMARY:` +
+   `READ WHEN:`, ended by `---`). Flag (`⚠`) any missing the header or the `---` terminator
+   (won't route); flag (`i`) an empty `SUMMARY:`/`READ WHEN:`, or a `---` with no blank line
+   above it (parses as a setext heading; the terminator vanishes on render). → Fix: add /
+   repair the header, deriving `SUMMARY` / `READ WHEN` from the file (mechanical).
 5. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<slug>/archive/`. Flag a `work/` effort whose cockpit notes /
-   contents read as done but that still sits in `work/` (location is state — leaving it
-   in `work/` says "still live").
-6. **uses.md health.** For each line in `uses.md`: flag (`⚠`) a subscribed
-   `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) a
-   subscription whose target was already vendored into the repo (the copy + the live
-   subscription now double up). Local-shadows-global is by-design, not drift — don't
-   flag it.
-7. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one
-   sub-action with no turn-to-turn forcing function (the cockpit gets rewritten because
-   the loop hands it back; knowledge doesn't), so it's the first thing a drifting
-   session drops. Glance at the recent commit subjects (`git log --oneline -20`): if a
-   run clearly caught bugs / made decisions / hit traps (fix/bug/race/decision-shaped
-   subjects) yet `knowledge/` saw no add or update across the same span, flag (`⚠`) the
-   flatline — the learnings likely never crystallized. Then look for **orphaned
-   external scratch**: a sibling workflow's working dir left in the repo (e.g.
-   `.superpowers/…`, a `tmp/` progress log) — often *where* the uncrystallized
-   knowledge actually lives. Flag (`i`) it as both cleanup and a crystallize prompt:
-   mine it for what passes the write gate, then clear it.
+   contents read as done but that still sits in `work/` (location is state). → Fix: move it
+   (mechanical).
+6. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
+   `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) one whose
+   target was already vendored into the repo (copy + live subscription double up).
+   Local-shadows-global is by-design — don't flag it. → Propose the removal/repoint (lossy).
+7. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
+   with no turn-to-turn forcing function, so it's the first thing a slipping session drops.
+   Glance at recent commit subjects (`git log --oneline -20`): if a run clearly caught bugs /
+   made decisions / hit traps yet `knowledge/` saw no add or update across that span, flag
+   (`⚠`) the flatline — learnings likely never crystallized. Then look for **orphaned scratch**
+   (a sibling workflow's working dir left in the repo: `.superpowers/…`, a `tmp/` log) — often
+   *where* the uncrystallized knowledge lives. → Fix: mine the scratch for write-gate hits and
+   write them as knowledge (mechanical); propose clearing the scratch afterward.
+8. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
+   shape **by what each thing is, never losing content**:
+   - kind-folders (`specs/` `plans/` `checklists/` `docs/` `incidents/`) → regroup into
+     `knowledge/<domain>/` by subject; an active plan/spec → `work/<effort>/`; a done one →
+     `archive/`; an unstarted one → `ideas/`.
+   - delete `INDEX.md`; strip YAML frontmatter and replace it with a routing header.
+   - recorded config (`version` / `runtime` / `agents_md` / toggles) → drop it.
+   - vendored shared copies → subscribe to the master in `## Subscriptions` and delete the
+     local copy (fold any project-specific addition into the local file or `briefing.md` first).
+   - dangling body cross-links after moves aren't load-bearing (routing never follows them) →
+     repoint the valuable ones, leave the rest.
+   Structural moves are mechanical; anything that risks losing content → propose.
 
 ## Output
 
-Prose list of findings grouped by check, each line `⚠`/`i` + the path + one-sentence
-what's-wrong + how to resolve. End with a one-line tally (`N warn · M info`), or
-"clean" when nothing drifted. Recommend fixes; never apply them.
+Prose list grouped by check: each line `⚠`/`i` + path + what was wrong + **what you did**
+(fixed) or **what you propose** (lossy). End with a tally — `N fixed · M proposed`, or
+`clean` when the deck already matched. Close with the banner `─── 🔧 walkaround ───`
+(it pairs with launch's `🛠️`, preflight's `🛫`, and landing's `🛬`).

@@ -18,7 +18,7 @@ For each scenario, mark the result:
 - [ ] **S3 — Pitfall capture**: after hitting a pitfall, the AI writes a `# ⚠ <title>` trap under `knowledge/<domain>/` with a routing header (SUMMARY / READ WHEN) and a root cause.
 - [ ] **S4 — Persist at turn end**: a turn that did real work rewrites `cockpit.md` to reflect now and makes one local commit; a pure-conversation turn commits nothing.
 - [ ] **S5 — walkaround audit**: `/flightdeck:walkaround` surfaces drift (cockpit vs reality, orphaned `work/`, duplicate traps, missing routing headers) read-only, and fixes nothing.
-- [ ] **S6 — Deckless launch**: in a directory with no `cockpit.md`, `/flightdeck:preflight` points to `/flightdeck:launch`, which seeds the skeleton (`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`).
+- [ ] **S6 — Deckless launch**: in a directory with no `cockpit.md`, `/flightdeck:preflight` points to `/flightdeck:launch`, which seeds the skeleton (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`).
 
 Mark each `[x]` if pass, `[!]` with note if partial, `[ ]` if fail (and explain).
 

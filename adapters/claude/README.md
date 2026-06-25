@@ -42,7 +42,8 @@ After install:
 ```
 ~/.claude/skills/preflight/    # /flightdeck:preflight — session-entry takeover (read-only; deckless → launch)
 ├── SKILL.md
-└── protocol.md
+├── concepts.md
+└── operations.md
 ~/.claude/skills/launch/       # /flightdeck:launch — first-time deck creation
 └── SKILL.md
 ~/.claude/skills/walkaround/   # /flightdeck:walkaround — read-only integrity audit
@@ -66,7 +67,7 @@ If the skill does not appear:
 ## How invocation works
 
 - **Nothing loads automatically** — flightdeck installs no startup hook. You run `/flightdeck:preflight` to begin a session; if you never run it, flightdeck isn't engaged.
-- `/flightdeck:preflight` is the session-entry takeover: it loads the protocol, reads `cockpit.md` (plus `rules.md` / `uses.md`), walks the tree for what's needed, and reports the next item. In a deckless dir (no `cockpit.md`) it points you to `/flightdeck:launch` and stops — deck creation lives there.
+- `/flightdeck:preflight` is the session-entry takeover: it loads the protocol, reads `cockpit.md` (plus `briefing.md`), walks the tree for what's needed, and reports the next item. In a deckless dir (no `cockpit.md`) it points you to `/flightdeck:launch` and stops — deck creation lives there.
 - **persist** is automatic, not a command: at the end of any turn that did real work, the AI scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites `cockpit.md`, and commits the repo.
 - Flightdeck is **self-contained**: it does not require any other plugin to function. If you also have `superpowers` installed, the SKILL.md mentions its `brainstorming` / `writing-plans` skills as optional companions — fine if present, fine if absent.
 

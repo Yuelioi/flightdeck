@@ -41,13 +41,12 @@ A `flightdeck/` directory your AI reads and writes by convention — a **warm ti
 your-project/
 └── flightdeck/            # warm tier — git-tracked, committed every turn
     ├── cockpit.md         # the must-read recovery payload (Focus / In flight / Next / Open questions)
-    ├── rules.md           # project house rules — read on entry, stable
-    ├── uses.md            # shared-knowledge subscriptions (one ~/.flightdeck path per line)
+    ├── briefing.md        # stable, human-owned — ## Conventions (house rules) + ## Subscriptions
     ├── work/              # in-flight multi-step efforts (one file or folder each)
     └── knowledge/         # persistent knowledge, nested by domain
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
-├── knowledge/             # genuinely cross-project knowledge (subscribed via uses.md)
+├── knowledge/             # genuinely cross-project knowledge (subscribed via briefing's ## Subscriptions)
 └── projects/<slug>/       # one project's cold store: archive/ + ideas/
                            # <slug> = the project's abs path, separators → - (collision-proof)
 ```
@@ -123,7 +122,7 @@ You don't build the deck by hand — run `/flightdeck:launch` once and it writes
 
 **Session start** — run `/flightdeck:preflight`. It:
 
-1. Loads the protocol and reads `flightdeck/cockpit.md` (plus `rules.md` and `uses.md`).
+1. Loads the protocol and reads `flightdeck/cockpit.md` (plus `briefing.md`).
 2. Walks the tree for what the task needs (lazy — only the cockpit loads by default).
 3. Glances at `git status` — a passive one-line note only when something looks off, never a blocking prompt.
 4. Reports the next item — say "go" to execute.
@@ -136,8 +135,8 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 
 | Command | Purpose |
 | --- | --- |
-| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `cockpit.md` / `rules.md` / `uses.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
-| `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
+| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `cockpit.md` / `briefing.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
+| `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
 | `/flightdeck:walkaround` | **Integrity audit** — a read-only, on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, orphaned work, duplicate traps, missing routing headers). The only trust-but-verify net. Reports findings; fixes nothing. |
 
 **persist** is the fourth verb, but it's not a command — it runs automatically at the end of any execution turn (scan for knowledge, rewrite cockpit, commit). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). Nothing fires on session start; there's no background process.
@@ -153,34 +152,33 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 
 ## Configuration
 
-`flightdeck/rules.md` is the per-project control panel — a single, stable file read on entry. No frontmatter, no structured fields:
+`flightdeck/briefing.md` is the per-project control panel — a single, stable, human-owned file read on entry. No frontmatter, no structured fields; two sections:
 
 ```markdown
-## House rules
+## Conventions
+deck-local conventions + behavioral rules the AI maintains from your natural-language
+requests, e.g. "publishing surface is English", "ask before committing". Omit = defaults.
 
-### Project conventions
-deck-local conventions, e.g. "specs in Chinese", "publishing surface is English"
-
-### Rules
-behavioral rules the AI maintains from your natural-language requests; omit = defaults
+## Subscriptions
+one ~/.flightdeck-relative path per line — shared knowledge this deck pulls in; empty = none
 ```
 
-Everything is **inferred or skill judgment** — git from a `.git` directory, the rest from the protocol. To change a behavior, **just tell the AI a persistent preference in plain language** — "ask before committing", "don't auto-start work" — and it appends a free-prose rule under `### Rules` (noting source + date) and honors it above the default. There's no magic-string toggle catalog to memorize.
+Everything is **inferred or skill judgment** — git from a `.git` directory, the rest from the protocol. To change a behavior, **just tell the AI a persistent preference in plain language** — "ask before committing", "don't auto-start work" — and it appends a free-prose rule under `## Conventions` (noting source + date) and honors it above the default. There's no magic-string toggle catalog to memorize.
 
 ## Shared knowledge across projects
 
-Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one copy across every deck you run. flightdeck handles this with a plain **subscription list**:
+Some procedures and reference docs aren't project-specific — a commit-message checklist, a comment-style guide — and you want one copy across every deck you run. flightdeck handles this with the **`## Subscriptions`** list in `briefing.md`:
 
-- **`uses.md`** — one `~/.flightdeck`-relative path per line (`#` comments). A directory entry subscribes its whole subtree. On entry, preflight folds the subscribed global files into the routing tree alongside local `knowledge/`.
+- **Subscriptions** — one `~/.flightdeck`-relative path per line. A directory entry subscribes its whole subtree. On entry, preflight folds the subscribed global files into the routing tree alongside local `knowledge/`.
 - **Cold tier as the shared store** — global knowledge lives in `~/.flightdeck/knowledge/`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
 - **Local shadows global** — if a project has its own file at the same relative path, the local one wins entirely (replace, not merge) — deterministic, zero-maintenance.
 - **Vendoring (opt-in)** — when you need the repo self-contained, snapshot a subscribed global file into the repo as a frozen copy and drop the subscription. The default is a live subscription, no copy.
 
-A deck with an empty `uses.md` never touches the global store and works standalone.
+A deck with an empty `## Subscriptions` never touches the global store and works standalone.
 
 ## Why it exists
 
-Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when it's moved to the cold store), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `rules.md` + `work/` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
+Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when it's moved to the cold store), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
 
 > ✨ Semantic clarity outranks thematic consistency — the aviation metaphor is used only where it sharpens intent, never as a theme.
 
@@ -222,13 +220,13 @@ Skill content under [`skills/`](skills/) is **tool-agnostic markdown**; manifest
 <details>
 <summary><b>I have an older <code>flightdeck/</code> — how do I upgrade?</b></summary>
 
-This rewrite ships **no** automatic migration machinery, and older decks are not auto-upgraded. Recommended path: create a fresh deck with `/flightdeck:launch`, then hand-copy your old `cockpit.md` content and any still-relevant knowledge files (give each a routing header). See [MIGRATION.md](MIGRATION.md) for notes.
+This rewrite ships **no** automatic migration machinery. To bring an older deck current, run `/flightdeck:walkaround` — it repairs the deck to the current shape (and migrates old-form structure: `INDEX.md`, frontmatter, kind-folders), preserving your content. Or start fresh with `/flightdeck:launch` and hand-copy the `cockpit.md` content and knowledge files you still want (give each a routing header).
 
 </details>
 
 ## Documentation
 
-**Protocol reference** (canonical, AI-facing): the micro-core in [skills/preflight/SKILL.md](skills/preflight/SKILL.md) loads on entry; the deep detail is in [protocol.md](skills/preflight/protocol.md). History in [CHANGELOG.md](CHANGELOG.md).
+**Protocol reference** (canonical, AI-facing): the micro-core in [skills/preflight/SKILL.md](skills/preflight/SKILL.md) loads on entry; the on-demand detail is in [concepts.md](skills/preflight/concepts.md) (definitions) + [operations.md](skills/preflight/operations.md) (procedures). History in [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 

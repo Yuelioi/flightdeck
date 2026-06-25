@@ -3,8 +3,8 @@
 #
 # Installs preflight + launch + walkaround.
 #
-# Creating a deck is not part of install — run /flightdeck:launch in a session
-# and the skill writes the deck files directly (no scaffold to copy).
+# Creating a deck is not part of install — run /flightdeck:launch in a session;
+# it copies the scaffold shipped inside the launch skill.
 #
 # Usage:
 #   ./install.sh                          # auto-detect AI tool, install skills

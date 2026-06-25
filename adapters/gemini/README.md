@@ -5,7 +5,7 @@
 ## What's in place
 
 - [`gemini-extension.json`](../../gemini-extension.json) — Gemini CLI extension manifest pointing at `GEMINI.md` as context file.
-- [`GEMINI.md`](../../GEMINI.md) — `@`-includes the preflight protocol (`SKILL.md` + `protocol.md`).
+- [`GEMINI.md`](../../GEMINI.md) — `@`-includes the preflight protocol (`SKILL.md` + `concepts.md` + `operations.md`).
 
 ## Install
 
@@ -29,7 +29,7 @@ Gemini CLI's extension mechanism loads `GEMINI.md` as project / session context.
 ## Likely Gemini-specific concerns
 
 - **No conditional loading**: unlike Claude's skill triggers, Gemini may load the protocol unconditionally. This is fine for projects that have `flightdeck/` but adds noise for projects that don't.
-- **Token cost**: the `@`-includes pull the micro-core plus the deep protocol in every session. Including only `SKILL.md` (the always-loaded micro-core) and leaving `protocol.md` as on-demand reference would cut this.
+- **Token cost**: the `@`-includes pull the micro-core plus the on-demand companions in every session. Including only `SKILL.md` (the always-loaded micro-core) and leaving `concepts.md` / `operations.md` as on-demand reference would cut this.
 
 ## How to verify (and flip the matrix to ✅ tested)
 

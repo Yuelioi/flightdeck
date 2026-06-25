@@ -7,7 +7,7 @@
     appropriate target. Installs preflight + launch + walkaround.
 
     Creating a deck is not part of install — run /flightdeck:launch in a
-    session and the skill writes the deck files directly (no scaffold to copy).
+    session; it copies the scaffold shipped inside the launch skill.
 
 .PARAMETER Tool
     Which AI tool to install for. Default: auto-detect.

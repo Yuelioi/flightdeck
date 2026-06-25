@@ -41,13 +41,12 @@
 your-project/
 └── flightdeck/            # 温存层 —— git 跟踪，每回合提交
     ├── cockpit.md         # 必读的恢复载荷（Focus / In flight / Next / Open questions）
-    ├── rules.md           # 项目 house rules —— 进场时读，稳定
-    ├── uses.md            # 共享知识订阅（每行一个 ~/.flightdeck 路径）
+    ├── briefing.md        # 稳定、人维护 —— ## Conventions（house rules）+ ## Subscriptions
     ├── work/              # 进行中的多步工作（每项一个文件或文件夹）
     └── knowledge/         # 常驻知识，按域嵌套
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
-├── knowledge/             # 真·跨项目知识（经 uses.md 订阅）
+├── knowledge/             # 真·跨项目知识（经 briefing 的 ## Subscriptions 订阅）
 └── projects/<slug>/       # 单个项目的冷存：archive/ + ideas/
                            # <slug> = 项目绝对路径，分隔符 → -（防同名碰撞）
 ```
@@ -123,7 +122,7 @@ READ WHEN: <什么时候路由到这里才对>
 
 **会话开始** —— 运行 `/flightdeck:preflight`。它：
 
-1. 加载协议、读 `flightdeck/cockpit.md`（外加 `rules.md` 和 `uses.md`）。
+1. 加载协议、读 `flightdeck/cockpit.md`（外加 `briefing.md`）。
 2. 按任务所需走目录树（懒加载 —— 默认只读 cockpit）。
 3. 瞥一眼 `git status` —— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
 4. 报告下一项 —— 说 "go" 执行。
@@ -136,8 +135,8 @@ READ WHEN: <什么时候路由到这里才对>
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `cockpit.md` / `rules.md` / `uses.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
-| `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `rules.md` + `uses.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
+| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `cockpit.md` / `briefing.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
+| `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
 | `/flightdeck:walkaround` | **完整性审计** —— 一个只读、按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、孤儿 work、重复 trap、缺路由头）。唯一的 trust-but-verify 网。只报告，不修。 |
 
 **persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（扫描知识、重写 cockpit、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
@@ -153,34 +152,32 @@ READ WHEN: <什么时候路由到这里才对>
 
 ## 配置
 
-`flightdeck/rules.md` 是按项目的控制面板 —— 单一、稳定、进场时读。无 frontmatter、无结构化字段：
+`flightdeck/briefing.md` 是按项目的控制面板 —— 单一、稳定、人维护、进场时读。无 frontmatter、无结构化字段；两段：
 
 ```markdown
-## House rules
+## Conventions
+deck 局部约定 + AI 按你自然话维护的行为规则，如 "发布面一律英文"、"commit 前先问我"。省略 = 默认。
 
-### Project conventions
-deck 局部约定，如 "specs 用中文"、"发布面一律英文"
-
-### Rules
-AI 按你自然话维护的行为规则；省略 = 默认
+## Subscriptions
+每行一个 ~/.flightdeck 相对路径 —— 这个 deck 拉进的共享知识；空 = 不订阅
 ```
 
-一切靠**推断或 skill 判断** —— git 由是否有 `.git` 目录推断，其余由协议决定。要改某个行为，**直接用自然话告诉 AI 一条持久偏好** ——「commit 前先问我」「别自动 start 工作」—— AI 会在 `### Rules` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录。
+一切靠**推断或 skill 判断** —— git 由是否有 `.git` 目录推断，其余由协议决定。要改某个行为，**直接用自然话告诉 AI 一条持久偏好** ——「commit 前先问我」「别自动 start 工作」—— AI 会在 `## Conventions` 下追加一条自由文规则（注明来源 + 日期）并高于默认执行。没有要记的 magic-string 开关目录。
 
 ## 跨项目共享知识
 
-有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用一份。flightdeck 用一个普通的**订阅清单**来处理：
+有些流程和参考文档并不专属某个项目 —— 一份 commit message 清单、一份注释风格指南 —— 你希望在所有 deck 之间共用一份。flightdeck 用 `briefing.md` 里的 **`## Subscriptions`** 清单来处理：
 
-- **`uses.md`** —— 每行一个 `~/.flightdeck` 相对路径（`#` 注释）。目录项订阅其整棵子树。进场时 preflight 把订阅的全局文件折进路由树，与本地 `knowledge/` 并列。
+- **Subscriptions** —— 每行一个 `~/.flightdeck` 相对路径。目录项订阅其整棵子树。进场时 preflight 把订阅的全局文件折进路由树，与本地 `knowledge/` 并列。
 - **冷存层作共享库** —— 全局知识住在 `~/.flightdeck/knowledge/`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
 - **本地遮蔽全局** —— 项目若在同一相对路径有自己的文件，本地的整份胜出（替换，非合并）—— 确定、零维护。
 - **下发（vendoring，可选）** —— 需要仓库自包含时，把订阅的全局文件快照进仓库当冻结副本、并撤掉订阅。默认是活订阅、不拷贝。
 
-`uses.md` 为空的 deck 从不碰全局库，可独立工作。
+`## Subscriptions` 为空的 deck 从不碰全局库，可独立工作。
 
 ## 为什么需要它
 
-多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（工作在项目里就是活的，移进冷存就是完成）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `rules.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
+多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（工作在项目里就是活的，移进冷存就是完成）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 
@@ -222,13 +219,13 @@ flightdeck 与 [AGENTS.md](https://agents.md) 互补 —— 用 `AGENTS.md` 放�
 <details>
 <summary><b>我有个旧的 <code>flightdeck/</code> —— 怎么升级？</b></summary>
 
-这次重写**没有**自动迁移机制，旧 deck 不会被自动升级。推荐路径：用 `/flightdeck:launch` 新建 deck，把旧 `cockpit.md` 内容和仍有用的知识文件手工搬过来（每份补一个路由头）。说明见 [MIGRATION.md](MIGRATION.md)。
+这次重写**没有**自动迁移机制。要把旧 deck 升级到当前形态，跑 `/flightdeck:walkaround` —— 它会把 deck 修复成当前形状（并迁移旧结构：`INDEX.md`、frontmatter、kind-folder），保留你的内容。或用 `/flightdeck:launch` 新建，再把还想要的 `cockpit.md` 内容和知识文件手工搬过来（每份补一个路由头）。
 
 </details>
 
 ## 文档
 
-**协议参考**（canonical，AI 向）：进场加载的 micro-core 在 [skills/preflight/SKILL.md](skills/preflight/SKILL.md)；深层细节在 [protocol.md](skills/preflight/protocol.md)。历史见 [CHANGELOG.md](CHANGELOG.md)。
+**协议参考**（canonical，AI 向）：进场加载的 micro-core 在 [skills/preflight/SKILL.md](skills/preflight/SKILL.md)；按需细节在 [concepts.md](skills/preflight/concepts.md)（定义）+ [operations.md](skills/preflight/operations.md)（操作）。历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 贡献
 
