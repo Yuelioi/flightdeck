@@ -8,7 +8,7 @@ Focus: **AI-native 重设 cutover** —— 协议 / 外圈 / repo 清理基本�
 
 - **work/ai-native-redesign/** —— 重设主 effort;`design.md`(决策单一真相源)+ `coverage-check.md`(3.0→新形态映射)。草稿已 graduate 进 live `skills/`;真相源 = `skills/preflight/{SKILL,operations,concepts}.md` + `skills/walkaround/SKILL.md`。发版后可归档。
 - **work/2026-06-22-stage-land-lifecycle.md** —— 旧 stage/land 生命周期设计(轻量单文件;plan 已 done 进冷 archive)。
-- **读头分层特性**(本会话,并入 redesign):扫头从「条件兜底」→ 入口默认「先地图后领土」+ 按 READ-WHEN 分层 + 标准档展示(In force / On call)+ 写头提权词表。已落协议(SKILL/operations/README)。曾同步过一次 alpha.4 缓存,**之后又改动 → 缓存现 stale**;待你说「同步」刷成终版,去外部 deck 新会话实测分层手感。
+- **读头分层特性**(本会话,并入 redesign):扫头从「条件兜底」→ 入口默认「先地图后领土」+ 按 READ-WHEN 分层 + 标准档展示(In force / On call)+ 写头提权词表。已落协议(SKILL/operations/README)。**已同步 alpha.4 缓存(build 932c0c95)→ current**;用户去外部 deck 新会话实测分层手感中。未 bump / 未 push。
 
 ## Next
 
