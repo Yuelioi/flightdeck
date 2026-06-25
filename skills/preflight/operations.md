@@ -137,6 +137,25 @@ task. This ranking is what keeps a large deck usable — a deck can be mostly re
 and foregrounding all of them as equal "must-read" rules would drown the few that bind; the
 map is scanned whole, but only the proactive handful occupies attention.
 
+**Surface it in standard tiers** (SKILL.md step 3) — the report makes the scan visible and
+keeps the deferred tier on the radar rather than dropping it:
+
+- **In force** — standing conventions binding this session (the proactive / `checklist`
+  handful). Name them; these are honoured as the work touches their action.
+- **On call** — everything else, indexed. Each is pulled the instant its `READ WHEN:`
+  fires; surface it as a count by domain, not a dump.
+
+*Ranking defers, it never discards.* A low-tier header is "read later, on its trigger," not
+"ignored for good" — an `# ⚠` trap whose symptom never appears simply never needs reading,
+but the moment the symptom shows it routes you straight there.
+
+**Authoring side — the header's shape sets the tier.** When you *write* a knowledge file,
+its `READ WHEN:` phrasing and title glyph decide how preflight will rank it later — no
+separate priority field exists, by design. Want it honoured as a standing rule → phrase
+`READ WHEN:` proactively ("before \<a routine action>") and title it a `checklist`. It's a
+gotcha to pull on a symptom → phrase it reactively ("when \<a symptom / failure>") and open
+`# ⚠`. Write the header for how you want the file to surface.
+
 Reference recipe — `AREA` is the directory you're routing into (ripgrep if you have it,
 otherwise any grep; one way, not a fixed command):
 

@@ -38,7 +38,12 @@ rule overrides a flightdeck default; a direct user request overrides everything.
    *reactive* ("when \<a symptom>" / `# ⚠` traps) → note it exists, pull its **body** only
    when the symptom shows. Binding conventions (comment / commit rules and the like) stay
    foregrounded regardless of task. **Bodies stay lazy** — load one only when its
-   `READ WHEN:` matches the work at hand.
+   `READ WHEN:` matches the work at hand. **Surface the ranked map** in the entry report
+   under standard tiers, so the scan is visible and nothing is silently dropped: **In
+   force** — the standing conventions binding this session (name them); **On call** — the
+   rest, indexed, each pulled the moment its `READ WHEN:` fires (a count by domain, not a
+   dump). Ranking *defers, never discards*: a low-tier header stays on call and is read
+   when its trigger hits — never brushed aside for good.
 4. **Reality note (cockpit ↔ git + work).** Two cheap cross-checks; one soft line each or
    silence, report-don't-fix:
    - *git:* `git branch --show-current` + `git status --short` + `git log --oneline -5`.
@@ -82,7 +87,12 @@ repo → `─── 🛬 landing ─── no git, not committed`. Full detail: 
 - **Routing header.** Every knowledge file opens with a header ended by a `---`: a title
   (`# <title>`; trap `# ⚠ <title>`; checklist `# <X> checklist`), `SUMMARY:` (one line),
   `READ WHEN:` (when to route here), optional `RECHECK WHEN:`. Leave a blank line before
-  the `---`. Routing reads only the header. Full anatomy + example: concepts.md.
+  the `---`. Routing reads only the header. The header's **shape is also its priority
+  signal** — preflight tiers a file by how its `READ WHEN:` reads (proactive "before \<an
+  action>" / `checklist` = a standing rule held *In force*; reactive "when \<a symptom>" /
+  `# ⚠` = pulled *On call* at its trigger). So write it for how you want it to surface:
+  phrase a must-honour rule proactively, a gotcha reactively. Full anatomy + example:
+  concepts.md.
 - **Write gate.** Record only what changes how you'll act later, or that you'll look up
   again. Skip one-off logs, a passing build, fruitless exploration, a no-op rerun.
 - **Zero-loss covers the recovery payload** (cockpit.md + briefing.md + work + knowledge,
