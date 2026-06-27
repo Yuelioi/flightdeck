@@ -1,36 +1,36 @@
-# ⚠ scaffold ships verbatim
+# ⚠ launch scaffold ships verbatim
 
-SUMMARY: scaffolds/full/ ships verbatim to users — careless edits break first-time setup.
-READ WHEN: before editing scaffolds/full/ or the first-time-setup flow
+SUMMARY: `skills/launch/scaffold/flightdeck/` ships verbatim to users — careless edits break first-time setup.
+READ WHEN: before editing `skills/launch/scaffold/` or the first-time-setup / launch flow
 
 ---
 
 ## Signature
 
-- symptom: `stray scratch files left in scaffolds/full/ get copied verbatim into every new user's deck`
+- symptom: `stray scratch files left in skills/launch/scaffold/ get copied verbatim into every new user's deck`
 - error_type: —
-- where: scaffolds/full/ + preflight copy-the-scaffold first-time-setup
-- trigger: leaving any non-contract file (scratch / leftover) inside scaffolds/full/ when it is copied verbatim into a new deck
+- where: skills/launch/scaffold/ + launch copy-the-scaffold first-time setup
+- trigger: leaving any non-contract file (scratch / leftover) inside skills/launch/scaffold/ when it is copied verbatim into a new deck
 
 ## 症状/复现
 
-3 AI-review `.txt` files were dropped into `scaffolds/full/flightdeck/debriefs/` as a scratch spot.
-Because the init-redesign makes `preflight` first-time-setup **copy `scaffolds/full/` verbatim**
-into each new deck, those txt would have been copied into every new user's `flightdeck/debriefs/`.
+3 AI-review `.txt` files were dropped into the shipped scaffold as a scratch spot. Because
+launch first-time setup **copies `skills/launch/scaffold/flightdeck/` verbatim** into each
+new deck, those files would have been copied into every new user's `flightdeck/`.
 
 ## 根因
 
-(assumption, not carelessness): I treated `scaffolds/full/` as an inert "template directory" — but
-under copy-the-scaffold it **is the shipped content**. Anything sitting in it (stray scratch,
-leftover files) becomes part of every freshly created deck.
+(assumption, not carelessness): I treated the scaffold as an inert "template directory" —
+but under copy-the-scaffold it **is the shipped content**. Anything sitting in it (stray
+scratch, leftover files) becomes part of every freshly created deck.
 
 ## 修法
 
-Keep `scaffolds/full/` **pristine** — each folder holds only its `INDEX.md` (empty AUTO region),
-plus the 2 contract files (`rules.md` + `cockpit.md`). No `archive/` and no history-log file ship
-(3.0 removed the separate landing log; `archive/` is created on demand at first land). Never use it
-as a scratch location. Pre-ship check: `find scaffolds/full -type f` should list *only* `rules.md`,
-`cockpit.md`, and each folder's `INDEX.md` — nothing else.
+Keep `skills/launch/scaffold/flightdeck/` **pristine**. It should contain only the launch
+contract: `cockpit.md`, `briefing.md`, `work/.gitkeep`, and `knowledge/.gitkeep`. Do not
+ship sample topic packages, sample knowledge, archives, old `INDEX.md` files, or scratch
+material. Never use it as a scratch location. Pre-ship check: list the scaffold files and
+verify that only those four contract files are present.
 
 ## Cases
 

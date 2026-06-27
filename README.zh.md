@@ -152,7 +152,7 @@ READ WHEN: <什么时候路由到这里才对>
 | --- | --- |
 | `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `briefing.md`、`cockpit.md` 和当前主题的 `context.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
 | `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
-| `/flightdeck:walkaround` | **完整性审计与修复** —— 一个按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、主题工作包形状不规范、孤儿 work、重复 trap、缺路由头）。机械问题直接修，可能丢语义的问题只提议。 |
+| `/flightdeck:walkaround` | **完整性审计与修复** —— 一个按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、主题工作包形状不规范、孤儿 work、重复 trap、缺路由头、knowledge 根目录堆积）。机械问题直接修，可能丢语义的问题只提议。 |
 
 **persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（扫描知识、重写 cockpit、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
 

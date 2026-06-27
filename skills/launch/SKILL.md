@@ -16,12 +16,14 @@ the whole job — **copy the scaffold, don't hand-author it.** The result under 
 
     cockpit.md     empty project index — Focus + ## In flight + ## Next + ## Open questions
     briefing.md    ## Conventions + ## Subscriptions (seed comments, empty to start)
-    work/          empty (.gitkeep)
-    knowledge/     empty (.gitkeep)
+    work/          empty (.gitkeep); future active work lives in work/<topic>/
+    knowledge/     empty (.gitkeep); future knowledge lives under knowledge/<domain>/
 
 ## Report
 
 Print the created layout. If the project isn't a git repo, add one line: zero-loss stays
 off until you `git init` (persist commits the deck each turn — no repo, no guarantee).
+Do not create a sample topic package during launch; `work/<topic>/` appears only when an
+actual active effort starts.
 Then close with the launch banner — `─── 🛠️ launch ───` followed by `deck created · run
 /flightdeck:preflight to start`. It pairs with preflight's `🛫` and landing's `🛬`.

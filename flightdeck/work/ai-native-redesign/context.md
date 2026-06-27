@@ -6,7 +6,9 @@ The AI-native reset is the active cutover work. The live protocol has moved from
 
 ## Next
 
-Verify the topic-package protocol diff, then continue the gated release path only after explicit user approval for CHANGELOG / version bump / push.
+Review whether any remaining outer-ring docs or adapters need topic-package wording sync.
+Continue the gated release path only after explicit user approval for CHANGELOG / version
+bump / push.
 
 ## Open questions
 
@@ -19,3 +21,4 @@ Verify the topic-package protocol diff, then continue the gated release path onl
 - User-facing deck content may stay in the user's language.
 - New active effort shape: `context.md`, `design.md`, `plan.md`, `progress.md`, optional `plans/`.
 - Knowledge should live under `knowledge/<domain>/...`, not as a root-level pile.
+- Launch copies `skills/launch/scaffold/flightdeck/` verbatim; keep that scaffold empty and pristine.

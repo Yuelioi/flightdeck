@@ -1,6 +1,6 @@
 ---
 name: walkaround
-description: Use when explicitly invoking the flightdeck repair pass — sweeps the deck against the current shape and fixes what's off (cockpit vs reality, orphaned work, duplicate traps, missing routing headers, done-but-not-archived, dead subscriptions, knowledge flatline), and migrates an older-shaped deck to the current form. Triggered by /flightdeck:walkaround.
+description: Use when explicitly invoking the flightdeck repair pass — sweeps the deck against the current shape and fixes what's off (cockpit vs reality, malformed topic packages, orphaned work, duplicate traps, missing routing headers, root-level knowledge piles, done-but-not-archived work, dead subscriptions, knowledge flatline), and migrates an older-shaped deck to the current form. Triggered by /flightdeck:walkaround.
 ---
 
 ## What this is
@@ -22,15 +22,20 @@ the current shape or it gets brought to it. What the current shape *is* lives in
 [../preflight/operations.md](../preflight/operations.md) (procedures) — walkaround checks
 against those, it doesn't restate them.
 
+Before sweeping, read those two files enough to hold the current shape. walkaround is a
+repair pass against the live protocol, not a stale copy of it.
+
 ## Safety — how it writes
 
 walkaround repairs, so it writes. Two postures, chosen by risk:
 
 - **Mechanical & lossless → apply, then report what you changed.** Adding a missing routing
   header, moving a finished effort to the cold archive, deleting an `INDEX.md`, stripping
-  YAML frontmatter, repointing a stale cockpit line.
+  YAML frontmatter, repointing a stale cockpit line, creating missing topic package entry
+  files from nearby content, moving a root-level knowledge file into an obvious domain.
 - **Lossy or a judgement call → propose, don't apply.** Merging two near-duplicate traps,
-  deciding which effort an orphaned folder belongs to, removing a dead subscription.
+  deciding which topic an orphaned folder belongs to, splitting a mixed-topic work file,
+  splitting mixed-domain knowledge, removing a dead subscription.
 - **Never delete content you can't place.** Unknown material is folded into the nearest home
   and flagged — never dropped.
 
@@ -43,16 +48,19 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
 1. **Cockpit shape + reality.** It should carry the canonical skeleton (`Focus:` +
    `## In flight` + `## Next` + `## Open questions`) — note (`i`) a missing section. Then
    reality: does `## In flight` match what's in `work/`? Flag (`⚠`) topics the cockpit
-   claims that aren't in `work/`, a `work/` topic the cockpit never mentions, and a
-   focus/next pointing at something already moved to the cold store. → Fix: repoint/rewrite
-   the cockpit line (mechanical).
+   claims that aren't in `work/`, a `work/` topic the cockpit never mentions, a
+   focus/next that points at a topic package but bypasses `context.md`, and a focus/next
+   pointing at something already moved to the cold store. → Fix: repoint/rewrite the
+   cockpit line (mechanical).
 2. **Topic package shape.** Each active `work/<topic>/` should carry `context.md`,
    `design.md`, `plan.md`, and `progress.md`; `plans/` is optional. Flag top-level
    `work/*.md` effort files, split sibling files such as `*-plan.md` / `*-spec.md`, or
    active spec/plan output parked outside `work/`. → Fix: when the topic is clear, create
    `work/<topic>/`, move design/spec content to `design.md`, move the current main steps to
    `plan.md`, summarize state in `context.md` / `progress.md`, and leave related notes
-   beside them. If multiple topics are mixed in one file, propose the split.
+   beside them. If `design.md` or `plan.md` is genuinely not known yet, create the missing
+   file with a short "not decided yet" placeholder rather than leaving the package
+   malformed. If multiple topics are mixed in one file, propose the split.
 3. **Orphaned work.** Each `work/<topic>/` should be reachable from the cockpit (focus /
    next / in-flight). Flag a folder the cockpit never mentions — lost, or
    finished-but-unrecorded. → Fix: if clearly finished, archive it (mechanical); if it's
@@ -67,7 +75,8 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    above it (parses as a setext heading; the terminator vanishes on render). → Fix: add /
    repair the header, deriving `SUMMARY` / `READ WHEN` from the file (mechanical).
 6. **Knowledge domain shape.** Knowledge should live under `knowledge/<domain>/...`, not as
-   a root-level pile. → Fix: when the domain is obvious, move the file under the matching
+   a root-level pile, while keeping kind encoded by title (`#`, `# ⚠`, `checklist`) rather
+   than by kind folders. → Fix: when the domain is obvious, move the file under the matching
    domain folder; if the file mixes domains, propose a split.
 7. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<slug>/archive/`. Flag a `work/` effort whose cockpit notes /

@@ -152,7 +152,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | --- | --- |
 | `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `briefing.md`, `cockpit.md`, and the active topic `context.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
 | `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
-| `/flightdeck:walkaround` | **Integrity audit and repair** — an on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, malformed topic packages, orphaned work, duplicate traps, missing routing headers). Fixes mechanical issues and proposes lossy ones. |
+| `/flightdeck:walkaround` | **Integrity audit and repair** — an on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, malformed topic packages, orphaned work, duplicate traps, missing routing headers, root-level knowledge piles). Fixes mechanical issues and proposes lossy ones. |
 
 **persist** is the fourth verb, but it's not a command — it runs automatically at the end of any execution turn (scan for knowledge, rewrite cockpit, commit). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). Nothing fires on session start; there's no background process.
 
