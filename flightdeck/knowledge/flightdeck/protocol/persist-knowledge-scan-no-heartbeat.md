@@ -53,9 +53,10 @@ AI 记得跑协议）的又一尖锐子型，与 [[sibling-workflow-leaves-cockp
 - **landing 行钉死知识计数（含 0）**：`cockpit ✓ · knowledge: 0 · commit <sha>`——一串
   `knowledge: 0` 跨回合就是可见的**心电平线**，而非沉默；省掉这段则遗漏隐形（heartbeat that shows the
   flatline）。
-- **walkaround #7（知识平线 + 孤儿 scratch）**：近 20 条提交像在修 bug / 做决策 / 踩坑，而
-  `knowledge/` 同期零增 → 报（⚠）平线；再找 `.superpowers/…`、`tmp/` 这类 deck 外 scratch（往往正是
-  未 crystallize 知识所在），报（i）当清理 + crystallize 提示。
+- **walkaround 知识平线检查**：近 20 条提交像在修 bug / 做决策 / 踩坑，而 `knowledge/` 同期零增
+  → 报（⚠）平线。默认只查 flightdeck 管辖域：项目 `flightdeck/`、项目 cold store、已订阅的
+  mother-store knowledge。`.superpowers/…`、`tmp/` 这类 sibling workflow scratch 不再默认扫；只有
+  cockpit / topic index / briefing / knowledge 明确指向时，才检查被引用的具体路径并提出清理。
 - **外圈同步**：README 中英 + adapters/claude 把 persist 叙述从被动「writes knowledge in place」改成主
   动「scans for new knowledge and writes it」+ scan-first 排序（走 [[outer-ring-docs-drift]] 的全圈清扫
   规则）。

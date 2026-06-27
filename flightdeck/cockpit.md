@@ -1,14 +1,14 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: work/ai-native-redesign/ — AI-native cutover, now past the `index.md` handoff migration and carrying mother-store subscription cleanup follow-up.
+Focus: work/ai-native-redesign/ — AI-native cutover, now past the `index.md` handoff migration and carrying local knowledge cleanup plus cache sync follow-up.
 
 ## In flight
 
-- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the current mother-store subscription cleanup and release gate.
+- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the current stale-knowledge cleanup and cache sync step.
 
 ## Next
 
-Verify and commit the mother-store subscription cleanup. Re-sync the Codex cache afterward. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
+Verify and commit the stale-knowledge cleanup, then sync both Claude and Codex plugin caches. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
 
 ## Open questions
 

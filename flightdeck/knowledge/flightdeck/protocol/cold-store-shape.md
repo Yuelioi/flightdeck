@@ -1,6 +1,6 @@
 # cold store shape
 
-SUMMARY: Cold project storage should preserve completed topic packages in `archive/<topic>/`, keep parked ideas as light `ideas/<topic>/idea.md` seeds, and keep global knowledge domain-routed.
+SUMMARY: Cold project storage should preserve completed topic packages in `archive/<topic>/`, keep parked ideas as light `ideas/<topic>/idea.md` seeds, and keep global knowledge domain-routed without making active topics depend on global paths.
 READ WHEN: before changing archive / ideas / global knowledge semantics, or when migrating cold-store content
 RECHECK WHEN: the topic work package shape or Subscriptions semantics changes
 
@@ -15,5 +15,13 @@ workspace. Its job is recovery-by-choice:
   way project knowledge is routed.
 
 Do not bulk-move legacy global root files casually: other decks may subscribe to those exact
-paths. Prefer compatibility first, then propose domain migration when a deck explicitly opts
-in or walkaround can see the impact.
+paths. When the affected live project briefings are visible through
+`~/.flightdeck/projects/<slug>/`, it is reasonable to move root files into domains and repoint
+those briefings in the same pass. Skip cold project slugs whose live briefing path no longer
+exists rather than guessing.
+
+Global knowledge is for discovery and standing cross-project behavior. Active topic recovery
+should not depend on `~/.flightdeck/knowledge/...` paths: if a topic needs shared knowledge to
+resume, materialize the relevant content into project-local `flightdeck/knowledge/<domain>/...`
+and point the topic index there. That keeps the warm recovery payload self-contained even
+when the mother store is reorganized.

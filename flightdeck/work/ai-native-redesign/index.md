@@ -3,13 +3,14 @@
 ## State
 
 The AI-native reset is the active cutover work. The topic-package `index.md` handoff
-migration has landed; the live tree now carries follow-up mother-store subscription cleanup.
+migration has landed; the live tree now carries follow-up stale-knowledge cleanup and cache
+sync.
 
 ## Next
 
-Verify, commit, and sync the plugin cache for the mother-store subscription cleanup.
-Continue release steps only after explicit user approval for CHANGELOG / version bump /
-push.
+Verify and commit the stale-knowledge cleanup, then sync both Claude and Codex plugin
+caches. Continue release steps only after explicit user approval for CHANGELOG / version
+bump / push.
 
 ## Read now
 
@@ -54,6 +55,8 @@ Current:
   live project briefings found via `~/.flightdeck/projects/<slug>/` have been repointed.
 - This dogfood deck now subscribes to `knowledge/windows/`; the duplicate local Windows
   knowledge files have been removed from the warm deck.
+- Local knowledge stale scan found `cold-store-shape` and `persist-knowledge-scan-no-heartbeat`
+  lagging the current mother-store / walkaround boundary rules; both are being refreshed.
 
 Verified:
 
