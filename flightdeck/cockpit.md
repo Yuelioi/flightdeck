@@ -1,14 +1,14 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: work/ai-native-redesign/ — AI-native cutover, now upgrading topic packages to an `index.md` handoff model.
+Focus: work/ai-native-redesign/ — AI-native cutover, now past the `index.md` handoff migration and carrying Codex cache-sync plus mother-store boundary follow-up work.
 
 ## In flight
 
-- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the exact protocol/docs files needed now.
+- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the current cache-sync / mother-store follow-up and release gate.
 
 ## Next
 
-Verify the `index.md` handoff protocol diff and stale-wording scan. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
+Verify, commit, and sync the Codex cache helper plus mother-store boundary updates. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
 
 ## Open questions
 

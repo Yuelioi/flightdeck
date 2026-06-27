@@ -172,3 +172,17 @@ apply beyond one repo.
 Prefer `~/.flightdeck/knowledge/<domain>/...` and subscribe to either a domain directory or
 a specific file from `briefing.md`. Legacy root-level global files may still be subscribed
 for compatibility, but new global knowledge should not grow a root pile.
+Global knowledge is domain-routed, not topic-routed; `archive/<topic>/` and `ideas/<topic>/`
+belong only under `~/.flightdeck/projects/<slug>/`.
+
+Global knowledge moves are cross-project changes. A root-level global file is a compatibility
+path, not a normal cleanup target: do not move, rename, or delete it just because one deck's
+walkaround found it.
+
+Global knowledge is discovery/input, not an active topic's recovery payload. If a topic
+needs a global note to continue, first materialize the relevant content into the project's
+warm `flightdeck/knowledge/<domain>/...` as a local note, summary, or project-specific
+adaptation, then point `work/<topic>/index.md` at that local file. Topic `## Read now` /
+`## Read if` pointers should not depend on `~/.flightdeck/knowledge/...` paths directly.
+That keeps active recovery self-contained in the project git repo even if the mother store
+is later reorganized.

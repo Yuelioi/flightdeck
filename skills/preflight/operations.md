@@ -118,6 +118,12 @@ plans listed under `## Read now`; read `## Read if` entries only when their cond
 true. Add new entries when newly discovered knowledge or a newly selected plan becomes
 required for future continuation.
 
+Do not point an active topic directly at `~/.flightdeck/knowledge/...`. Global knowledge is
+allowed to inform the work, but if the topic needs it for recovery, first materialize the
+relevant content into project-local `flightdeck/knowledge/<domain>/...` (copy, summary, or
+project-specific adaptation) and point the topic index at that local file. This avoids
+breaking active recovery when global knowledge is merged, renamed, or reorganized.
+
 Sibling workflows or spec-generators that default their output elsewhere must be pointed at
 this folder or relocated into it before continuing. Do not leave active effort artifacts as
 `work/<topic>.md`, `work/<topic>-plan.md`, `work/<topic>-spec.md`, split top-level files, or
@@ -179,6 +185,22 @@ placed under a domain.
   the same result. To extend a global file, read both yourself; the file-level rule stays
   replace. A subscribed global path that's missing/renamed → preflight emits one soft
   warning and continues; it does not fail.
+- **Topic dependency boundary.** `briefing.md ## Subscriptions` admits global knowledge
+  into the routing map; it is not a topic dependency file. Active topic `index.md` read
+  pointers should reference local topic files or project-local `flightdeck/knowledge/...`.
+  When a topic needs a global note, materialize it locally before adding the pointer.
+- **Missing global path recovery.** If a subscribed global knowledge path cannot be loaded,
+  re-read the current project's `briefing.md` before calling it dead; the briefing is the
+  source of truth and may have changed. A missing path from a topic index is a protocol
+  drift: topic indexes should not point at global paths directly, so materialize or remove
+  the dependency instead of treating it as a subscription repair.
+- **Global path migration.** Moving, renaming, or deleting `~/.flightdeck/knowledge/...`
+  can break other decks. Do not perform it as a normal walkaround confirmation. Before a
+  dedicated global migration, discover likely subscribers by walking
+  `~/.flightdeck/projects/<slug>/`, deriving the live project path from each slug, and
+  reading each project's current `flightdeck/briefing.md`. Repoint live subscriptions first,
+  keep any legacy root-level path as compatibility while any verified briefing references
+  it, and only then remove the old path.
 - **Vendoring (opt-in).** References to `~/.flightdeck` make the repo non-self-contained.
   When you need the repo portable, vendor: snapshot the referenced global file into the repo
   as a frozen copy, and drop its `## Subscriptions` entry. Default is live subscription, no

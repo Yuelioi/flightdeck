@@ -185,6 +185,7 @@ deck 局部约定 + AI 按你自然话维护的行为规则，如 "发布面一�
 - **Subscriptions** —— 每行一个 `~/.flightdeck` 相对路径。目录项订阅其整棵子树。进场时 preflight 把订阅的全局文件折进路由树，与本地 `knowledge/` 并列。
 - **冷存层作共享库** —— 全局知识住在 `~/.flightdeck/knowledge/`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
 - **全局知识也按域组织** —— 新共享知识放 `~/.flightdeck/knowledge/<domain>/...`。旧的根目录全局文件可继续作为订阅兼容路径，但不要继续扩大根目录堆积。
+- **主题恢复依赖留在本地** —— 全局知识可以参与发现和判断，但 `work/<topic>/index.md` 不应直接指向 `~/.flightdeck/knowledge/...`。如果某个主题恢复时必须依赖一条共享知识，先把相关内容落到项目本地 `flightdeck/knowledge/<domain>/...`，再让主题 index 指向本地文件。
 - **本地遮蔽全局** —— 项目若在同一相对路径有自己的文件，本地的整份胜出（替换，非合并）—— 确定、零维护。
 - **下发（vendoring，可选）** —— 需要仓库自包含时，把订阅的全局文件快照进仓库当冻结副本、并撤掉订阅。默认是活订阅、不拷贝。
 

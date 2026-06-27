@@ -186,6 +186,7 @@ Some procedures and reference docs aren't project-specific — a commit-message 
 - **Subscriptions** — one `~/.flightdeck`-relative path per line. A directory entry subscribes its whole subtree. On entry, preflight folds the subscribed global files into the routing tree alongside local `knowledge/`.
 - **Cold tier as the shared store** — global knowledge lives in `~/.flightdeck/knowledge/`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
 - **Domain-shaped global knowledge** — use `~/.flightdeck/knowledge/<domain>/...` for new shared knowledge. Legacy root-level global files can keep working as subscriptions, but don't grow the root pile.
+- **Topic recovery stays local** — global knowledge can inform a topic, but `work/<topic>/index.md` should not point directly at `~/.flightdeck/knowledge/...`. If a topic needs a shared note to resume, materialize the relevant content into project-local `flightdeck/knowledge/<domain>/...` and point the topic there.
 - **Local shadows global** — if a project has its own file at the same relative path, the local one wins entirely (replace, not merge) — deterministic, zero-maintenance.
 - **Vendoring (opt-in)** — when you need the repo self-contained, snapshot a subscribed global file into the repo as a frozen copy and drop the subscription. The default is a live subscription, no copy.
 

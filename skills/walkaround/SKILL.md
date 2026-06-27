@@ -22,8 +22,13 @@ the current shape or it gets brought to it. What the current shape *is* lives in
 [../preflight/operations.md](../preflight/operations.md) (procedures) — walkaround checks
 against those, it doesn't restate them.
 
-Before sweeping, read those two files enough to hold the current shape. walkaround is a
-repair pass against the live protocol, not a stale copy of it.
+Before sweeping, first read the project's `flightdeck/briefing.md`, then read those two
+protocol files enough to hold the current shape. `briefing.md` is the project's rulebook:
+honor its `## Conventions` for language, gates, repo-specific constraints, and maintenance
+preferences while running the walkaround, and use its `## Subscriptions` as the source of
+truth for subscription checks. If `briefing.md` is missing or malformed, flag that as a
+finding before continuing with best judgement. walkaround is a repair pass against the live
+project rules plus the live protocol, not a stale copy of either.
 
 ## Safety — how it writes
 
@@ -88,20 +93,36 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    `~/.flightdeck/projects/<slug>/archive/<topic>/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state). → Fix: move it
    (mechanical).
-9. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
-   `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) one whose
-   target was already vendored into the repo (copy + live subscription double up); flag (`i`)
-   a subscribed global knowledge file that still lives directly under `~/.flightdeck/knowledge/`
-   instead of a domain folder. Local-shadows-global is by-design — don't flag it. → Propose
-   the removal/repoint or domain migration (lossy if other decks may subscribe to the old path).
-10. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
+9. **Subscription health + topic dependency boundary.** For each path in `briefing.md`'s
+   `## Subscriptions`: flag (`⚠`) a `~/.flightdeck/…` path that's missing or renamed (dead
+   subscription); flag (`i`) one whose target was already vendored into the repo (copy + live
+   subscription double up). Re-read the current `briefing.md` before calling a subscribed
+   global path dead; the briefing is the source of truth. Local-shadows-global is by-design
+   — don't flag it. A subscribed global knowledge file that still lives directly under
+   `~/.flightdeck/knowledge/` is a legacy compatibility path: report it as (`i`), but do
+   **not** include it in ordinary "execute proposed fixes" cleanup. Moving / renaming /
+   deleting global knowledge requires a dedicated global subscription migration: discover
+   likely subscribers from `~/.flightdeck/projects/<slug>/`, verify their live project
+   briefings, repoint them, keep the old path until no verified briefing references it, then
+   remove it.
+
+   Then inspect active topic `index.md` read pointers. Flag (`⚠`) any `## Read now` /
+   `## Read if` entry that points directly at `~/.flightdeck/knowledge/...` or otherwise
+   depends on a global knowledge path for recovery. → Fix: materialize the relevant content
+   into project-local `flightdeck/knowledge/<domain>/...` and repoint the topic index there;
+   if the materialization would be lossy or unclear, propose it instead.
+10. **Knowledge flatline inside the flightdeck boundary.** persist's knowledge scan is the one sub-action
    with no turn-to-turn forcing function, so it's the first thing a slipping session drops.
    Glance at recent commit subjects (`git log --oneline -20`): if a run clearly caught bugs /
    made decisions / hit traps yet `knowledge/` saw no add or update across that span, flag
-   (`⚠`) the flatline — learnings likely never crystallized. Then look for **orphaned scratch**
-   (a sibling workflow's working dir left in the repo: `.superpowers/…`, a `tmp/` log) — often
-   *where* the uncrystallized knowledge lives. → Fix: mine the scratch for write-gate hits and
-   write them as knowledge (mechanical); propose clearing the scratch afterward.
+   (`⚠`) the flatline — learnings likely never crystallized. Stay inside the flightdeck
+   boundary by default: local `flightdeck/`, the project's cold store under
+   `~/.flightdeck/projects/<slug>/`, and subscribed global knowledge under `~/.flightdeck/`.
+   Do **not** sweep sibling workflow scratch such as `.superpowers/` or `tmp/` unless a
+   flightdeck file (`cockpit.md`, a topic `index.md`, `briefing.md`, or knowledge) explicitly
+   points there. If such a pointer exists, inspect only the referenced path, mine any
+   write-gate hit into `knowledge/`, and propose clearing the scratch rather than doing it
+   automatically.
 11. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
    shape **by what each thing is, never losing content**:
    - kind-folders (`specs/` `plans/` `checklists/` `docs/` `incidents/`) → regroup into
@@ -120,5 +141,7 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
 
 Prose list grouped by check: each line `⚠`/`i` + path + what was wrong + **what you did**
 (fixed) or **what you propose** (lossy). End with a tally — `N fixed · M proposed`, or
-`clean` when the deck already matched. Close with the banner `─── 🔧 walkaround ───`
-(it pairs with launch's `🛠️`, preflight's `🛫`, and landing's `🛬`).
+`clean` when the deck already matched. If there are proposed fixes, ask whether to execute
+the listed proposed cleanup / migration now; if the user says yes, continue directly with
+those fixes while still respecting the safety posture above. Close with the banner
+`─── 🔧 walkaround ───` (it pairs with launch's `🛠️`, preflight's `🛫`, and landing's `🛬`).

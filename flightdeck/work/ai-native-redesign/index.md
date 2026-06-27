@@ -2,14 +2,15 @@
 
 ## State
 
-The AI-native reset is the active cutover work. The protocol is moving from a
-cockpit-as-notebook model to topic packages where `cockpit.md` is the project chooser and
-`work/<topic>/index.md` is the topic handoff board.
+The AI-native reset is the active cutover work. The topic-package `index.md` handoff
+migration has landed; the live tree now carries follow-up Codex cache-sync and mother-store
+boundary work.
 
 ## Next
 
-Commit the `index.md` handoff model migration. Continue release steps only after explicit
-user approval for CHANGELOG / version bump / push.
+Verify, commit, and sync the plugin cache for the Codex cache helper plus mother-store
+boundary updates. Continue release steps only after explicit user approval for CHANGELOG /
+version bump / push.
 
 ## Read now
 
@@ -19,8 +20,10 @@ user approval for CHANGELOG / version bump / push.
 - skills/walkaround/SKILL.md
 - README.md
 - README.zh.md
+- scripts/sync_codex_cache.ps1
 - flightdeck/work/ai-native-redesign/plan.md
 - flightdeck/knowledge/flightdeck/protocol/cockpit-bloat-topic-index.md
+- flightdeck/knowledge/flightdeck/testing/local-plugin-testing.md
 
 ## Read if
 
@@ -48,8 +51,10 @@ Done:
 
 Current:
 
-- Protocol, README, example deck, dogfood deck, and cockpit-bloat knowledge now use
-  `index.md` as the topic entry point.
+- Codex cache-sync helper, local-plugin-testing checklist update, and mother-store boundary
+  protocol updates are uncommitted.
+- Two Windows environment knowledge notes have been copied into global knowledge for
+  cross-project discovery; active topic recovery still points only at local project files.
 
 Verified:
 
