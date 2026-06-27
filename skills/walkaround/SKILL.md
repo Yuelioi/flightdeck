@@ -11,7 +11,8 @@ end up not matching the current shape two ways, and **walkaround is the one pass
 both**:
 
 - **a usage slip** — a step was skipped: a knowledge file with no routing header, an effort
-  left in `work/` after it finished, a cockpit that no longer matches reality. → Fix it.
+  left in `work/` after it finished, a malformed topic package, a cockpit that no longer
+  matches reality. → Fix it.
 - **an older shape** — the deck predates the current form (`INDEX.md`, YAML frontmatter,
   kind-folders, recorded config). → Migrate it.
 
@@ -41,31 +42,42 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
 
 1. **Cockpit shape + reality.** It should carry the canonical skeleton (`Focus:` +
    `## In flight` + `## Next` + `## Open questions`) — note (`i`) a missing section. Then
-   reality: does `## In flight` match what's in `work/`? Flag (`⚠`) efforts the cockpit
-   claims that aren't in `work/`, and a focus/next pointing at something already moved to the
-   cold store. → Fix: repoint/rewrite the cockpit line (mechanical).
-2. **Orphaned work.** Each `work/<effort>/` should be reachable from the cockpit (focus /
+   reality: does `## In flight` match what's in `work/`? Flag (`⚠`) topics the cockpit
+   claims that aren't in `work/`, a `work/` topic the cockpit never mentions, and a
+   focus/next pointing at something already moved to the cold store. → Fix: repoint/rewrite
+   the cockpit line (mechanical).
+2. **Topic package shape.** Each active `work/<topic>/` should carry `context.md`,
+   `design.md`, `plan.md`, and `progress.md`; `plans/` is optional. Flag top-level
+   `work/*.md` effort files, split sibling files such as `*-plan.md` / `*-spec.md`, or
+   active spec/plan output parked outside `work/`. → Fix: when the topic is clear, create
+   `work/<topic>/`, move design/spec content to `design.md`, move the current main steps to
+   `plan.md`, summarize state in `context.md` / `progress.md`, and leave related notes
+   beside them. If multiple topics are mixed in one file, propose the split.
+3. **Orphaned work.** Each `work/<topic>/` should be reachable from the cockpit (focus /
    next / in-flight). Flag a folder the cockpit never mentions — lost, or
    finished-but-unrecorded. → Fix: if clearly finished, archive it (mechanical); if it's
    unclear what it is or where it belongs, propose.
-3. **Duplicate traps.** Two `# ⚠ <title>` files describing the same pitfall (same domain,
+4. **Duplicate traps.** Two `# ⚠ <title>` files describing the same pitfall (same domain,
    near-identical symptom) → recurrence should re-read the existing trap, not spawn a copy
    (see operations.md § Incidents). → Propose a merge (lossy).
-4. **Missing / empty routing headers.** Every knowledge file — local `knowledge/` **and any
+5. **Missing / empty routing headers.** Every knowledge file — local `knowledge/` **and any
    subscribed global file** — must open with a routing header (`# <title>` + `SUMMARY:` +
    `READ WHEN:`, ended by `---`). Flag (`⚠`) any missing the header or the `---` terminator
    (won't route); flag (`i`) an empty `SUMMARY:`/`READ WHEN:`, or a `---` with no blank line
    above it (parses as a setext heading; the terminator vanishes on render). → Fix: add /
    repair the header, deriving `SUMMARY` / `READ WHEN` from the file (mechanical).
-5. **Done but not archived.** A finished effort should be moved out of `work/` into
+6. **Knowledge domain shape.** Knowledge should live under `knowledge/<domain>/...`, not as
+   a root-level pile. → Fix: when the domain is obvious, move the file under the matching
+   domain folder; if the file mixes domains, propose a split.
+7. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<slug>/archive/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state). → Fix: move it
    (mechanical).
-6. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
+8. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
    `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) one whose
    target was already vendored into the repo (copy + live subscription double up).
    Local-shadows-global is by-design — don't flag it. → Propose the removal/repoint (lossy).
-7. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
+9. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
    with no turn-to-turn forcing function, so it's the first thing a slipping session drops.
    Glance at recent commit subjects (`git log --oneline -20`): if a run clearly caught bugs /
    made decisions / hit traps yet `knowledge/` saw no add or update across that span, flag
@@ -73,11 +85,12 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    (a sibling workflow's working dir left in the repo: `.superpowers/…`, a `tmp/` log) — often
    *where* the uncrystallized knowledge lives. → Fix: mine the scratch for write-gate hits and
    write them as knowledge (mechanical); propose clearing the scratch afterward.
-8. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
+10. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
    shape **by what each thing is, never losing content**:
    - kind-folders (`specs/` `plans/` `checklists/` `docs/` `incidents/`) → regroup into
-     `knowledge/<domain>/` by subject; an active plan/spec → `work/<effort>/`; a done one →
-     `archive/`; an unstarted one → `ideas/`.
+     `knowledge/<domain>/` by subject; an active plan/spec → `work/<topic>/design.md` +
+     `work/<topic>/plan.md` with `context.md` / `progress.md`; a done one → `archive/`;
+     an unstarted one → `ideas/`.
    - delete `INDEX.md`; strip YAML frontmatter and replace it with a routing header.
    - recorded config (`version` / `runtime` / `agents_md` / toggles) → drop it.
    - vendored shared copies → subscribe to the master in `## Subscriptions` and delete the

@@ -10,13 +10,14 @@ The SKILL.md verb spelled out. Persist runs at the end of an execution turn — 
 real work or moved the board. A pure conversation / clarification turn that changed nothing
 persists nothing.
 
-**Don't let the cockpit lag a long run.** The trigger is every turn that moved the board —
+**Don't let the deck lag a long run.** The trigger is every turn that moved the board —
 and a single effort can span many turns. Persist at each completed batch / milestone, not
 only when the whole effort wraps: the bar is that someone could close the conversation
-*right now* and recover from `cockpit.md` alone. The same bar holds when you execute under
-another workflow (executing-plans, a subagent loop, an external task runner): that
-workflow's own ledger is **not** the cockpit; an engaged session still owes the cockpit a
-current `Focus` / `## In flight` at each milestone.
+*right now* and recover from `cockpit.md` + the active `work/<topic>/context.md` alone.
+The same bar holds when you execute under another workflow (executing-plans, a subagent
+loop, an external task runner): that workflow's own ledger is **not** the deck; an engaged
+session still owes both the active topic context and the cockpit index a current state at
+each milestone.
 
 In order:
 
@@ -29,13 +30,17 @@ In order:
   that ends up in a gitignored scratch file and never graduates). "Nothing qualified" is
   legitimate — but you reach it by scanning on purpose, and you **report** it (the landing
   line), so a flatline of empty scans is visible rather than silent.
-- **Efforts.** If a `work/<effort>/` finished this turn, move it out to
+- **Efforts.** If a `work/<topic>/` finished this turn, move it out to
   `~/.flightdeck/projects/<slug>/archive/` (location is state). "Done" is a judgement: when
   the work reads as finished, **say in your turn report that you're archiving it** (so the
   user can object next turn) rather than archiving silently. Otherwise leave it in `work/`.
+- **Topic recovery.** Rewrite the active `work/<topic>/context.md` whenever the topic state
+  changed. Keep it short: state, next, blockers/open questions, and key facts. Update
+  `progress.md` when execution progress changed; compress it into done/current/verified/not
+  done rather than appending a transcript.
 - **cockpit.md.** Rewrite it to reflect now, in the canonical skeleton (`Focus:` +
-  `## In flight` + `## Next` + `## Open questions`). Keep it small — it's the recovery
-  payload.
+  `## In flight` + `## Next` + `## Open questions`). Keep it small — it's the project
+  index, not the topic notebook.
 - **commit.** `git commit` the project repo with a one-line summary of the turn's
   increment. **One commit per turn** (mid-turn writes batch into it). If the turn moved the
   board but produced no new knowledge, the cockpit rewrite is itself a real change → commit
@@ -51,18 +56,34 @@ In order:
   a command, not a separate ritual; there is no `/landing`. A turn that persisted nothing
   prints no landing line. No git repo → `─── 🛬 landing ─── no git, not committed`.
 
-## Writing a spec / plan, and where it ends up
+## Writing a topic work package, and where it ends up
 
-An effort's spec/design and plan live **together** in `work/<effort>/` — a brainstorming
-`design.md`, a `plan.md` (superpowers' writing-plans output drops in as-is; flightdeck
-doesn't re-stamp it), plus any notes or checks. Don't scatter one effort's design and plan
-across a top-level file **and** a separate folder, and don't drop them into a side `docs/`
-tree. Sibling workflows or spec-generators that default their output elsewhere → point them
-at (or relocate into) `work/<effort>/`, so the deck (cockpit, routing, walkaround, the
-done→cold move) can see it. A project's own finished/reference docs can still live in
-`docs/`; this is about the *active* effort's working artifacts.
+An active effort's working artifacts live together under `work/<topic>/` with stable names:
 
-When the effort is **done**, move the whole `work/<effort>/` to
+```text
+work/<topic>/
+  context.md
+  design.md
+  plan.md
+  progress.md
+  plans/
+```
+
+`context.md` is the topic recovery payload: update it whenever a new session would need a
+fresh state, next action, blocker, or key fact to continue. `design.md` holds the why,
+approach, tradeoffs, and settled decisions. `plan.md` is the current main execution plan,
+including checklist output from another workflow. If there are multiple plausible plans,
+keep the chosen one in `plan.md` and put the alternates under `plans/` with purpose names
+(`rollback-plan.md`, `cookie-session-plan.md`). `progress.md` is a compressed status
+summary; never use it as a chronological log.
+
+Sibling workflows or spec-generators that default their output elsewhere must be pointed at
+this folder or relocated into it before continuing. Do not leave active effort artifacts as
+`work/<topic>.md`, `work/<topic>-plan.md`, `work/<topic>-spec.md`, split top-level files, or
+a side `docs/` tree. A project's own finished/reference docs can still live in `docs/`;
+this is about the *active* effort's working artifacts.
+
+When the effort is **done**, move the whole `work/<topic>/` to
 `~/.flightdeck/projects/<slug>/archive/` (location is state; `<slug>` = the project's
 absolute path with `/`, `\`, `:` replaced by `-`). Say in your turn report that you're
 archiving it. An **unstarted** idea lives in `~/.flightdeck/projects/<slug>/ideas/`.
@@ -72,8 +93,10 @@ archiving it. An **unstarted** idea lives in `~/.flightdeck/projects/<slug>/idea
 The micro-core rule: record only what changes how you act later, or that you'll look up
 again.
 
-- RECORD: a bug + its root cause; a decision and why; a reusable procedure; a trap you'd
-  otherwise hit again.
+- RECORD in `knowledge/`: a bug + its root cause; a cross-topic or future-facing decision
+  and why; a reusable procedure; a trap you'd otherwise hit again.
+- RECORD in `work/<topic>/`: topic-local state, progress, unresolved implementation
+  questions, and design details that would not change a future session outside that topic.
 - SKIP: "ran the tests, they passed"; "explored the API, found nothing useful"; "reran the
   build after a flake"; a log of steps with no durable conclusion.
 - Borderline → ask: would a future session, cold, act differently for having this written?

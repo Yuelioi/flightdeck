@@ -1,15 +1,15 @@
 # Cockpit — notes-cli
 
-Focus: add CSV export to the `notes` command so users can pull their notes into a spreadsheet.
+Focus: work/add-csv-export/ — add CSV export to the `notes` command so users can pull their notes into a spreadsheet.
 
 ## In flight
 
-- add-csv-export — design done, plan drafted; implementing the formatter next.
-  See `work/add-csv-export/`.
+- work/add-csv-export/ — design done, plan drafted; implementing the formatter next.
+  Read `work/add-csv-export/context.md` first.
 
 ## Next
 
-Implement the CSV row formatter — the first unchecked step in `work/add-csv-export/plan.md`.
+Continue `work/add-csv-export/context.md` → implement the CSV row formatter.
 
 ## Open questions
 

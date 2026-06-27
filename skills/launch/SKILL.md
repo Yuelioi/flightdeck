@@ -14,7 +14,7 @@ Copy the `scaffold/flightdeck/` directory that ships beside this skill into the 
 root, then replace `<project>` in the two `# …` headings with the project's name. That's
 the whole job — **copy the scaffold, don't hand-author it.** The result under `flightdeck/`:
 
-    cockpit.md     empty recovery payload — Focus + ## In flight + ## Next + ## Open questions
+    cockpit.md     empty project index — Focus + ## In flight + ## Next + ## Open questions
     briefing.md    ## Conventions + ## Subscriptions (seed comments, empty to start)
     work/          empty (.gitkeep)
     knowledge/     empty (.gitkeep)

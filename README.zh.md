@@ -21,7 +21,7 @@
 
 ## ✨ 亮点
 
-- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：扫描这一回合的产出、把值得留的新知识写进 `knowledge/`，重写 `cockpit.md`，提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
+- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：扫描这一回合的产出、把值得留的新知识写进 `knowledge/`，重写当前主题的 `context.md` / `progress.md`，重写 `cockpit.md`，提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
 - **无 schema、无脚本、无 INDEX。** 整套东西就是纯 markdown 加两条约定：**位置即状态**（项目里的文件夹 = 活的，移出 = 完成）和每个知识文件一行的**路由头**。没东西要迁移、没东西要保持同步、没东西会在模型升级时坏掉。
 
 ## TL;DR
@@ -31,7 +31,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch` 建好一个 deck。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、当前主题的 `context.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch` 建好一个 deck。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
@@ -40,10 +40,10 @@
 ```
 your-project/
 └── flightdeck/            # 温存层 —— git 跟踪，每回合提交
-    ├── cockpit.md         # 必读的恢复载荷（Focus / In flight / Next / Open questions）
+    ├── cockpit.md         # 项目索引（Focus / In flight / Next / Open questions）
     ├── briefing.md        # 稳定、人维护 —— ## Conventions（house rules）+ ## Subscriptions
-    ├── work/              # 进行中的多步工作（每项一个文件或文件夹）
-    └── knowledge/         # 常驻知识，按域嵌套
+    ├── work/              # 主题工作包：context.md + design.md + plan.md + progress.md
+    └── knowledge/         # 路由到未来行为的知识，按域嵌套
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
 ├── knowledge/             # 真·跨项目知识（经 briefing 的 ## Subscriptions 订阅）
@@ -53,9 +53,9 @@ your-project/
 
 没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的一项是活的；把它移进 `~/.flightdeck/projects/<name>/archive/` 就标记为完成。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
 
-### cockpit.md —— 唯一必读文件
+### cockpit.md —— 项目索引
 
-每次会话首先读取。它故意保持小 —— 它是恢复载荷，每回合重写：
+每次会话首先读取。它故意保持小 —— 指向当前主题工作包，而不是承载主题笔记：
 
 ```markdown
 # Cockpit — payment-service
@@ -64,18 +64,33 @@ Focus: stabilize the Stripe webhook handler — failing edge cases under knowled
 
 ## In flight
 
-- webhook-idempotency/ — reproducing the duplicate-event bug; deciding DB vs Redis key
+- work/webhook-idempotency/ — 先读 `context.md`；deciding DB vs Redis key
 
 ## Next
 
-Reproduce the duplicate-event case from knowledge/stripe/idempotency.md, then pick the key store.
+Continue `work/webhook-idempotency/context.md` → next action.
 
 ## Open questions
 
 - Is the duplicate caused by Stripe retries or our own re-enqueue? (unverified)
 ```
 
-没有 500 行的上下文倾倒 —— 历史内容都在 `knowledge/` 更深一层，按需通过走目录树 + grep 路由头取得。
+没有 500 行的上下文倾倒。主题细节在 `work/<topic>/context.md` / `design.md` / `plan.md`；可复用的未来行为在 `knowledge/`，按需通过走目录树 + grep 路由头取得。
+
+### work/&lt;topic&gt;/ —— 主题工作包
+
+每个进行中的工作都是一个目录，入口文件名稳定：
+
+```text
+work/<topic>/
+  context.md    # 主题恢复载荷：状态、下一步、阻塞点、关键事实
+  design.md     # 为什么、方案、取舍、已定决策
+  plan.md       # 当前主执行计划
+  progress.md   # 压缩进度摘要，不是流水账
+  plans/        # 可选：备选或已废弃计划
+```
+
+preflight 在 cockpit 后读取当前主题的 `context.md`。执行时读 `plan.md`；需要设计判断时读 `design.md`。`progress.md` 重写为摘要，让下次会话不需要回放旧聊天也能继续。
 
 ### 路由头 —— 唯一的约定
 
@@ -135,9 +150,9 @@ READ WHEN: <什么时候路由到这里才对>
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `cockpit.md` / `briefing.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
+| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `briefing.md`、`cockpit.md` 和当前主题的 `context.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
 | `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
-| `/flightdeck:walkaround` | **完整性审计** —— 一个只读、按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、孤儿 work、重复 trap、缺路由头）。唯一的 trust-but-verify 网。只报告，不修。 |
+| `/flightdeck:walkaround` | **完整性审计与修复** —— 一个按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、主题工作包形状不规范、孤儿 work、重复 trap、缺路由头）。机械问题直接修，可能丢语义的问题只提议。 |
 
 **persist** 是第四个动词，但它不是命令 —— 它在任何执行回合末尾自动跑（扫描知识、重写 cockpit、commit）。`commit` 是**本地自动、push 才先问**（本地 commit 可逆；push 是受控关卡）。会话开始不加载任何东西，也没有后台进程。
 
@@ -146,7 +161,7 @@ READ WHEN: <什么时候路由到这里才对>
 | 当下情形 | AI 去读 |
 | --- | --- |
 | 会话开始 /「我们刚在干嘛？」 | `cockpit.md` |
-| 一项进行中的多步工作 | `work/<effort>/` |
+| 一项进行中的多步工作 | 先读 `work/<topic>/context.md`，再按需读 `plan.md` / `design.md` |
 |「迁移为啥挂了？」 | `knowledge/<域>/` 下的 `# ⚠` trap |
 |「测试怎么跑？」 | `knowledge/<域>/` 下的 `# … checklist` |
 

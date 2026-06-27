@@ -21,7 +21,7 @@
 
 ## ✨ Highlights
 
-- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites `cockpit.md`, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
+- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites the active topic `context.md` / `progress.md`, rewrites `cockpit.md`, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
 - **No schema, no scripts, no INDEX.** The whole thing is plain markdown and two conventions: **location is state** (a folder in the project is live; moved out is done) and a one-line **routing header** on each knowledge file. Nothing to migrate, nothing to keep in sync, nothing that breaks on a model upgrade.
 
 ## TL;DR
@@ -31,7 +31,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which seeds a deck. Nothing loads on its own; you invoke it.
+Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, the active topic `context.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which seeds a deck. Nothing loads on its own; you invoke it.
 
 ## What it is
 
@@ -40,10 +40,10 @@ A `flightdeck/` directory your AI reads and writes by convention — a **warm ti
 ```
 your-project/
 └── flightdeck/            # warm tier — git-tracked, committed every turn
-    ├── cockpit.md         # the must-read recovery payload (Focus / In flight / Next / Open questions)
+    ├── cockpit.md         # project index (Focus / In flight / Next / Open questions)
     ├── briefing.md        # stable, human-owned — ## Conventions (house rules) + ## Subscriptions
-    ├── work/              # in-flight multi-step efforts (one file or folder each)
-    └── knowledge/         # persistent knowledge, nested by domain
+    ├── work/              # topic packages: context.md + design.md + plan.md + progress.md
+    └── knowledge/         # routed future-behavior knowledge, nested by domain
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
 ├── knowledge/             # genuinely cross-project knowledge (subscribed via briefing's ## Subscriptions)
@@ -53,9 +53,9 @@ your-project/
 
 There is no `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` effort is active; moving it to `~/.flightdeck/projects/<name>/archive/` marks it done. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.
 
-### cockpit.md — the one must-read file
+### cockpit.md — the project index
 
-Read first every session. It's small on purpose — it's the recovery payload, rewritten each turn:
+Read first every session. It stays small on purpose — it points at the active topic package instead of carrying the topic notebook:
 
 ```markdown
 # Cockpit — payment-service
@@ -64,18 +64,33 @@ Focus: stabilize the Stripe webhook handler — failing edge cases under knowled
 
 ## In flight
 
-- webhook-idempotency/ — reproducing the duplicate-event bug; deciding DB vs Redis key
+- work/webhook-idempotency/ — read `context.md` first; deciding DB vs Redis key
 
 ## Next
 
-Reproduce the duplicate-event case from knowledge/stripe/idempotency.md, then pick the key store.
+Continue `work/webhook-idempotency/context.md` → next action.
 
 ## Open questions
 
 - Is the duplicate caused by Stripe retries or our own re-enqueue? (unverified)
 ```
 
-No 500-line context dump — anything historical is one level deeper in `knowledge/`, found on demand by walking the tree and grepping routing headers.
+No 500-line context dump. Topic detail lives in `work/<topic>/context.md` / `design.md` / `plan.md`; reusable future behavior lives in `knowledge/`, found on demand by walking the tree and grepping routing headers.
+
+### work/&lt;topic&gt;/ — the topic package
+
+Each active effort is a folder with stable entry files:
+
+```text
+work/<topic>/
+  context.md    # topic recovery payload: state, next, blockers, key facts
+  design.md     # why, approach, tradeoffs, settled decisions
+  plan.md       # current main execution plan
+  progress.md   # compressed progress summary, not a log
+  plans/        # optional alternate or superseded plans
+```
+
+Preflight reads the active `context.md` after cockpit. Execution reads `plan.md`; design questions read `design.md`. `progress.md` is rewritten as a summary so the next session can continue without replaying the chat.
 
 ### The routing header — the one convention
 
@@ -135,9 +150,9 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 
 | Command | Purpose |
 | --- | --- |
-| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `cockpit.md` / `briefing.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
+| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `briefing.md`, `cockpit.md`, and the active topic `context.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
 | `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
-| `/flightdeck:walkaround` | **Integrity audit** — a read-only, on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, orphaned work, duplicate traps, missing routing headers). The only trust-but-verify net. Reports findings; fixes nothing. |
+| `/flightdeck:walkaround` | **Integrity audit and repair** — an on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, malformed topic packages, orphaned work, duplicate traps, missing routing headers). Fixes mechanical issues and proposes lossy ones. |
 
 **persist** is the fourth verb, but it's not a command — it runs automatically at the end of any execution turn (scan for knowledge, rewrite cockpit, commit). `commit` is **local-auto, push asks** (local commits are reversible; push is the gated checkpoint). Nothing fires on session start; there's no background process.
 
@@ -146,7 +161,7 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 | What's happening | AI reads |
 | --- | --- |
 | session start / "what were we doing?" | `cockpit.md` |
-| an in-flight multi-step effort | `work/<effort>/` |
+| an in-flight multi-step effort | `work/<topic>/context.md` first, then `plan.md` / `design.md` on demand |
 | "why did the migration break?" | a `# ⚠` trap under `knowledge/<domain>/` |
 | "how do I run the tests?" | a `# … checklist` under `knowledge/<domain>/` |
 
