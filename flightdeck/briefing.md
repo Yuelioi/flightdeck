@@ -15,5 +15,6 @@ de-scope 红线：核心卖点「上下文不丢」零损失——只砍指令�
 ## Subscriptions
 
 <!-- one ~/.flightdeck-relative path per line; empty = subscribe to nothing global -->
-knowledge/comments.md
-knowledge/commits.md
+knowledge/coding/comments.md
+knowledge/git/commits.md
+knowledge/windows/

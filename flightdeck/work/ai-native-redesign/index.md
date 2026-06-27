@@ -3,14 +3,13 @@
 ## State
 
 The AI-native reset is the active cutover work. The topic-package `index.md` handoff
-migration has landed; the live tree now carries follow-up Codex cache-sync and mother-store
-boundary work.
+migration has landed; the live tree now carries follow-up mother-store subscription cleanup.
 
 ## Next
 
-Verify, commit, and sync the plugin cache for the Codex cache helper plus mother-store
-boundary updates. Continue release steps only after explicit user approval for CHANGELOG /
-version bump / push.
+Verify, commit, and sync the plugin cache for the mother-store subscription cleanup.
+Continue release steps only after explicit user approval for CHANGELOG / version bump /
+push.
 
 ## Read now
 
@@ -51,10 +50,10 @@ Done:
 
 Current:
 
-- Codex cache-sync helper, local-plugin-testing checklist update, and mother-store boundary
-  protocol updates are uncommitted.
-- Two Windows environment knowledge notes have been copied into global knowledge for
-  cross-project discovery; active topic recovery still points only at local project files.
+- Root-level global knowledge files have been moved to domain paths in the mother store, and
+  live project briefings found via `~/.flightdeck/projects/<slug>/` have been repointed.
+- This dogfood deck now subscribes to `knowledge/windows/`; the duplicate local Windows
+  knowledge files have been removed from the warm deck.
 
 Verified:
 
