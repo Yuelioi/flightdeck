@@ -30,8 +30,9 @@ In order:
   that ends up in a gitignored scratch file and never graduates). "Nothing qualified" is
   legitimate — but you reach it by scanning on purpose, and you **report** it (the landing
   line), so a flatline of empty scans is visible rather than silent.
-- **Efforts.** If a `work/<topic>/` finished this turn, move it out to
-  `~/.flightdeck/projects/<slug>/archive/` (location is state). "Done" is a judgement: when
+- **Efforts.** If a `work/<topic>/` finished this turn, first compress `progress.md` so the
+  finished package explains done/current/verified/not-done, then move the whole folder to
+  `~/.flightdeck/projects/<slug>/archive/<topic>/` (location is state). "Done" is a judgement: when
   the work reads as finished, **say in your turn report that you're archiving it** (so the
   user can object next turn) rather than archiving silently. Otherwise leave it in `work/`.
 - **Topic recovery.** Rewrite the active `work/<topic>/context.md` whenever the topic state
@@ -83,10 +84,15 @@ this folder or relocated into it before continuing. Do not leave active effort a
 a side `docs/` tree. A project's own finished/reference docs can still live in `docs/`;
 this is about the *active* effort's working artifacts.
 
-When the effort is **done**, move the whole `work/<topic>/` to
-`~/.flightdeck/projects/<slug>/archive/` (location is state; `<slug>` = the project's
-absolute path with `/`, `\`, `:` replaced by `-`). Say in your turn report that you're
-archiving it. An **unstarted** idea lives in `~/.flightdeck/projects/<slug>/ideas/`.
+When the effort is **done**, compress `progress.md` into a final status summary and move the
+whole `work/<topic>/` to `~/.flightdeck/projects/<slug>/archive/<topic>/` (location is
+state; `<slug>` = the project's absolute path with `/`, `\`, `:` replaced by `-`). Say in your turn report that you're
+archiving it. An **unstarted** idea lives in `~/.flightdeck/projects/<slug>/ideas/<topic>/`
+as a light seed, usually `idea.md`, not a full active package.
+
+To start an idea, move or copy its seed into `work/<topic>/`, then create the active package
+entry files (`context.md`, `design.md`, `plan.md`, `progress.md`). Do not let an unstarted
+idea masquerade as active work by giving it a full recovery payload while it is still cold.
 
 ## Write gate — concrete calls
 
@@ -121,6 +127,10 @@ to. No fingerprint, no recurrence counter.
 `briefing.md`'s `## Subscriptions` is a plain list — one `~/.flightdeck/`-relative path per
 line (a directory entry subscribes the whole subtree; HTML-comment notes; no YAML).
 preflight folds these global files/dirs into the routing tree alongside local `knowledge/`.
+Global knowledge should follow the same domain-folder and routing-header conventions as
+project knowledge (`~/.flightdeck/knowledge/<domain>/...`). Existing root-level global
+files can keep working as subscribed compatibility paths, but new global knowledge should be
+placed under a domain.
 
 - **Shadowing.** Conflict on the same relpath: the **local file shadows the global one
   entirely (replace, not merge)** → deterministic, zero-maintenance, two preflights give

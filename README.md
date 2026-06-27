@@ -47,11 +47,11 @@ your-project/
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
 ├── knowledge/             # genuinely cross-project knowledge (subscribed via briefing's ## Subscriptions)
-└── projects/<slug>/       # one project's cold store: archive/ + ideas/
+└── projects/<slug>/       # one project's cold store: archive/<topic>/ + ideas/<topic>/
                            # <slug> = the project's abs path, separators → - (collision-proof)
 ```
 
-There is no `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` effort is active; moving it to `~/.flightdeck/projects/<name>/archive/` marks it done. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.
+There is no `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` topic package is active; moving it to `~/.flightdeck/projects/<name>/archive/<topic>/` marks it done. Parked ideas live in `ideas/<topic>/` as light seeds, not active recovery packages. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.
 
 ### cockpit.md — the project index
 
@@ -144,7 +144,7 @@ You don't build the deck by hand — run `/flightdeck:launch` once and it writes
 
 On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which seeds the skeleton after a quick check (one `git init` offer if there's no repo — the zero-loss guarantee needs git).
 
-**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: scans what the turn produced for anything that passes the write gate and writes it to `knowledge/`, rewrites `cockpit.md` to reflect now, and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
+**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: scans what the turn produced for anything that passes the write gate and writes it to `knowledge/`, rewrites the active topic `context.md` / `progress.md`, rewrites `cockpit.md` to reflect now, and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
 
 ### Commands
 
@@ -186,6 +186,7 @@ Some procedures and reference docs aren't project-specific — a commit-message 
 
 - **Subscriptions** — one `~/.flightdeck`-relative path per line. A directory entry subscribes its whole subtree. On entry, preflight folds the subscribed global files into the routing tree alongside local `knowledge/`.
 - **Cold tier as the shared store** — global knowledge lives in `~/.flightdeck/knowledge/`. Want it elsewhere? Make that path a symlink, or a directory junction on Windows (`mklink /J %USERPROFILE%\.flightdeck <target>`).
+- **Domain-shaped global knowledge** — use `~/.flightdeck/knowledge/<domain>/...` for new shared knowledge. Legacy root-level global files can keep working as subscriptions, but don't grow the root pile.
 - **Local shadows global** — if a project has its own file at the same relative path, the local one wins entirely (replace, not merge) — deterministic, zero-maintenance.
 - **Vendoring (opt-in)** — when you need the repo self-contained, snapshot a subscribed global file into the repo as a frozen copy and drop the subscription. The default is a live subscription, no copy.
 
@@ -193,7 +194,7 @@ A deck with an empty `## Subscriptions` never touches the global store and works
 
 ## Why it exists
 
-Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when it's moved to the cold store), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
+Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when its topic package moves to the cold archive, parked when it stays as an idea seed), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
 
 > ✨ Semantic clarity outranks thematic consistency — the aviation metaphor is used only where it sharpens intent, never as a theme.
 

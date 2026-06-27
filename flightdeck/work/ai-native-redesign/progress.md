@@ -10,10 +10,12 @@
   creating sample content.
 - Walkaround now explicitly repairs malformed topic packages and root-level knowledge piles.
 - The launch scaffold trap has been refreshed to the current scaffold path and contract.
+- Cold-store semantics now distinguish archived topic packages, parked idea seeds, and
+  domain-routed global knowledge.
 
 ## Current
 
-- Checking remaining outer-ring/adapters for topic-package wording drift.
+- Checking remaining outer-ring/adapters for cold-store wording drift.
 
 ## Verified
 
@@ -22,5 +24,5 @@
 
 ## Not done
 
-- Final outer-ring/adapters stale-wording scan.
+- Final outer-ring/adapters stale-wording scan after cold-store wording changes.
 - Release notes / version bump / push, all gated by user approval.

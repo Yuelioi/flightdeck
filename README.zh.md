@@ -47,11 +47,11 @@ your-project/
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
 ├── knowledge/             # 真·跨项目知识（经 briefing 的 ## Subscriptions 订阅）
-└── projects/<slug>/       # 单个项目的冷存：archive/ + ideas/
+└── projects/<slug>/       # 单个项目的冷存：archive/<topic>/ + ideas/<topic>/
                            # <slug> = 项目绝对路径，分隔符 → -（防同名碰撞）
 ```
 
-没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的一项是活的；把它移进 `~/.flightdeck/projects/<name>/archive/` 就标记为完成。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
+没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的 topic package 是活的；把它移进 `~/.flightdeck/projects/<name>/archive/<topic>/` 就标记为完成。停放的 idea 住在 `ideas/<topic>/`，只是轻量 seed，不是 active recovery package。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
 
 ### cockpit.md —— 项目索引
 
@@ -144,7 +144,7 @@ READ WHEN: <什么时候路由到这里才对>
 
 全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：做个快速检查后播种骨架（没 repo 时问一句 `git init` —— 零丢失保证需要 git）。
 
-**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：扫描这一回合的产出、把过了写入门控的写进 `knowledge/`，把 `cockpit.md` 重写到当下，做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
+**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：扫描这一回合的产出、把过了写入门控的写进 `knowledge/`，重写当前主题的 `context.md` / `progress.md`，把 `cockpit.md` 重写到当下，做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
 ### 命令
 
@@ -185,6 +185,7 @@ deck 局部约定 + AI 按你自然话维护的行为规则，如 "发布面一�
 
 - **Subscriptions** —— 每行一个 `~/.flightdeck` 相对路径。目录项订阅其整棵子树。进场时 preflight 把订阅的全局文件折进路由树，与本地 `knowledge/` 并列。
 - **冷存层作共享库** —— 全局知识住在 `~/.flightdeck/knowledge/`。想放别处？把这个路径做成符号链接，Windows 上用目录联接（`mklink /J %USERPROFILE%\.flightdeck <target>`）。
+- **全局知识也按域组织** —— 新共享知识放 `~/.flightdeck/knowledge/<domain>/...`。旧的根目录全局文件可继续作为订阅兼容路径，但不要继续扩大根目录堆积。
 - **本地遮蔽全局** —— 项目若在同一相对路径有自己的文件，本地的整份胜出（替换，非合并）—— 确定、零维护。
 - **下发（vendoring，可选）** —— 需要仓库自包含时，把订阅的全局文件快照进仓库当冻结副本、并撤掉订阅。默认是活订阅、不拷贝。
 
@@ -192,7 +193,7 @@ deck 局部约定 + AI 按你自然话维护的行为规则，如 "发布面一�
 
 ## 为什么需要它
 
-多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（工作在项目里就是活的，移进冷存就是完成）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
+多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（topic package 在项目里就是活的，移进冷 archive 就是完成，停在 ideas 里就是未启动 seed）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 

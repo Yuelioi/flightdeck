@@ -66,7 +66,8 @@ deck rule overrides a flightdeck default; a direct user request overrides everyt
 ### Fallback when the cockpit names no next action
 
 Don't auto-start. Surface candidates: active topic packages in `work/` first; then ideas in
-`~/.flightdeck/projects/<slug>/ideas/`. Ask which to start.
+`~/.flightdeck/projects/<slug>/ideas/` as parked seeds. Ask which to start; starting an idea
+means creating a real `work/<topic>/` package from the seed.
 
 ## Persist (every turn that moved the board) — automatic
 

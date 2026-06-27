@@ -6,9 +6,9 @@ The AI-native reset is the active cutover work. The live protocol has moved from
 
 ## Next
 
-Review whether any remaining outer-ring docs or adapters need topic-package wording sync.
-Continue the gated release path only after explicit user approval for CHANGELOG / version
-bump / push.
+Review whether remaining outer-ring docs or adapters need cold-store wording sync after
+the archive / ideas / global-knowledge update. Continue the gated release path only after
+explicit user approval for CHANGELOG / version bump / push.
 
 ## Open questions
 
@@ -22,3 +22,5 @@ bump / push.
 - New active effort shape: `context.md`, `design.md`, `plan.md`, `progress.md`, optional `plans/`.
 - Knowledge should live under `knowledge/<domain>/...`, not as a root-level pile.
 - Launch copies `skills/launch/scaffold/flightdeck/` verbatim; keep that scaffold empty and pristine.
+- Cold project storage now distinguishes completed `archive/<topic>/` packages from light
+  unstarted `ideas/<topic>/idea.md` seeds.

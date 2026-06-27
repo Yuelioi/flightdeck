@@ -78,15 +78,22 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    a root-level pile, while keeping kind encoded by title (`#`, `# ⚠`, `checklist`) rather
    than by kind folders. → Fix: when the domain is obvious, move the file under the matching
    domain folder; if the file mixes domains, propose a split.
-7. **Done but not archived.** A finished effort should be moved out of `work/` into
-   `~/.flightdeck/projects/<slug>/archive/`. Flag a `work/` effort whose cockpit notes /
+7. **Cold project store shape.** `archive/<topic>/` should contain completed topic packages;
+   `ideas/<topic>/` should contain light unstarted seeds, usually `idea.md`, not full active
+   recovery packages. → Fix: if an archived package is missing `progress.md`, add a short
+   final summary from the contents; if an idea already has active-package files, propose
+   promotion into `work/<topic>/` or reduction to an idea seed.
+8. **Done but not archived.** A finished effort should be moved out of `work/` into
+   `~/.flightdeck/projects/<slug>/archive/<topic>/`. Flag a `work/` effort whose cockpit notes /
    contents read as done but that still sits in `work/` (location is state). → Fix: move it
    (mechanical).
-8. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
+9. **Subscription health.** For each path in `briefing.md`'s `## Subscriptions`: flag (`⚠`) a
    `~/.flightdeck/…` path that's missing or renamed (dead subscription); flag (`i`) one whose
-   target was already vendored into the repo (copy + live subscription double up).
-   Local-shadows-global is by-design — don't flag it. → Propose the removal/repoint (lossy).
-9. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
+   target was already vendored into the repo (copy + live subscription double up); flag (`i`)
+   a subscribed global knowledge file that still lives directly under `~/.flightdeck/knowledge/`
+   instead of a domain folder. Local-shadows-global is by-design — don't flag it. → Propose
+   the removal/repoint or domain migration (lossy if other decks may subscribe to the old path).
+10. **Knowledge flatline + orphaned scratch.** persist's knowledge scan is the one sub-action
    with no turn-to-turn forcing function, so it's the first thing a slipping session drops.
    Glance at recent commit subjects (`git log --oneline -20`): if a run clearly caught bugs /
    made decisions / hit traps yet `knowledge/` saw no add or update across that span, flag
@@ -94,12 +101,12 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    (a sibling workflow's working dir left in the repo: `.superpowers/…`, a `tmp/` log) — often
    *where* the uncrystallized knowledge lives. → Fix: mine the scratch for write-gate hits and
    write them as knowledge (mechanical); propose clearing the scratch afterward.
-10. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
+11. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
    shape **by what each thing is, never losing content**:
    - kind-folders (`specs/` `plans/` `checklists/` `docs/` `incidents/`) → regroup into
      `knowledge/<domain>/` by subject; an active plan/spec → `work/<topic>/design.md` +
-     `work/<topic>/plan.md` with `context.md` / `progress.md`; a done one → `archive/`;
-     an unstarted one → `ideas/`.
+     `work/<topic>/plan.md` with `context.md` / `progress.md`; a done one → `archive/<topic>/`;
+     an unstarted one → `ideas/<topic>/idea.md`.
    - delete `INDEX.md`; strip YAML frontmatter and replace it with a routing header.
    - recorded config (`version` / `runtime` / `agents_md` / toggles) → drop it.
    - vendored shared copies → subscribe to the master in `## Subscriptions` and delete the

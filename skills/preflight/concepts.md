@@ -13,8 +13,8 @@ thing *is*; how to operate on them is [operations.md](operations.md).
   knowledge/   routed future-behavior knowledge, nested by domain
 
 ~/.flightdeck/   cold tier — a plain global dir, NOT git (the global / "mother" store)
-  knowledge/     cross-project knowledge — genuinely universal (consulted via Subscriptions)
-  projects/<slug>/  one project's cold store: archive/ + ideas/
+  knowledge/     cross-project knowledge, domain-routed like project knowledge
+  projects/<slug>/  one project's cold store: archive/<topic>/ + ideas/<topic>/
                     <slug> = project abs path, separators / \ : → -  (collision-proof)
 ```
 
@@ -101,8 +101,38 @@ library grows.
   zero-loss guarantee. cockpit + briefing + work topic packages + knowledge live here.
 - **cold** = `~/.flightdeck`, the plain global "mother" store — NOT git, outside the
   guarantee. It holds two things: cross-project `knowledge/` (genuinely universal, opted
-  into via a briefing `## Subscriptions` line), and `projects/<slug>/` with `archive/`
-  (efforts moved out of `work/` when done) + `ideas/` (unstarted, out of the project view).
+  into via a briefing `## Subscriptions` line), and `projects/<slug>/` with
+  `archive/<topic>/` (completed topic packages moved out of `work/`) + `ideas/<topic>/`
+  (unstarted seeds, out of the project view).
 
 **Location is state.** There is no status field; a thing's tier and folder say whether it's
-active (`work/`), done (cold `archive/`), or parked (cold `ideas/`).
+active (`work/`), done (cold `archive/<topic>/`), or parked (cold `ideas/<topic>/`).
+
+## cold project store — archive and ideas
+
+Cold project storage is deliberately outside the zero-loss guarantee and outside normal
+preflight loading. It is kept for recovery-by-choice, not session continuity.
+
+- `~/.flightdeck/projects/<slug>/archive/<topic>/` holds a completed topic package moved
+  out of `work/<topic>/`. Preserve its shape (`context.md`, `design.md`, `plan.md`,
+  `progress.md`, optional `plans/` / notes) so later archaeology has the whole effort
+  together. Before moving, compress `progress.md` enough that the archive explains what
+  finished and what was verified.
+- `~/.flightdeck/projects/<slug>/ideas/<topic>/` holds an unstarted topic seed. Keep it
+  light: usually `idea.md` (problem / why it matters / activation trigger / rough notes).
+  Do not create a full `context.md` / `plan.md` until the idea is promoted into active
+  `work/<topic>/`; otherwise parked ideas look like live recovery payloads.
+- To start an idea, move or copy it into `work/<topic>/`, then create the active package
+  entry files (`context.md`, `design.md`, `plan.md`, `progress.md`) from the seed. Location
+  changes the state; no status field is added.
+
+## global knowledge
+
+Global knowledge under `~/.flightdeck/knowledge/` follows the same routing-header and
+domain-folder rules as project knowledge. It is for genuinely cross-project behavior:
+commit conventions, command-running rules, reusable tool procedures, framework traps that
+apply beyond one repo.
+
+Prefer `~/.flightdeck/knowledge/<domain>/...` and subscribe to either a domain directory or
+a specific file from `briefing.md`. Legacy root-level global files may still be subscribed
+for compatibility, but new global knowledge should not grow a root pile.
