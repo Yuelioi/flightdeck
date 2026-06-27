@@ -5,11 +5,11 @@ Focus: work/add-csv-export/ — add CSV export to the `notes` command so users c
 ## In flight
 
 - work/add-csv-export/ — design done, plan drafted; implementing the formatter next.
-  Read `work/add-csv-export/context.md` first.
+  Choose this topic, then read `work/add-csv-export/index.md`.
 
 ## Next
 
-Continue `work/add-csv-export/context.md` → implement the CSV row formatter.
+Choose `work/add-csv-export/` → implement the CSV row formatter.
 
 ## Open questions
 

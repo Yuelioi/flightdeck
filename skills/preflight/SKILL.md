@@ -1,6 +1,6 @@
 ---
 name: preflight
-description: Use when explicitly invoking the flightdeck entry ritual — loads this protocol, reads briefing.md (the rules), cockpit.md (the project index), and the active topic context, walks the deck tree for what the task needs, and reports the next step. Nothing is injected; not running preflight = flightdeck not engaged. Triggered by /flightdeck:preflight.
+description: Use when explicitly invoking the flightdeck entry ritual — loads this protocol, reads briefing.md (the rules), cockpit.md (the project index), scans knowledge routing headers, lists resumable work, and stops for the user's choice. Nothing is injected; not running preflight = flightdeck not engaged. Triggered by /flightdeck:preflight.
 ---
 
 **The iron law: every turn files what it learned, and nothing is lost when the
@@ -23,17 +23,13 @@ deck rule overrides a flightdeck default; a direct user request overrides everyt
    deck's house rules + AI-maintenance preferences; `## Subscriptions` = the
    `~/.flightdeck`-relative paths this project pulls in from the global tier. Fold each
    subscribed path into the routing tree alongside local `knowledge/` — its routing
-   header joins the map scanned in step 4; local shadows global on the same relpath; a
+   header joins the map scanned in step 3; local shadows global on the same relpath; a
    missing subscribed path → one soft warning, continue.
 2. **Read `flightdeck/cockpit.md` — the project index.** Note focus + next, the
    in-flight topic packages (`work/`), open questions. Do **not** rewrite it on entry.
-3. **Read active topic context — the topic recovery payload.** If cockpit focus / next
-   / in-flight names a current `work/<topic>/`, read that package's `context.md` before
-   reporting the next step. Load only `context.md` at entry; `design.md`, `plan.md`,
-   `progress.md`, and archived `plans/` stay on demand until execution actually needs
-   them. If the active package lacks `context.md`, flag one soft shape warning and
-   continue from cockpit.
-4. **Scan the routing headers — map first, bodies on demand.** `ls work/` for the topic
+   Do **not** read any `work/<topic>/` file yet; cockpit is the chooser screen, not the
+   recovery payload.
+3. **Scan the routing headers — map first, bodies on demand.** `ls work/` for the topic
    folders; then read the routing header (title + `SUMMARY:` + `READ WHEN:`) of every file
    across local `knowledge/` and the subscribed subtrees — *every* entry, not only when
    filenames are ambiguous. Headers are one-liners by design: the whole map is cheap to
@@ -50,24 +46,44 @@ deck rule overrides a flightdeck default; a direct user request overrides everyt
    rest, indexed, each pulled the moment its `READ WHEN:` fires (a count by domain, not a
    dump). Ranking *defers, never discards*: a low-tier header stays on call and is read
    when its trigger hits — never brushed aside for good.
-5. **Reality note (cockpit ↔ git + work).** Two cheap cross-checks; one soft line each or
+4. **Reality note (cockpit ↔ git + work).** Two cheap cross-checks; one soft line each or
    silence, report-don't-fix:
    - *git:* `git branch --show-current` + `git status --short` + `git log --oneline -5`.
      One line only if reality clearly diverges from the cockpit focus (branch or recent
      commits plainly about something else — a sign the last session moved the board
      without persisting), or on a detached HEAD.
-   - *work:* the `## In flight` from step 2 should match the topic folders from step 4.
+   - *work:* the `## In flight` from step 2 should match the topic folders from step 3.
      Flag an in-flight topic the cockpit names but `work/` lacks, a `work/` topic the
-     cockpit never mentions, or an active topic folder missing `context.md`.
-6. **Report the next step, then STOP.** State the cockpit/topic-context next action in one sentence and
-   emit the `─── 🛫 preflight ───` banner (`[Next]` + the read-only / "say go" line). Do
-   NOT load task files or start execution.
+     cockpit never mentions, or an active topic folder missing `index.md`.
+5. **Report the choices, then STOP.** Summarize the in-flight topics and `## Next` from
+   cockpit, surface the knowledge header map tiers, then ask which item to resume. Emit
+   the `─── 🛫 preflight ───` banner (`[Choices]` + the read-only / "choose item" line).
+   Do **not** load task files, read knowledge bodies, or start execution until the user
+   chooses a topic.
 
 ### Fallback when the cockpit names no next action
 
-Don't auto-start. Surface candidates: active topic packages in `work/` first; then ideas in
+Never auto-start. Surface candidates: active topic packages in `work/` first; then ideas in
 `~/.flightdeck/projects/<slug>/ideas/` as parked seeds. Ask which to start; starting an idea
 means creating a real `work/<topic>/` package from the seed.
+
+## Resuming a chosen topic
+
+After the user chooses a topic, read only that topic's `work/<topic>/index.md` first. It is
+the topic handoff board: state, next, progress summary, and the `## Read now` / `## Read if`
+pointers that decide which design, plan, and knowledge bodies to load. Do **not** read
+`design.md`, `plan.md`, or every file under `plans/` just because they exist.
+
+Execution then follows `index.md`:
+
+1. Read every path under `## Read now`.
+2. Treat `## Read if` as conditional triggers; read those files only when the condition is
+   true.
+3. If the current action matches a knowledge header from the routing map, read that body and
+   add it to `index.md ## Read now` or `## Read if` if future continuation needs the same
+   dependency.
+4. Long specs and old plans stay cold inside the topic package until the index points at
+   them.
 
 ## Persist (every turn that moved the board) — automatic
 
@@ -79,9 +95,9 @@ At turn end, in order:
    under `knowledge/<domain>/` with a routing header — catching the learning *is* the
    trigger; don't defer it to effort-end. "Nothing qualified" is a valid outcome — but
    reached **on purpose**, by scanning, every turn.
-2. **Rewrite active topic recovery files** (`work/<topic>/context.md`, and `progress.md`
-   when execution state changed) so the topic recovers without stuffing details into
-   cockpit.
+2. **Rewrite the active topic index** (`work/<topic>/index.md`) so the topic recovers
+   without stuffing details into cockpit. Keep state, next, progress, open questions, and
+   read pointers current.
 3. **Rewrite `cockpit.md`** as the small project index: focus, in-flight topic packages,
    global next, and cross-topic open questions.
 4. **`git commit`** the project repo — one commit per turn.
@@ -110,11 +126,11 @@ repo → `─── 🛬 landing ─── no git, not committed`. Full detail: 
   sinks. Full anatomy + example: concepts.md.
 - **Write gate.** Record only what changes how you'll act later, or that you'll look up
   again. Skip one-off logs, a passing build, fruitless exploration, a no-op rerun.
-- **Zero-loss covers the recovery payload** (`cockpit.md` project index + active
-  `work/<topic>/context.md` topic payload + briefing.md + work + knowledge,
-  all warm, all git): persist commits every turn; cockpit must answer where to go, and the active context must answer what is true
-  inside that topic / next / open questions. The cold store is unversioned — outside
-  the guarantee.
+- **Zero-loss covers the recovery payload** (`cockpit.md` project index + chosen
+  `work/<topic>/index.md` topic handoff + briefing.md + work + knowledge, all warm, all
+  git): persist commits every turn; cockpit must answer what can be resumed, and the chosen
+  topic index must answer what is true, what to read now, what to do next, and what remains
+  conditional. The cold store is unversioned — outside the guarantee.
 
 ## Not engaged unless you run this
 

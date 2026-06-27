@@ -13,11 +13,11 @@ persists nothing.
 **Don't let the deck lag a long run.** The trigger is every turn that moved the board —
 and a single effort can span many turns. Persist at each completed batch / milestone, not
 only when the whole effort wraps: the bar is that someone could close the conversation
-*right now* and recover from `cockpit.md` + the active `work/<topic>/context.md` alone.
-The same bar holds when you execute under another workflow (executing-plans, a subagent
-loop, an external task runner): that workflow's own ledger is **not** the deck; an engaged
-session still owes both the active topic context and the cockpit index a current state at
-each milestone.
+*right now* and recover from `cockpit.md` as the chooser, then the chosen
+`work/<topic>/index.md` as the topic handoff. The same bar holds when you execute under
+another workflow (executing-plans, a subagent loop, an external task runner): that
+workflow's own ledger is **not** the deck; an engaged session still owes both the chosen
+topic index and the cockpit index a current state at each milestone.
 
 In order:
 
@@ -30,18 +30,20 @@ In order:
   that ends up in a gitignored scratch file and never graduates). "Nothing qualified" is
   legitimate — but you reach it by scanning on purpose, and you **report** it (the landing
   line), so a flatline of empty scans is visible rather than silent.
-- **Efforts.** If a `work/<topic>/` finished this turn, first compress `progress.md` so the
+- **Efforts.** If a `work/<topic>/` finished this turn, first compress `index.md` so the
   finished package explains done/current/verified/not-done, then move the whole folder to
   `~/.flightdeck/projects/<slug>/archive/<topic>/` (location is state). "Done" is a judgement: when
   the work reads as finished, **say in your turn report that you're archiving it** (so the
   user can object next turn) rather than archiving silently. Otherwise leave it in `work/`.
-- **Topic recovery.** Rewrite the active `work/<topic>/context.md` whenever the topic state
-  changed. Keep it short: state, next, blockers/open questions, and key facts. Update
-  `progress.md` when execution progress changed; compress it into done/current/verified/not
-  done rather than appending a transcript.
+- **Topic handoff.** Rewrite the active `work/<topic>/index.md` whenever the topic state,
+  next step, read pointers, blockers/open questions, or progress changed. Keep it short:
+  state, next, `## Read now`, `## Read if`, progress, verification, and open questions.
+  If the turn read or created a knowledge body that future continuation depends on, add that
+  path to `index.md ## Read now` or `## Read if`; if a listed dependency no longer applies,
+  remove it.
 - **cockpit.md.** Rewrite it to reflect now, in the canonical skeleton (`Focus:` +
   `## In flight` + `## Next` + `## Open questions`). Keep it small — it's the project
-  index, not the topic notebook.
+  index / chooser, not the topic notebook.
 - **commit.** `git commit` the project repo with a one-line summary of the turn's
   increment. **One commit per turn** (mid-turn writes batch into it). If the turn moved the
   board but produced no new knowledge, the cockpit rewrite is itself a real change → commit
@@ -59,24 +61,62 @@ In order:
 
 ## Writing a topic work package, and where it ends up
 
-An active effort's working artifacts live together under `work/<topic>/` with stable names:
+An active effort's working artifacts live together under `work/<topic>/`. The only required
+entry file is `index.md`; everything else is read on demand from its pointers:
 
 ```text
 work/<topic>/
-  context.md
-  design.md
-  plan.md
-  progress.md
-  plans/
+  index.md
+  design.md   optional
+  plan.md     optional
+  plans/      optional
+  notes.md    optional scratch
 ```
 
-`context.md` is the topic recovery payload: update it whenever a new session would need a
-fresh state, next action, blocker, or key fact to continue. `design.md` holds the why,
-approach, tradeoffs, and settled decisions. `plan.md` is the current main execution plan,
-including checklist output from another workflow. If there are multiple plausible plans,
-keep the chosen one in `plan.md` and put the alternates under `plans/` with purpose names
-(`rollback-plan.md`, `cookie-session-plan.md`). `progress.md` is a compressed status
-summary; never use it as a chronological log.
+`index.md` is the topic handoff board: update it whenever a new session would need a fresh
+state, next action, blocker, key fact, progress summary, or read pointer to continue.
+`design.md` holds long why / approach / tradeoffs only when the topic needs that surface.
+`plan.md` is fine for a single current plan; when a long spec is split into staged plans,
+put them under `plans/` and point `index.md ## Next` / `## Read now` at the current stage.
+
+Recommended `index.md` shape:
+
+```markdown
+# Index — <topic>
+
+## State
+
+## Next
+
+## Read now
+
+- plans/08-final-cleanup.md
+- knowledge/<domain>/<file>.md
+
+## Read if
+
+- design.md — if a step conflicts with the settled design
+- plans/01-auth-model.md — if auth decisions need archaeology
+
+## Progress
+
+Done:
+- plans/01-auth-model.md
+
+Current:
+- plans/08-final-cleanup.md
+
+Verified:
+- ...
+
+## Open questions
+```
+
+The read sections are dependency locks, not discovery mechanisms. Use the header map from
+preflight to decide what belongs there while planning. During execution, read the bodies or
+plans listed under `## Read now`; read `## Read if` entries only when their condition is
+true. Add new entries when newly discovered knowledge or a newly selected plan becomes
+required for future continuation.
 
 Sibling workflows or spec-generators that default their output elsewhere must be pointed at
 this folder or relocated into it before continuing. Do not leave active effort artifacts as
@@ -84,15 +124,17 @@ this folder or relocated into it before continuing. Do not leave active effort a
 a side `docs/` tree. A project's own finished/reference docs can still live in `docs/`;
 this is about the *active* effort's working artifacts.
 
-When the effort is **done**, compress `progress.md` into a final status summary and move the
-whole `work/<topic>/` to `~/.flightdeck/projects/<slug>/archive/<topic>/` (location is
-state; `<slug>` = the project's absolute path with `/`, `\`, `:` replaced by `-`). Say in your turn report that you're
-archiving it. An **unstarted** idea lives in `~/.flightdeck/projects/<slug>/ideas/<topic>/`
-as a light seed, usually `idea.md`, not a full active package.
+When the effort is **done**, compress `index.md ## Progress` into a final status summary
+and move the whole `work/<topic>/` to
+`~/.flightdeck/projects/<slug>/archive/<topic>/` (location is state; `<slug>` = the
+project's absolute path with `/`, `\`, `:` replaced by `-`). Say in your turn report that
+you're archiving it. An **unstarted** idea lives in
+`~/.flightdeck/projects/<slug>/ideas/<topic>/` as a light seed, usually `idea.md`, not a
+full active package.
 
-To start an idea, move or copy its seed into `work/<topic>/`, then create the active package
-entry files (`context.md`, `design.md`, `plan.md`, `progress.md`). Do not let an unstarted
-idea masquerade as active work by giving it a full recovery payload while it is still cold.
+To start an idea, move or copy its seed into `work/<topic>/`, then create `index.md` and any
+needed supporting files. Do not let an unstarted idea masquerade as active work by giving it
+a full handoff board while it is still cold.
 
 ## Write gate — concrete calls
 
@@ -152,8 +194,10 @@ The routing-header **map** preflight scans on every entry (SKILL.md step 3): run
 `derive-listing <area>` — grep each file's routing header and print a one-shot directory to
 context. It runs at entry as a matter of course, not only when `ls` + filenames are
 ambiguous: a `READ WHEN:` can't route you anywhere unless it's resident, so the cheap
-one-liner headers are loaded up front and the bodies stay on demand. It is **a convention, an
-action you perform** — not an installed command: you run the grep yourself.
+one-liner headers are loaded up front and the bodies stay on demand. It is **a convention,
+an action you perform** — not an installed command: you run the grep yourself. The map helps
+write or repair `index.md ## Read now` / `## Read if`; it does not authorize reading every
+knowledge body.
 
 Surface per file: its path, title (keeping the `⚠` / `checklist` glyph), `SUMMARY:`, and
 `READ WHEN:` — everything above the first `---`. Omit `RECHECK WHEN:` (freshness, not

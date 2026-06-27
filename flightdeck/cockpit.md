@@ -1,14 +1,14 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: work/ai-native-redesign/ — AI-native cutover, now upgrading the active work model to topic packages.
+Focus: work/ai-native-redesign/ — AI-native cutover, now upgrading topic packages to an `index.md` handoff model.
 
 ## In flight
 
-- work/ai-native-redesign/ — current reset effort. Read `context.md` first; `design.md` is the decision source; `plan.md` is the current execution checklist; `progress.md` is the compressed status.
+- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the exact protocol/docs files needed now.
 
 ## Next
 
-Verify the topic-package protocol diff and stale-wording scan. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
+Verify the `index.md` handoff protocol diff and stale-wording scan. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
 
 ## Open questions
 
@@ -17,7 +17,7 @@ Verify the topic-package protocol diff and stale-wording scan. Release steps (CH
 
 ## House pointers
 
-Rules → briefing.md · preferences → project agent instructions · active topic → work/ai-native-redesign/context.md · knowledge → knowledge/<domain>/ · cold archive/ideas → ~/.flightdeck
+Rules → briefing.md · preferences → project agent instructions · active topic → work/ai-native-redesign/index.md · knowledge → knowledge/<domain>/ · cold archive/ideas → ~/.flightdeck
 
 ## Note on dogfooding
 

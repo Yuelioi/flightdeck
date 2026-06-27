@@ -21,8 +21,8 @@
 
 ## ✨ Highlights
 
-- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites the active topic `context.md` / `progress.md`, rewrites `cockpit.md`, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
-- **No schema, no scripts, no INDEX.** The whole thing is plain markdown and two conventions: **location is state** (a folder in the project is live; moved out is done) and a one-line **routing header** on each knowledge file. Nothing to migrate, nothing to keep in sync, nothing that breaks on a model upgrade.
+- **Zero-loss by default — the recovery payload commits itself.** At the end of any turn that did real work, flightdeck **persists** automatically: it scans for new knowledge worth keeping and writes it to `knowledge/`, rewrites the active topic `index.md`, rewrites `cockpit.md`, and commits the repo. There's no wrap-up command to remember. Close the window whenever you like — the next `/flightdeck:preflight` resumes from a true picture, not a stale one.
+- **No schema, no scripts, no project-wide INDEX.** The whole thing is plain markdown and two conventions: **location is state** (a folder in the project is live; moved out is done) and a one-line **routing header** on each knowledge file. Nothing to migrate, nothing to keep in sync, nothing that breaks on a model upgrade.
 
 ## TL;DR
 
@@ -31,7 +31,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/cockpit.md`, the active topic `context.md`, glances at `git status`, and reports where you left off. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which seeds a deck. Nothing loads on its own; you invoke it.
+Run `/flightdeck:preflight` at the start of a session — the session-entry takeover. In an existing project it reads `flightdeck/briefing.md` and `flightdeck/cockpit.md`, scans knowledge headers, lists resumable work, and waits for your choice before reading a topic's `index.md`. In a fresh one (no `cockpit.md`) it points you to `/flightdeck:launch`, which seeds a deck. Nothing loads on its own; you invoke it.
 
 ## What it is
 
@@ -42,7 +42,7 @@ your-project/
 └── flightdeck/            # warm tier — git-tracked, committed every turn
     ├── cockpit.md         # project index (Focus / In flight / Next / Open questions)
     ├── briefing.md        # stable, human-owned — ## Conventions (house rules) + ## Subscriptions
-    ├── work/              # topic packages: context.md + design.md + plan.md + progress.md
+    ├── work/              # topic packages: index.md + optional design/plan files
     └── knowledge/         # routed future-behavior knowledge, nested by domain
 
 ~/.flightdeck/             # cold tier — a plain global dir, NOT git
@@ -51,11 +51,11 @@ your-project/
                            # <slug> = the project's abs path, separators → - (collision-proof)
 ```
 
-There is no `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` topic package is active; moving it to `~/.flightdeck/projects/<name>/archive/<topic>/` marks it done. Parked ideas live in `ideas/<topic>/` as light seeds, not active recovery packages. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.
+There is no project-wide `INDEX.md`, no YAML frontmatter, and no status field. **Location is state**: a `work/` topic package is active; moving it to `~/.flightdeck/projects/<name>/archive/<topic>/` marks it done. Parked ideas live in `ideas/<topic>/` as light seeds, not active recovery packages. Knowledge is resident — present means valid, deleted means dead. Nuanced states (blocked, waiting, reviewing) live in cockpit prose, not in a folder or a field.
 
 ### cockpit.md — the project index
 
-Read first every session. It stays small on purpose — it points at the active topic package instead of carrying the topic notebook:
+Read first every session. It stays small on purpose — it lists resumable topic packages instead of carrying the topic notebook:
 
 ```markdown
 # Cockpit — payment-service
@@ -64,33 +64,32 @@ Focus: stabilize the Stripe webhook handler — failing edge cases under knowled
 
 ## In flight
 
-- work/webhook-idempotency/ — read `context.md` first; deciding DB vs Redis key
+- work/webhook-idempotency/ — next: choose DB vs Redis key; topic index has the read list
 
 ## Next
 
-Continue `work/webhook-idempotency/context.md` → next action.
+Choose `work/webhook-idempotency/` to resume.
 
 ## Open questions
 
 - Is the duplicate caused by Stripe retries or our own re-enqueue? (unverified)
 ```
 
-No 500-line context dump. Topic detail lives in `work/<topic>/context.md` / `design.md` / `plan.md`; reusable future behavior lives in `knowledge/`, found on demand by walking the tree and grepping routing headers.
+No 500-line context dump. Topic handoff lives in `work/<topic>/index.md`; long design and plan files are read only when that index points at them. Reusable future behavior lives in `knowledge/`, found by scanning routing headers and loading bodies on demand.
 
 ### work/&lt;topic&gt;/ — the topic package
 
-Each active effort is a folder with stable entry files:
+Each active effort is a folder with one stable entry file and optional supporting files:
 
 ```text
 work/<topic>/
-  context.md    # topic recovery payload: state, next, blockers, key facts
-  design.md     # why, approach, tradeoffs, settled decisions
-  plan.md       # current main execution plan
-  progress.md   # compressed progress summary, not a log
-  plans/        # optional alternate or superseded plans
+  index.md      # topic handoff: state, next, progress, read pointers
+  design.md     # optional long design / spec
+  plan.md       # optional current plan
+  plans/        # optional staged, alternate, or superseded plans
 ```
 
-Preflight reads the active `context.md` after cockpit. Execution reads `plan.md`; design questions read `design.md`. `progress.md` is rewritten as a summary so the next session can continue without replaying the chat.
+Preflight stops at `cockpit.md` until you choose a topic. Then it reads only that topic's `index.md` first. `index.md` says what to read now, what to read only if a condition fires, what progress is done, and what the next action is.
 
 ### The routing header — the one convention
 
@@ -140,17 +139,17 @@ You don't build the deck by hand — run `/flightdeck:launch` once and it writes
 1. Loads the protocol and reads `flightdeck/cockpit.md` (plus `briefing.md`).
 2. Scans the routing-header map (cheap one-liners), then loads bodies on demand — ranked by each header's `READ WHEN:`, so binding conventions stay foregrounded and reactive traps wait for their symptom.
 3. Glances at `git status` — a passive one-line note only when something looks off, never a blocking prompt.
-4. Reports the next item — say "go" to execute.
+4. Reports the available items and asks which one to resume. It does not read topic files or knowledge bodies until you choose.
 
 On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:launch`, which seeds the skeleton after a quick check (one `git init` offer if there's no repo — the zero-loss guarantee needs git).
 
-**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: scans what the turn produced for anything that passes the write gate and writes it to `knowledge/`, rewrites the active topic `context.md` / `progress.md`, rewrites `cockpit.md` to reflect now, and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
+**Session end** — nothing to remember. When a turn produced a real increment, flightdeck **persists** on its own: scans what the turn produced for anything that passes the write gate and writes it to `knowledge/`, rewrites the active topic `index.md`, rewrites `cockpit.md` to reflect now, and makes one local commit. A pure-conversation turn that changed nothing commits nothing. The next session — even a different AI or developer — picks up exactly here.
 
 ### Commands
 
 | Command | Purpose |
 | --- | --- |
-| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `briefing.md`, `cockpit.md`, and the active topic `context.md`, walks the tree for what's needed, reports the next item. Nothing auto-fires; not running it means flightdeck isn't engaged. |
+| `/flightdeck:preflight` | **Session-entry takeover** — loads the protocol, reads `briefing.md` and `cockpit.md`, scans knowledge headers, lists resumable items, and waits for your choice before reading a topic `index.md`. Nothing auto-fires; not running it means flightdeck isn't engaged. |
 | `/flightdeck:launch` | **First-time deck creation** — seeds the skeleton (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`). One `git init` offer if there's no repo. Refuses if a deck already exists. |
 | `/flightdeck:walkaround` | **Integrity audit and repair** — an on-demand sweep for drift the new form has no mechanism to self-correct (cockpit vs reality, malformed topic packages, orphaned work, duplicate traps, missing routing headers, root-level knowledge piles). Fixes mechanical issues and proposes lossy ones. |
 
@@ -160,8 +159,8 @@ On a brand-new project (no `cockpit.md`) preflight points you to `/flightdeck:la
 
 | What's happening | AI reads |
 | --- | --- |
-| session start / "what were we doing?" | `cockpit.md` |
-| an in-flight multi-step effort | `work/<topic>/context.md` first, then `plan.md` / `design.md` on demand |
+| session start / "what were we doing?" | `briefing.md` + `cockpit.md` + knowledge headers |
+| a chosen in-flight effort | `work/<topic>/index.md` first, then only files listed in `## Read now` / matching `## Read if` |
 | "why did the migration break?" | a `# ⚠` trap under `knowledge/<domain>/` |
 | "how do I run the tests?" | a `# … checklist` under `knowledge/<domain>/` |
 
@@ -194,7 +193,7 @@ A deck with an empty `## Subscriptions` never touches the global store and works
 
 ## Why it exists
 
-Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when its topic package moves to the cold archive, parked when it stays as an idea seed), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `briefing.md` + `work/` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
+Most "AI memory" systems fail by saving everything — the signal drowns in a junk drawer. flightdeck does the opposite: a **strict write gate** (only what changes a future decision, or that you'll look up again), **location-as-state** (work is live in the project, done when its topic package moves to the cold archive, parked when it stays as an idea seed), a one-line **routing header** so knowledge is found without a full-context dump, and a **zero-loss recovery payload** (`cockpit.md` + `briefing.md` + each active topic's `index.md` + `knowledge/`) committed every turn. It's plain markdown — diff it in review, grep it from the terminal, and it survives a model upgrade or a switch between AI tools.
 
 > ✨ Semantic clarity outranks thematic consistency — the aviation metaphor is used only where it sharpens intent, never as a theme.
 

@@ -21,14 +21,15 @@ thing *is*; how to operate on them is [operations.md](operations.md).
 ## cockpit.md — the project index
 
 The volatile "where do I go next" file: rewritten every turn, kept small. It is an
-index, not the place for topic detail. The bar is that someone could close the
-conversation right now, run preflight, and know which `work/<topic>/context.md` to read
-without reading git. Canonical skeleton — `Focus:` (usually a `work/<topic>/` path) +
-`## In flight` (active topic packages) + `## Next` (next concrete action or topic
-context pointer) + `## Open questions` (only blocked / waiting / undecided questions
-that cross topics or belong at project level). Those four are the minimum; extra
-sections are fine when they stay index-like. A light convention, not a YAML schema — no
-status field, no `Updated:` line (git knows when/who).
+index / chooser screen, not the place for topic detail. The bar is that someone could
+close the conversation right now, run preflight, see the resumable `work/<topic>/`
+choices, and choose one without reading git or any topic file. Canonical skeleton —
+`Focus:` (usually a `work/<topic>/` path or project-wide focus) + `## In flight` (active
+topic packages, each with a one-line next) + `## Next` (the project-level next choice) +
+`## Open questions` (only blocked / waiting / undecided questions that cross topics or
+belong at project level). Those four are the minimum; extra sections are fine when they
+stay index-like. A light convention, not a YAML schema — no status field, no `Updated:`
+line (git knows when/who).
 
 ## briefing.md — the stable rules
 
@@ -41,32 +42,61 @@ Human-owned, read first on entry. Two sections, no frontmatter:
 Stable across turns. persist never rewrites it — only the AI maintaining a rule on your
 request, or you, edits it.
 
-## topic work package — context, design, plan, progress
+## topic work package — index first, long files on demand
 
 An active effort in `work/` is always a **topic package** — one folder per topic, with
-stable entry files:
+one stable entry file and optional supporting files:
 
 ```text
 work/<topic>/
-  context.md    topic recovery payload: state, next, blockers, key facts
-  design.md     why + approach + tradeoffs
-  plan.md       current main execution plan
-  progress.md   compressed progress summary, not a step log
-  plans/        optional alternate, superseded, or branch plans
-  notes.md      optional scratch; clear or fold before archiving
+  index.md      topic handoff board: state, next, progress, read pointers
+  design.md     optional long design / spec / decision surface
+  plan.md       optional current main execution plan
+  plans/        optional alternate, staged, superseded, or branch plans
+  notes.md      optional scratch; clear or fold into index before archiving
 ```
 
-`context.md` is the first file preflight reads after cockpit for the active topic. It must
-be short enough to restore the thread quickly, and concrete enough to continue without the
-old chat. `design.md` is the decision surface. `plan.md` is the single current mainline;
-additional plans live under `plans/` and are named for their purpose. `progress.md` is a
-rolling summary of done/current/verified/not-done, not a chronological transcript.
+`index.md` is the first and only topic file read **after the user chooses that topic**. It
+must be short enough to restore the thread quickly, and concrete enough to continue without
+the old chat. It absorbs the old context/progress split: state, next, progress summary,
+verification, open questions, and explicit read pointers live together under H2 sections.
+
+Recommended `index.md` skeleton:
+
+```markdown
+# Index — <topic>
+
+## State
+
+## Next
+
+## Read now
+
+- plans/08-final-cleanup.md
+- knowledge/coding/comments.md
+
+## Read if
+
+- design.md — if the next plan conflicts with settled design
+- plans/01-auth-model.md — if auth decisions need archaeology
+
+## Progress
+
+## Open questions
+```
+
+`design.md`, `plan.md`, and `plans/` are not preloaded. They are supporting material read
+only when `index.md` points at them or the current action makes a `## Read if` condition
+true. `plans/` is not required when there is only one plan; when alternatives or staged
+plans exist, name them by purpose or order (`08-final-cleanup.md`, `rollback.md`), and keep
+`index.md ## Next` pointing at the current one.
 
 Do not create top-level `work/<topic>.md` efforts, split sibling plan/spec files, or side
 `docs/` working trees for active effort artifacts. Effort package files are reached from
-cockpit and preflight, not routed through knowledge — so they carry **no routing header**.
+cockpit and the topic index, not routed through knowledge — so they carry **no routing
+header**.
 
-## knowledge — the three kinds + the routing header
+## knowledge — headers for discovery, bodies for execution
 
 Persistent, routed-on-relevance, nested by domain (`knowledge/git/commit-style.md`,
 `knowledge/storage/sqlite/wal-mode.md` — as deep as the domain needs). Every file opens
@@ -95,6 +125,12 @@ Knowledge is *resident*: present = valid, deleted = dead. No lifecycle, no statu
 knowledge under a domain folder (`knowledge/<domain>/...`); avoid root-level piles as the
 library grows.
 
+Preflight reads knowledge **headers** to build the routing map, never full bodies. A
+knowledge body is read only when a chosen topic / index / action needs it. `index.md
+## Read now` and `## Read if` are the topic's dependency pointers: they record which
+knowledge bodies were chosen from the header map, so the next session does not have to
+infer the same dependencies again.
+
 ## warm vs cold — the two tiers
 
 - **warm** = the project's `flightdeck/` — git-tracked, committed each turn, inside the
@@ -114,17 +150,17 @@ Cold project storage is deliberately outside the zero-loss guarantee and outside
 preflight loading. It is kept for recovery-by-choice, not session continuity.
 
 - `~/.flightdeck/projects/<slug>/archive/<topic>/` holds a completed topic package moved
-  out of `work/<topic>/`. Preserve its shape (`context.md`, `design.md`, `plan.md`,
-  `progress.md`, optional `plans/` / notes) so later archaeology has the whole effort
-  together. Before moving, compress `progress.md` enough that the archive explains what
-  finished and what was verified.
+  out of `work/<topic>/`. Preserve its shape (`index.md`, optional `design.md`, `plan.md`,
+  `plans/` / notes) so later archaeology has the whole effort together. Before moving,
+  compress `index.md ## Progress` enough that the archive explains what finished and what
+  was verified.
 - `~/.flightdeck/projects/<slug>/ideas/<topic>/` holds an unstarted topic seed. Keep it
   light: usually `idea.md` (problem / why it matters / activation trigger / rough notes).
-  Do not create a full `context.md` / `plan.md` until the idea is promoted into active
+  Do not create a full `index.md` / plan set until the idea is promoted into active
   `work/<topic>/`; otherwise parked ideas look like live recovery payloads.
 - To start an idea, move or copy it into `work/<topic>/`, then create the active package
-  entry files (`context.md`, `design.md`, `plan.md`, `progress.md`) from the seed. Location
-  changes the state; no status field is added.
+  entry file (`index.md`) and any needed supporting files from the seed. Location changes
+  the state; no status field is added.
 
 ## global knowledge
 

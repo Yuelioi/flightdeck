@@ -31,8 +31,8 @@ walkaround repairs, so it writes. Two postures, chosen by risk:
 
 - **Mechanical & lossless → apply, then report what you changed.** Adding a missing routing
   header, moving a finished effort to the cold archive, deleting an `INDEX.md`, stripping
-  YAML frontmatter, repointing a stale cockpit line, creating missing topic package entry
-  files from nearby content, moving a root-level knowledge file into an obvious domain.
+  YAML frontmatter, repointing a stale cockpit line, creating or repairing a topic
+  `index.md` from nearby content, moving a root-level knowledge file into an obvious domain.
 - **Lossy or a judgement call → propose, don't apply.** Merging two near-duplicate traps,
   deciding which topic an orphaned folder belongs to, splitting a mixed-topic work file,
   splitting mixed-domain knowledge, removing a dead subscription.
@@ -49,18 +49,19 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    `## In flight` + `## Next` + `## Open questions`) — note (`i`) a missing section. Then
    reality: does `## In flight` match what's in `work/`? Flag (`⚠`) topics the cockpit
    claims that aren't in `work/`, a `work/` topic the cockpit never mentions, a
-   focus/next that points at a topic package but bypasses `context.md`, and a focus/next
+   focus/next that points at a topic package but bypasses `index.md`, and a focus/next
    pointing at something already moved to the cold store. → Fix: repoint/rewrite the
    cockpit line (mechanical).
-2. **Topic package shape.** Each active `work/<topic>/` should carry `context.md`,
-   `design.md`, `plan.md`, and `progress.md`; `plans/` is optional. Flag top-level
-   `work/*.md` effort files, split sibling files such as `*-plan.md` / `*-spec.md`, or
-   active spec/plan output parked outside `work/`. → Fix: when the topic is clear, create
-   `work/<topic>/`, move design/spec content to `design.md`, move the current main steps to
-   `plan.md`, summarize state in `context.md` / `progress.md`, and leave related notes
-   beside them. If `design.md` or `plan.md` is genuinely not known yet, create the missing
-   file with a short "not decided yet" placeholder rather than leaving the package
-   malformed. If multiple topics are mixed in one file, propose the split.
+2. **Topic package shape.** Each active `work/<topic>/` should carry `index.md`; `design.md`,
+   `plan.md`, `plans/`, and notes are optional supporting files. Flag top-level `work/*.md`
+   effort files, split sibling files such as `*-plan.md` / `*-spec.md`, active spec/plan
+   output parked outside `work/`, or a topic whose `index.md` lacks useful `## Next` /
+   `## Read now` pointers. → Fix: when the topic is clear, create `work/<topic>/`, move
+   long design/spec content to `design.md`, move long or staged plans to `plan.md` or
+   `plans/`, and summarize state / next / progress / read pointers in `index.md`. If a
+   legacy package has `context.md` and `progress.md`, merge their durable content into
+   `index.md` and remove the old files after verifying nothing is lost. If multiple topics
+   are mixed in one file, propose the split.
 3. **Orphaned work.** Each `work/<topic>/` should be reachable from the cockpit (focus /
    next / in-flight). Flag a folder the cockpit never mentions — lost, or
    finished-but-unrecorded. → Fix: if clearly finished, archive it (mechanical); if it's
@@ -80,8 +81,8 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
    domain folder; if the file mixes domains, propose a split.
 7. **Cold project store shape.** `archive/<topic>/` should contain completed topic packages;
    `ideas/<topic>/` should contain light unstarted seeds, usually `idea.md`, not full active
-   recovery packages. → Fix: if an archived package is missing `progress.md`, add a short
-   final summary from the contents; if an idea already has active-package files, propose
+   recovery packages. → Fix: if an archived package is missing `index.md`, add a short
+   final handoff from the contents; if an idea already has active-package files, propose
    promotion into `work/<topic>/` or reduction to an idea seed.
 8. **Done but not archived.** A finished effort should be moved out of `work/` into
    `~/.flightdeck/projects/<slug>/archive/<topic>/`. Flag a `work/` effort whose cockpit notes /
@@ -104,8 +105,8 @@ field-matching. For each finding: mark severity (`⚠` / `i`), then **fix** it (
 11. **Older shape → migrate.** If the deck carries old-form structure, fold it to the current
    shape **by what each thing is, never losing content**:
    - kind-folders (`specs/` `plans/` `checklists/` `docs/` `incidents/`) → regroup into
-     `knowledge/<domain>/` by subject; an active plan/spec → `work/<topic>/design.md` +
-     `work/<topic>/plan.md` with `context.md` / `progress.md`; a done one → `archive/<topic>/`;
+     `knowledge/<domain>/` by subject; an active plan/spec → `work/<topic>/design.md` /
+     `plan.md` or `plans/` plus `work/<topic>/index.md`; a done one → `archive/<topic>/`;
      an unstarted one → `ideas/<topic>/idea.md`.
    - delete `INDEX.md`; strip YAML frontmatter and replace it with a routing header.
    - recorded config (`version` / `runtime` / `agents_md` / toggles) → drop it.

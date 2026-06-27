@@ -21,8 +21,8 @@
 
 ## ✨ 亮点
 
-- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：扫描这一回合的产出、把值得留的新知识写进 `knowledge/`，重写当前主题的 `context.md` / `progress.md`，重写 `cockpit.md`，提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
-- **无 schema、无脚本、无 INDEX。** 整套东西就是纯 markdown 加两条约定：**位置即状态**（项目里的文件夹 = 活的，移出 = 完成）和每个知识文件一行的**路由头**。没东西要迁移、没东西要保持同步、没东西会在模型升级时坏掉。
+- **默认零丢失 —— 恢复载荷自己落盘。** 任何做了真实工作的回合末尾，flightdeck 自动 **persist**：扫描这一回合的产出、把值得留的新知识写进 `knowledge/`，重写当前主题的 `index.md`，重写 `cockpit.md`，提交仓库。没有要记着跑的收尾命令。想关窗口随时关 —— 下一次 `/flightdeck:preflight` 从真实现场接手，而不是过期快照。
+- **无 schema、无脚本、无项目级 INDEX。** 整套东西就是纯 markdown 加两条约定：**位置即状态**（项目里的文件夹 = 活的，移出 = 完成）和每个知识文件一行的**路由头**。没东西要迁移、没东西要保持同步、没东西会在模型升级时坏掉。
 
 ## TL;DR
 
@@ -31,7 +31,7 @@
 /plugin install flightdeck@flightdeck-marketplace
 ```
 
-会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/cockpit.md`、当前主题的 `context.md`、瞥一眼 `git status`、报告你上次停在哪。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch` 建好一个 deck。不会自动加载任何东西，你来调它。
+会话开始时运行 `/flightdeck:preflight` —— 会话入口接管。已有项目里它读 `flightdeck/briefing.md` 和 `flightdeck/cockpit.md`，扫描知识头部，列出可继续的工作，并等你选择后才读取该主题的 `index.md`。全新项目（没有 `cockpit.md`）里它指引你去 `/flightdeck:launch` 建好一个 deck。不会自动加载任何东西，你来调它。
 
 ## 它是什么
 
@@ -42,7 +42,7 @@ your-project/
 └── flightdeck/            # 温存层 —— git 跟踪，每回合提交
     ├── cockpit.md         # 项目索引（Focus / In flight / Next / Open questions）
     ├── briefing.md        # 稳定、人维护 —— ## Conventions（house rules）+ ## Subscriptions
-    ├── work/              # 主题工作包：context.md + design.md + plan.md + progress.md
+    ├── work/              # 主题工作包：index.md + 可选 design/plan 文件
     └── knowledge/         # 路由到未来行为的知识，按域嵌套
 
 ~/.flightdeck/             # 冷存层 —— 全局普通目录，不是 git
@@ -51,11 +51,11 @@ your-project/
                            # <slug> = 项目绝对路径，分隔符 → -（防同名碰撞）
 ```
 
-没有 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的 topic package 是活的；把它移进 `~/.flightdeck/projects/<name>/archive/<topic>/` 就标记为完成。停放的 idea 住在 `ideas/<topic>/`，只是轻量 seed，不是 active recovery package。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
+没有项目级 `INDEX.md`、没有 YAML frontmatter、没有 status 字段。**位置即状态**：`work/` 里的 topic package 是活的；把它移进 `~/.flightdeck/projects/<name>/archive/<topic>/` 就标记为完成。停放的 idea 住在 `ideas/<topic>/`，只是轻量 seed，不是 active recovery package。知识是常驻的 —— 在 = 有效，删了 = 死了。微妙状态（阻塞、等待、待评审）活在 cockpit 散文里，而不是某个文件夹或字段。
 
 ### cockpit.md —— 项目索引
 
-每次会话首先读取。它故意保持小 —— 指向当前主题工作包，而不是承载主题笔记：
+每次会话首先读取。它故意保持小 —— 列出可继续的主题工作包，而不是承载主题笔记：
 
 ```markdown
 # Cockpit — payment-service
@@ -64,33 +64,32 @@ Focus: stabilize the Stripe webhook handler — failing edge cases under knowled
 
 ## In flight
 
-- work/webhook-idempotency/ — 先读 `context.md`；deciding DB vs Redis key
+- work/webhook-idempotency/ — next: choose DB vs Redis key；主题 index 里有读取清单
 
 ## Next
 
-Continue `work/webhook-idempotency/context.md` → next action.
+Choose `work/webhook-idempotency/` to resume.
 
 ## Open questions
 
 - Is the duplicate caused by Stripe retries or our own re-enqueue? (unverified)
 ```
 
-没有 500 行的上下文倾倒。主题细节在 `work/<topic>/context.md` / `design.md` / `plan.md`；可复用的未来行为在 `knowledge/`，按需通过走目录树 + grep 路由头取得。
+没有 500 行的上下文倾倒。主题交接入口在 `work/<topic>/index.md`；长设计和计划文件只有被这个 index 指向时才读。可复用的未来行为在 `knowledge/`，通过扫描路由头发现，正文按需加载。
 
 ### work/&lt;topic&gt;/ —— 主题工作包
 
-每个进行中的工作都是一个目录，入口文件名稳定：
+每个进行中的工作都是一个目录，只有一个稳定入口文件，其它都是按需支撑材料：
 
 ```text
 work/<topic>/
-  context.md    # 主题恢复载荷：状态、下一步、阻塞点、关键事实
-  design.md     # 为什么、方案、取舍、已定决策
-  plan.md       # 当前主执行计划
-  progress.md   # 压缩进度摘要，不是流水账
-  plans/        # 可选：备选或已废弃计划
+  index.md      # 主题交接：状态、下一步、进度、读取指针
+  design.md     # 可选：长设计 / spec
+  plan.md       # 可选：当前计划
+  plans/        # 可选：分阶段、备选或已废弃计划
 ```
 
-preflight 在 cockpit 后读取当前主题的 `context.md`。执行时读 `plan.md`；需要设计判断时读 `design.md`。`progress.md` 重写为摘要，让下次会话不需要回放旧聊天也能继续。
+preflight 在你选择主题前停在 `cockpit.md`。选择后只先读该主题的 `index.md`。`index.md` 说明现在要读什么、什么条件下才读、哪些进度已完成、下一步是什么。
 
 ### 路由头 —— 唯一的约定
 
@@ -140,17 +139,17 @@ READ WHEN: <什么时候路由到这里才对>
 1. 加载协议、读 `flightdeck/cockpit.md`（外加 `briefing.md`）。
 2. 扫路由头地图（便宜的一行头），再按需加载 body —— 按各头的 `READ WHEN:` 排序，约束性约定常驻前台、reactive trap 等症状出现才拉。
 3. 瞥一眼 `git status` —— 仅在明显不对时给一行被动提示，绝不阻塞式追问。
-4. 报告下一项 —— 说 "go" 执行。
+4. 报告可继续项并询问要恢复哪个。你选择前，它不读主题文件，也不读知识正文。
 
 全新项目（没有 `cockpit.md`）则 preflight 指引你去 `/flightdeck:launch`：做个快速检查后播种骨架（没 repo 时问一句 `git init` —— 零丢失保证需要 git）。
 
-**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：扫描这一回合的产出、把过了写入门控的写进 `knowledge/`，重写当前主题的 `context.md` / `progress.md`，把 `cockpit.md` 重写到当下，做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
+**会话结束** —— 没有要记的东西。一轮产出了真实增量时，flightdeck 自己 **persist**：扫描这一回合的产出、把过了写入门控的写进 `knowledge/`，重写当前主题的 `index.md`，把 `cockpit.md` 重写到当下，做一次本地 commit。纯对话、啥都没改的一轮不提交。下一次会话 —— 哪怕换个 AI 或换个人 —— 都能从这里精确接上。
 
 ### 命令
 
 | 命令 | 用途 |
 | --- | --- |
-| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `briefing.md`、`cockpit.md` 和当前主题的 `context.md`，按需走目录树，报告下一项。不会自动触发；不跑它就等于 flightdeck 没接管。 |
+| `/flightdeck:preflight` | **会话入口接管** —— 加载协议，读 `briefing.md` 和 `cockpit.md`，扫描知识头部，列出可继续项，并等你选择后才读取主题 `index.md`。不会自动触发；不跑它就等于 flightdeck 没接管。 |
 | `/flightdeck:launch` | **首次建 deck** —— 播种骨架（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。没 repo 时问一句 `git init`。deck 已存在则拒绝。 |
 | `/flightdeck:walkaround` | **完整性审计与修复** —— 一个按需的漂移巡检，针对新形态没有机制自纠的部分（cockpit 对不上现实、主题工作包形状不规范、孤儿 work、重复 trap、缺路由头、knowledge 根目录堆积）。机械问题直接修，可能丢语义的问题只提议。 |
 
@@ -160,8 +159,8 @@ READ WHEN: <什么时候路由到这里才对>
 
 | 当下情形 | AI 去读 |
 | --- | --- |
-| 会话开始 /「我们刚在干嘛？」 | `cockpit.md` |
-| 一项进行中的多步工作 | 先读 `work/<topic>/context.md`，再按需读 `plan.md` / `design.md` |
+| 会话开始 /「我们刚在干嘛？」 | `briefing.md` + `cockpit.md` + 知识头部 |
+| 已选择的一项进行中工作 | 先读 `work/<topic>/index.md`，再只读 `## Read now` 或命中的 `## Read if` |
 |「迁移为啥挂了？」 | `knowledge/<域>/` 下的 `# ⚠` trap |
 |「测试怎么跑？」 | `knowledge/<域>/` 下的 `# … checklist` |
 
@@ -193,7 +192,7 @@ deck 局部约定 + AI 按你自然话维护的行为规则，如 "发布面一�
 
 ## 为什么需要它
 
-多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（topic package 在项目里就是活的，移进冷 archive 就是完成，停在 ideas 里就是未启动 seed）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `briefing.md` + `work/` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
+多数「AI memory」方案的失败在于什么都存 —— 信号淹没在垃圾抽屉里。flightdeck 反着来：**严格写入门控**（只存会改变未来决策、或你会再查的东西）、**位置即状态**（topic package 在项目里就是活的，移进冷 archive 就是完成，停在 ideas 里就是未启动 seed）、一行**路由头**让知识无需全量倾倒就能被找到、以及每回合提交的**零丢失恢复载荷**（`cockpit.md` + `briefing.md` + 每个 active topic 的 `index.md` + `knowledge/`）。它是纯 markdown —— 能在 review 里 diff、在终端 grep，还能扛过模型升级或 AI 工具切换。
 
 > ✨ 语义清晰高于主题统一 —— 航空隐喻只在能让意图更清晰处使用，绝不当成主题。
 

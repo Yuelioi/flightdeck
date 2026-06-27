@@ -5,8 +5,8 @@ three jobs:
 
 - **Format by example.** Every file here is a correct instance of a convention: the
   `cockpit.md` skeleton, the `briefing.md` two-section layout, a folder effort under
-  `work/` with its design and plan co-located, a checklist knowledge file, and a `# ⚠`
-  trap. Read the files, not a spec.
+  `work/` with an `index.md` handoff plus co-located design / plan files, a checklist
+  knowledge file, and a `# ⚠` trap. Read the files, not a spec.
 - **Migration / repair target.** `/flightdeck:walkaround` brings an older or drifted deck
   to this shape — preserving your content — so this deck is what it converges on.
 - **Launch reference.** `/flightdeck:launch` seeds a deck shaped like this one, emptied
