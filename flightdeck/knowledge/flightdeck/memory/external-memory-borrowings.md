@@ -49,7 +49,7 @@ READ WHEN: before planning flightdeck memory / knowledge / routing capability, o
 2. **#1 写门负例**——提升写入端质量、纯 prompt 层低风险，**单独推进**（不绑进重构）。
 3. **#7 恢复回归测试**——最重要，但**放后面**：先让恢复模型稳定，再固化成测试，否则把测试绑死在还会变的流程上（"别测一个还在变的目标"）。
 
-**Cursor 注入路径（架构决策，认真对待）**：claude-mem 实测 Cursor `sessionStart` 注入不可靠（社区踩坑），改用 `.cursor/rules/*.mdc`（`alwaysApply: true`）规则文件、hook 在入场+回合末刷新（见 `references/claude-mem/cursor-hooks/CONTEXT-INJECTION.md`）。**原则：稳定加载 > 优雅加载。** flightdeck 在 hook refactor 里把 **`.cursor/rules/flightdeck-context.mdc` 规则文件作为 Cursor 的主路径独立成立**，而非 sessionStart 的备用——核心行为不绑在已知不稳的 sessionStart 上。已回流进 `2026-06-07-hook-primary-refactor` spec/plan。
+**Cursor 注入路径（架构决策，认真对待）**：claude-mem 实测 Cursor `sessionStart` 注入不可靠（社区踩坑），改用 `.cursor/rules/*.mdc`（`alwaysApply: true`）规则文件、hook 在入场+回合末刷新（见 `references/claude-mem/cursor-hooks/CONTEXT-INJECTION.md`）。**原则：稳定加载 > 优雅加载。** flightdeck 在 hook refactor 里把 **`.cursor/rules/flightdeck-context.mdc` 规则文件作为 Cursor 的主路径独立成立**，而非 sessionStart 的备用——核心行为不绑在已知不稳的 sessionStart 上。
 
 > 一句话收束（用户原话）：先做 #2 + #4（并入 hook refactor），随后补 #1，然后等流程稳定后用 #7 作为第一次真正验证 flightdeck 核心价值的行为测试。
 

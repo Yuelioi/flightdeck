@@ -1,14 +1,15 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: work/ai-native-redesign/ — AI-native cutover, now past the `index.md` handoff migration and carrying local knowledge cleanup plus cache sync follow-up.
+Focus: no active topic package; AI-native redesign has moved to the cold archive.
 
 ## In flight
 
-- work/ai-native-redesign/ — current reset effort. Choose this topic, then read `index.md`; it points at the current stale-knowledge cleanup and cache sync step.
+None.
 
 ## Next
 
-Verify and commit the stale-knowledge cleanup, then sync both Claude and Codex plugin caches. Release steps (CHANGELOG, version bump, push) remain gated by explicit user approval.
+AI-native redesign is archived. Release steps (CHANGELOG, version bump, push) remain gated
+by explicit user approval.
 
 ## Open questions
 
@@ -17,7 +18,8 @@ Verify and commit the stale-knowledge cleanup, then sync both Claude and Codex p
 
 ## House pointers
 
-Rules → briefing.md · preferences → project agent instructions · active topic → work/ai-native-redesign/index.md · knowledge → knowledge/<domain>/ · cold archive/ideas → ~/.flightdeck
+Rules → briefing.md · preferences → project agent instructions · active topics → work/ ·
+knowledge → knowledge/<domain>/ · cold archive/ideas → ~/.flightdeck
 
 ## Note on dogfooding
 

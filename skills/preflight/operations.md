@@ -151,6 +151,10 @@ again.
   and why; a reusable procedure; a trap you'd otherwise hit again.
 - RECORD in `work/<topic>/`: topic-local state, progress, unresolved implementation
   questions, and design details that would not change a future session outside that topic.
+- When writing knowledge, make it self-contained. Do not leave "see the spec / plan /
+  topic package" as the load-bearing content, and do not point knowledge at lifecycle files
+  as dependencies. Copy the durable conclusion, root cause, procedure, or decision into the
+  knowledge body itself.
 - SKIP: "ran the tests, they passed"; "explored the API, found nothing useful"; "reran the
   build after a flake"; a log of steps with no durable conclusion.
 - Borderline → ask: would a future session, cold, act differently for having this written?

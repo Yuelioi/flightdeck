@@ -125,6 +125,12 @@ Knowledge is *resident*: present = valid, deleted = dead. No lifecycle, no statu
 knowledge under a domain folder (`knowledge/<domain>/...`); avoid root-level piles as the
 library grows.
 
+Knowledge is durable, so it must be self-contained. Do not make a knowledge file depend on
+links into a topic package, spec, design, plan, or archived work file; those artifacts move
+with lifecycle state and can be renamed or removed. If a lesson came from a spec or plan,
+copy the stable conclusion and enough context into the knowledge body, then let the source
+artifact remain archaeology.
+
 Preflight reads knowledge **headers** to build the routing map, never full bodies. A
 knowledge body is read only when a chosen topic / index / action needs it. `index.md
 ## Read now` and `## Read if` are the topic's dependency pointers: they record which

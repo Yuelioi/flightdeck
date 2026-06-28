@@ -36,7 +36,7 @@ It deliberately does **not** write the CHANGELOG. Everything in Steps 1, 3–6 t
    - `.cursor-plugin/plugin.json`
    - `gemini-extension.json`
    - `README.md` + `README.zh.md` (version badge + warning-banner token — `set` rewrites both)
-3. **Add a `CHANGELOG.md` entry** at the top under a new `## [x.y.z] — YYYY-MM-DD` heading, grouped Keep-a-Changelog style (`Added` / `Changed` / `Fixed` / etc.). Link archived specs/plans in `flightdeck/archive/` where relevant.
+3. **Add a `CHANGELOG.md` entry** at the top under a new `## [x.y.z] — YYYY-MM-DD` heading, grouped Keep-a-Changelog style (`Added` / `Changed` / `Fixed` / etc.). Summarize relevant archived work context when useful, but do not make the changelog depend on archived spec or plan links.
    - **Migration is `/flightdeck:walkaround`'s job, not a doc.** If a release changes deck structure, fold the old→new mapping into walkaround's check 8 and update the `examples/deck/` reference — there is no migration file to bump.
 4. **Commit** — subject `vX.Y.Z: <one-line summary>` (matches existing release commits). Follow `checklists/commits.md` if present.
 5. **Tag — annotated** — `git tag -a vX.Y.Z -m "vX.Y.Z — <summary>"`. Must be annotated: lightweight tags (`git tag vX.Y.Z`) are silently skipped by `--follow-tags` and never reach origin. The README version badge reads GitHub releases, which come from tags.

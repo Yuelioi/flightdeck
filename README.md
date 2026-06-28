@@ -108,6 +108,8 @@ READ WHEN: <when routing here is the right move>
 
 Routing reads only the header (cheap). The title glyph encodes the kind, so there's no `kind` field and no folder-per-kind — knowledge nests by **domain** instead, and the folder tree is the index.
 
+Knowledge is long-lived and self-contained. It should copy the durable lesson into the body, not depend on links into a topic package, spec, design, plan, or archived work file whose location changes with lifecycle state.
+
 ## Install
 
 ### Claude Code &nbsp;<sub>✅ tested</sub>
