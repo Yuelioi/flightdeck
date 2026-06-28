@@ -2,7 +2,7 @@
 
 SUMMARY: In an engaged run persist rewrites cockpit + commits reliably, but silently drops the knowledge-write sub-action across the whole session — only the cockpit is re-surfaced as a next action each turn, so the learning rots in a gitignored sibling-workflow scratch file and never crystallizes.
 READ WHEN: a long engaged run produced zero (or far too few) knowledge files despite catching bugs / making decisions / hitting traps; or deciding whether a persist sub-action or the landing line needs more turn-to-turn visibility.
-RECHECK WHEN: persist's sub-action set, its ordering, or the landing-line format changes in skills/preflight/{SKILL,protocol}.md; or walkaround's checks change.
+RECHECK WHEN: persist's sub-action set, its ordering, or the landing-line format changes in skills/preflight/SKILL.md or skills/preflight/operations.md; or walkaround's checks change.
 
 ---
 
@@ -38,18 +38,18 @@ persist 有三子动作（rewrite cockpit / write knowledge / commit），但只
 - **cleanup** 根本不在 persist scope 内：location-is-state 只管 `work/` 进冷存，不管 skill 自己在 deck
   外建的 scratch dir，也不管 harness 的 task board。没人 own → 烂着。
 
-一句话：**cockpit 有心跳，knowledge 和 cleanup 没有。** 这是 spec 头号风险（无机械自纠偏、全系统靠
-AI 记得跑协议）的又一尖锐子型，与 [[sibling-workflow-leaves-cockpit-stale]] 同源——那个是 cockpit 跨
+一句话：**cockpit 有心跳，knowledge 和 cleanup 没有。** 这是 flightdeck 头号风险（无机械自纠偏、全系统靠
+AI 记得跑协议）的又一尖锐子型，与 `sibling-workflow-leaves-cockpit-stale` 同源——那个是 cockpit 跨
 工作流陈旧，这个是 knowledge 子动作没心跳。
 
 ## 修法 / 已加固（2026-06-25，发布面协议）
 
 给没心跳的子动作装心跳——哪怕只是 landing 行里一句诚实的计数：
 
-- **scan 提为强制步**：`SKILL.md` 微核把 persist 重排成有序三步，**第一步 = 每回合扫一遍知识**（过写
-  入门控就**当场**写进 `knowledge/<域>/`，不拖到 effort 收尾）；`protocol.md` § Knowledge 改成「scan
-  first, every turn, forcing step」，并点明「拖延的知识就是那条进了 gitignored scratch、永不毕业的学
-  习」。「没东西够格」是合法结果，但必须**靠扫描、刻意**抵达。
+- **scan 提为强制步**：`SKILL.md` 微核把 persist 重排成有序步骤，**第一步 = 每回合扫一遍知识**（过写
+  入门控就**当场**写进 `knowledge/<域>/`，不拖到 effort 收尾）；`operations.md` 的 Persist 展开段说明
+  「scan first, every turn, forcing step」，并点明「拖延的知识就是那条进了 gitignored scratch、永不毕业
+  的学习」。「没东西够格」是合法结果，但必须**靠扫描、刻意**抵达。
 - **landing 行钉死知识计数（含 0）**：`cockpit ✓ · knowledge: 0 · commit <sha>`——一串
   `knowledge: 0` 跨回合就是可见的**心电平线**，而非沉默；省掉这段则遗漏隐形（heartbeat that shows the
   flatline）。
@@ -57,10 +57,9 @@ AI 记得跑协议）的又一尖锐子型，与 [[sibling-workflow-leaves-cockp
   → 报（⚠）平线。默认只查 flightdeck 管辖域：项目 `flightdeck/`、项目 cold store、已订阅的
   mother-store knowledge。`.superpowers/…`、`tmp/` 这类 sibling workflow scratch 不再默认扫；只有
   cockpit / topic index / briefing / knowledge 明确指向时，才检查被引用的具体路径并提出清理。
-- **外圈同步**：README 中英 + adapters/claude 把 persist 叙述从被动「writes knowledge in place」改成主
-  动「scans for new knowledge and writes it」+ scan-first 排序（走 [[outer-ring-docs-drift]] 的全圈清扫
-  规则）。
-- **否决项**：不在 seed / `rules.md` 塞默认 landing checklist（用户既定取舍：别给每个新项目塞默认，内
+- **外圈同步**：README 中英 + adapters 把 persist 叙述从被动「writes knowledge in place」改成主动
+  「scans for new knowledge and writes it」+ scan-first 排序（走 `outer-ring-docs-drift` 的全圈清扫规则）。
+- **否决项**：不在 launch seed / scaffold 塞默认 landing checklist（用户既定取舍：别给每个新项目塞默认，内
   嵌本体即可）。external-scratch 的清理走 walkaround，不进 persist 核心 scope。
 - **改不了的**：整系统仍依赖 AI 记得扫——forcing step + 可见计数把「忘了扫」从沉默变成显形，不是物理
   强制。

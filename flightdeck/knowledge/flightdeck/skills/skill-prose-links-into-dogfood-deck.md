@@ -9,7 +9,7 @@ READ WHEN: before adding a markdown link or relative path inside any skills/ pro
 
 - symptom: `skill 散文里的相对链接 ../../docs/why-no-hooks.md 从 skills/preflight/ 解析到仓库根 docs/（无此文件）；真正的文件在 dogfood deck flightdeck/docs/ 下`
 - error_type: dangling-link
-- where: skills/**（SKILL.md / protocol.md / exit-ritual.md / templates.md / folder-semantics.md）
+- where: skills/**（SKILL.md / concepts.md / operations.md / launch scaffold 等 shipped skill prose）
 - trigger: 在 shipped skill 散文里写一条指向 deck 内容（flightdeck/docs/ 等）或深度算错的相对链接
 
 ## 症状/复现
@@ -30,7 +30,7 @@ shipped skill 指向 `flightdeck/…` 或算错深度的相对链接，对**每�
 ## 修法
 
 - shipped skill 散文里的链接**只许指向 `skills/` 内部**（相对路径在 skills 树内闭合，
-  如 `../preflight/exit-ritual.md#anchor`）。
+  如 `../preflight/operations.md#persist-turn-end-expanded`）。
 - 要引 deck 才有的理由（why-no-hooks 之类），**别深链 deck**——把理由**内联成散文**
   （"consistent with flightdeck's deliberate no-startup-hooks design"），或指向 shipped
   的公开文档（仓库根 `docs/`）。

@@ -2,7 +2,7 @@
 
 SUMMARY: A session driven by another workflow (SDD / executing-plans) that never runs preflight leaves flightdeck disengaged — turn-end persist never applies, so the cockpit silently rots while real work proceeds (tracked in git + the other ledger), and the divergence only surfaces on the next re-entry.
 READ WHEN: a session does substantial work under another workflow (SDD, executing-plans, subagent-driven) without running /flightdeck:preflight; or re-entry preflight shows cockpit focus diverging from recent commits / branch.
-RECHECK WHEN: the "persist only applies once preflight loaded the protocol this session" rule, or the preflight drift check, changes in skills/preflight/{SKILL,protocol}.md.
+RECHECK WHEN: the "persist only applies once preflight loaded the protocol this session" rule, or the preflight drift check, changes in skills/preflight/SKILL.md or skills/preflight/operations.md.
 
 ---
 
@@ -53,14 +53,14 @@ A,三者对不上,确认焦点"。也就是 cockpit 烂了但 re-entry 把它兜
 
 能改的改了,改不了的说清楚:
 
-- **engaged 会话**:`protocol.md` § Persist 把触发从模糊的「turn end」钉成 **milestone
-  粒度**——每做完一批任务/里程碑就刷 cockpit,判据「现在关对话光靠 cockpit 能恢复、不用
-  翻 git」;并点名跨工作流(executing-plans/SDD/subagent)那套账本不是 cockpit。
+- **engaged 会话**:`operations.md` § Persist 把触发从模糊的「turn end」钉成 **milestone
+  粒度**——每做完一批任务/里程碑就刷 cockpit,判据「现在关对话光靠 cockpit + topic index 能恢复、不用
+  翻 git」;并点名跨工作流(executing-plans/SDD/subagent)那套账本不是 deck。
   `SKILL.md` 微核 persist 行同步。
 - **re-entry 网**:`SKILL.md` 第4步 passive git note 从只比「分支 vs focus」扩到也看
   「最近几条提交 vs focus」(`git log --oneline -5`)——这是唯一能兜住「上场没 persist」
   的机制(本 case 正是靠它)。
-- **改不了的**:没跑 preflight 的会话物理上读不到 protocol.md。彻底堵死只能靠 startup
+- **改不了的**:没跑 preflight 的会话物理上读不到 flightdeck protocol。彻底堵死只能靠 startup
   hook(flightdeck 故意不要)或用户混用时也跑一次 preflight。加固后真实保证 = engaged
   不再 lag + re-entry 更可靠报警,不是「绝对不会陈旧」。
 

@@ -19,11 +19,11 @@ RECHECK WHEN: the set of outer-ring docs (README / adapters / scaffolds) that mi
 
 ## 根因
 
-失实清扫的 spec 把范围圈定为 `skills/` 12 个文件——协议（AI 面）有清扫仪式，外圈（人类面）没有任何机制把它挂进协议变更的影响面：外圈文档不带 `applies_to`、不进 walkaround 审计、也不在 landing 的 stale 检测路径上，于是协议每动一次，外圈就静默漂移一格。点状修补（只改被指出的那一处）会漏同文件其他段落——本档案 Case 2 即「修 mermaid 旧名时漏掉同一张图里的根 INDEX/sketches/debriefs 节点」。
+失实清扫把范围圈定为 `skills/` 12 个文件——协议（AI 面）有清扫仪式，外圈（人类面）没有任何机制把它挂进协议变更的影响面：外圈文档不进 walkaround 审计，也不在 landing 的 stale 检测路径上，于是协议每动一次，外圈就静默漂移一格。点状修补（只改被指出的那一处）会漏同文件其他段落——本档案 Case 2 即「修 mermaid 旧名时漏掉同一张图里的根 INDEX/sketches/debriefs 节点」。
 
 ## 修法
 
-协议语义/文件夹模型/仪式行为变更落地时，清扫范围默认含外圈：README 中英 + docs/*.md + .github 模板 + adapters/*.md（CHANGELOG/TEST_PLAN/archive 是历史记录，不改）。手法用「关键词全仓 grep + 逐句对照权威源（protocol/folder-semantics/exit-ritual/templates）」，不点状修补。本档案 `applies_to` 即外圈清单，landing 的 stale 检测可借此挂钩。
+协议语义/文件夹模型/仪式行为变更落地时，清扫范围默认含外圈：README 中英 + docs/*.md + .github 模板 + adapters/*.md（CHANGELOG/TEST_PLAN/archive 是历史记录，不改）。手法用「关键词全仓 grep + 逐句对照权威源（`skills/preflight/SKILL.md` + `concepts.md` + `operations.md` + 相关 skill）」；不点状修补。以本文件的 `READ WHEN` 和本段清单作为外圈清扫范围，别再依赖已废弃的 `applies_to` 字段。
 
 ## Cases
 
