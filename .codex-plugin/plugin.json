@@ -1,6 +1,6 @@
 {
   "name": "flightdeck",
-  "version": "3.0.0-alpha.5",
+  "version": "3.0.0-alpha.6",
   "description": "Operational protocol for AI-assisted engineering sessions — preflight entry, automatic per-turn persist, a write gate, and a walkaround audit",
   "author": {
     "name": "月离",

@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: no active topic package; AI-native redesign has moved to the cold archive.
+Focus: local `v3.0.0-alpha.6` release/tag includes the README refresh; no active topic package.
 
 ## In flight
 
@@ -8,12 +8,13 @@ None.
 
 ## Next
 
-AI-native redesign is archived. Release steps (CHANGELOG, version bump, push) remain gated
-by explicit user approval.
+`v3.0.0-alpha.6` is committed and tagged locally with the shorter README, verified Codex
+GitHub-link install notes, and only real user-invoked commands documented. User approved
+`git push`; push after final verification.
 
 ## Open questions
 
-- Release version remains undecided; current package version is `3.0.0-alpha.5`.
+- Release version selected: `3.0.0-alpha.6`.
 - `git push` remains explicitly gated by user approval.
 
 ## House pointers

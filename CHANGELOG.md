@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-alpha.6] — 2026-06-29
+
+AI-native redesign cut：把 flightdeck 收敛成「读索引、按需加载、每轮持久化」的更小协议面。本版重点是 preflight 的 eager routing map、topic package handoff、warm/cold 分层、knowledge 自包含约束，以及发布外圈同步后的文档/适配器整理。
+
+### Added
+- **preflight eager routing map** — 入口阶段现在扫描所有本地与订阅 knowledge 的 routing header，并按 `READ WHEN:` 形态分成 `In force` / `On call`；正文仍按需加载，避免订阅知识挂着但永不进入上下文。
+- **topic work packages** — 活跃工作统一放入 `work/<topic>/`，由 `index.md` 作为恢复看板；`design.md` / `plan.md` / `plans/` 只通过 `index.md` 的 `Read now` / `Read if` 拉取。
+- **cold archive / ideas shape** — 完成工作进入 `~/.flightdeck/projects/<slug>/archive/<topic>/`，未启动想法保留为 `ideas/<topic>/idea.md`，项目 slug 使用碰撞安全的绝对路径派生。
+- **landing heartbeat** — engaged session 的 persist 现在明确报告 knowledge scan 数量，即使为 `knowledge: 0` 也要出现在 landing line，防止长会话静默漏记知识。
+
+### Changed
+- **single briefing entrypoint** — deck 规则收敛到 `flightdeck/briefing.md`，preflight / launch / walkaround 围绕同一套 house rules 与 subscriptions 工作。
+- **cockpit is only the chooser** — cockpit 保持项目级 focus / in-flight / next / open questions；单一 topic 的设计、进度和 read list 下沉到对应 topic index。
+- **global subscriptions by domain** — dogfood deck 改用 domain-routed global subscriptions，并删除本地重复的 commit/comment knowledge。
+- **outer ring aligned to new form** — README、adapters、manifests、examples/deck 和 release knowledge 同步到新协议形态；旧 3.0 草稿与死脚本清理出发布面。
+
+### Fixed
+- **knowledge durability** — knowledge 文件必须自包含，不能把关键结论托给 spec / plan / archive 链接；相关 checklist 已进入发布流程约束。
+- **Windows routing-header grep trap** — 记录 CRLF 会破坏严格 `^---$` header terminator grep 的 Windows 陷阱，后续工具审计需用兼容写法。
+- **preflight recovery drift** — 记录 sibling workflow 未进入 preflight 时导致 cockpit 变陈旧的根因，并把 milestone persist 规则补进协议和适配器文档。
+
+### Breaking
+- **old staged / landing lifecycle retired from the warm protocol** — active lifecycle 现在以 topic package location 和 index handoff 为准；旧 staged/land 草稿、状态模型和相关脚本不再作为发布协议面。
+- **active topics must not depend on global knowledge paths directly** — topic index 需要的共享知识必须先 materialize 到项目本地 `flightdeck/knowledge/...`，再作为恢复依赖引用。
+
 ## [3.0.0-alpha.5] — 2026-06-23
 
 stage/land 生命周期落地第 1 步（plan 1/3）：cockpit 的 `## Staged` 派生视图打地基。设计见 `docs/`（stage/land lifecycle）；spec 采用 `status: staged` + 复用 `stale`/`verify` 而非新增状态。本版仅含派生视图脚本基础，散文重写（plan 2）与 signal 体系 + walkaround 翻转（plan 3）后续。
