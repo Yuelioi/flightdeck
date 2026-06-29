@@ -1,6 +1,6 @@
 # Cockpit — flightdeck (the flightdeck project itself)
 
-Focus: local `v3.0.0-alpha.6` release/tag includes the README refresh; no active topic package.
+Focus: `v3.0.0-alpha.6` release/tag pushed; no active topic package.
 
 ## In flight
 
@@ -8,14 +8,13 @@ None.
 
 ## Next
 
-`v3.0.0-alpha.6` is committed and tagged locally with the shorter README, verified Codex
-GitHub-link install notes, and only real user-invoked commands documented. User approved
-`git push`; push after final verification.
+`v3.0.0-alpha.6` is published to `origin/main` with the shorter README, verified Codex
+GitHub-link install notes, and only real user-invoked commands documented.
 
 ## Open questions
 
 - Release version selected: `3.0.0-alpha.6`.
-- `git push` remains explicitly gated by user approval.
+- Next push remains gated by explicit user approval.
 
 ## House pointers
 
