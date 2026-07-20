@@ -92,6 +92,17 @@ operation.
 
 ## Knowledge
 
-Put reusable current guidance under `flightdeck/knowledge/<subject>/<topic>.md`. Use clear headings,
-direct positive guidance, concise examples, and source links when helpful. Do not add required
-frontmatter, kinds, activation rules, routing fields, revisions, histories, or trap classifications.
+Treat `flightdeck/knowledge/` as the demand-grown project operating playbook. Put one independently
+applicable, current positive practice under each organic `<subject>/<topic>.md` path. Use clear
+headings, concise examples, and source links when helpful; do not pre-seed a taxonomy or starter set.
+
+Work selects Knowledge only when its current action raises a project-specific practice question. It
+reads an existing Work link first, otherwise searches bounded subject paths, filenames, and
+headings. Guidance is advisory. Put it in Next only when immediately required, under References
+when a fresh session needs continuing support, and do not log ordinary consultation.
+
+Promote a Work conclusion only when current evidence verifies it, another independent Work is
+plausibly likely to benefit, and it can be rewritten as self-contained project-specific positive
+guidance. Rewrite or remove disproven material and keep unresolved replacement research in Work.
+Do not add required frontmatter, kinds, activation rules, routing fields, revisions, histories,
+stale flags, recheck ledgers, trap classifications, or a Knowledge index or registry.

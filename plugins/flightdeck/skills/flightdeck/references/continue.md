@@ -13,8 +13,10 @@ Recover from the repository, not from assumed chat history.
    the working tree.
 5. Summarize Goal, Current, Next, important constraints, and uncommitted state. Note any stale or
    missing link plainly.
-6. Continue with the Next action unless the user asked only to inspect or list resumable work.
+6. When the current action raises a project-specific practice question, read relevant Knowledge
+   already linked by the Work first. If none is linked, search only the applicable subject paths,
+   filenames, and headings. Treat selected guidance as advisory; do not scan or preload the library.
+7. Continue with the Next action unless the user asked only to inspect or list resumable work.
 
 The deck contains only Open Work. Finished and Stopped Work remains at its stable path and is opened
-only when named or relevant as history. Search Knowledge by subject only when the current task needs
-guidance that the Work has not already linked.
+only when named or relevant as history.

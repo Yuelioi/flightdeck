@@ -7,25 +7,29 @@ Publish the verified alpha.7 tree as one squashed `v3.0.0-alpha.7` commit based 
 
 ## Status
 
-Open
+Finished
 
 ## Current
 
-Release preparation is complete against freshly fetched `origin/main` at
-`7e0f7a8199adfa883b6f36bda13a050a6986a0bd`. The complete feature tree and six authorized local
-cleanup refs are inventoried, the changelog is release-dated, and all pre-candidate gates pass. No
-alpha.7 commit, tag, push, ref cleanup, or publication has yet been performed.
+Flightdeck v3.0.0-alpha.7 is published. Remote `main`, annotated tag `v3.0.0-alpha.7`, and the public
+GitHub prerelease expose verified commit `e9fd9396ca7b8bb7e3afbd96189dd1e68a11916f`. The authorized
+obsolete local refs are removed, while history and Git objects remain intact.
 
 ## Next
 
-Create the direct-child squash commit described by the
-[release commit Slice](slices/02-create-release-commit.md), preserving exact feature-tree equality.
+None.
 
 ## Progress
 
 - Created a separate release Work without reopening the Finished implementation Work.
 - Confirmed ADR-0022 is the release procedure authority and the user authorized its release steps.
 - Fetched `origin/main`, bounded the cleanup set, and passed every pre-candidate validation gate.
+- Created and verified one direct-child squash commit with exact accepted-tree equality.
+- Removed five obsolete local feature/backup branches and one private Flightdeck checkpoint ref.
+- Fast-forwarded remote `main`, pushed the annotated alpha.7 tag, and published the GitHub
+  prerelease.
+- Recreated two initial local commit-tree attempts whose messages were malformed; both objects are
+  unreferenced and intentionally remain unpruned.
 
 ## References
 

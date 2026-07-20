@@ -14,10 +14,16 @@ milestone. Do not rewrite documents merely because a small edit, test, or commit
 4. Update the Work page's Current, Next, current execution pointer, and concise recent Progress when
    Work-level recovery meaning changed. Embed at most three immediately required local links in
    Next; keep all other useful links under References.
-5. Update `context.md` only for stable goal-specific facts, constraints, decisions, or terms. Keep
+5. Persist a selected Knowledge link only when a fresh session still needs the relationship: put
+   immediately required guidance in Next and continuing support under References. Do not copy the
+   guidance or log ordinary consultation.
+6. Update `context.md` only for stable goal-specific facts, constraints, decisions, or terms. Keep
    progress and session narration out of it.
-6. Update the deck only for Work creation, Focus changes, or terminal lifecycle changes.
-7. Add or revise Knowledge only for concise positive guidance reusable across future Work.
+7. Update the deck only for Work creation, Focus changes, or terminal lifecycle changes.
+8. Add or revise Knowledge only when current evidence verifies the conclusion, another independent
+   Work is plausibly likely to benefit, and the result can be rewritten as one self-contained
+   project-specific positive practice. Rewrite verified replacement guidance or remove disproven
+   material; keep unresolved replacement research in Work without Knowledge status metadata.
 
 Before handing off, reread the dashboard as a fresh agent: it should reveal why the Work exists,
 where it stands, what happens next, and which small set of files must be opened first.

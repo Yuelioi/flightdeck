@@ -2,6 +2,13 @@
 
 Notable user-facing changes are recorded here.
 
+## Unreleased
+
+### Changed
+
+- Defined Knowledge as a demand-grown advisory project playbook with need-driven, link-first Work
+  discovery, recovery-value links, verified promotion, and repair-or-remove maintenance.
+
 ## v3.0.0-alpha.7 — 2026-07-20
 
 ### Added

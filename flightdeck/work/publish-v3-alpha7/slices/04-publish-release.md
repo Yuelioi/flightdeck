@@ -7,17 +7,19 @@ authorized obsolete local refs have been removed.
 
 ## Current
 
-Not yet started.
+Remote `main` and annotated tag `v3.0.0-alpha.7` resolve to verified commit
+`e9fd9396ca7b8bb7e3afbd96189dd1e68a11916f`. The public GitHub prerelease was published at
+<https://github.com/Yuelioi/flightdeck/releases/tag/v3.0.0-alpha.7>. The five authorized local
+feature/backup branches and one private Flightdeck checkpoint ref were removed without object
+pruning.
 
 ## Next
 
-After candidate verification passes, remove the authorized local refs, fast-forward `main`, push
-it, create and push `v3.0.0-alpha.7`, perform the configured publication, and verify the remote
-result.
+None.
 
 ## Verification
 
-- [ ] Authorized obsolete local refs are removed without pruning objects.
-- [ ] Remote `main` resolves to the verified release commit.
-- [ ] Remote tag `v3.0.0-alpha.7` resolves to the verified release commit.
-- [ ] The configured publication surface exposes v3.0.0-alpha.7.
+- [x] Authorized obsolete local refs are removed without pruning objects.
+- [x] Remote `main` resolves to the verified release commit.
+- [x] Remote tag `v3.0.0-alpha.7` resolves to the verified release commit.
+- [x] The configured publication surface exposes v3.0.0-alpha.7.

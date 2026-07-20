@@ -59,11 +59,14 @@ remains at the root when another convention owns it.
 - Use [route-output.md](references/route-output.md) for specialist work. Supported Work-scoped
   documents belong to their owning Work; source changes, external-system records, and unsupported
   outputs stay at their natural location and are linked.
-- Write Knowledge as concise, positive guidance organized by subject. Use headings, examples, and
-  source links when useful. Do not add routing fields, kinds, revisions, histories, traps, or
-  recheck metadata.
-- Keep failed attempts in Work progress while relevant. Promote only reusable conclusions into
-  Knowledge; put enforceable rules in tests or validators.
+- Treat Knowledge as a demand-grown project operating playbook. Keep one concise, independently
+  applicable positive practice per organically named subject path; use headings, examples, and
+  source links when useful. Guidance advises judgment and does not prove compliance; put rules that
+  must be enforced in tests, validators, or repository instructions.
+- Keep failed attempts and unresolved research in Work. Promote only verified, plausibly reusable,
+  self-contained project guidance; rewrite or remove guidance disproved by current reality. Do not
+  add a required taxonomy, index, routing field, kind, activation rule, revision, history, stale
+  flag, trap, recheck ledger, or consultation receipt.
 - Treat one top-level AI session as the repository's Flightdeck operator. It may coordinate child
   agents but must consolidate their results into the authoritative Work documents. Do not add
   cross-session locks, claims, or merge protocols.

@@ -28,7 +28,7 @@ flightdeck/
 - `plan.md` 按需创建，负责阶段顺序和 Slice 完成汇总，不复制 Work 状态。
 - Slice 保存必须跨新会话或提交恢复的一个交付物或决定。Step 留在 Slice 内；每个 Slice 都由
   一个 Plan 项链接。
-- `knowledge/` 保存跨 Work 可复用的当前正向指导。
+- `knowledge/` 是按真实需求增长的项目操作手册，保存跨 Work 可复用的当前正向实践。
 
 Finished 或 Stopped 的 Work 保留稳定路径，但离开 Deck 的 Open Work 列表。
 
@@ -62,9 +62,15 @@ owning Work。源码变更、外部系统记录、临时文件和不受支持的
 
 ## Knowledge
 
-Knowledge 是普通正向指导，例如 `flightdeck/knowledge/ui/form-errors.md`。目录、文件名、标题
-和正文足以发现内容；不要求 kind、路由字段、`read_when`、`recheck_when`、revision、history
-或 trap 分类。相关失败过程留在 Work，可强制规则进入测试或 validator。
+Knowledge 是按真实需求增长的项目操作手册；每个自然 subject 路径只保存一项可独立应用的
+正向实践，例如 `flightdeck/knowledge/ui/form-errors.md`。它既不是宽泛的项目记忆，也不是
+强制规则仓库。
+
+当前动作出现项目特有的实践问题时，Work 先读取自己已经链接的相关 Knowledge，再按有限的
+subject 路径、文件名和标题搜索。指导只影响判断；普通查阅不留日志，只有新会话仍需要时才
+持久链接。只晋升已经验证、很可能跨 Work 复用且可自包含的结论；被事实推翻的指导应重写或
+删除，未解决的研究留在 Work。不要增加强制 taxonomy、索引、kind、激活或路由字段、revision、
+history、stale 标记、recheck ledger 或 trap 分类。
 
 ## 操作边界
 

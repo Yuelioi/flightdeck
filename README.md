@@ -29,7 +29,8 @@ flightdeck/
 - `plan.md` is optional. It owns ordered stage and Slice completion without duplicating Work state.
 - A Slice holds a durable deliverable or decision whose detail must survive a fresh session or
   commit. Steps stay inside it; every Slice is linked from one Plan item.
-- `knowledge/` contains concise, current guidance reusable across future Work.
+- `knowledge/` is the demand-grown project operating playbook: current positive practices reusable
+  across future Work.
 
 Finished and Stopped Work stays at its stable path but leaves the deck's Open Work list.
 
@@ -66,10 +67,16 @@ Project-wide vocabulary remains in root `CONTEXT.md`; architectural decisions re
 
 ## Knowledge
 
-Knowledge is ordinary positive guidance such as `flightdeck/knowledge/ui/form-errors.md`. Directory,
-filename, heading, and prose make it discoverable. It has no required kinds, routing fields,
-`read_when`, `recheck_when`, revisions, histories, or trap collection. Keep failed attempts with the
-Work while relevant and put enforceable rules in tests or validators.
+Knowledge is the demand-grown project operating playbook, with one independently applicable
+positive practice per organic subject path such as `flightdeck/knowledge/ui/form-errors.md`. It is
+neither broad project memory nor an enforceable rule store.
+
+When the current action raises a project-specific practice question, Work reads relevant Knowledge
+it already links before searching bounded subject paths, filenames, and headings. Guidance advises
+judgment; ordinary consultation is not logged, and a link persists only when a fresh session still
+needs it. Promote only verified, plausibly reusable, self-contained conclusions. Rewrite or remove
+disproven guidance, leaving unresolved research in Work. Do not add a required taxonomy, index,
+kind, activation or routing field, revision, history, stale flag, recheck ledger, or trap collection.
 
 ## Operating boundary
 
