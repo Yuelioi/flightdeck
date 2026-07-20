@@ -1,19 +1,21 @@
 {
   "name": "flightdeck-marketplace",
-  "description": "Self-hosted marketplace for the flightdeck plugin (operational protocol for AI-assisted engineering sessions)",
+  "description": "Local marketplace for the Claude Code flightdeck host artifact",
   "owner": {
-    "name": "月离",
-    "email": "yuelioi1210@gmail.com"
+    "name": "Yueli",
+    "email": "yuelioi1210@gmail.com",
+    "url": "https://github.com/Yuelioi"
   },
   "plugins": [
     {
       "name": "flightdeck",
-      "description": "Operational protocol for AI-assisted engineering sessions",
-      "version": "3.0.0-alpha.6",
-      "source": "./",
+      "description": "An AI-first Markdown work desk for durable repository work",
+      "version": "3.0.0-alpha.7",
+      "source": "./plugins/flightdeck",
       "author": {
-        "name": "月离",
-        "email": "yuelioi1210@gmail.com"
+        "name": "Yueli",
+        "email": "yuelioi1210@gmail.com",
+        "url": "https://github.com/Yuelioi"
       }
     }
   ]

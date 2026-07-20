@@ -1,0 +1,20 @@
+{
+  "name": "flightdeck-local",
+  "interface": {
+    "displayName": "Flightdeck Local"
+  },
+  "plugins": [
+    {
+      "name": "flightdeck",
+      "source": {
+        "source": "local",
+        "path": "./plugins/flightdeck"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,6 +1,0 @@
-{
-  "name": "flightdeck",
-  "description": "Operational protocol for AI-assisted engineering sessions",
-  "version": "3.0.0-alpha.6",
-  "contextFileName": "GEMINI.md"
-}

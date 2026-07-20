@@ -1,51 +1,30 @@
-# Index — add CSV export
+# Add CSV export
 
-## State
+## Goal
 
-Design is drafted and the main plan is ready. Implementation should continue with the CSV
-row formatter.
+Let users download the currently filtered orders as a correctly encoded CSV file.
+
+## Status
+
+Open
+
+## Current
+
+The output contract is accepted and the service query is implemented. The HTTP handler and its
+integration test remain.
 
 ## Next
 
-Implement the first unchecked step in `plan.md`.
-
-## Read now
-
-- plan.md
-- design.md
-- knowledge/git/commit-style.md
-
-## Read if
-
-- knowledge/storage/sqlite/wal-mode.md — if export needs database transaction behavior.
-- knowledge/build/flaky-watch-mode.md — if tests fail only in watch mode.
+Implement the streaming download handler through the
+[current Delivery Slice](slices/03-add-streaming-handler.md).
 
 ## Progress
 
-Done:
+- Confirmed that export uses the visible filters rather than the complete order set.
+- Defined UTF-8, header order, quoting, and filename behavior.
+- Added the filtered export query and unit coverage.
 
-- Design drafted.
-- Plan drafted.
+## References
 
-Current:
-
-- Implementing the CSV row formatter.
-
-Verified:
-
-- Not yet verified.
-
-Not done:
-
-- Formatter implementation.
-- CLI integration.
-- Export tests.
-
-## Open questions
-
-- Should export include archived notes by default, or require `--all`? (waiting on user)
-
-## Key facts
-
-- The active command is `notes export --format csv`.
-- CSV escaping rules live in `design.md`.
+- [CSV safety guidance](../../knowledge/engineering/csv-export.md) — reusable spreadsheet and
+  encoding considerations.

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Flightdeck"
+  short_description: "Resume durable repository Work from Markdown"
+  default_prompt: "Use $flightdeck to recover the focused Work and continue from its Next action."
+policy:
+  allow_implicit_invocation: true

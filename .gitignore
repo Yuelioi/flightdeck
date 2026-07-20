@@ -6,18 +6,13 @@ Thumbs.db
 .idea/
 .vscode/
 node_modules/
-__pycache__/
-*.pyc
 .env
 .env.local
 
 # Imported external reference material — heavy clones, browse-only, never committed.
 /references/
 
-# Session scratch (flightdeck 1.2: ephemeral working notes live here)
+# Session scratch
 tmp/
 
-# Build-stamp anchor: per-machine local sync state (scripts/build_stamp.py).
-# Records THIS machine's last cache sync — meaningless/misleading if shared. Never commit.
-.current
 .claude

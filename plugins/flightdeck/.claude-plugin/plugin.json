@@ -1,0 +1,21 @@
+{
+  "name": "flightdeck",
+  "version": "3.0.0-alpha.7",
+  "description": "An AI-first Markdown work desk for durable repository work",
+  "author": {
+    "name": "Yueli",
+    "email": "yuelioi1210@gmail.com",
+    "url": "https://github.com/Yuelioi"
+  },
+  "homepage": "https://github.com/Yuelioi/flightdeck#readme",
+  "repository": "git+https://github.com/Yuelioi/flightdeck.git",
+  "license": "MIT",
+  "keywords": [
+    "flightdeck",
+    "ai-collaboration",
+    "session-continuity",
+    "markdown",
+    "recovery"
+  ],
+  "skills": "./skills/"
+}

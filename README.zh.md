@@ -1,152 +1,98 @@
-<div align="center">
+# Flightdeck
 
-# flightdeck
+Flightdeck 是一个面向 AI 的 Markdown 长期工作台。新会话无需依赖旧聊天，就能恢复一个目标、
+当前事实、下一步、稳定上下文、执行细节和相关链接。
 
-**面向 AI 辅助工程会话的轻量操作协议。**
+发布产品只有 Markdown 与宿主 manifests；没有服务器、CLI、数据库、schema、generator、私有
+checkpoint 图或生成态。
 
-[![Version: 3.0.0-alpha.6](https://img.shields.io/badge/version-3.0.0--alpha.6-orange?style=flat-square)](CHANGELOG.md)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-tested-success?style=flat-square)](adapters/claude/README.md)
-[![Codex](https://img.shields.io/badge/Codex-tested-success?style=flat-square)](adapters/codex/README.md)
-
-中文 · [English README](README.md)
-
-</div>
-
----
-
-> [!WARNING]
-> flightdeck 3.0 仍是 alpha。协议已经能用，并且本仓库正在 dogfood，但稳定版 3.0 前文件形态和措辞仍可能调整。安装新版本不会自动迁移旧 deck；可以运行 `/flightdeck:walkaround` 审计并修复旧形态，也可以用 `/flightdeck:launch` 重新开始。
-
-AI 助手擅长单次会话，不擅长跨会话连续工作。flightdeck 给它一份小而明确的恢复载荷：当前在做什么、发生了什么变化、哪些知识以后还重要、下一步是什么。
-
-## 你会得到什么
-
-- **跨会话接续** — `/flightdeck:preflight` 读取项目 deck，列出可恢复的工作，并等你选择后才加载主题细节。
-- **零丢失交接** — 工作推进后，flightdeck 更新当前主题索引、更新 `cockpit.md`、捕捉长期有用的知识，并做本地 commit。
-- **严格写入门控** — 只记录会影响未来行为的决策、坑、流程和事实，不做垃圾抽屉式记忆。
-- **纯 markdown** — deck 就是仓库里的文件和目录。能 diff、能 review、能 grep，也能跨 AI 工具继续使用。
-
-## 安装
-
-### Codex CLI / Codex App
-
-Codex 通过 GitHub 插件链接安装已经验证。
-
-1. 打开 `Plugins`。
-2. 选择从 GitHub 添加插件。
-3. 粘贴：
-
-```text
-https://github.com/Yuelioi/flightdeck
-```
-
-然后启用 `Flightdeck`，在项目里运行 `/flightdeck:launch`。
-
-### Claude Code
-
-```text
-/plugin marketplace add Yuelioi/flightdeck
-/plugin install flightdeck@flightdeck-marketplace
-```
-
-更新时重新运行 `/plugin install`。卸载用 `/plugin uninstall flightdeck`。
-
-### 其它工具
-
-Cursor 和 Gemini 的 manifest 已包含在仓库里，但还没有完成端到端验证：
-
-- Cursor: [`.cursor-plugin/`](.cursor-plugin/)
-- Gemini CLI: [`gemini-extension.json`](gemini-extension.json)
-
-欢迎提交验证日志。
-
-## 第一次使用
-
-在项目仓库中运行：
-
-```text
-/flightdeck:launch
-```
-
-它会创建：
+## 文件模型
 
 ```text
 flightdeck/
-  briefing.md      # 项目规则和共享知识订阅
-  cockpit.md       # 小型项目索引：focus、active work、next step
-  work/            # 活跃主题工作包
-  knowledge/       # 长期项目知识，通过路由头触发
+  deck.md
+  work/<work-id>/
+    index.md
+    context.md
+    plan.md          # 可选的完成汇总
+    slices/          # 仅保存从 Plan 展开的持久执行细节
+    references/      # 可选；由本 Work 拥有的产物
+  knowledge/<subject>/<topic>.md
 ```
 
-之后每次会话开始运行：
+- `deck.md` 只有一份 Open Work 列表；非空时恰好标记一个 Focus，并可保留少量稳定项目链接。
+  Focus 只是导航，不是生命周期状态。
+- `index.md` 是恢复入口，负责 Goal、Status、Current、Next 和当前执行指针。Work 只有 `Open`、
+  `Finished`、`Stopped` 三种状态。
+- `context.md` 保存该目标稳定的事实、约束、决策与术语。
+- `plan.md` 按需创建，负责阶段顺序和 Slice 完成汇总，不复制 Work 状态。
+- Slice 保存必须跨新会话或提交恢复的一个交付物或决定。Step 留在 Slice 内；每个 Slice 都由
+  一个 Plan 项链接。
+- `knowledge/` 保存跨 Work 可复用的当前正向指导。
+
+Finished 或 Stopped 的 Work 保留稳定路径，但离开 Deck 的 Open Work 列表。
+
+## 自然语言操作
+
+用户只需用普通语言表达意图：开始一项长期工作、继续指定或 Focus Work、切换会话前保存，
+或结束/停止 Work。由 Flightdeck 判断哪些可见文档需要维护。
+
+恢复时读取选中的 Work page、必需 context、已有的低分辨率 Plan、Next 中最多三个必需本地
+链接以及实时 Git 状态。其他 Work、Slices、References 和 Knowledge 保持惰性。
+
+Save 只重写恢复语义发生实质变化的文档，绝不自动 stage、commit、push、tag、建分支或创建
+私有 Git checkpoint。
+
+## 复杂与不确定的 Work
+
+只有目标确实需要多个阶段或验收项时才创建 Plan；只有某个 Plan 项需要独立持久的 Current 与
+Next 时才创建 Slice。
+
+当 Goal 清楚但路线不清楚时，可使用 Wayfinding 阶段，一次解决一个 Decision Slice。
+`Not yet specified` 可以保留尚无法精确表述的不确定性；Delivery Slice 必须分开，避免把“已
+决定”误作“已交付”。
+
+## 专业 skill 产物
+
+Flightdeck 将受支持、属于某个 Work 的领域上下文、决策、研究、规格、审查和执行拆解写入
+owning Work。源码变更、外部系统记录、临时文件和不受支持的产物保留在权威自然位置并链接。
+
+项目级术语仍在根 `CONTEXT.md`，架构决策仍在 `docs/adr/`。Handoff 由普通 Flightdeck Save
+代替，不再建立另一份协议文档。
+
+## Knowledge
+
+Knowledge 是普通正向指导，例如 `flightdeck/knowledge/ui/form-errors.md`。目录、文件名、标题
+和正文足以发现内容；不要求 kind、路由字段、`read_when`、`recheck_when`、revision、history
+或 trap 分类。相关失败过程留在 Work，可强制规则进入测试或 validator。
+
+## 操作边界
+
+Flightdeck 假定同一仓库同一时刻只有一个顶层 AI 会话。该会话可以协调子代理，但必须统一
+汇总权威 Work 状态；Flightdeck 不提供跨顶层会话的锁、认领或兼容协议。
+
+## 本地插件
+
+`plugins/flightdeck` 是 Codex 与 Claude 共用的自包含插件包。在本仓库的 Codex marketplace
+中运行：
 
 ```text
-/flightdeck:preflight
+codex plugin add flightdeck@flightdeck-local
 ```
 
-preflight 会读取 `briefing.md`、读取 `cockpit.md`、扫描知识头部、报告可恢复的工作，然后停下来等你选择。它不会把所有主题文件或所有知识正文一次性塞进上下文。
+Claude Code 本地开发可直接加载：
 
-## 核心模型
-
-flightdeck 有两层：
-
-- **温层** — 仓库里的 `flightdeck/`。这是恢复载荷，应该被 commit。
-- **冷层** — 仓库外的 `~/.flightdeck/`。完成的主题包和暂存想法可以放在那里。
-
-核心规则是**位置即状态**：
-
-- `flightdeck/work/<topic>/` 表示活跃工作。
-- `~/.flightdeck/projects/<slug>/archive/<topic>/` 表示完成工作。
-- `~/.flightdeck/projects/<slug>/ideas/<topic>/` 表示暂存想法，不是活跃工作。
-
-每个活跃主题都有一个 `index.md`，说明当前事实、现在要读什么、什么条件下再读什么、发生了什么变化、下一步是什么。
-
-知识文件使用一个很小的路由头：
-
-```markdown
-# <title>
-
-SUMMARY: <一行摘要>
-READ WHEN: <什么时候应该加载这份知识>
-
----
+```text
+claude --plugin-dir plugins/flightdeck
 ```
-
-这样 preflight 可以把地图留在上下文里，同时只在触发条件出现时加载正文。
-
-## 命令
-
-| 命令 | 用途 |
-| --- | --- |
-| `/flightdeck:launch` | 创建新的 deck 骨架。已有 deck 时拒绝覆盖。 |
-| `/flightdeck:preflight` | 进入会话：读取 deck，扫描路由头，列出可恢复工作，并等你选择。 |
-| `/flightdeck:walkaround` | 审计并修复 deck 漂移：陈旧 cockpit、畸形主题包、缺路由头、旧 deck 形态等。 |
-
-## 兼容性
-
-| 工具 | 状态 | 说明 |
-| --- | --- | --- |
-| Claude Code | 已测试 | marketplace 安装已验证。 |
-| Codex CLI / App | 已测试 | GitHub 插件链接安装已验证。 |
-| Cursor | 仅 manifest | 尚未端到端验证行为。 |
-| Gemini CLI | 仅 manifest | 尚未端到端验证行为。 |
 
 ## 文档
 
-- 协议入口：[skills/preflight/SKILL.md](skills/preflight/SKILL.md)
-- 概念说明：[skills/preflight/concepts.md](skills/preflight/concepts.md)
-- 操作细节：[skills/preflight/operations.md](skills/preflight/operations.md)
-- 版本历史：[CHANGELOG.md](CHANGELOG.md)
+- [格式与写作指南](docs/format.md)
+- [升级旧版或已偏移的 workspace](docs/upgrade.md)
+- [完整示例](examples/deck/README.md)
+- [架构决策](docs/adr/)
+- [贡献说明](.github/CONTRIBUTING.md) 与 [安全策略](.github/SECURITY.md)
+- [English README](README.md)
 
-## 贡献
-
-高信号贡献：
-
-- 一份 AI 偏离协议的 transcript。
-- Cursor 或 Gemini 的验证日志。
-- 一个能让 deck 更容易冷启动恢复的小修复。
-
-## License
-
-[MIT](LICENSE) © 月离 (Yuelioi)
+Flightdeck 使用 MIT License。

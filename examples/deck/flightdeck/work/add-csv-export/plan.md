@@ -1,10 +1,15 @@
-# Plan — CSV export for `notes`
+# Add CSV export plan
 
-- [ ] Add the CSV row formatter (`id, created, title, body`) with RFC 4180 quoting
-- [ ] Wire up `notes export --csv` to stream rows to stdout
-- [ ] Add `--all` to include archived notes (default: active only) — pending the open question
-- [ ] Tests: a note containing commas, quotes, and newlines round-trips through export
+## Delivery
 
-<!-- The - [ ] checkboxes belong to whatever runs the plan (e.g. superpowers'
-     executing-plans); flightdeck tracks the effort by its location in work/, not by
-     ticking these boxes. -->
+- [x] Define the output and authorization contract.
+- [x] Implement the filtered export query.
+- [ ] [Add the streaming HTTP handler](slices/03-add-streaming-handler.md).
+- [ ] Add integration coverage and user-facing documentation.
+
+## Acceptance
+
+- [ ] Response columns and filename match the accepted contract.
+- [ ] Filters and authorization match the order list.
+- [ ] Large exports stream without retaining all rows.
+- [ ] Spreadsheet-formula cells are neutralized.

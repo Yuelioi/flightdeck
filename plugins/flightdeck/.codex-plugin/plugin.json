@@ -1,0 +1,38 @@
+{
+  "name": "flightdeck",
+  "version": "3.0.0-alpha.7+codex.20260720122656",
+  "description": "An AI-first Markdown work desk for durable repository work",
+  "author": {
+    "name": "Yueli",
+    "email": "yuelioi1210@gmail.com",
+    "url": "https://github.com/Yuelioi"
+  },
+  "homepage": "https://github.com/Yuelioi/flightdeck#readme",
+  "repository": "git+https://github.com/Yuelioi/flightdeck.git",
+  "license": "MIT",
+  "keywords": [
+    "flightdeck",
+    "ai-collaboration",
+    "session-continuity",
+    "markdown",
+    "recovery"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Flightdeck",
+    "shortDescription": "Resume durable repository Work from Markdown",
+    "longDescription": "Recover and maintain durable Work, Plans, Slices, context, and specialist outputs through human-readable Markdown.",
+    "developerName": "Yueli",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Continue prior durable work.",
+      "Start a durable Work for this project."
+    ],
+    "websiteURL": "https://github.com/Yuelioi/flightdeck#readme",
+    "screenshots": []
+  }
+}
