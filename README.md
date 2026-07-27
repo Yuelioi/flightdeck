@@ -41,8 +41,9 @@ goal, save before switching sessions, or finish or stop the Work. Flightdeck dec
 documents need maintenance.
 
 Recovery reads the selected Work page and required context, an existing low-resolution Plan, at
-most three local links embedded directly in Next, and live Git state. Other Work, Slices,
-References, and Knowledge remain lazy.
+most three local links embedded directly in Next, and live Git state. It also inspects Knowledge
+subject/topic paths and reads only guidance relevant to the current action. Other Work, Slices,
+References, and unrelated Knowledge remain lazy.
 
 Save rewrites only documents whose recovery meaning materially changed. It never stages, commits,
 pushes, tags, branches, or creates a private Git checkpoint.
@@ -71,12 +72,14 @@ Knowledge is the demand-grown project operating playbook, with one independently
 positive practice per organic subject path such as `flightdeck/knowledge/ui/form-errors.md`. It is
 neither broad project memory nor an enforceable rule store.
 
-When the current action raises a project-specific practice question, Work reads relevant Knowledge
-it already links before searching bounded subject paths, filenames, and headings. Guidance advises
-judgment; ordinary consultation is not logged, and a link persists only when a fresh session still
-needs it. Promote only verified, plausibly reusable, self-contained conclusions. Rewrite or remove
-disproven guidance, leaving unresolved research in Work. Do not add a required taxonomy, index,
-kind, activation or routing field, revision, history, stale flag, recheck ledger, or trap collection.
+Before executing a new or recovered action, Work proactively checks for relevant Knowledge without
+waiting for the user to name the library. It reads relevant existing Work links first, then inspects
+subject/topic paths and searches headings only within plausible subjects before reading matching
+guidance. Path inspection is routine, but unrelated bodies remain lazy. Guidance advises judgment;
+ordinary consultation is not logged, and a link persists only when a fresh session still needs it.
+Promote only verified, plausibly reusable, self-contained conclusions. Rewrite or remove disproven
+guidance, leaving unresolved research in Work. Do not add a required taxonomy, index, kind,
+activation or routing field, revision, history, stale flag, recheck ledger, or trap collection.
 
 ## Operating boundary
 

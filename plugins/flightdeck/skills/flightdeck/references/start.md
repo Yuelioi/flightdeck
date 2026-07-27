@@ -19,7 +19,8 @@ Use this branch when the user wants repository work to survive future sessions.
    Work and useful project links.
 7. Write one executable Next action with at most three local links required to perform it. Other
    supporting material belongs under References and stays lazy.
-8. Report the Work's Goal and first Next, then begin the requested work.
+8. Perform the main skill's bounded Knowledge check for the first action.
+9. Report the Work's Goal and first Next, then begin the requested work.
 
 The first Next action must be executable. Initial context should contain only facts, constraints,
 terms, and decisions that a fresh session would otherwise have to rediscover.

@@ -6,11 +6,11 @@ status: accepted
 
 Knowledge is the project-level operating playbook: curated, current, positive guidance for
 recurring project situations, not broad memory, task history, architectural authority, vocabulary,
-or enforceable rules. Work discovers it only when a current action raises a project-specific
-practice question, follows existing Work links before a bounded subject search, treats selected
-guidance as advisory, and persists a link only when a fresh session still needs it. This keeps
-useful project judgment available without restoring eager loading, routing metadata, consultation
-logs, or another runtime state system.
+or enforceable rules. Work follows existing links before bounded path and heading discovery, treats
+selected guidance as advisory, and persists a link only when a fresh session still needs it. This
+keeps useful project judgment available without restoring eager loading, routing metadata,
+consultation logs, or another runtime state system. ADR-0027 refines the original implicit
+need-trigger into a proactive bounded check before execution.
 
 ## Consequences
 

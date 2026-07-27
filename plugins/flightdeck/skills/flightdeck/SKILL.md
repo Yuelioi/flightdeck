@@ -47,6 +47,21 @@ Keep `deck.md` tiny: one Open Work list, exactly one Focus marker when any Work 
 stable project links at most. Focus is navigation, not Work status. A repository-wide `CONTEXT.md`
 remains at the root when another convention owns it.
 
+## Bounded Knowledge check
+
+Before executing the current action when a Work is started, recovered, or given a materially new
+Next, check for applicable project guidance without waiting for the user to name the library:
+
+1. Read relevant Knowledge already linked by the Work.
+2. Inspect the subject and topic paths under `flightdeck/knowledge/` and compare them with the user
+   request plus the Work's Goal, Current, and Next. When path names are not decisive, search
+   headings only inside plausible subject paths.
+3. Read clearly relevant topics before acting. If none appears relevant, continue without asking
+   the user where Knowledge lives.
+
+Path inspection is routine discovery; document bodies remain lazy. Do not scan or preload unrelated
+Knowledge.
+
 ## Boundaries
 
 - Write at most three local links required for the immediate action directly into Next. Recovery

@@ -38,7 +38,8 @@ Finished 或 Stopped 的 Work 保留稳定路径，但离开 Deck 的 Open Work 
 或结束/停止 Work。由 Flightdeck 判断哪些可见文档需要维护。
 
 恢复时读取选中的 Work page、必需 context、已有的低分辨率 Plan、Next 中最多三个必需本地
-链接以及实时 Git 状态。其他 Work、Slices、References 和 Knowledge 保持惰性。
+链接以及实时 Git 状态；同时检查 Knowledge 的 subject/topic 路径，并且只读取与当前动作相关
+的指导。其他 Work、Slices、References 和无关 Knowledge 保持惰性。
 
 Save 只重写恢复语义发生实质变化的文档，绝不自动 stage、commit、push、tag、建分支或创建
 私有 Git checkpoint。
@@ -66,11 +67,12 @@ Knowledge 是按真实需求增长的项目操作手册；每个自然 subject �
 正向实践，例如 `flightdeck/knowledge/ui/form-errors.md`。它既不是宽泛的项目记忆，也不是
 强制规则仓库。
 
-当前动作出现项目特有的实践问题时，Work 先读取自己已经链接的相关 Knowledge，再按有限的
-subject 路径、文件名和标题搜索。指导只影响判断；普通查阅不留日志，只有新会话仍需要时才
-持久链接。只晋升已经验证、很可能跨 Work 复用且可自包含的结论；被事实推翻的指导应重写或
-删除，未解决的研究留在 Work。不要增加强制 taxonomy、索引、kind、激活或路由字段、revision、
-history、stale 标记、recheck ledger 或 trap 分类。
+执行新建或恢复的当前动作之前，Work 会主动检查相关 Knowledge，无需用户指出目录。它先读取
+Work 已链接的相关指导，再检查 subject/topic 路径；仅在可能相关的 subject 内搜索标题并读取
+命中文档。路径检查是例行发现步骤，无关正文仍保持惰性。指导只影响判断；普通查阅不留日志，
+只有新会话仍需要时才持久链接。只晋升已经验证、很可能跨 Work 复用且可自包含的结论；被事实
+推翻的指导应重写或删除，未解决的研究留在 Work。不要增加强制 taxonomy、索引、kind、激活或
+路由字段、revision、history、stale 标记、recheck ledger 或 trap 分类。
 
 ## 操作边界
 

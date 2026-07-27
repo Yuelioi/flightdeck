@@ -61,10 +61,13 @@ not a workflow runtime; abandoned internal runtime experiments do not create a n
 - **Recovery link:** One of at most three local links written directly into Next because the linked
   file is required to perform that action. Other links remain lazy supporting material.
 - **Recovery:** Loading the selected Work page and context, its optional low-resolution Plan, at
-  most three links required by Next, and the live Git state before continuing execution.
+  most three links required by Next, the live Git state, and any guidance selected by a bounded
+  Knowledge path check before continuing execution.
 - **Knowledge:** The project-level operating playbook: curated, current, positive guidance reused
   across future Work to answer how this project should approach a recurring situation. It is not
   task history, broad project memory, an architecture record, a glossary, or an enforceable rule.
+  Work proactively discovers it by inspecting subject/topic paths before reading only relevant
+  guidance.
 - **Save:** Rewriting only the visible Work documents whose recovery meaning materially changed.
   It is triggered by handoff semantics rather than edits or commits and is neither a log nor an
   automatic Git operation.

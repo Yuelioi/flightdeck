@@ -83,8 +83,9 @@ language belongs in root `CONTEXT.md`; ADRs belong in `docs/adr/`.
 ## Recovery and Save
 
 Recovery reads the selected Work page and context, an existing low-resolution Plan, at most three
-local links from Next, and live Git state. It does not preload every Slice, Reference, Knowledge
-document, historical Work, or Git history.
+local links from Next, and live Git state. Before execution it inspects Knowledge subject/topic
+paths and reads only guidance relevant to the current action. It does not preload every Slice,
+Reference, Knowledge document, historical Work, or Git history.
 
 Save updates Slice detail, Plan completion, Work Current/Next, stable context, and Deck navigation
 only when their own recovery meaning changed. Save edits Markdown only and does not imply a Git
@@ -96,10 +97,12 @@ Treat `flightdeck/knowledge/` as the demand-grown project operating playbook. Pu
 applicable, current positive practice under each organic `<subject>/<topic>.md` path. Use clear
 headings, concise examples, and source links when helpful; do not pre-seed a taxonomy or starter set.
 
-Work selects Knowledge only when its current action raises a project-specific practice question. It
-reads an existing Work link first, otherwise searches bounded subject paths, filenames, and
-headings. Guidance is advisory. Put it in Next only when immediately required, under References
-when a fresh session needs continuing support, and do not log ordinary consultation.
+Before executing a new or recovered action, Work proactively checks for applicable Knowledge. It
+reads relevant existing Work links first, inspects subject/topic paths against the request and
+Work Goal, Current, and Next, then searches headings only inside plausible subjects when path names
+are insufficient. Read matching guidance before acting; do not ask the user to locate the library.
+Guidance is advisory. Put it in Next only when immediately required, under References when a fresh
+session needs continuing support, and do not log ordinary consultation.
 
 Promote a Work conclusion only when current evidence verifies it, another independent Work is
 plausibly likely to benefit, and it can be rewritten as self-contained project-specific positive
