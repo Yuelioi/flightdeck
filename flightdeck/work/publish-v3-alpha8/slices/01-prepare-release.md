@@ -6,17 +6,17 @@ The remote base is current and all public release metadata consistently describe
 
 ## Current
 
-The remote base is freshly fetched, fast-forward ancestry is proven, all version surfaces identify
-alpha.8, the changelog entry is dated 2026-08-02, and pre-commit release gates pass. The prepared
-tree remains uncommitted.
+Release commit `34a4e95885588d3bf4b5af55a53f56d81727b181` preserves the two post-alpha.7
+functional commits, aligns all version surfaces at alpha.8, and dates the changelog entry
+2026-08-02. Its fetched remote base is an ancestor.
 
 ## Next
 
-Create the release commit.
+None.
 
 ## Verification
 
 - [x] The fetched remote base is an ancestor of local `main`.
 - [x] All version surfaces identify alpha.8.
 - [x] The changelog has a dated alpha.8 entry and no duplicate release content under Unreleased.
-- [ ] The release commit is clean and ready for full verification.
+- [x] The release commit is clean and ready for full verification.

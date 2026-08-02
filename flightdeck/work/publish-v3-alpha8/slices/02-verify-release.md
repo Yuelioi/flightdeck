@@ -6,15 +6,18 @@ The exact release commit passes source, manifest, link, package-boundary, and in
 
 ## Current
 
-Pending release preparation.
+Release commit `34a4e95885588d3bf4b5af55a53f56d81727b181` passes whitespace and cleanliness
+checks; four-file JSON and version alignment; strict Claude plugin and marketplace validation; 116
+Markdown files with 210 local prose links; the 18-file runtime-free package boundary; exact
+source/install SHA-256 equality; and fresh installed-plugin recovery.
 
 ## Next
 
-Validate the prepared release commit and installed plugin payload.
+None.
 
 ## Verification
 
-- [ ] Repository and Markdown checks pass.
-- [ ] Codex and Claude manifests plus marketplace metadata validate and align.
-- [ ] The plugin remains a self-contained Markdown-only package.
-- [ ] The installed Codex payload exactly matches the source package.
+- [x] Repository and Markdown checks pass.
+- [x] Codex and Claude manifests plus marketplace metadata validate and align.
+- [x] The plugin remains a self-contained Markdown-only package.
+- [x] The installed Codex payload exactly matches the source package.

@@ -6,14 +6,16 @@ The verified alpha.8 commit and annotated tag are public and the GitHub prerelea
 
 ## Current
 
-Pending release verification.
+Remote `main` contains verified release commit `34a4e95885588d3bf4b5af55a53f56d81727b181`.
+The annotated tag resolves to that commit and the public prerelease is available at
+<https://github.com/Yuelioi/flightdeck/releases/tag/v3.0.0-alpha.8>.
 
 ## Next
 
-Fast-forward `origin/main`, push the annotated tag, and create the GitHub prerelease.
+None.
 
 ## Verification
 
-- [ ] Remote `main` resolves to the verified release commit.
-- [ ] Remote tag `v3.0.0-alpha.8` resolves to the verified release commit.
-- [ ] The public GitHub prerelease exposes v3.0.0-alpha.8.
+- [x] Remote `main` contains the verified release commit.
+- [x] Remote tag `v3.0.0-alpha.8` resolves to the verified release commit.
+- [x] The public GitHub prerelease exposes v3.0.0-alpha.8.

@@ -8,20 +8,17 @@ public GitHub prerelease.
 
 ## Status
 
-Open
+Finished
 
 ## Current
 
-Freshly fetched `origin/main` remains at alpha.7 commit `e9fd9396ca7b8bb7e3afbd96189dd1e68a11916f`
-and is an ancestor of local `main`. Alpha.8 version and changelog surfaces are aligned in the
-uncommitted release tree. Source, manifest, link, package, reinstall, payload-equality, and fresh
-recovery checks pass.
+Flightdeck v3.0.0-alpha.8 is published. Annotated tag `v3.0.0-alpha.8` and the public GitHub
+prerelease expose verified release commit `34a4e95885588d3bf4b5af55a53f56d81727b181`, and remote
+`main` contains that commit.
 
 ## Next
 
-Create the release commit, then verify that exact commit through the [verification
-Slice](slices/02-verify-release.md), following the project guidance for [testing the installed
-plugin](../../knowledge/plugins/test-installed-copy.md).
+None.
 
 ## Progress
 
@@ -30,6 +27,9 @@ plugin](../../knowledge/plugins/test-installed-copy.md).
 - Aligned the three version surfaces and promoted the changelog entry with the 2026-08-02 date.
 - Reinstalled Codex cache version `3.0.0-alpha.8+codex.20260802212946`; its 18-file payload exactly
   matches source and a fresh read-only session recovered this Work correctly.
+- Verified release commit `34a4e95885588d3bf4b5af55a53f56d81727b181` across repository,
+  manifest, link, package-boundary, installed-copy, and remote-availability gates.
+- Atomically pushed `main` and the annotated alpha.8 tag, then published the GitHub prerelease.
 
 ## References
 
