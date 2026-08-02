@@ -4,6 +4,8 @@ Notable user-facing changes are recorded here.
 
 ## Unreleased
 
+## v3.0.0-alpha.8 — 2026-08-02
+
 ### Changed
 
 - Defined Knowledge as a demand-grown advisory project playbook with proactive bounded, link-first

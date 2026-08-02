@@ -10,7 +10,7 @@
     {
       "name": "flightdeck",
       "description": "An AI-first Markdown work desk for durable repository work",
-      "version": "3.0.0-alpha.7",
+      "version": "3.0.0-alpha.8",
       "source": "./plugins/flightdeck",
       "author": {
         "name": "Yueli",
